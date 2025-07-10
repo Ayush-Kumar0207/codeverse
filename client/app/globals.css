@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* globals.css */
+
+/* globals.css */
+html {
+  transition: background-color 0.3s ease, color 2s ease;
+}
+
+* {
+  transition: color 2s ease, background-color 0.3s ease, border-color 1s ease;
+}
+
+@import "github-markdown-css/github-markdown.css";
+
+/* Optional: Dark theme preview styling */
+.markdown-body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 1rem;
+}
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #666666;
+  --input-bg: #f0f0f0;
+  --border-color: #cccccc;
+  --card-bg: #fafafa;
+  --hover-bg: #e0e0e0;
+}
+
+.dark {
+  --background: #0d1117;
+  --foreground: #ffffff;
+  --muted: #a0a0a0;
+  --input-bg: #1e1e2f;
+  --border-color: #3b3b5a;
+  --card-bg: #1e1e2f;
+  --hover-bg: #2c2c42;
+}
+
+
+/* === CSS Variables for Theming === */
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #8b5cf6;
+  --secondary: #a78bfa;
+
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100%;
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+
+html.dark {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #7c3aed;
+  --secondary: #a78bfa;
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* === Global Reset and Theme === */
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  @apply transition-colors duration-300 ease-in-out;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.6;
+}
+
+/* === Improve Forms === */
+input,
+button,
+textarea,
+select {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+}
+
+/* === Scrollbar Styling === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+
+/* === Custom Classes === */
+.text-gradient {
+  background: linear-gradient(to right, var(--secondary), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

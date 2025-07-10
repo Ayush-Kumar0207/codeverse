@@ -1,0 +1,16 @@
+# Ignore node modules
+node_modules/
+.env
+.env.local
+.next
+dist
+build
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS junk
+Thumbs.db
