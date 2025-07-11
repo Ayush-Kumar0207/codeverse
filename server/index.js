@@ -20,12 +20,20 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Allow frontend origin from env or default to localhost
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
+const allowedOrigins = [
+  "http://localhost:3000",                          // for local dev
+  "https://codeverse-rho.vercel.app",               // your deployed frontend
+];
 
 // ✅ CORS Middleware
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
 
