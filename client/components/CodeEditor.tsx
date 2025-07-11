@@ -101,7 +101,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
         console.log("🔍 Prompt to AI:", prompt);
 
         try {
-          const res = await axios.post("http://localhost:5000/api/ai/suggest", {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
             prompt,
             model: "codellama",
           });

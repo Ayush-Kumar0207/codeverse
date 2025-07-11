@@ -12,7 +12,7 @@ interface Message {
   roomId?: string;
 }
 
-const socket = io("http://localhost:5000");
+const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}`);
 const ROOM_ID = "room1";
 
 export default function ChatBox() {
@@ -78,7 +78,7 @@ export default function ChatBox() {
       const cleanedPrompt = prompt.replace(/^(@ai|ask:)/i, "").trim();
 
       try {
-        const res = await fetch("http://localhost:5000/api/ai/suggest", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: cleanedPrompt }),

@@ -27,7 +27,7 @@ export default function ProfilePage() {
 
     const fetchSavedCodes = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/code/user/${user._id}`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/code/user/${user._id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -25,7 +25,7 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/projects/create",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/create`,
         {
           title,
           language,

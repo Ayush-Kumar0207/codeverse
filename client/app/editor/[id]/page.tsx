@@ -50,7 +50,7 @@ export default function EditorPage() {
     if (!id) return;
 
     axios
-      .get(`http://localhost:5000/api/projects/${id}`)
+      .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/${id}`)
       .then((res) => {
         setProject(res.data.project);
         const initialLang = res.data.project.language as keyof LanguageExtensionMap;
@@ -118,7 +118,7 @@ export default function EditorPage() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/execute",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/execute`,
         {
           code,
           language,
@@ -145,7 +145,7 @@ export default function EditorPage() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/code/save",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/code/save`,
         {
           code,
           userId: user._id,

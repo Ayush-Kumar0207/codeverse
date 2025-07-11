@@ -9,7 +9,7 @@ export default function DemoPage() {
   useEffect(() => {
     const launchDemo = async () => {
       try {
-        const res = await axios.post("http://localhost:5000/api/projects/create", {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/create`, {
           title: "Demo Project",
           language: "javascript",
           owner: null, // No login required

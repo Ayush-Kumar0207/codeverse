@@ -16,7 +16,7 @@ export default function Dashboard() {
     const token = getToken();
     if (!token) return router.push("/login");
 
-    fetch("http://localhost:5000/api/auth/profile", {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

@@ -18,7 +18,7 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
         {/* GitHub Login */}
         <button
-          onClick={() => (window.location.href = "http://localhost:5000/api/auth/github")}
+          onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/github`)}
           className="w-full bg-[var(--input-bg,#2f2f42)] hover:bg-[var(--hover-bg,#3a3a55)] p-3 rounded-md flex items-center justify-center gap-2 border border-[var(--border-color,#46466a)] text-sm text-[var(--muted)] font-medium transition-colors"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

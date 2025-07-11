@@ -8,56 +8,59 @@ const passport = require("passport");
 const { Server } = require("socket.io");
 
 const socketHandler = require("./sockets");
-const connectDB = require("./config/db"); // MongoDB connection
+const connectDB = require("./config/db");
 const codeRoutes = require("./routes/code");
 const authRoutes = require("./routes/auth");
 const projectRoutes = require("./routes/projects");
 
-dotenv.config(); // Load .env
+dotenv.config(); // Load environment variables
 
-// Connect to DB
 connectDB();
 
-// Initialize app/server
 const app = express();
 const server = http.createServer(app);
 
-// Middleware
+// ✅ Allow frontend origin from env or default to localhost
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
+
+// ✅ CORS Middleware
 app.use(cors({
-  origin: "http://localhost:3000", // React frontend
+  origin: FRONTEND_ORIGIN,
   credentials: true,
 }));
+
 app.use(express.json());
 
-// ✅ Setup express-session BEFORE passport
+// ✅ Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || "super_secret_key", // use env var in prod
+  secret: process.env.SESSION_SECRET || "super_secret_key",
   resave: false,
   saveUninitialized: false,
 }));
 
+// ✅ AI Route
 const aiRoutes = require("./routes/ai");
 app.use("/api/ai", aiRoutes);
 
+// ✅ Execute Route
 const executeRoute = require("./routes/execute");
 app.use("/api/execute", executeRoute);
 
 // ✅ Passport middleware
-require("./config/passport"); // Make sure this configures GitHub strategy
+require("./config/passport");
 app.use(passport.initialize());
 app.use(passport.session());
 
 // ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
-
 app.use("/api/code", codeRoutes);
-
 const testRoutes = require("./routes/test");
 app.use("/api/test", testRoutes);
+const versionRoutes = require('./routes/versions');
+app.use('/api/versions', versionRoutes);
 
-
-// ✅ Root route
+// ✅ Health check
 app.get("/", (req, res) => {
   res.send("✅ CodeVerse Backend Running!");
 });
@@ -65,21 +68,16 @@ app.get("/", (req, res) => {
 // ✅ Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // ✅ matches frontend origin
+    origin: FRONTEND_ORIGIN,
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   }
 });
-  
-global._io = io; // 👈 Make io globally accessible
-app.set("io", io);          // ✅ Attach io to app
-socketHandler(io);          // ✅ Setup socket events
+global._io = io;
+app.set("io", io);
+socketHandler(io);
 
-const versionRoutes = require('./routes/versions');
-// console.log("✅ versionRoutes loaded:", typeof versionRoutes); // 🧪 Debug
-app.use('/api/versions', versionRoutes); // ❌ CRASHES if versionRoutes is not a function
-
-// Start server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

@@ -25,7 +25,7 @@ export default function VersionHistory({
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/code/versions", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/code/versions`, {
           params: { userId, fileName },
         });
         setVersions(res.data.versions);

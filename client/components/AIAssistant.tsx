@@ -24,7 +24,7 @@ export default function AIAssistant({ code }: Props) {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/ai/suggest", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
         prompt: `${trimmedPrompt}\n\n${trimmedCode}`,
       });
       setSuggestion(res.data.suggestion || "⚠️ No suggestion returned.");
