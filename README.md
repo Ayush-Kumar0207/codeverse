@@ -1,5 +1,10 @@
 # ⚡ CodeVerse – Real-Time Collaborative IDE with AI Assistance
 
+[![Vercel Status](https://img.shields.io/badge/frontend-Vercel-black)](https://vercel.com)  
+[![Render Status](https://img.shields.io/badge/backend-Render-blue)](https://render.com)  
+[![MongoDB Atlas](https://img.shields.io/badge/database-MongoDB%20Atlas-green)](https://www.mongodb.com/atlas)  
+[![MIT License](https://img.shields.io/badge/license-MIT-lightgrey)](#license)
+
 > A modern, cloud-based platform for real-time collaborative coding, live code execution, version control, and AI-powered code suggestions.
 
 ## 🔗 Live Demo
