@@ -20,14 +20,26 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Allow frontend origin from env or default to localhost
-const FRONTEND_ORIGIN = "https://codeverse-rho.vercel.app" || "http://localhost:3000";
+// ✅ Allow multiple frontend origins
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://codeverse-rho.vercel.app", // your main production frontend
+  "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app", // Vercel preview deployment
+];
 
-// ✅ CORS Middleware
+// ✅ CORS Middleware with dynamic origin check
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like curl or Postman) or whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("❌ Not allowed by CORS: " + origin));
+    }
+  },
   credentials: true,
 }));
+
 
 app.use(express.json());
 
