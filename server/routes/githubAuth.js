@@ -61,7 +61,7 @@ router.get("/github/callback", async (req, res) => {
     });
 
     // Redirect to frontend with token & user
-    const redirectWithToken = `http://localhost:3000/login?token=${token}&user=${encodeURIComponent(
+    const redirectWithToken = `${process.env.NEXT_PUBLIC_API_BASE_URL}/login?token=${token}&user=${encodeURIComponent(
       JSON.stringify(user)
     )}`;
 

@@ -40,5 +40,18 @@ router.get("/versions", async (req, res) => {
   }
 });
 
+// GET /api/code/user/:userId — Fetch all saved versions for a user
+router.get("/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const codes = await Version.find({ userId }).sort({ createdAt: -1 });
+    res.json({ codes });
+  } catch (err) {
+    console.error("Error fetching saved codes:", err);
+    res.status(500).json({ error: "Failed to fetch saved code snippets." });
+  }
+});
+
 // ✅ ✅ ✅ ADD THIS LINE AT THE END ✅ ✅ ✅
 module.exports = router;

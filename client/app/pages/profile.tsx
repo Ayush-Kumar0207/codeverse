@@ -8,7 +8,7 @@ import axios from "axios";
 // ✅ Define the type for a saved code snippet
 type SavedCode = {
   code: string;
-  timestamp: string;
+  createdAt: string;
 };
 
 export default function ProfilePage() {
@@ -91,7 +91,7 @@ export default function ProfilePage() {
                   <code className="block whitespace-pre-wrap">{code.code}</code>
                 </div>
                 <div className="text-xs text-right text-gray-500 mt-2">
-                  {new Date(code.timestamp).toLocaleString()}
+                  {new Date(code.createdAt).toLocaleString()}
                 </div>
               </li>
             ))}

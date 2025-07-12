@@ -1,5 +1,3 @@
-// server/sockets/index.js
-
 const codeRooms = {}; // In-memory store for room code
 
 function socketHandler(io) {
@@ -11,10 +9,15 @@ function socketHandler(io) {
       socket.join(roomId);
       console.log(`👥 ${socket.id} joined room ${roomId}`);
 
-      // Send last synced code if available
       if (codeRooms[roomId]) {
         socket.emit("syncCode", codeRooms[roomId]);
       }
+    });
+
+    // 💬 Real-time Chat Message Handling
+    socket.on("chatMessage", (msg) => {
+      console.log("📩 Chat message received:", msg);
+      io.to(msg.roomId).emit("chatMessage", msg);
     });
 
     // Collaborative Code Change
@@ -23,7 +26,7 @@ function socketHandler(io) {
       socket.to(roomId).emit("codeChange", code);
     });
 
-    // ✅ Collaborative Execution Events
+    // Collaborative Execution
     socket.on("execution:start", ({ roomId, user }) => {
       socket.to(roomId).emit("execution:start", { user });
     });

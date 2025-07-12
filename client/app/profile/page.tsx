@@ -8,7 +8,7 @@ import axios from "axios";
 // ✅ Define a type for saved code snippet
 type SavedCode = {
   code: string;
-  timestamp: string;
+  createdAt: string;
   fileName?: string; // optional, if available in response
   language?: string; // optional, if available
 };
@@ -105,7 +105,7 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <div className="text-xs text-right text-gray-500 mt-2">
-                  {new Date(code.timestamp).toLocaleString()}
+                  {new Date(code.createdAt).toLocaleString()}
                 </div>
               </li>
             ))}

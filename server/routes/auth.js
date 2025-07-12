@@ -104,7 +104,7 @@ router.get(
       const token = generateToken({ username: user.username, _id: user._id });
 
       // Redirect back to frontend with token
-      res.redirect(`http://localhost:3000/github-success?token=${token}`);
+      res.redirect(`${process.env.NEXT_PUBLIC_API_BASE_URL}/github-success?token=${token}`);
     } catch (err) {
       console.error("GitHub OAuth error:", err.message);
       res.redirect("/login");
