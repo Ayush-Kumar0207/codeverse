@@ -12,9 +12,15 @@ const connectDB = require("./config/db");
 const codeRoutes = require("./routes/code");
 const authRoutes = require("./routes/auth");
 const projectRoutes = require("./routes/projects");
+const aiRoutes = require("./routes/ai");
+const executeRoute = require("./routes/execute");
+const testRoutes = require("./routes/test");
+const versionRoutes = require("./routes/versions");
 
-dotenv.config(); // Load environment variables
+// ✅ Load environment variables
+dotenv.config();
 
+// ✅ Connect to MongoDB
 connectDB();
 
 const app = express();
@@ -23,14 +29,13 @@ const server = http.createServer(app);
 // ✅ Allow multiple frontend origins
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://codeverse-rho.vercel.app", // your main production frontend
-  "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app", // Vercel preview deployment
+  "https://codeverse-rho.vercel.app", // your main frontend domain
+  "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app", // preview deployment
 ];
 
-// ✅ CORS Middleware with dynamic origin check
+// ✅ CORS Middleware with dynamic origin validation
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like curl or Postman) or whitelisted origins
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -40,25 +45,14 @@ app.use(cors({
   credentials: true,
 }));
 
-
+// ✅ Middleware
 app.use(express.json());
-
-// ✅ Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || "super_secret_key",
   resave: false,
   saveUninitialized: false,
 }));
 
-// ✅ AI Route
-const aiRoutes = require("./routes/ai");
-app.use("/api/ai", aiRoutes);
-
-// ✅ Execute Route
-const executeRoute = require("./routes/execute");
-app.use("/api/execute", executeRoute);
-
-// ✅ Passport middleware
 require("./config/passport");
 app.use(passport.initialize());
 app.use(passport.session());
@@ -67,10 +61,10 @@ app.use(passport.session());
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/code", codeRoutes);
-const testRoutes = require("./routes/test");
+app.use("/api/ai", aiRoutes);
+app.use("/api/execute", executeRoute);
 app.use("/api/test", testRoutes);
-const versionRoutes = require('./routes/versions');
-app.use('/api/versions', versionRoutes);
+app.use("/api/versions", versionRoutes);
 
 // ✅ Health check
 app.get("/", (req, res) => {
@@ -80,11 +74,18 @@ app.get("/", (req, res) => {
 // ✅ Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_ORIGIN,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("❌ Socket.IO CORS blocked: " + origin));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
-  }
+  },
 });
+
 global._io = io;
 app.set("io", io);
 socketHandler(io);
