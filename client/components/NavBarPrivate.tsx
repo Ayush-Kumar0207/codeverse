@@ -28,8 +28,7 @@ export default function NavBarPrivate() {
 
           <div className="hidden md:flex space-x-6 items-center text-sm">
             <Link href="/" className="hover:text-purple-400">Home</Link>
-            <Link href="/editor" className="hover:text-purple-400">Editor</Link>
-            <Link href="/about" className="hover:text-purple-400">About</Link>
+            <Link href="/about" className="hover:text-purple-400">About Us</Link>
 
             {/* ✅ Profile icon with link */}
             <div className="relative group">
@@ -60,8 +59,7 @@ export default function NavBarPrivate() {
       {menuOpen && (
         <div className="md:hidden px-4 pt-2 pb-4 space-y-2 bg-gray-800 border-t border-gray-700">
           <Link href="/" className="block text-sm hover:text-purple-400">Home</Link>
-          <Link href="/editor" className="block text-sm hover:text-purple-400">Editor</Link>
-          <Link href="/about" className="block text-sm hover:text-purple-400">About</Link>
+          <Link href="/about" className="block text-sm hover:text-purple-400">About Us</Link>
           <Link href="/profile" className="block text-sm hover:text-purple-400">Profile</Link>
           <button onClick={handleLogout} className="block text-sm hover:text-purple-400">Logout</button>
         </div>
