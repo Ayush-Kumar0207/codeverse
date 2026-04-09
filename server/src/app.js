@@ -3,7 +3,7 @@ const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
 
-require("../config/passport");
+require("./config/passport");
 
 const authRoutes = require("./routes/auth.routes");
 const projectRoutes = require("./routes/projects.routes");

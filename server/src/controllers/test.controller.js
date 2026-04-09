@@ -1,11 +1,16 @@
-const asyncHandler = require("../middlewares/asyncHandler");
-const User = require("../../models/User");
+const { supabase } = require("../../config/db");
 
 const testUser = asyncHandler(async (req, res) => {
-  const savedUser = await new User({
-    username: "testuser",
-    password: "hashedpassword123",
-  }).save();
+  const { data: savedUser, error } = await supabase
+    .from("users")
+    .insert([{
+      username: "testuser_" + Date.now(),
+      password: "hashedpassword123",
+    }])
+    .select()
+    .single();
+
+  if (error) throw error;
 
   res.json({ message: "✅ User saved successfully!", savedUser });
 });

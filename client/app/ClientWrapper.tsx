@@ -12,7 +12,7 @@ function ConditionalNavBar() {
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <AuthProvider>
         <div className="flex flex-col min-h-screen">
           <ConditionalNavBar />

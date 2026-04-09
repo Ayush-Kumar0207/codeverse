@@ -1,4 +1,4 @@
-const Version = require("../../models/Version");
+const { supabase } = require("../../config/db");
 const HttpError = require("../utils/httpError");
 
 async function saveCodeVersion({ code, userId, fileName }) {
@@ -6,8 +6,13 @@ async function saveCodeVersion({ code, userId, fileName }) {
     throw new HttpError(400, "Missing code, fileName or userId");
   }
 
-  const version = new Version({ userId, fileName, code });
-  await version.save();
+  const { data, error } = await supabase
+    .from("versions")
+    .insert([{ user_id: userId, file_name: fileName, code }])
+    .select()
+    .single();
+
+  if (error) throw error;
   return { message: "Code version saved successfully" };
 }
 
@@ -16,12 +21,26 @@ async function getCodeVersions({ userId, fileName }) {
     throw new HttpError(400, "Missing userId or fileName");
   }
 
-  const versions = await Version.find({ userId, fileName }).sort({ createdAt: -1 }).limit(10);
+  const { data: versions, error } = await supabase
+    .from("versions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("file_name", fileName)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (error) throw error;
   return { versions };
 }
 
 async function getSavedCodes(userId) {
-  const codes = await Version.find({ userId }).sort({ createdAt: -1 });
+  const { data: codes, error } = await supabase
+    .from("versions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
   return { codes };
 }
 

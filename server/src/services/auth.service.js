@@ -1,24 +1,37 @@
 const bcrypt = require("bcrypt");
-const User = require("../../models/User");
+const { supabase } = require("../../config/db");
 const { generateToken } = require("../../utils/jwt");
 const HttpError = require("../utils/httpError");
 
 async function registerUser({ username, password, email }) {
-  const existingUser = await User.findOne({ username });
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("username")
+    .eq("username", username)
+    .single();
+
   if (existingUser) {
     throw new HttpError(400, "Username already taken");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPassword, email });
-  await user.save();
+  const { error } = await supabase
+    .from("users")
+    .insert([{ username, password: hashedPassword, email }]);
+
+  if (error) throw error;
 
   return { message: "User registered successfully" };
 }
 
 async function loginUser({ username, password }) {
-  const user = await User.findOne({ username });
-  if (!user) {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .single();
+
+  if (error || !user) {
     throw new HttpError(401, "Invalid credentials");
   }
 
@@ -27,12 +40,12 @@ async function loginUser({ username, password }) {
     throw new HttpError(401, "Invalid credentials");
   }
 
-  const token = generateToken({ username: user.username, _id: user._id });
+  const token = generateToken({ username: user.username, _id: user.id });
 
   return {
     token,
     user: {
-      _id: user._id,
+      _id: user.id,
       username: user.username,
       email: user.email,
     },
@@ -40,8 +53,13 @@ async function loginUser({ username, password }) {
 }
 
 async function getProfile(username) {
-  const user = await User.findOne({ username }).select("-password");
-  if (!user) {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("id, username, email, github_id, created_at")
+    .eq("username", username)
+    .single();
+
+  if (error || !user) {
     throw new HttpError(404, "User not found");
   }
 
@@ -49,19 +67,30 @@ async function getProfile(username) {
 }
 
 async function processGithubUser(githubUser) {
-  let user = await User.findOne({ githubId: githubUser.githubId });
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("*")
+    .eq("github_id", githubUser.githubId)
+    .single();
+
+  let user = existingUser;
 
   if (!user) {
-    user = new User({
-      username: githubUser.username,
-      email: githubUser.email || `${githubUser.githubId}@github.com`,
-      githubId: githubUser.githubId,
-      avatar: githubUser.avatar,
-    });
-    await user.save();
+    const { data: newUser, error: insertError } = await supabase
+      .from("users")
+      .insert([{
+        username: githubUser.username,
+        email: githubUser.email || `${githubUser.githubId}@github.com`,
+        github_id: githubUser.githubId,
+      }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+    user = newUser;
   }
 
-  const token = generateToken({ username: user.username, _id: user._id });
+  const token = generateToken({ username: user.username, _id: user.id });
 
   return { token, user };
 }
