@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { createProject } from "@/services/projects";
 
 export default function DemoPage() {
   const router = useRouter();
@@ -9,14 +9,14 @@ export default function DemoPage() {
   useEffect(() => {
     const launchDemo = async () => {
       try {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/create`, {
+        const res = await createProject({
           title: "Demo Project",
           language: "javascript",
-          owner: null, // No login required
-          isDemo: true, // Optional: mark as demo in backend
+          owner: null,
+          isDemo: true,
         });
 
-        const project = res.data.project;
+        const project = res.project;
         if (project && project._id) {
           router.push(`/editor/${project._id}`);
         } else {

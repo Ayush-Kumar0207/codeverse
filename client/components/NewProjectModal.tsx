@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { createProject } from "@/services/projects";
+import type { SupportedLanguage } from "@shared/types/language";
 
 interface Props {
   onClose: () => void;
@@ -10,7 +11,7 @@ interface Props {
 
 const NewProjectModal: React.FC<Props> = ({ onClose }) => {
   const [title, setTitle] = useState("");
-  const [language, setLanguage] = useState("javascript");
+  const [language, setLanguage] = useState<SupportedLanguage>("javascript");
 
   const router = useRouter();
 
@@ -24,21 +25,13 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
     }
 
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/projects/create`,
-        {
-          title,
-          language,
-          owner: user._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await createProject({
+        title,
+        language,
+        owner: user._id,
+      });
 
-      const newProject = res.data.project;
+      const newProject = res.project;
 
       alert("✅ Project created!");
       onClose(); // Close modal
@@ -64,7 +57,7 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
 
         <select
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
           className="w-full p-2 border border-gray-400 rounded mb-4 bg-transparent text-black dark:text-white"
         >
           <option value="javascript">JavaScript</option>

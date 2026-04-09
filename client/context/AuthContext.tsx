@@ -2,24 +2,19 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-type User = {
-  username: string;
-  email?: string;
-  _id?: string;
-};
+import type { SharedUser } from "@shared/types/user";
 
 type AuthContextType = {
-  user: User | null;
+  user: SharedUser | null;
   token: string | null;
-  login: (user: User, token: string) => void;
+  login: (user: SharedUser, token: string) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SharedUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const login = (user: User, token: string) => {
+  const login = (user: SharedUser, token: string) => {
     setUser(user);
     setToken(token);
     localStorage.setItem("token", token);

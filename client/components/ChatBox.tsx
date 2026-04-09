@@ -1,23 +1,20 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
 import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/hooks/useSocket";
+import { suggestCode } from "@/services/ai";
+import { SOCKET_EVENTS } from "@shared/constants/socket-events";
+import type { ChatMessage } from "@shared/types/chat";
 
-// ✅ Define message type
-interface Message {
-  user: string;
-  message: string;
-  time: string;
-  roomId?: string;
-}
+type Props = {
+  roomId: string;
+};
 
-const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}`);
-const ROOM_ID = "room1";
-
-export default function ChatBox() {
+export default function ChatBox({ roomId }: Props) {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { socket, on, off } = useSocket(roomId);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isAutoScroll, setIsAutoScroll] = useState(true);
 
@@ -26,16 +23,16 @@ export default function ChatBox() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    socket.emit("joinRoom", ROOM_ID);
-
-    socket.on("chatMessage", (data: Message) => {
+    const handleMessage = (data: ChatMessage) => {
       setMessages((prev) => [...prev, data]);
-    });
+    };
+
+    on(SOCKET_EVENTS.CHAT_MESSAGE, handleMessage);
 
     return () => {
-      socket.off("chatMessage");
+      off(SOCKET_EVENTS.CHAT_MESSAGE, handleMessage);
     };
-  }, []);
+  }, [off, on]);
 
   useEffect(() => {
     if (isAutoScroll) {
@@ -60,8 +57,8 @@ export default function ChatBox() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMsg: Message = {
-      roomId: ROOM_ID,
+    const userMsg: ChatMessage = {
+      roomId,
       user: user?.username || "Guest",
       message: input.trim(),
       time: new Date().toLocaleTimeString([], {
@@ -70,7 +67,7 @@ export default function ChatBox() {
       }),
     };
 
-    socket.emit("chatMessage", userMsg);
+    socket.emit(SOCKET_EVENTS.CHAT_MESSAGE, userMsg);
     const prompt = input;
     setInput("");
 
@@ -78,16 +75,10 @@ export default function ChatBox() {
       const cleanedPrompt = prompt.replace(/^(@ai|ask:)/i, "").trim();
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: cleanedPrompt }),
-        });
-
-        const data = await res.json();
+        const data = await suggestCode(cleanedPrompt);
         if (data.suggestion) {
-          const aiReply: Message = {
-            roomId: ROOM_ID,
+          const aiReply: ChatMessage = {
+            roomId,
             user: "CodeVerse AI 🤖",
             message: data.suggestion,
             time: new Date().toLocaleTimeString([], {
@@ -95,7 +86,7 @@ export default function ChatBox() {
               minute: "2-digit",
             }),
           };
-          socket.emit("chatMessage", aiReply);
+          socket.emit(SOCKET_EVENTS.CHAT_MESSAGE, aiReply);
         }
       } catch (err) {
         console.error("Ollama AI Error:", err);

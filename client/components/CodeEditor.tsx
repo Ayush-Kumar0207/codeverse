@@ -1,23 +1,17 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
-import axios from "axios";
 import * as monacoType from "monaco-editor";
-import debounce from "lodash.debounce";
-import socket from "@/lib/socket";
-
-const ROOM_ID = "room1";
+import { useSocket } from "@/hooks/useSocket";
+import { suggestCode } from "@/services/ai";
+import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
   activeFile: string;
+  roomId: string;
 };
 
 export type CodeEditorHandle = {
@@ -56,62 +50,62 @@ const getLanguageFromFilename = (filename: string): string => {
   }
 };
 
-const CodeEditor = forwardRef<CodeEditorHandle, Props>(
-  ({ value, onChange, activeFile }, ref) => {
-    const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
-    const monacoRef = useRef<typeof monacoType | null>(null);
-    const registeredLanguages = useRef<Set<string>>(new Set());
-    const aiRequestInProgress = useRef(false);
+const CodeEditor = forwardRef<CodeEditorHandle, Props>(({ value, onChange, activeFile, roomId }, ref) => {
+  const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof monacoType | null>(null);
+  const registeredLanguages = useRef<Set<string>>(new Set());
+  const { socket, on, off } = useSocket(roomId);
 
-    useImperativeHandle(ref, () => ({
-      getCode: () => editorRef.current?.getValue() || "",
-      setCode: (code: string) => {
-        if (editorRef.current && code !== editorRef.current.getValue()) {
-          editorRef.current.setValue(code);
-        }
-      },
-    }));
+  useImperativeHandle(ref, () => ({
+    getCode: () => editorRef.current?.getValue() || "",
+    setCode: (code: string) => {
+      if (editorRef.current && code !== editorRef.current.getValue()) {
+        editorRef.current.setValue(code);
+      }
+    },
+  }));
 
-    useEffect(() => {
-      socket.emit("joinRoom", ROOM_ID);
+  useEffect(() => {
+    const handleCodeChange = (newCode: string) => {
+      if (editorRef.current && newCode !== editorRef.current.getValue()) {
+        editorRef.current.setValue(newCode);
+      }
+    };
 
-      socket.on("codeChange", (newCode: string) => {
-        if (editorRef.current && newCode !== editorRef.current.getValue()) {
-          editorRef.current.setValue(newCode);
-        }
-      });
+    const handleSyncCode = (initialCode: string) => {
+      if (editorRef.current) {
+        editorRef.current.setValue(initialCode);
+      }
+    };
 
-      socket.on("syncCode", (initialCode: string) => {
-        if (editorRef.current) {
-          editorRef.current.setValue(initialCode);
-        }
-      });
+    on(SOCKET_EVENTS.CODE_CHANGE, handleCodeChange);
+    on(SOCKET_EVENTS.SYNC_CODE, handleSyncCode);
 
-      return () => {
-        socket.disconnect();
-      };
-    }, []);
+    return () => {
+      off(SOCKET_EVENTS.CODE_CHANGE, handleCodeChange);
+      off(SOCKET_EVENTS.SYNC_CODE, handleSyncCode);
+    };
+  }, [off, on]);
 
-    const debouncedAICompletionRef = useRef(
-      debounce(async (model: monacoType.editor.ITextModel, position: monacoType.Position) => {
-        const currentLine = model.getLineContent(position.lineNumber).trim();
+  useEffect(() => {
+    if (!monacoRef.current) return;
 
-        const prompt = `continue this code and give suggested code which user may write after what he has written and suggested autocomplete code should be from after the code till where user have already typed and not from the beginning:-${currentLine}`;
+    const language = getLanguageFromFilename(activeFile);
+    if (registeredLanguages.current.has(language)) return;
 
-        console.log("🔍 Prompt to AI:", prompt);
-
+    const disposable = monacoRef.current.languages.registerCompletionItemProvider(language, {
+      triggerCharacters: [".", "(", " ", "="],
+      provideCompletionItems: async (model, position) => {
         try {
-          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
-            prompt,
-            model: "codellama",
-          });
+          const res = await suggestCode(
+            `continue this code and give suggested code which user may write after what he has written and suggested autocomplete code should be from after the code till where user have already typed and not from the beginning:-${model.getLineContent(position.lineNumber).trim()}`,
+            "codellama"
+          );
 
-          const raw = res.data?.suggestion || "";
+          const raw = res.suggestion || "";
           const suggestionText =
             raw.split("```")[1]?.split("\n").slice(1).join("\n").trim() ||
             raw.split("\n").slice(0, 5).join("\n").trim();
-
-          console.log("💡 AI suggestion received:", suggestionText);
 
           if (!suggestionText) return { suggestions: [] };
 
@@ -121,8 +115,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
                 label: "💡 AI Suggestion",
                 kind: monacoRef.current!.languages.CompletionItemKind.Snippet,
                 insertText: suggestionText,
-                insertTextRules:
-                  monacoRef.current!.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                insertTextRules: monacoRef.current!.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                 range: {
                   startLineNumber: position.lineNumber,
                   endLineNumber: position.lineNumber,
@@ -135,62 +128,45 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
         } catch (err) {
           console.error("❌ AI autocomplete failed", err);
           return { suggestions: [] };
-        } finally {
-          aiRequestInProgress.current = false;
         }
-      }, 500)
-    );
+      },
+    });
 
-    useEffect(() => {
-      if (!monacoRef.current) return;
+    registeredLanguages.current.add(language);
 
-      const language = getLanguageFromFilename(activeFile);
-      if (registeredLanguages.current.has(language)) return;
+    return () => disposable.dispose();
+  }, [activeFile]);
 
-      console.log("📦 Registering AI suggestion provider for:", language);
+  const handleEditorMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+  };
 
-      monacoRef.current.languages.registerCompletionItemProvider(language, {
-        triggerCharacters: [".", "(", " ", "="],
-        provideCompletionItems: (model, position) => {
-          console.log("✨ AI provider triggered for", language);
-          return debouncedAICompletionRef.current(model, position);
-        },
-      });
-
-      registeredLanguages.current.add(language);
-    }, [activeFile]);
-
-    const handleEditorMount: OnMount = (editor, monaco) => {
-      editorRef.current = editor;
-      monacoRef.current = monaco;
-      console.log("🚀 Monaco editor mounted");
-    };
-
-    return (
-      <div className="w-full h-[80vh] border rounded-xl shadow-md">
-        <Editor
-          height="100%"
-          theme="vs-dark"
-          language={getLanguageFromFilename(activeFile)}
-          value={value}
-          onChange={(newValue) => {
-            if (newValue !== undefined) {
-              onChange(newValue);
-              socket.emit("codeChange", { roomId: ROOM_ID, code: newValue });
-            }
-          }}
-          onMount={handleEditorMount}
-          options={{
-            fontSize: 14,
-            wordWrap: "on",
-            minimap: { enabled: false },
-            automaticLayout: true,
-          }}
-        />
-      </div>
-    );
-  }
-);
+  return (
+    <div className="w-full h-[80vh] border rounded-xl shadow-md">
+      <Editor
+        height="100%"
+        theme="vs-dark"
+        language={getLanguageFromFilename(activeFile)}
+        value={value}
+        onChange={(newValue) => {
+          if (newValue !== undefined) {
+            onChange(newValue);
+            socket.emit(SOCKET_EVENTS.CODE_CHANGE, { roomId, code: newValue });
+          }
+        }}
+        onMount={handleEditorMount}
+        options={{
+          fontSize: 14,
+          wordWrap: "on",
+          minimap: { enabled: false },
+          automaticLayout: true,
+        }}
+      />
+    </div>
+  );
+});
 
 CodeEditor.displayName = "CodeEditor";
 export default CodeEditor;
+

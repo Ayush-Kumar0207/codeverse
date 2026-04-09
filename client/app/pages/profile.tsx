@@ -3,19 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
-
-// ✅ Define the type for a saved code snippet
-type SavedCode = {
-  code: string;
-  createdAt: string;
-};
+import { fetchSavedCodes } from "@/services/code";
+import type { SharedVersion } from "@shared/types/version";
 
 export default function ProfilePage() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [savedCodes, setSavedCodes] = useState<SavedCode[]>([]);
+  const [savedCodes, setSavedCodes] = useState<SharedVersion[]>([]);
 
   useEffect(() => {
     if (!user || !token) {
@@ -24,14 +19,10 @@ export default function ProfilePage() {
     }
 
     // ✅ Fetch user's saved code snippets
-    const fetchSavedCodes = async () => {
+    const fetchSavedCodesData = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/code/user/${user._id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setSavedCodes(res.data.codes || []);
+        const res = await fetchSavedCodes(user._id || "");
+        setSavedCodes(res.codes || []);
       } catch (err) {
         console.error("Failed to fetch saved codes:", err);
       } finally {
@@ -39,7 +30,7 @@ export default function ProfilePage() {
       }
     };
 
-    fetchSavedCodes();
+    fetchSavedCodesData();
   }, [user, token, router]);
 
   const handleLogout = () => {
@@ -91,7 +82,7 @@ export default function ProfilePage() {
                   <code className="block whitespace-pre-wrap">{code.code}</code>
                 </div>
                 <div className="text-xs text-right text-gray-500 mt-2">
-                  {new Date(code.createdAt).toLocaleString()}
+                  {new Date(code.createdAt || Date.now()).toLocaleString()}
                 </div>
               </li>
             ))}

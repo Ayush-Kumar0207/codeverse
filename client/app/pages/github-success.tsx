@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
+import { fetchProfile } from "@/services/auth";
+import { setToken } from "@/utils/auth";
 
 export default function GitHubSuccess() {
   const router = useRouter();
@@ -19,20 +21,15 @@ export default function GitHubSuccess() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        setToken(token);
+        const data = await fetchProfile();
 
-        const data = await res.json();
-
-        if (res.ok && data.user) {
-          login(data.user, token);
-          router.push("/dashboard");
-        } else {
-          console.error("❌ Failed to fetch user:", data.error);
-        }
+        if (data.user) {
+        login(data.user, token);
+        router.push("/dashboard");
+      } else {
+        console.error("❌ Failed to fetch user");
+      }
       } catch (err) {
         console.error("❌ GitHub login failed:", err);
       } finally {

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import { suggestCode } from "@/services/ai";
 
 type Props = {
   code: string;
@@ -24,10 +24,8 @@ export default function AIAssistant({ code }: Props) {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/suggest`, {
-        prompt: `${trimmedPrompt}\n\n${trimmedCode}`,
-      });
-      setSuggestion(res.data.suggestion || "⚠️ No suggestion returned.");
+      const res = await suggestCode(`${trimmedPrompt}\n\n${trimmedCode}`);
+      setSuggestion(res.suggestion || "⚠️ No suggestion returned.");
     } catch (err) {
       console.error("AI Suggestion Error:", err);
       setSuggestion("⚠️ Error getting suggestion from AI.");

@@ -2,30 +2,28 @@
 import { useEffect, useState } from "react";
 import { getToken, removeToken } from "../../utils/auth";
 import { useRouter } from "next/navigation";
-
-type User = {
-  username: string;
-  email: string;
-};
+import { fetchProfile } from "@/services/auth";
+import type { SharedUser } from "@shared/types/user";
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SharedUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const token = getToken();
     if (!token) return router.push("/login");
 
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    fetchProfile()
       .then((data) => {
         if (data.user) setUser(data.user);
         else {
           removeToken();
           router.push("/login");
         }
+      })
+      .catch(() => {
+        removeToken();
+        router.push("/login");
       });
   }, [router]); // ✅ added dependency
 

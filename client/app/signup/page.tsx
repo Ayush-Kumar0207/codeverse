@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import React from "react"; // ✅ Needed for typing React.FormEvent
+import { registerRequest } from "@/services/auth";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -16,19 +17,9 @@ export default function SignUpPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (res.ok) {
+      await registerRequest(form);
         alert("Registration successful!");
         router.push("/login");
-      } else {
-        const { error } = await res.json();
-        alert("Error: " + error);
-      }
     } catch (err) {
       console.error("Registration failed", err);
       alert("Something went wrong. Please try again.");

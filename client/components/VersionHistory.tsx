@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-interface Version {
-  _id: string;
-  code: string;
-  createdAt: string;
-}
+import { fetchCodeVersions } from "@/services/code";
+import type { SharedVersion } from "@shared/types/version";
 
 type Props = {
   userId: string;
@@ -20,15 +15,13 @@ export default function VersionHistory({
   onRevert,
   refreshSignal,
 }: Props) {
-  const [versions, setVersions] = useState<Version[]>([]);
+  const [versions, setVersions] = useState<SharedVersion[]>([]);
 
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/code/versions`, {
-          params: { userId, fileName },
-        });
-        setVersions(res.data.versions);
+        const res = await fetchCodeVersions({ userId, fileName });
+        setVersions(res.versions);
       } catch (err) {
         console.error("Failed to fetch versions", err);
       }
@@ -46,7 +39,7 @@ export default function VersionHistory({
             key={version._id}
             className="flex justify-between items-center bg-[#2a2a40] px-4 py-2 rounded"
           >
-            <span>{new Date(version.createdAt).toLocaleString()}</span>
+            <span>{new Date(version.createdAt || Date.now()).toLocaleString()}</span>
             <button
               onClick={() => onRevert(version.code)}
               className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded"
