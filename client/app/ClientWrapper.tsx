@@ -2,22 +2,42 @@
 
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import NavBarPrivate from "@/components/NavBarPrivate";
 import NavBarPublic from "@/components/NavBarPublic";
+import { ActivityBar } from "@/components/ActivityBar";
+import { CommandPalette } from "@/components/CommandPalette";
 
-function ConditionalNavBar() {
-  const { user } = useAuth();
-  return user ? <NavBarPrivate /> : <NavBarPublic />;
+function AuthenticatedShell({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  
+  if (loading) return null;
+
+  if (!user) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <NavBarPublic />
+        <main className="flex-grow container mx-auto px-4 py-12">{children}</main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen w-full bg-background overflow-hidden">
+      <ActivityBar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-grow overflow-hidden relative">
+          {children}
+        </main>
+      </div>
+      <CommandPalette />
+    </div>
+  );
 }
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <AuthProvider>
-        <div className="flex flex-col min-h-screen">
-          <ConditionalNavBar />
-          <main className="flex-grow container mx-auto px-4 py-6">{children}</main>
-        </div>
+        <AuthenticatedShell>{children}</AuthenticatedShell>
       </AuthProvider>
     </ThemeProvider>
   );

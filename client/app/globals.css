@@ -2,116 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@100..900&display=swap');
+
 @import "github-markdown-css/github-markdown.css";
+@import "tw-animate-css";
 
 @layer base {
-  /* ============================================
-     ENTERPRISE DARK THEME - Default (Linear/Vercel Style)
-     ============================================ */
   :root {
-    --radius: 0.5rem;
-    
-    /* Core theme - Dark by default */
-    --background: 220 13% 5%;
-    --foreground: 0 0% 95%;
-    --card: 220 13% 8%;
-    --card-foreground: 0 0% 95%;
-    --popover: 220 13% 8%;
-    --popover-foreground: 0 0% 95%;
-    
-    /* Primary - Electric Purple */
-    --primary: 263 70% 58%;
+    --radius: 0.75rem;
+
+    /* Midnight Palette - Core */
+    --background: 222 47% 2%; /* Deep Slate 950 #020617 */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 5%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand Accents - Vibrant Indigo */
+    --primary: 239 84% 67%; /* #6366F1 */
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary - Slate */
-    --secondary: 220 13% 15%;
-    --secondary-foreground: 0 0% 95%;
+    /* Secondary & Muted - Deep Slate */
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 47% 10%;
+    --muted-foreground: 215 20% 65%;
     
-    /* Muted - Subtle gray */
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 10% 60%;
-    
-    /* Accent - Cyan */
-    --accent: 190 90% 50%;
-    --accent-foreground: 220 13% 5%;
-    
-    /* Destructive - Red */
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
+
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Border & Input */
-    --border: 220 13% 18%;
-    --input: 220 13% 18%;
-    --ring: 263 70% 58%;
-    
-    /* Sidebar - IDE Style */
-    --sidebar-background: 220 13% 8%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-border: 220 13% 15%;
-    --sidebar-ring: 263 70% 58%;
-    --sidebar-accent: 220 13% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    
-    /* Editor Colors */
-    --editor-background: 220 13% 10%;
-    --editor-foreground: 0 0% 95%;
-    --editor-line: 220 13% 15%;
-    --editor-selection: 263 50% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 15%;
+    --input: 222 47% 15%;
+    --ring: 239 84% 67%;
+
+    /* IDE Specific */
+    --activity-bar-background: 222 47% 3%;
+    --activity-bar-foreground: 215 20% 65%;
+    --activity-bar-active: 239 84% 67%;
+
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 215 20% 65%;
+    --sidebar-border: 222 47% 12%;
+
+    --editor-background: 222 47% 4%;
+    --editor-foreground: 210 40% 98%;
+    --editor-line: 222 47% 10%;
+    --editor-selection: 239 84% 67% / 30%;
   }
 
-  /* ============================================
-     LIGHT THEME OVERRIDE
-     ============================================ */
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 220 13% 5%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 5%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 5%;
-    
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 220 13% 96%;
-    --secondary-foreground: 220 13% 5%;
-    
-    --muted: 220 13% 96%;
-    --muted-foreground: 220 10% 45%;
-    
-    --accent: 190 90% 50%;
-    --accent-foreground: 220 13% 5%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
-    --ring: 263 70% 50%;
-    
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 13% 15%;
-    --sidebar-border: 220 13% 90%;
-    --sidebar-ring: 263 70% 50%;
-    --sidebar-accent: 220 13% 96%;
-    --sidebar-accent-foreground: 220 13% 5%;
-    
-    --editor-background: 0 0% 100%;
-    --editor-foreground: 220 13% 5%;
-    --editor-line: 220 13% 96%;
-    --editor-selection: 263 50% 85%;
+  .dark {
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 98%;
+    --primary: 239 84% 67%;
+    --secondary: 222 47% 12%;
+    --muted: 222 47% 10%;
+    --accent: 239 84% 67%;
+    --border: 222 47% 15%;
   }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
-  
+
   html {
-    @apply antialiased;
+    @apply antialiased scroll-smooth;
   }
-  
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -119,11 +81,11 @@
 }
 
 /* ============================================
-   SCROLLBAR STYLING - Minimal Dark
+   SCROLLBAR STYLING - Minimal Midnight
    ============================================ */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -131,20 +93,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: hsl(var(--muted-foreground) / 0.1);
+  border-radius: 10px;
+  transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
+  background: hsl(var(--muted-foreground) / 0.3);
 }
 
 /* ============================================
@@ -152,63 +107,17 @@
    ============================================ */
 ::selection {
   background: hsl(var(--editor-selection));
-  color: hsl(var(--editor-foreground));
-}
-
-/* ============================================
-   FOCUS RING
-   ============================================ */
-:focus-visible {
-  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-}
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: hsl(var(--foreground));
 }
 
 /* ============================================
    UTILITY CLASSES
    ============================================ */
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideInFromBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.animate-slide-down {
-  animation: slideInFromTop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.glass-effect {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsl(var(--border) / 0.5);
 }
 
 .text-gradient {
@@ -218,71 +127,61 @@
   background-clip: text;
 }
 
-.glass-effect {
-  background: hsl(var(--card) / 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* ============================================
-   EDITOR SPECIFIC
+   ATMOSPHERE UTILITIES
    ============================================ */
-.editor-container {
-  background: hsl(var(--editor-background));
+.noise-bg {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
 }
 
-.editor-tab {
-  @apply px-3 py-2 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent transition-all duration-150;
+.glow-orb {
+  background: radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%);
+  filter: blur(80px);
 }
 
-.editor-tab:hover {
-  @apply text-foreground bg-muted/50;
-}
-
-.editor-tab.active {
-  @apply text-foreground border-primary bg-muted;
-}
-
-/* ============================================
-   MARKDOWN OVERRIDES
-   ============================================ */
-.markdown-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: transparent !important;
-  color: hsl(var(--foreground));
-}
-
-.markdown-body pre {
-  background: hsl(var(--muted)) !important;
-  border-radius: var(--radius);
-}
-
-.markdown-body code {
-  background: hsl(var(--muted)) !important;
-  color: hsl(var(--accent));
-  padding: 0.2em 0.4em;
-  border-radius: calc(var(--radius) - 2px);
+.glow-orb-secondary {
+  background: radial-gradient(circle, hsl(var(--accent) / 0.1), transparent 70%);
+  filter: blur(100px);
 }
 
 /* ============================================
-   RESIZABLE PANELS
+   RESIZABLE PANELS - God Level Styling
    ============================================ */
 [data-panel-resize-handle] {
-  @apply relative flex items-center justify-center bg-border transition-colors;
-  width: 4px;
+  @apply relative flex items-center justify-center transition-colors;
+}
+
+[data-panel-resize-handle][data-panel-group-direction="horizontal"] {
+  width: 1px;
+}
+
+[data-panel-resize-handle][data-panel-group-direction="vertical"] {
+  height: 1px;
 }
 
 [data-panel-resize-handle]:hover,
 [data-panel-resize-handle][data-resize-handle-active] {
-  @apply bg-primary/50;
+  @apply bg-primary/40;
 }
 
-[data-panel-resize-handle]::after {
-  content: '';
-  @apply absolute w-1 h-8 rounded-full bg-muted-foreground/30;
+/* ============================================
+   MARKDOWN & EDITOR
+   ============================================ */
+.markdown-body {
+  background: transparent !important;
+  color: hsl(var(--foreground)) !important;
 }
 
-[data-panel-resize-handle]:hover::after,
-[data-panel-resize-handle][data-resize-handle-active]::after {
-  @apply bg-primary;
+.markdown-body pre {
+  background: hsl(var(--black) / 0.2) !important;
+  border: 1px solid hsl(var(--border));
 }

@@ -5,6 +5,8 @@ import { useChatMessages } from "@/hooks/useChatMessages";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { useDynamicTextarea } from "@/hooks/useDynamicTextarea";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   roomId: string;
@@ -31,36 +33,37 @@ export default function ChatBox({ roomId }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#121826] text-white rounded-xl shadow-lg border border-gray-700 p-4">
-      <h2 className="text-lg font-bold mb-4 text-purple-400 border-b border-gray-700 pb-2 text-center">
-        💬 Real-time Chat
-      </h2>
-
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-4 pr-1">
+    <div className="flex flex-col h-full w-full bg-transparent text-foreground p-3 overflow-hidden">
+      <div 
+        ref={chatContainerRef} 
+        className="flex-1 overflow-y-auto space-y-3 pr-2 no-scrollbar"
+      >
         {messages.map((msg, idx) => {
           const isOwn = msg.user === user?.username || (!user && msg.user === "Guest");
 
           return (
-            <div key={idx} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+            <div key={idx} className={`flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
               <div
-                className={`px-4 py-2 max-w-xs text-sm rounded-xl shadow-md transition ${
+                className={cn(
+                  "px-3 py-2 max-w-[85%] text-[11px] rounded-lg shadow-sm transition-all",
                   isOwn
-                    ? "bg-purple-600 text-white rounded-br-none"
-                    : "bg-gray-800 text-gray-100 rounded-bl-none"
-                }`}
+                    ? "bg-primary/10 border border-primary/20 text-foreground"
+                    : "bg-white/5 border border-white/5 text-muted-foreground"
+                )}
               >
-                <div className="font-semibold text-xs mb-1">
-                  {isOwn ? "You" : msg.user || "Anonymous"}
-                </div>
+                {!isOwn && (
+                  <div className="font-bold text-[9px] mb-1 text-primary/80 uppercase tracking-tighter">
+                    {msg.user || "Anonymous"}
+                  </div>
+                )}
 
-                <div>{msg.message}</div>
-
-                <div className="text-[10px] text-gray-400 mt-1 text-right">
-                  {new Date(msg.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
+                <div className="leading-relaxed">{msg.message}</div>
+              </div>
+              <div className="text-[8px] text-muted-foreground/40 mt-1 px-1">
+                {new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </div>
             </div>
           );
@@ -68,10 +71,10 @@ export default function ChatBox({ roomId }: Props) {
         <div ref={messageEndRef} />
       </div>
 
-      <div className="flex mt-4 gap-2">
+      <div className="flex flex-col mt-4 gap-2">
         <textarea
           ref={textareaRef}
-          placeholder="Type a message... (@ai What is JSX?)"
+          placeholder="Ask AI or message team..."
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
@@ -79,15 +82,18 @@ export default function ChatBox({ roomId }: Props) {
           }}
           onKeyDown={handleKeyPress}
           rows={1}
-          className="flex-1 h-14 mt-3 resize-none px-4 py-0.5 rounded-xl border border-gray-600 bg-[#0f172a] text-white focus:outline-none focus:ring-2 focus:ring-purple-500 max-h-32 overflow-y-hidden"
+          className="w-full resize-none px-3 py-2 rounded-md border border-white/5 bg-black/20 text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 max-h-32 shadow-inner"
         />
-
-        <button
-          onClick={handleSend}
-          className="px-4 py-2 h-14 mt-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium"
-        >
-          Send
-        </button>
+        <div className="flex justify-between items-center px-1">
+          <span className="text-[9px] text-muted-foreground/30">Shift+Enter for newline</span>
+          <Button
+            onClick={handleSend}
+            size="sm"
+            className="h-7 px-4 bg-primary hover:bg-primary/90 text-[10px] font-bold uppercase tracking-widest"
+          >
+            Send
+          </Button>
+        </div>
       </div>
     </div>
   );

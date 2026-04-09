@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ThemeToggleSimple } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { PresenceHeader } from "@/components/ActivityBar";
 
 // Icons
 import {
@@ -70,6 +71,12 @@ import {
   Folder,
 } from "lucide-react";
 
+interface PresenceUser {
+  username: string;
+  avatar?: string;
+  status?: string;
+}
+
 export default function EditorPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -80,6 +87,7 @@ export default function EditorPage() {
 
   const [project, setProject] = useState<SharedProject | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
+  const [activeUsers, setActiveUsers] = useState<PresenceUser[]>([]);
 
   const {
     files,
@@ -130,9 +138,33 @@ export default function EditorPage() {
       });
   }, [id, initializeProjectFiles]);
 
+  // Presence Logic
+  useEffect(() => {
+    if (!socket || !user) return;
+
+    // Set initial user
+    setActiveUsers([{ username: user.username, avatar: user.avatar, status: "Editing" }]);
+
+    socket.on(SOCKET_EVENTS.USER_JOINED, (data: any) => {
+      setActiveUsers(prev => {
+        const exists = prev.find(u => u.username === data.username);
+        if (exists) return prev;
+        return [...prev, { username: data.username, avatar: data.avatar, status: "Joined" }];
+      });
+    });
+
+    socket.on(SOCKET_EVENTS.USER_LEFT, (data: any) => {
+      setActiveUsers(prev => prev.filter(u => u.username !== data.username));
+    });
+
+    return () => {
+      socket.off(SOCKET_EVENTS.USER_JOINED);
+      socket.off(SOCKET_EVENTS.USER_LEFT);
+    };
+  }, [socket, user]);
+
   // Handle code execution
   const handleRun = async () => {
-    // Check if language requires execution
     if (["html", "css", "markdown"].includes(language)) {
       setOutput("⚠️ This file doesn't require execution.");
       return;
@@ -173,17 +205,15 @@ export default function EditorPage() {
     }
   };
 
-  // Panel refs for programmatic resizing
+  // Panel refs
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const bottomPanelRef = useRef<ImperativePanelHandle>(null);
 
-  // Panel collapse states
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [bottomCollapsed, setBottomCollapsed] = useState(true);
 
-  // Get file icon based on extension
   const getFileIcon = (filename: string) => {
     if (filename.endsWith(".md")) return <FileText className="h-4 w-4 text-blue-400" />;
     if (filename.endsWith(".html")) return <FileCode className="h-4 w-4 text-orange-400" />;
@@ -196,121 +226,28 @@ export default function EditorPage() {
 
   if (!project) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
+      <div className="h-full flex items-center justify-center bg-background">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center gap-4"
         >
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-muted-foreground">Loading Project...</p>
+          <p className="text-muted-foreground">Initializing Midnight Shell...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="h-screen flex flex-col bg-background overflow-hidden font-sans">
-        {/* Professional IDE Header */}
-        <header className="h-12 flex items-center justify-between px-4 border-b bg-card/50 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2"
-            >
-              <div className="flex items-center justify-center h-7 w-7 rounded bg-gradient-to-br from-primary to-accent">
-                <span className="text-xs font-bold text-primary-foreground">CV</span>
-              </div>
-              <h1 className="text-sm font-semibold tracking-tight">
-                {project.title}
-                <span className="text-muted-foreground font-normal"> — {project.language}</span>
-              </h1>
-            </motion.div>
-          </div>
+    <TooltipProvider>
+      <div className="h-screen flex flex-col bg-background overflow-hidden font-sans border-l border-white/5">
+        <PresenceHeader 
+          projectTitle={project.title} 
+          users={activeUsers} 
+        />
 
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowNewFileModal(true)}
-                    className="h-8 gap-1.5"
-                  >
-                    <FilePlus className="h-4 w-4" />
-                    <span className="hidden sm:inline">New File</span>
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent>Create new file</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={!activeFile}
-                    className="h-8 gap-1.5 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent>Delete current file</TooltipContent>
-            </Tooltip>
-
-            <Separator orientation="vertical" className="h-5 mx-1" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleSave}
-                    className="h-8 gap-1.5"
-                  >
-                    <Save className="h-4 w-4" />
-                    <span className="hidden sm:inline">Save</span>
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent>Save changes</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    size="sm"
-                    onClick={handleRun}
-                    disabled={loading}
-                    className="h-8 gap-1.5 bg-green-600 hover:bg-green-700"
-                  >
-                    <Play className="h-4 w-4" />
-                    <span className="hidden sm:inline">{loading ? "Running..." : "Run"}</span>
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent>Execute code</TooltipContent>
-            </Tooltip>
-
-            <Separator orientation="vertical" className="h-5 mx-1" />
-
-            <ThemeToggleSimple variant="ghost" size="sm" />
-          </div>
-        </header>
-
-        {/* Resizable IDE Layout */}
         <PanelGroup direction="horizontal" className="flex-1">
-          {/* Left Sidebar - File Explorer */}
           <Panel
             ref={leftPanelRef}
             defaultSize={15}
@@ -320,48 +257,26 @@ export default function EditorPage() {
             collapsedSize={0}
             onCollapse={() => setLeftCollapsed(true)}
             onExpand={() => setLeftCollapsed(false)}
-            className="flex flex-col bg-sidebar border-r"
+            className="flex flex-col bg-[var(--sidebar-background)] border-r border-[var(--sidebar-border)]"
           >
-            <div className="h-9 flex items-center justify-between px-3 border-b">
-              <span className="text-xs font-semibold text-sidebar-foreground uppercase tracking-wider">
+            <div className="h-9 flex items-center justify-between px-3 border-b border-[var(--sidebar-border)] bg-black/20">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                 Explorer
               </span>
               <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => setShowNewFileModal(true)}
-                    >
-                      <FilePlus className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>New file</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => leftPanelRef.current?.collapse()}
-                    >
-                      <ChevronLeft className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Collapse sidebar</TooltipContent>
-                </Tooltip>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 hover:bg-white/5"
+                  onClick={() => setShowNewFileModal(true)}
+                >
+                  <FilePlus className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="p-2">
-                <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-muted-foreground">
-                  <FolderOpen className="h-3.5 w-3.5" />
-                  <span>{project.title}</span>
-                </div>
+              <div className="p-2 space-y-0.5">
                 <AnimatePresence>
                   {Object.keys(files).map((file, index) => (
                     <motion.div
@@ -369,23 +284,23 @@ export default function EditorPage() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
-                      transition={{ delay: index * 0.03 }}
+                      transition={{ delay: index * 0.02 }}
                     >
                       <button
                         onClick={() => setActiveFile(file)}
                         className={cn(
-                          "w-full flex items-center gap-2 px-3 py-1.5 text-sm rounded-sm transition-colors",
+                          "w-full flex items-center gap-2 px-3 py-1.5 text-xs rounded-md transition-all duration-200 group relative",
                           file === activeFile
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                         )}
                       >
                         {getFileIcon(file)}
                         <span className="truncate">{file}</span>
                         {file === activeFile && (
                           <motion.div
-                            layoutId="active-file-indicator"
-                            className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"
+                            layoutId="active-indicator"
+                            className="absolute left-0 w-1 h-4 bg-primary rounded-r-full"
                           />
                         )}
                       </button>
@@ -396,216 +311,110 @@ export default function EditorPage() {
             </ScrollArea>
           </Panel>
 
-          <PanelResizeHandle className="w-1 bg-border hover:bg-primary/50 transition-colors" />
+          <PanelResizeHandle className="w-[1px] bg-white/5 hover:bg-primary/30 transition-colors" />
 
-          {/* Center Panel - Editor */}
-          <Panel defaultSize={60} minSize={30} className="flex flex-col">
+          <Panel defaultSize={60} minSize={30} className="flex flex-col bg-background">
             <PanelGroup direction="vertical">
-              {/* Editor Area */}
               <Panel defaultSize={70} minSize={20} className="flex flex-col">
-                {/* Tabs */}
-                <div className="h-9 flex items-center bg-muted/30 border-b overflow-x-auto">
+                <div className="h-9 flex items-center bg-black/20 border-b border-white/5 overflow-x-auto no-scrollbar">
                   <AnimatePresence mode="popLayout">
                     {Object.keys(files).map((file) => (
                       <motion.button
                         key={file}
                         layout
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
                         onClick={() => setActiveFile(file)}
                         className={cn(
-                          "group flex items-center gap-2 px-3 py-2 text-xs border-r min-w-fit transition-colors",
+                          "flex items-center gap-2 px-4 py-2 text-[11px] border-r border-white/5 min-w-fit transition-all relative group",
                           file === activeFile
-                            ? "bg-background text-foreground border-t-2 border-t-primary"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            ? "bg-background text-foreground"
+                            : "bg-black/40 text-muted-foreground hover:bg-black/20"
                         )}
                       >
                         {getFileIcon(file)}
-                        <span className="truncate max-w-[120px]">{file}</span>
+                        <span className="truncate max-w-[150px]">{file}</span>
                         {file === activeFile && (
-                          <X
-                            className="h-3 w-3 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (Object.keys(files).length > 1) {
-                                const filesList = Object.keys(files);
-                                const currentIndex = filesList.indexOf(file);
-                                const nextFile = filesList[currentIndex + 1] || filesList[currentIndex - 1];
-                                if (nextFile) setActiveFile(nextFile);
-                              }
-                            }}
-                          />
+                          <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                         )}
+                        <X 
+                          className="h-3 w-3 ml-2 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Logic to close tab
+                          }}
+                        />
                       </motion.button>
                     ))}
                   </AnimatePresence>
                 </div>
 
-                {/* Editor Content */}
-                <div className="flex-1 relative">
-                  {activeFile.endsWith(".md") ? (
-                    <div className="h-full flex flex-col">
-                      <div className="flex-1">
-                        <CodeEditor
-                          ref={editorRef}
-                          value={files[activeFile]}
-                          onChange={(newCode) =>
-                            setFiles((prev) => ({ ...prev, [activeFile]: newCode }))
-                          }
-                          activeFile={activeFile}
-                          roomId={roomId}
-                        />
-                      </div>
-                      <ScrollArea className="h-1/2 border-t">
-                        <div className="p-4 prose prose-invert max-w-none">
-                          <ReactMarkdown>{files[activeFile]}</ReactMarkdown>
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  ) : (
-                    <CodeEditor
-                      ref={editorRef}
-                      value={code}
-                      onChange={(newCode) =>
-                        setFiles((prev) => ({ ...prev, [activeFile]: newCode }))
-                      }
-                      activeFile={activeFile}
-                      roomId={roomId}
-                    />
-                  )}
-
-                  {/* HTML Preview Overlay */}
-                  <AnimatePresence>
-                    {language === "html" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="absolute top-4 right-4 w-96 bg-card border rounded-lg shadow-lg overflow-hidden"
-                      >
-                        <div className="h-8 flex items-center justify-between px-3 border-b bg-muted/50">
-                          <span className="text-xs font-medium">Preview</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={openPreviewInBrowser}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                        <iframe
-                          className="w-full h-64 bg-white"
-                          sandbox="allow-scripts allow-same-origin"
-                          srcDoc={combinedPreview}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                <div className="flex-1 relative bg-[var(--editor-background)]">
+                   <CodeEditor
+                    ref={editorRef}
+                    value={files[activeFile] || ""}
+                    onChange={(newCode) =>
+                      setFiles((prev) => ({ ...prev, [activeFile]: newCode }))
+                    }
+                    activeFile={activeFile}
+                    roomId={roomId}
+                  />
+                  
+                  {/* Global Actions Overlay */}
+                  <div className="absolute top-4 right-6 flex items-center gap-2 opacity-20 hover:opacity-100 transition-opacity">
+                      <Button size="sm" variant="secondary" onClick={handleSave} className="h-8 shadow-2xl">
+                        <Save className="w-3.5 h-3.5 mr-2" />
+                        Save
+                      </Button>
+                      <Button size="sm" onClick={handleRun} disabled={loading} className="h-8 shadow-2xl bg-primary hover:bg-primary/90">
+                        <Play className="w-3.5 h-3.5 mr-2" />
+                        Run
+                      </Button>
+                  </div>
                 </div>
               </Panel>
 
-              <PanelResizeHandle className="h-1 bg-border hover:bg-primary/50 transition-colors" />
+              <PanelResizeHandle className="h-[1px] bg-white/5 hover:bg-primary/30 transition-colors" />
 
-              {/* Bottom Panel - Terminal/Output */}
               <Panel
                 ref={bottomPanelRef}
                 defaultSize={30}
-                minSize={10}
+                minSize={8}
                 collapsible
-                collapsedSize={5}
+                collapsedSize={4}
                 onCollapse={() => setBottomCollapsed(true)}
                 onExpand={() => setBottomCollapsed(false)}
-                className="flex flex-col bg-card"
+                className="flex flex-col bg-black/40"
               >
-                <div className="h-8 flex items-center justify-between px-3 border-b bg-muted/30">
+                <div className="h-8 flex items-center justify-between px-3 border-b border-white/5 bg-black/20">
                   <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => bottomPanelRef.current?.expand()}
-                      className={cn(
-                        "flex items-center gap-1.5 text-xs font-medium transition-colors",
-                        !bottomCollapsed && "text-foreground"
-                      )}
-                    >
-                      <Terminal className="h-3.5 w-3.5" />
-                      <span>Terminal</span>
+                    <button className={cn("text-[10px] font-bold uppercase tracking-widest", !bottomCollapsed ? "text-primary" : "text-muted-foreground")}>
+                      Terminal
                     </button>
-                    <button
-                      onClick={() => bottomPanelRef.current?.expand()}
-                      className={cn(
-                        "flex items-center gap-1.5 text-xs font-medium transition-colors",
-                        !bottomCollapsed && "text-foreground"
-                      )}
-                    >
-                      <Play className="h-3.5 w-3.5" />
-                      <span>Output</span>
+                    <button className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Output
                     </button>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => setOutput("")}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() =>
-                        bottomCollapsed
-                          ? bottomPanelRef.current?.expand()
-                          : bottomPanelRef.current?.collapse()
-                      }
-                    >
-                      {bottomCollapsed ? (
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      ) : (
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
-                  </div>
+                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setBottomCollapsed(!bottomCollapsed)}>
+                    {bottomCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </Button>
                 </div>
 
-                <AnimatePresence>
-                  {!bottomCollapsed && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="flex-1 p-3 font-mono text-sm overflow-auto"
-                    >
-                      {output ? (
-                        <pre
-                          className={cn(
-                            "whitespace-pre-wrap",
-                            output.includes("Error") || output.includes("❌")
-                              ? "text-red-400"
-                              : output.includes("⚠️")
-                              ? "text-yellow-400"
-                              : "text-green-400"
-                          )}
-                        >
-                          {output}
-                        </pre>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Run your code to see output here...
-                        </span>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {!bottomCollapsed && (
+                  <ScrollArea className="flex-1 p-4 font-mono text-xs text-muted-foreground">
+                    <div className="space-y-1">
+                      <div className="text-primary opacity-50">codeverse@enterprise:~$ npm run dev</div>
+                      <div>{">"} codeverse-client@0.1.0 dev</div>
+                      <div>{">"} next dev</div>
+                      <div className="text-green-500">READY  - started server on 0.0.0.0:3000, url: http://localhost:3000</div>
+                      <div className="text-foreground mt-4">{output}</div>
+                    </div>
+                  </ScrollArea>
+                )}
               </Panel>
             </PanelGroup>
           </Panel>
 
-          <PanelResizeHandle className="w-1 bg-border hover:bg-primary/50 transition-colors" />
+          <PanelResizeHandle className="w-[1px] bg-white/5 hover:bg-primary/30 transition-colors" />
 
-          {/* Right Sidebar - Chat & History */}
           <Panel
             ref={rightPanelRef}
             defaultSize={25}
@@ -615,179 +424,86 @@ export default function EditorPage() {
             collapsedSize={0}
             onCollapse={() => setRightCollapsed(true)}
             onExpand={() => setRightCollapsed(false)}
-            className="flex flex-col bg-sidebar border-l"
+            className="flex flex-col bg-[var(--sidebar-background)] border-l border-[var(--sidebar-border)]"
           >
-            <div className="h-9 flex items-center justify-between px-3 border-b">
-              <span className="text-xs font-semibold text-sidebar-foreground uppercase tracking-wider">
-                Collaboration
+            <div className="h-9 flex items-center justify-between px-3 border-b border-[var(--sidebar-border)] bg-black/20">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                AI Assistant
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => rightPanelRef.current?.collapse()}
-              >
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setRightCollapsed(true)}>
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Chat Section */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="h-8 flex items-center gap-2 px-3 border-b bg-muted/30">
-                  <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium">Chat</span>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <ChatBox roomId={roomId} />
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Version History Section */}
-              {user && user._id && (
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="h-8 flex items-center gap-2 px-3 border-b bg-muted/30">
-                    <History className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs font-medium">Version History</span>
+               <ChatBox roomId={roomId} />
+               <Separator className="bg-white/5" />
+               <div className="p-4 bg-black/20 border-t border-white/5">
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Capabilities</div>
+                  <div className="space-y-2">
+                    <div className="px-2 py-1.5 bg-white/5 rounded text-[10px] text-foreground/70">Debug current selection</div>
+                    <div className="px-2 py-1.5 bg-white/5 rounded text-[10px] text-foreground/70">Refactor active file</div>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <VersionHistory
-                      userId={user._id}
-                      fileName={activeFile}
-                      onRevert={(nextCode) =>
-                        setFiles((prev) => ({ ...prev, [activeFile]: nextCode }))
-                      }
-                      refreshSignal={refreshCount}
-                    />
-                  </div>
-                </div>
-              )}
+               </div>
             </div>
           </Panel>
         </PanelGroup>
 
-        {/* Collapsed Sidebar Toggles */}
+        {/* Floating Toggle for explorer if collapsed */}
         {leftCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10"
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 rounded-l-none shadow-lg"
-                  onClick={() => leftPanelRef.current?.expand()}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">Show Explorer</TooltipContent>
-            </Tooltip>
-          </motion.div>
+           <Button 
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-4 rounded-l-none bg-primary p-0"
+            onClick={() => leftPanelRef.current?.expand()}
+           >
+            <ChevronRight className="w-3 h-3" />
+           </Button>
         )}
-
+        
+        {/* Floating Toggle for AI if collapsed */}
         {rightCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10"
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 rounded-r-none shadow-lg"
-                  onClick={() => rightPanelRef.current?.expand()}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">Show Collaboration</TooltipContent>
-            </Tooltip>
-          </motion.div>
+           <Button 
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-4 rounded-r-none bg-primary p-0"
+            onClick={() => rightPanelRef.current?.expand()}
+           >
+            <ChevronLeft className="w-3 h-3" />
+           </Button>
         )}
 
-        {/* New File Dialog */}
+        {/* Dialogs */}
         <Dialog open={showNewFileModal} onOpenChange={setShowNewFileModal}>
-          <DialogContent className="sm:max-w-[425px]">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <FilePlus className="h-5 w-5 text-primary" />
-                  Create New File
-                </DialogTitle>
-                <DialogDescription>
-                  Enter a filename with extension (e.g., example.py, index.js)
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Input
-                  placeholder="example.py"
-                  value={newFileName}
-                  onChange={(e) => setNewFileName(e.target.value)}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter") {
-                      const created = createFile();
-                      if (!created) alert("Invalid or duplicate filename.");
-                    }
-                  }}
-                  className="col-span-3"
-                  autoFocus
-                />
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowNewFileModal(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    const created = createFile();
-                    if (!created) alert("Invalid or duplicate filename.");
-                  }}
-                >
-                  Create File
-                </Button>
-              </DialogFooter>
-            </motion.div>
+          <DialogContent className="sm:max-w-[425px] bg-card border-white/10 glass-effect">
+            <DialogHeader>
+              <DialogTitle>Create New File</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Enter filename with extension (e.g. main.py)
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              placeholder="index.js"
+              className="mt-4 bg-black/20 border-white/10"
+              autoFocus
+            />
+            <DialogFooter className="mt-6">
+              <Button variant="ghost" onClick={() => setShowNewFileModal(false)}>Cancel</Button>
+              <Button onClick={() => { createFile(); setShowNewFileModal(false); }}>Create</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent className="sm:max-w-[425px]">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-destructive">
-                  <Trash2 className="h-5 w-5" />
-                  Delete File
-                </DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to delete <strong>{activeFile}</strong>? This action cannot be undone.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="mt-4">
-                <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={deleteActiveFile}>
-                  Delete
-                </Button>
-              </DialogFooter>
-            </motion.div>
+          <DialogContent className="sm:max-w-[425px] bg-card border-white/10">
+            <DialogHeader>
+              <DialogTitle className="text-destructive">Delete File</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {activeFile}?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-6">
+                <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={deleteActiveFile}>Delete</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

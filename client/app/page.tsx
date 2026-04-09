@@ -1,132 +1,425 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ThemeProvider } from "next-themes";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { 
+  Terminal, 
+  Users, 
+  Cpu, 
+  History, 
+  MessageSquare, 
+  Zap, 
+  Github, 
+  ChevronRight, 
+  Command,
+  Layout,
+  Code2,
+  Globe,
+  Plus
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import NewProjectModal from "@/components/NewProjectModal";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
+// --- Atmosphere Component ---
+const Atmosphere = () => (
+  <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="absolute inset-0 noise-bg" />
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 2 }}
+      className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] glow-orb rounded-full" 
+    />
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 2, delay: 0.5 }}
+      className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] glow-orb-secondary rounded-full" 
+    />
+  </div>
+);
+
+// --- IDE Mockup Component ---
+const IDEMockup = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40, rotateX: 15 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 5 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="relative w-full max-w-5xl mx-auto aspect-video rounded-xl border border-white/10 bg-[#05070a]/80 glass-effect shadow-2xl overflow-hidden group"
+      style={{ perspective: "1000px" }}
+    >
+      {/* OS Header */}
+      <div className="h-9 w-full bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+        <div className="flex gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
+          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
+        </div>
+        <div className="mx-auto text-[10px] text-muted-foreground font-medium opacity-50 tracking-widest uppercase">
+          codeverse_enterprise_shell.app
+        </div>
+      </div>
+
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <div className="w-48 bg-black/40 border-r border-white/5 p-4 space-y-4 hidden md:block">
+          <div className="space-y-1.5">
+             <div className="h-2 w-20 bg-primary/20 rounded-full" />
+             <div className="h-2 w-32 bg-white/5 rounded-full" />
+             <div className="h-2 w-24 bg-white/5 rounded-full" />
+             <div className="h-2 w-28 bg-white/5 rounded-full" />
+          </div>
+        </div>
+
+        {/* Editor Area */}
+        <div className="flex-1 p-6 font-mono text-sm space-y-2">
+          <motion.div 
+            initial={{ width: 0 }}
+            whileInView={{ width: "100%" }}
+            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            className="flex gap-2"
+          >
+            <span className="text-primary">const</span>
+            <span className="text-indigo-300">collaborate</span>
+            <span className="text-white">=</span>
+            <span className="text-yellow-400">() {"=>"}</span>
+            <span className="text-white">{"{"}</span>
+          </motion.div>
+          <div className="pl-6 text-muted-foreground opacity-50">
+            // Real-time synchronization active
+          </div>
+          <div className="pl-6 flex gap-2">
+            <span className="text-primary">await</span>
+            <span className="text-indigo-300">CodeVerse</span>
+            <span className="text-white">.sync();</span>
+          </div>
+          <div className="text-white">{"}"}</div>
+
+          {/* Floating Cursors Simulation */}
+          <motion.div 
+             animate={{ x: [0, 150, 80], y: [0, 40, 0] }}
+             transition={{ duration: 4, repeat: Infinity }}
+             className="absolute top-20 left-40 flex items-center gap-1"
+          >
+            <LucideCursor color="#6366F1" name="Ayush" />
+          </motion.div>
+          
+          <motion.div 
+             animate={{ x: [0, -100, -50], y: [0, -20, 20] }}
+             transition={{ duration: 6, repeat: Infinity }}
+             className="absolute bottom-20 right-40 flex items-center gap-1"
+          >
+            <LucideCursor color="#F43F5E" name="Collaborator" />
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const LucideCursor = ({ color, name }: { color: string, name: string }) => (
+  <div className="relative group">
+     <ArrowCursor color={color} />
+     <div 
+       className="absolute left-4 top-4 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-lg whitespace-nowrap"
+       style={{ backgroundColor: color }}
+     >
+       {name}
+     </div>
+  </div>
+);
+
+const ArrowCursor = ({ color }: { color: string }) => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0L14 7L7 14L5 9L0 7V0Z" fill={color} />
+  </svg>
+);
+
+// --- Component Definition ---
 export default function HomePage() {
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const features = [
+    {
+      title: "Real-Time Engine",
+      desc: "Architected for sub-50ms latency collaboration globally.",
+      icon: Zap,
+      color: "text-amber-400",
+      bg: "bg-amber-400/10"
+    },
+    {
+      title: "A.I. Core",
+      desc: "Neural-assisted coding with deep project context integration.",
+      icon: Cpu,
+      color: "text-indigo-400",
+      bg: "bg-indigo-400/10"
+    },
+    {
+      title: "Enterprise History",
+      desc: "Immaculate version snapshots with instant rollback capabilities.",
+      icon: History,
+      color: "text-emerald-400",
+      bg: "bg-emerald-400/10"
+    },
+    {
+      title: "Tactile Chat",
+      desc: "Integrated team communication built directly into the grid.",
+      icon: MessageSquare,
+      color: "text-pink-400",
+      bg: "bg-pink-400/10"
+    },
+    {
+      title: "Midnight UI",
+      desc: "High-density design engineered for professional power users.",
+      icon: Layout,
+      color: "text-primary",
+      bg: "bg-primary/10"
+    },
+    {
+      title: "Open Deployment",
+      desc: "One-click deployment to global edge infrastructures.",
+      icon: Globe,
+      color: "text-blue-400",
+      bg: "bg-blue-400/10"
+    }
+  ];
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-6 py-10 md:px-20 transition-colors duration-300">
-        
-        {/* ✅ Hero Section */}
-        <section className="text-center mb-20">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-gradient">
-            CodeVerse
-          </h1>
-          <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-            A next-gen real-time code editor powered by AI, built for developers and teams to collaborate faster and smarter.
-          </p>
+    <div className="relative min-h-screen bg-background font-sans selection:bg-primary/30 scroll-smooth">
+      <Atmosphere />
 
-          <div className="mt-8 flex justify-center gap-4">
-            {!user ? (
-              <>
-                <Link
-                  href="/login"
-                  className="bg-[var(--primary)] hover:bg-purple-700 px-6 py-3 rounded-md font-semibold transition"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/demo"
-                  className="border border-gray-500 hover:border-[var(--primary)] text-[var(--foreground)] px-6 py-3 rounded-md font-semibold transition"
-                >
-                  Try Demo
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-md font-semibold transition"
-                >
-                  Go to Dashboard
-                </Link>
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="border border-gray-500 hover:border-[var(--primary)] text-[var(--foreground)] px-6 py-3 rounded-md font-semibold transition"
-                >
-                  Start New Project
-                </button>
-              </>
-            )}
+      {/* --- Sticky Header --- */}
+      <nav 
+        className={cn(
+          "fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b",
+          scrolled ? "py-3 bg-background/80 backdrop-blur-md border-white/10 shadow-2xl" : "py-6 bg-transparent border-transparent"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <Link href="/" className="group flex items-center gap-2">
+            <div className="w-8 h-8 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+              <Command className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-black tracking-tighter text-white font-outfit">CodeVerse</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            {["Technology", "Collaboration", "Pricing", "Enterprise"].map((link) => (
+              <Link key={link} href="#" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+                {link}
+              </Link>
+            ))}
           </div>
 
-          {/* ✅ New Project Modal */}
-          {showModal && (
-            <NewProjectModal onClose={() => setShowModal(false)} />
-          )}
-        </section>
+          <div className="flex items-center gap-4">
+            {!user ? (
+               <Link href="/login">
+                <Button variant="ghost" className="text-white hover:bg-white/5">Sign In</Button>
+               </Link>
+            ) : (
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="text-white hover:bg-white/5">Dashboard</Button>
+                </Link>
+            )}
+            <Link href={user ? "/dashboard" : "/login"}>
+               <Button className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold px-6">
+                 Get Started
+               </Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
-        {/* Features */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-          {[
-            {
-              title: "⚡ Real-Time Collaboration",
-              desc: "Code with teammates in sync using blazing-fast WebSocket technology.",
-            },
-            {
-              title: "🤖 AI Suggestions",
-              desc: "Smart autocomplete and refactoring using OpenAI's Codex engine.",
-            },
-            {
-              title: "🔐 GitHub Login",
-              desc: "Sign in with your GitHub to manage files and projects securely.",
-            },
-            {
-              title: "🕒 Version Control",
-              desc: "Rewind any time with built-in version snapshots.",
-            },
-            {
-              title: "💬 Built-in Chat",
-              desc: "Communicate instantly without switching tools.",
-            },
-            {
-              title: "🌐 Markdown & Preview",
-              desc: "Live markdown preview for docs and READMEs.",
-            },
-          ].map((feature, i) => (
-            <div
-              key={i}
-              className="border border-gray-700 rounded-lg p-6 hover:border-[var(--primary)] transition"
-            >
-              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-              <p className="text-gray-400">{feature.desc}</p>
-            </div>
-          ))}
-        </section>
-
-        {/* How It Works */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-semibold mb-6">How It Works</h2>
-          <ol className="space-y-4 list-decimal list-inside text-gray-400">
-            <li>Create or join a coding room using a unique link</li>
-            <li>Write code collaboratively in real time using our AI-powered editor</li>
-            <li>Discuss ideas live via built-in chat and save versions anytime</li>
-          </ol>
-        </section>
-
-        {/* Final CTA */}
-        <section className="text-center">
-          <h3 className="text-2xl font-bold mb-4">Ready to Code Smarter?</h3>
-          <Link
-            href={user ? "/dashboard" : "/login"}
-            className="bg-pink-600 hover:bg-pink-700 px-8 py-3 rounded-lg text-lg font-semibold transition"
+      <main className="relative z-10 pt-32 pb-20">
+        {/* --- Hero Section --- */}
+        <section className="max-w-7xl mx-auto px-6 text-center mb-32">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-bold uppercase tracking-widest mb-8"
           >
-            {user ? "Go to Dashboard" : "Get Started Now"}
-          </Link>
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            V2.0 Midnight Release Now Live
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="text-6xl md:text-8xl font-black font-outfit tracking-tighter text-white mb-6 leading-[0.9]"
+          >
+            Immaculate <br />
+            <span className="text-gradient">Collaboration.</span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-lg md:text-xl text-muted-foreground/80 max-w-2xl mx-auto mb-12 font-inter leading-relaxed"
+          >
+            Architected for the forward-thinking developer. A God-Level IDE shell engineered for real-time multiplayer coding with deep A.I. integration.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="flex flex-wrap justify-center gap-4 mb-24"
+          >
+            <Button 
+              size="lg" 
+              onClick={() => user ? setShowModal(true) : window.location.href = "/login"}
+              className="h-14 px-10 bg-primary text-white text-lg font-bold rounded-xl shadow-2xl shadow-primary/30 hover:scale-105 transition-all"
+            >
+              Start New Project
+            </Button>
+            <Link href="/demo">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="h-14 px-10 border-white/10 text-white bg-white/5 hover:bg-white/10 rounded-xl hover:scale-105 transition-all"
+              >
+                Watch Demo
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Software Showcase */}
+          <IDEMockup />
         </section>
 
-        {/* Footer */}
-        <footer className="mt-24 border-t border-gray-800 pt-6 text-sm text-gray-500 text-center">
-          © {new Date().getFullYear()} CodeVerse — Built with ❤️ for Developers
-        </footer>
+        {/* --- Active Now Section --- */}
+        <section className="max-w-4xl mx-auto px-6 mb-40 text-center">
+            <h2 className="text-xs font-bold text-primary uppercase tracking-[0.4em] mb-12">Active Now</h2>
+            <div className="flex flex-wrap justify-center gap-6">
+               {[
+                 { name: "Ayush", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayush" },
+                 { name: "Sarah", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
+                 { name: "John", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John" },
+                 { name: "Emma", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" }
+               ].map((u, i) => (
+                 <motion.div 
+                  key={u.name}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex flex-col items-center gap-2 group cursor-pointer"
+                 >
+                    <div className="w-16 h-16 rounded-full border-2 border-primary/20 bg-background/80 p-1 group-hover:border-primary transition-all group-hover:scale-110">
+                       <img src={u.avatar} alt={u.name} className="w-full h-full rounded-full" />
+                    </div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-0 group-hover:opacity-100 transition-opacity tracking-widest">{u.name}</span>
+                 </motion.div>
+               ))}
+               <motion.div 
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="w-16 h-16 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center text-white/40 hover:border-primary hover:text-primary transition-all cursor-pointer"
+                >
+                  <Plus className="w-6 h-6" />
+                </motion.div>
+            </div>
+        </section>
+
+        {/* --- Features Grid --- */}
+        <section className="max-w-7xl mx-auto px-6 mb-40">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="p-8 rounded-2xl glass-effect group cursor-pointer relative overflow-hidden"
+                >
+                  {/* Icon Glow */}
+                  <div className={cn("absolute -top-10 -left-10 w-32 h-32 blur-[40px] opacity-20 transition-opacity group-hover:opacity-40", f.bg)} />
+                  
+                  <div className={cn("inline-flex p-3 rounded-lg mb-6", f.bg)}>
+                    <f.icon className={cn("w-6 h-6", f.color)} />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 font-outfit">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground font-inter leading-relaxed">
+                    {f.desc}
+                  </p>
+                </motion.div>
+              ))}
+           </div>
+        </section>
+
+        {/* --- CTA Section --- */}
+        <section className="max-w-5xl mx-auto px-6 text-center">
+           <div className="p-12 md:p-20 rounded-3xl glass-effect border border-primary/20 relative overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full glow-orb opacity-10" />
+              <h2 className="text-4xl md:text-6xl font-black font-outfit text-white mb-6 tracking-tighter">
+                Ready for the <br />
+                <span className="text-gradient">Next Generation?</span>
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto mb-10 text-lg leading-relaxed">
+                Join thousands of engineers building the world's most immaculate software with CodeVerse.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                 <Button 
+                   size="lg" 
+                   className="h-14 px-10 bg-primary text-white font-bold group"
+                   onClick={() => window.location.href = "/login"}
+                 >
+                   Deploy Now
+                   <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                 </Button>
+              </div>
+           </div>
+        </section>
       </main>
-    </ThemeProvider>
+
+      {/* --- Footer --- */}
+      <footer className="border-t border-white/5 py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+           <div className="flex items-center gap-2">
+              <Command className="w-6 h-6 text-primary" />
+              <span className="text-lg font-black tracking-tighter text-white">CodeVerse</span>
+           </div>
+           
+           <div className="flex gap-8 text-sm text-muted-foreground font-medium">
+             <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
+             <Link href="#" className="hover:text-white transition-colors">Terms</Link>
+             <Link href="#" className="hover:text-white transition-colors">Status</Link>
+             <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
+           </div>
+
+           <div className="text-xs text-muted-foreground/50 font-mono">
+              © {new Date().getFullYear()} CODEVERSE_SYSTEMS v2.0
+           </div>
+        </div>
+      </footer>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {showModal && (
+          <NewProjectModal onClose={() => setShowModal(false)} />
+        )}
+      </AnimatePresence>
+
+      <style jsx global>{`
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+      `}</style>
+    </div>
   );
 }
