@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createProject } from "@/services/projects";
+import { useProjectCreation } from "@/hooks/useProjectCreation";
 import type { SupportedLanguage } from "@shared/types/language";
 
 interface Props {
@@ -12,32 +11,19 @@ interface Props {
 const NewProjectModal: React.FC<Props> = ({ onClose }) => {
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState<SupportedLanguage>("javascript");
+  const { handleCreate, isAuthenticated } = useProjectCreation();
 
-  const router = useRouter();
-
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const token = localStorage.getItem("token");
-
-  const handleCreate = async () => {
-    if (!user || !token) {
+  const handleSubmit = async () => {
+    if (!isAuthenticated) {
       alert("Please login to create a project.");
       return;
     }
 
     try {
-      const res = await createProject({
-        title,
-        language,
-        owner: user._id,
-      });
-
-      const newProject = res.project;
-
-      alert("✅ Project created!");
-      onClose(); // Close modal
-      router.push(`/editor/${newProject._id}`);
+      await handleCreate(title, language);
+      onClose();
     } catch (err) {
-      console.error("❌ Failed to create project:", err);
+      console.error("Failed to create project:", err);
       alert("Failed to create project.");
     }
   };
@@ -75,7 +61,7 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
             Cancel
           </button>
           <button
-            onClick={handleCreate}
+            onClick={handleSubmit}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
           >
             Create

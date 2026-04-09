@@ -2,18 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_LANGUAGE_FILES, LANGUAGE_FILE_MAP } from "@shared/constants/languages";
+import { getLanguageFromFilename } from "./useLanguageDetection";
 import type { SharedProject } from "@shared/types/project";
-export function getLanguageFromFilename(filename: string) {
-  if (filename.endsWith(".html")) return "html";
-  if (filename.endsWith(".css")) return "css";
-  if (filename.endsWith(".js")) return "javascript";
-  if (filename.endsWith(".py")) return "python";
-  if (filename.endsWith(".java")) return "java";
-  if (filename.endsWith(".cpp")) return "cpp";
-  if (filename.endsWith(".c")) return "c";
-  if (filename.endsWith(".md")) return "markdown";
-  return "plaintext";
-}
 
 export function useEditorState() {
   const [files, setFiles] = useState<Record<string, string>>({});

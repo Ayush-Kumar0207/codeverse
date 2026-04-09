@@ -1,37 +1,15 @@
 // client/components/AIAssistant.tsx
 "use client";
 
-import { useState } from "react";
-import { suggestCode } from "@/services/ai";
+import { useAIAssistant } from "@/hooks/useAIAssistant";
 
 type Props = {
   code: string;
 };
 
 export default function AIAssistant({ code }: Props) {
-  const [prompt, setPrompt] = useState("");
-  const [suggestion, setSuggestion] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleAsk = async () => {
-    const trimmedPrompt = prompt.trim();
-    const trimmedCode = code.trim();
-
-    if (trimmedPrompt.length < 5 || trimmedCode.length < 5) {
-      setSuggestion("⚠️ Prompt or code is too short.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await suggestCode(`${trimmedPrompt}\n\n${trimmedCode}`);
-      setSuggestion(res.suggestion || "⚠️ No suggestion returned.");
-    } catch (err) {
-      console.error("AI Suggestion Error:", err);
-      setSuggestion("⚠️ Error getting suggestion from AI.");
-    }
-    setLoading(false);
-  };
+  const { prompt, setPrompt, suggestion, loading, handleAsk, handleKeyDown } =
+    useAIAssistant({ code });
 
   return (
     <div className="p-4 bg-[#1b1b2f] text-white h-full rounded shadow flex flex-col gap-3">
@@ -41,9 +19,7 @@ export default function AIAssistant({ code }: Props) {
         placeholder="Ask AI to refactor, debug, or explain..."
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={(e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") handleAsk();
-        }}
+        onKeyDown={handleKeyDown}
         className="w-full h-24 p-2 rounded bg-[#0e0e16] border border-gray-600 text-white"
       />
 

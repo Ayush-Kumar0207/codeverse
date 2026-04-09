@@ -11,6 +11,7 @@ export function useSocket(roomId?: string) {
       joinRoom: (nextRoomId = roomId) => {
         if (nextRoomId) socket.emit(SOCKET_EVENTS.JOIN_ROOM, nextRoomId);
       },
+      emit: socket.emit.bind(socket),
       off: socket.off.bind(socket),
       on: socket.on.bind(socket),
     }),

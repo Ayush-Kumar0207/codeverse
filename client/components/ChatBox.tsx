@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useSocket } from "@/hooks/useSocket";
-import { suggestCode } from "@/services/ai";
-import { SOCKET_EVENTS } from "@shared/constants/socket-events";
-import type { ChatMessage } from "@shared/types/chat";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
+import { useDynamicTextarea } from "@/hooks/useDynamicTextarea";
+import { useState } from "react";
 
 type Props = {
   roomId: string;
@@ -13,103 +12,21 @@ type Props = {
 
 export default function ChatBox({ roomId }: Props) {
   const { user } = useAuth();
-  const { socket, on, off } = useSocket(roomId);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, sendMessage } = useChatMessages(roomId);
+  const { messageEndRef, chatContainerRef } = useAutoScroll([messages]);
+  const { textareaRef, resizeTextarea } = useDynamicTextarea();
   const [input, setInput] = useState("");
-  const [isAutoScroll, setIsAutoScroll] = useState(true);
 
-  const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const handleMessage = (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data]);
-    };
-
-    on(SOCKET_EVENTS.CHAT_MESSAGE, handleMessage);
-
-    return () => {
-      off(SOCKET_EVENTS.CHAT_MESSAGE, handleMessage);
-    };
-  }, [off, on]);
-
-  useEffect(() => {
-    if (isAutoScroll) {
-      messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, isAutoScroll]); // ✅ Added isAutoScroll to dependency
-
-  useEffect(() => {
-    const container = chatContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const isBottom =
-        container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
-      setIsAutoScroll(isBottom);
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const sendMessage = async () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-
-    const userMsg: ChatMessage = {
-      roomId,
-      user: user?.username || "Guest",
-      message: input.trim(),
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    socket.emit(SOCKET_EVENTS.CHAT_MESSAGE, userMsg);
-    const prompt = input;
+    await sendMessage(input);
     setInput("");
-
-    if (prompt.trim().startsWith("@ai") || prompt.trim().startsWith("ask:")) {
-      const cleanedPrompt = prompt.replace(/^(@ai|ask:)/i, "").trim();
-
-      try {
-        const data = await suggestCode(cleanedPrompt);
-        if (data.suggestion) {
-          const aiReply: ChatMessage = {
-            roomId,
-            user: "CodeVerse AI 🤖",
-            message: data.suggestion,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          };
-          socket.emit(SOCKET_EVENTS.CHAT_MESSAGE, aiReply);
-        }
-      } catch (err) {
-        console.error("Ollama AI Error:", err);
-      }
-    }
   };
-
-  const resizeTextarea = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
-    }
-  };
-
-  useEffect(() => {
-    resizeTextarea();
-  }, [input]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSend();
     }
   };
 
@@ -139,7 +56,10 @@ export default function ChatBox({ roomId }: Props) {
                 <div>{msg.message}</div>
 
                 <div className="text-[10px] text-gray-400 mt-1 text-right">
-                  {msg.time || ""}
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </div>
               </div>
             </div>
@@ -153,14 +73,17 @@ export default function ChatBox({ roomId }: Props) {
           ref={textareaRef}
           placeholder="Type a message... (@ai What is JSX?)"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            resizeTextarea();
+          }}
           onKeyDown={handleKeyPress}
           rows={1}
           className="flex-1 h-14 mt-3 resize-none px-4 py-0.5 rounded-xl border border-gray-600 bg-[#0f172a] text-white focus:outline-none focus:ring-2 focus:ring-purple-500 max-h-32 overflow-y-hidden"
         />
 
         <button
-          onClick={sendMessage}
+          onClick={handleSend}
           className="px-4 py-2 h-14 mt-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium"
         >
           Send
