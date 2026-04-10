@@ -31,6 +31,7 @@ interface PresenceHeaderProps {
   users?: PresenceUser[];
   showBackButton?: boolean;
   backHref?: string;
+  onDeploy?: () => void;
 }
 
 export function ActivityBar() {
@@ -181,6 +182,7 @@ export function PresenceHeader({
   users = [],
   showBackButton = false,
   backHref = "/",
+  onDeploy,
 }: PresenceHeaderProps) {
   return (
     <header className="h-12 border-b border-[var(--sidebar-border)] bg-background/80 backdrop-blur-md flex items-center justify-between px-4 z-40">
@@ -231,7 +233,10 @@ export function PresenceHeader({
 
         <div className="h-4 w-[1px] bg-border" />
         
-        <button className="flex items-center space-x-2 px-3 py-1 bg-primary text-primary-foreground text-xs rounded-md font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+        <button 
+          onClick={onDeploy}
+          className="flex items-center space-x-2 px-3 py-1 bg-primary text-primary-foreground text-xs rounded-md font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+        >
           <Github className="w-3 h-3" />
           <span>Deploy</span>
         </button>

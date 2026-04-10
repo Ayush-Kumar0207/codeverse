@@ -9,6 +9,7 @@ const SOCKET_EVENTS = Object.freeze({
   CURSOR_MOVE: "cursorMove",
   USER_JOINED: "userJoined",
   USER_LEFT: "userLeft",
+  PRESENCE_UPDATE: "presenceUpdate",
 });
 
 module.exports = { SOCKET_EVENTS };

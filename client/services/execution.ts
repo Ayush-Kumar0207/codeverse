@@ -6,7 +6,8 @@ export async function executeCode(payload: {
   language: SupportedLanguage;
   roomId: string;
   user: string;
-}): Promise<{ output: string }> {
+  fileName?: string;
+}): Promise<{ output: string; type?: string; stats?: any }> {
   const { data } = await apiClient.post("/api/execute", payload, {
     headers: { "Content-Type": "application/json" },
   });

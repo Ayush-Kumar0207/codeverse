@@ -9,4 +9,5 @@ export declare const SOCKET_EVENTS: {
   readonly CURSOR_MOVE: "cursorMove";
   readonly USER_JOINED: "userJoined";
   readonly USER_LEFT: "userLeft";
+  readonly PRESENCE_UPDATE: "presenceUpdate";
 };

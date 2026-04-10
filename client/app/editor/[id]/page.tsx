@@ -19,10 +19,14 @@ import { useSocket } from "@/hooks/useSocket";
 import { useCodeExecution } from "@/hooks/useCodeExecution";
 import { useCodeSave } from "@/hooks/useCodeSave";
 import { useHtmlPreview } from "@/hooks/useHtmlPreview";
+import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { fetchProjectById } from "@/services/projects";
 import { executeCode } from "@/services/execution";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 import type { SharedProject } from "@shared/types/project";
+import DiffViewer from "@/components/DiffViewer";
+import DeploymentModal from "@/components/DeploymentModal";
+import { deployProject } from "@/services/deployment";
 import dynamic from "next/dynamic";
 
 const TerminalPanel = dynamic(() => import("@/components/TerminalPanel"), {
@@ -115,7 +119,7 @@ export default function EditorPage() {
   } = useEditorState();
 
   // Code execution hook
-  const { output, loading, setOutput, setLoading } = useCodeExecution(
+  const { output, outputType, loading, setOutput, setOutputType, setLoading } = useCodeExecution(
     socket,
     language,
     code,
@@ -130,6 +134,58 @@ export default function EditorPage() {
 
   // HTML preview hook
   const { combinedPreview, openPreviewInBrowser } = useHtmlPreview(files, language);
+
+  // Chronos Diff Engine State
+  const [showDiffViewer, setShowDiffViewer] = useState(false);
+  const [versionCode, setVersionCode] = useState("");
+  const [versionDate, setVersionDate] = useState("");
+
+  // AI assistant hook with Project Context
+  const projectContext = Object.entries(files)
+    .map(([name, content]) => `File: ${name}\nContent:\n${content}\n---\n`)
+    .join("");
+
+  const {
+    prompt: aiPrompt,
+    setPrompt: setAiPrompt,
+    suggestion,
+    loading: aiLoading,
+    handleAsk,
+    handleKeyDown: handleAiKeyDown,
+  } = useAIAssistant({ code, context: projectContext });
+
+  const handleCompare = (code: string, date: string) => {
+    setVersionCode(code);
+    setVersionDate(date);
+    setShowDiffViewer(true);
+  };
+
+  const handleRevertFromDiff = () => {
+    setFiles((prev) => ({ ...prev, [activeFile]: versionCode }));
+    setShowDiffViewer(false);
+  };
+
+  // Aegis Deployment State
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deploymentUrl, setDeploymentUrl] = useState("");
+  const [deploymentError, setDeploymentError] = useState("");
+
+  const handleBeginDeployment = async () => {
+    setIsDeploying(true);
+    setDeploymentUrl("");
+    setDeploymentError("");
+
+    try {
+      const res = await deployProject({
+        projectId: id as string,
+        files
+      });
+      setDeploymentUrl(res.url);
+    } catch (err: any) {
+      console.error(err);
+      setDeploymentError(err.message || "Failed to initiate Aegis propagation.");
+    }
+  };
 
   // Load project
   useEffect(() => {
@@ -178,32 +234,52 @@ export default function EditorPage() {
       setActiveUsers(prev => prev.filter(u => u.username !== data.username));
     });
 
+    socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, (data: any) => {
+      setActiveUsers(prev => prev.map(u => 
+        u.username === data.username ? { ...u, status: data.status } : u
+      ));
+    });
+
     return () => {
       socket.off(SOCKET_EVENTS.USER_JOINED);
       socket.off(SOCKET_EVENTS.USER_LEFT);
+      socket.off(SOCKET_EVENTS.PRESENCE_UPDATE);
     };
   }, [socket, user]);
 
-  // Handle code execution
+  // Emit presence update when active file changes
+  useEffect(() => {
+    if (!socket || !user || !activeFile) return;
+    
+    socket.emit(SOCKET_EVENTS.PRESENCE_UPDATE, {
+      roomId,
+      username: user.username,
+      status: `Editing ${activeFile}`
+    });
+  }, [activeFile, socket, user, roomId]);
+
+  // Handle code execution with Adaptive Logic
+  const [activeBottomTab, setActiveBottomTab] = useState("terminal");
+
   const handleRun = async () => {
-    if (["html", "css", "markdown"].includes(language)) {
-      setOutput("⚠️ This file doesn't require execution.");
-      return;
-    }
-
-    const supportedLanguages: string[] = ["javascript", "python", "cpp", "c", "java"];
-    if (!supportedLanguages.includes(language)) {
-      setOutput("⚠️ Unsupported language.");
-      return;
-    }
-
     setLoading(true);
+    setBottomCollapsed(false);
+    
+    // Adaptive logic: If web file, we might skip the backend if it's purely static, 
+    // but the backend now handles this perfectly with 'visual' type.
+    
     socket?.emit(SOCKET_EVENTS.EXECUTION_START, {
       user: user?.username || "Guest",
       roomId,
       language,
     });
-    setOutput("⏳ Running...");
+    
+    // Switch to appropriate tab based on language immediately for better UX
+    if (["html", "css", "markdown"].includes(language)) {
+       setActiveBottomTab("output");
+    } else {
+       setActiveBottomTab("terminal");
+    }
 
     try {
       const res = await executeCode({
@@ -211,19 +287,59 @@ export default function EditorPage() {
         language,
         roomId,
         user: user?.username || "Guest",
+        fileName: activeFile
       });
+      
       setOutput(res.output || "✅ No output");
-    } catch (err) {
+      setOutputType((res.type as any) || "terminal");
+      
+      // Intelligent Tab Switching based on backend response
+      if (res.type === "visual") {
+         setActiveBottomTab("output");
+      } else {
+         setActiveBottomTab("terminal");
+      }
+    } catch (err: any) {
       console.error(err);
-      setOutput("❌ Error during execution.");
-      socket?.emit(SOCKET_EVENTS.EXECUTION_ERROR, {
-        user: user?.username || "Guest",
-        roomId,
-        error: "Execution failed.",
-      });
+      setOutput(err.message || "❌ Error during execution.");
+      setOutputType("terminal");
+      setActiveBottomTab("terminal");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Internal Visual Preview Component
+  const VisualPreview = () => {
+    if (language === "markdown" || activeFile.endsWith(".md")) {
+       return (
+         <div className="p-6 prose prose-invert max-w-none h-full overflow-auto bg-background/50">
+            <ReactMarkdown>{output || code}</ReactMarkdown>
+         </div>
+       );
+    }
+
+    // For HTML/CSS
+    const previewContent = language === "html" ? output || code : combinedPreview;
+    
+    return (
+      <div className="h-full w-full bg-white rounded-lg overflow-hidden flex flex-col">
+         <div className="h-7 bg-slate-100 border-b flex items-center px-4 gap-2 shrink-0">
+            <div className="flex gap-1.5">
+               <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+               <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+               <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+            </div>
+            <div className="text-[10px] font-mono text-slate-400 truncate">preview://simulation-environment/index.html</div>
+         </div>
+         <iframe 
+            srcDoc={previewContent}
+            title="Preview"
+            className="flex-1 w-full border-none shadow-inner"
+            sandbox="allow-scripts"
+         />
+      </div>
+    );
   };
 
   // Panel refs
@@ -268,6 +384,7 @@ export default function EditorPage() {
           users={activeUsers}
           showBackButton
           backHref="/"
+          onDeploy={handleBeginDeployment}
         />
 
         <PanelGroup direction="horizontal" className="flex-1">
@@ -404,36 +521,76 @@ export default function EditorPage() {
                 onExpand={() => setBottomCollapsed(false)}
                 className="flex flex-col bg-black/40"
               >
-                <div className="h-8 flex items-center justify-between px-3 border-b border-white/5 bg-black/20">
-                  <div className="flex items-center gap-4">
-                    <button className={cn("text-[10px] font-bold uppercase tracking-widest", !bottomCollapsed ? "text-primary" : "text-muted-foreground")}>
-                      Terminal
-                    </button>
-                    <button className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                      Output
-                    </button>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setBottomCollapsed(!bottomCollapsed)}>
-                    {bottomCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  </Button>
-                </div>
+                <Tabs value={activeBottomTab} onValueChange={setActiveBottomTab} className="h-full flex flex-col">
+                   <div className="h-8 flex items-center justify-between px-3 border-b border-white/5 bg-black/20 shrink-0">
+                     <TabsList className="bg-transparent h-7 p-0 gap-4">
+                        <TabsTrigger 
+                           value="terminal" 
+                           className="text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-transparent data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary h-7 px-0"
+                        >
+                           Terminal
+                        </TabsTrigger>
+                        <TabsTrigger 
+                           value="output" 
+                           className="text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-transparent data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary h-7 px-0"
+                        >
+                           Output
+                        </TabsTrigger>
+                     </TabsList>
+                     <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setBottomCollapsed(!bottomCollapsed)}>
+                       {bottomCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                     </Button>
+                   </div>
 
-                {!bottomCollapsed && (
-                  <div className="flex-1 bg-black/40">
-                     <TerminalPanel 
-                        output={output} 
-                        onData={(data) => {
-                          // In demo mode, simulate some shell responsiveness
-                          if (id === "demo-sandbox" && data === "\r") {
-                             // Handled in component for basic echo
-                          }
-                        }}
-                     />
-                  </div>
-                )}
+                   {!bottomCollapsed && (
+                     <div className="flex-1 overflow-hidden">
+                        <TabsContent value="terminal" className="h-full m-0 bg-black/40">
+                           <TerminalPanel 
+                              output={outputType === "terminal" ? output : `✅ Visual output ready in 'Output' tab.\n[Neural Identity synced]`} 
+                              onData={() => {}}
+                           />
+                        </TabsContent>
+                        <TabsContent value="output" className="h-full m-0 bg-black/60 p-4">
+                           <VisualPreview />
+                        </TabsContent>
+                        <TabsContent value="history" className="h-full m-0 bg-black/20">
+                          <VersionHistory
+                            userId={user?._id || "demo"}
+                            fileName={activeFile}
+                            onRevert={(newCode) => setFiles((prev) => ({ ...prev, [activeFile]: newCode }))}
+                            onCompare={handleCompare}
+                            refreshSignal={refreshCount}
+                          />
+                        </TabsContent>
+                     </div>
+                   )}
+                </Tabs>
               </Panel>
             </PanelGroup>
           </Panel>
+
+          <AnimatePresence>
+            {showDiffViewer && (
+              <DiffViewer
+                originalCode={versionCode}
+                modifiedCode={files[activeFile]}
+                fileName={activeFile}
+                versionDate={versionDate}
+                onClose={() => setShowDiffViewer(false)}
+                onRevert={handleRevertFromDiff}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            <DeploymentModal
+              isOpen={isDeploying}
+              onClose={() => setIsDeploying(false)}
+              deploymentUrl={deploymentUrl}
+              error={deploymentError}
+              projectName={project.title}
+            />
+          </AnimatePresence>
 
           <PanelResizeHandle className="w-[1px] bg-white/5 hover:bg-primary/30 transition-colors" />
 

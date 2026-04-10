@@ -35,6 +35,10 @@ function socketHandler(io) {
     socket.on(SOCKET_EVENTS.EXECUTION_ERROR, ({ roomId, user, error }) => {
       socket.to(roomId).emit(SOCKET_EVENTS.EXECUTION_ERROR, { user, error });
     });
+    
+    socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, ({ roomId, username, status }) => {
+      socket.to(roomId).emit(SOCKET_EVENTS.PRESENCE_UPDATE, { username, status });
+    });
 
     socket.on("disconnect", () => {
       console.log("❌ User disconnected:", socket.id);

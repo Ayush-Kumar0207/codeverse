@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Clock } from "lucide-react";
 import { fetchCodeVersions } from "@/services/code";
 import type { SharedVersion } from "@shared/types/version";
 
@@ -6,13 +8,15 @@ type Props = {
   userId: string;
   fileName: string;
   onRevert: (code: string) => void;
-  refreshSignal?: number; // ✅ NEW: Triggers re-fetch when changed
+  onCompare: (versionCode: string, date: string) => void; // ✅ Add onCompare
+  refreshSignal?: number;
 };
 
 export default function VersionHistory({
   userId,
   fileName,
   onRevert,
+  onCompare,
   refreshSignal,
 }: Props) {
   const [versions, setVersions] = useState<SharedVersion[]>([]);
@@ -28,24 +32,54 @@ export default function VersionHistory({
     };
 
     fetchVersions();
-  }, [userId, fileName, refreshSignal]); // ✅ Trigger re-fetch when signal changes
+  }, [userId, fileName, refreshSignal]);
 
   return (
-    <div className="p-4 bg-[#1b1b2f] text-white rounded-md">
-      <h3 className="text-lg font-semibold mb-2">🕒 Version History</h3>
-      <ul className="space-y-2">
+    <div className="flex flex-col h-full bg-black/20">
+      <div className="p-4 border-b border-white/5 bg-black/40">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+          <Clock className="w-3 h-3 text-primary" />
+          Chronos Timeline
+        </h3>
+      </div>
+      <ul className="flex-1 overflow-auto p-2 space-y-2">
+        {versions.length === 0 && (
+          <div className="h-40 flex flex-col items-center justify-center text-muted-foreground opacity-30 italic">
+            <Clock className="w-8 h-8 mb-2" />
+            <p className="text-[10px] uppercase tracking-tighter">No snapshots recorded</p>
+          </div>
+        )}
         {versions.map((version) => (
           <li
             key={version._id}
-            className="flex justify-between items-center bg-[#2a2a40] px-4 py-2 rounded"
+            className="group flex flex-col gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/5 transition-all duration-300"
           >
-            <span>{new Date(version.createdAt || Date.now()).toLocaleString()}</span>
-            <button
-              onClick={() => onRevert(version.code)}
-              className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded"
-            >
-              Revert
-            </button>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-foreground/80">
+                {new Date(version.createdAt || Date.now()).toLocaleString()}
+              </span>
+              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => onCompare(version.code, new Date(version.createdAt || "").toLocaleString())}
+                  className="px-2.5 py-1 text-[9px] font-bold uppercase bg-white/10 hover:bg-white/20 text-foreground rounded border border-white/10 transition-colors"
+                >
+                  Compare
+                </button>
+                <button
+                  onClick={() => onRevert(version.code)}
+                  className="px-2.5 py-1 text-[9px] font-bold uppercase bg-primary/20 hover:bg-primary/30 text-primary rounded border border-primary/20 transition-colors"
+                >
+                  Restore
+                </button>
+              </div>
+            </div>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+               <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                className="h-full bg-primary/30"
+               />
+            </div>
           </li>
         ))}
       </ul>

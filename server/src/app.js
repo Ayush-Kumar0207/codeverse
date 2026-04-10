@@ -11,6 +11,7 @@ const codeRoutes = require("./routes/code.routes");
 const aiRoutes = require("./routes/ai.routes");
 const executeRoutes = require("./routes/execute.routes");
 const versionRoutes = require("./routes/versions.routes");
+const deploymentRoutes = require("./routes/deployment.routes");
 const testRoutes = require("./routes/test.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 
@@ -53,6 +54,7 @@ function createApp() {
   app.use("/api/ai", aiRoutes);
   app.use("/api/execute", executeRoutes);
   app.use("/api/versions", versionRoutes);
+  app.use("/api/deploy", deploymentRoutes);
   app.use("/api/test", testRoutes);
 
   app.get("/", (req, res) => {

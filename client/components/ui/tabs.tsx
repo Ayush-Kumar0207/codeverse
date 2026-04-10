@@ -19,16 +19,24 @@ function useTabsContext() {
 }
 
 type TabsProps = {
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
   className?: string;
   children: React.ReactNode;
 };
 
-function Tabs({ defaultValue, className, children }: TabsProps) {
-  const [value, setValue] = React.useState(defaultValue);
+function Tabs({ defaultValue, value, onValueChange, className, children }: TabsProps) {
+  const [internalValue, setInternalValue] = React.useState(defaultValue || "");
+  
+  const activeValue = value !== undefined ? value : internalValue;
+  const setActiveValue = (val: string) => {
+    if (onValueChange) onValueChange(val);
+    if (value === undefined) setInternalValue(val);
+  };
 
   return (
-    <TabsContext.Provider value={{ value, setValue }}>
+    <TabsContext.Provider value={{ value: activeValue, setValue: setActiveValue }}>
       <div className={cn("flex flex-col", className)}>{children}</div>
     </TabsContext.Provider>
   );

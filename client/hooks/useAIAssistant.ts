@@ -3,6 +3,7 @@ import { suggestCode } from "@/services/ai";
 
 interface UseAIAssistantOptions {
   code?: string;
+  context?: string; // Full project context
 }
 
 export function useAIAssistant(options: UseAIAssistantOptions = {}) {
@@ -18,9 +19,12 @@ export function useAIAssistant(options: UseAIAssistantOptions = {}) {
 
     setLoading(true);
     try {
-      const fullPrompt = options.code ? `Code:\n${options.code}\n\nPrompt:\n${prompt}` : prompt;
-      const response = await suggestCode(fullPrompt);
-      setSuggestion(response.suggestion || "No suggestion received from AI.");
+      const response = await suggestCode({
+        prompt,
+        context: options.context || `Active File Content:\n${options.code}`,
+        systemPrompt: "You are the CodeVerse Neural Architect. You have access to the full project context. Provide production-grade, architectural advice."
+      });
+      setSuggestion(response.suggestion || "Synthetic silence from Ollama Engine.");
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to get AI suggestion";
       setSuggestion(`Error: ${errorMsg}`);
