@@ -40,8 +40,8 @@ export function ActivityBar() {
   const pathname = usePathname();
 
   const navItems = [
+    { icon: Search, label: "Search / Commands", id: "search", href: "#" },
     { icon: Files, label: "Dashboard", id: "dashboard", href: "/dashboard" },
-    { icon: Search, label: "Projects", id: "projects", href: "/" },
     { icon: MessageSquare, label: "Editor", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
@@ -49,9 +49,26 @@ export function ActivityBar() {
   return (
     <div className="w-12 flex flex-col items-center py-4 bg-[var(--activity-bar-background)] border-r border-[var(--sidebar-border)] h-full z-50">
       <div className="mb-8">
-        <Link href="/" className="text-primary">
-          <Command className="w-8 h-8" />
-        </Link>
+        <TooltipProvider delay={0}>
+          <Tooltip>
+            <TooltipTrigger
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push("/");
+              }}
+              aria-label="Go to Landing Page"
+              className="text-primary hover:scale-110 transition-transform flex items-center justify-center h-10 w-10 rounded-md"
+            >
+              <Command className="w-8 h-8" />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p className="font-bold">Go to Landing Page</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="flex-1 flex flex-col space-y-4 w-full items-center">
@@ -64,7 +81,11 @@ export function ActivityBar() {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(item.href);
+                  if (item.id === "search") {
+                    window.dispatchEvent(new CustomEvent("toggle-command-palette"));
+                  } else {
+                    router.push(item.href);
+                  }
                 }}
                 aria-label={item.label}
                 className={cn(
@@ -93,14 +114,17 @@ export function ActivityBar() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                router.push("/profile");
+                router.push("/settings");
               }}
-              className="h-10 w-10 flex items-center justify-center rounded-md text-muted-foreground hover:bg-white/5"
+              className={cn(
+                "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-white/5",
+                pathname === "/settings" ? "text-primary bg-white/5" : "text-muted-foreground"
+              )}
             >
               <Settings className="w-6 h-6" />
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Settings</p>
+              <p>System Settings</p>
             </TooltipContent>
           </Tooltip>
 
@@ -122,13 +146,30 @@ export function ActivityBar() {
             </TooltipContent>
           </Tooltip>
 
-          <div className="p-2 border-t border-white/10 w-full flex justify-center mt-2 pt-4">
-             {user?.avatar ? (
-                <img src={user.avatar} className="w-8 h-8 rounded-full border border-primary/50" alt="User" />
-             ) : (
-                <User className="w-6 h-6 text-muted-foreground" />
-             )}
-          </div>
+          <Tooltip>
+            <TooltipTrigger
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push("/profile");
+              }}
+              className={cn(
+                "w-full flex justify-center py-4 border-t border-white/10 mt-2 transition-all hover:bg-white/5 group",
+                pathname === "/profile" ? "bg-white/5" : ""
+              )}
+            >
+               {user?.avatar ? (
+                  <img src={user.avatar} className="w-8 h-8 rounded-full border border-primary/50 group-hover:scale-110 transition-transform" alt="User" />
+               ) : (
+                  <User className={cn("w-6 h-6 group-hover:scale-110 transition-transform", pathname === "/profile" ? "text-primary" : "text-muted-foreground")} />
+               )}
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Neural Identity</p>
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
       </div>
     </div>

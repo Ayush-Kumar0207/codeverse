@@ -13,10 +13,27 @@ async function createProject({ title, language, owner }) {
 }
 
 async function getProjectsByOwner(owner) {
+  let ownerId = owner;
+
+  // If owner doesn't look like a UUID, assume it's a username and look up the ID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(owner)) {
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("username", owner)
+      .single();
+
+    if (userError || !userData) {
+      throw new HttpError(404, "User not found");
+    }
+    ownerId = userData.id;
+  }
+
   const { data: projects, error } = await supabase
     .from("projects")
     .select("*")
-    .eq("owner_id", owner)
+    .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;

@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://codeverse-rho.vercel.app", "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "https://codeverse-rho.vercel.app", "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true,
   },

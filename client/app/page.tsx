@@ -193,14 +193,23 @@ export default function HomePage() {
       <Atmosphere />
 
       {/* --- Sticky Header --- */}
-      <header className="fixed top-0 inset-x-0 mx-auto z-50 p-4">
+      <header className={cn(
+        "fixed top-0 right-0 z-50 p-4 transition-all duration-300",
+        user ? "left-12" : "left-0"
+      )}>
         <nav className="glass-effect rounded-2xl px-6 py-4 flex flex-wrap items-center justify-between border-white/5 bg-black/20 backdrop-blur-md">
-          <Link href="/" className="flex items-center gap-2 group order-1 md:order-none">
-            <div className="w-8 h-8 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <Command className="w-5 h-5 text-white" />
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-primary uppercase tracking-[0.4em] opacity-50">Immersion Mode</span>
             </div>
-            <span className="text-xl font-black tracking-tighter text-white font-outfit">CodeVerse</span>
-          </Link>
+          ) : (
+            <Link href="/" className="flex items-center gap-2 group order-1 md:order-none">
+              <div className="w-8 h-8 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                <Command className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-black tracking-tighter text-white font-outfit">CodeVerse</span>
+            </Link>
+          )}
 
             <div className="flex flex-wrap items-center gap-4 md:gap-8 justify-center w-full md:w-auto mt-4 md:mt-0 order-3 md:order-none">
               {[

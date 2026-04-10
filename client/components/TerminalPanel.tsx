@@ -46,15 +46,21 @@ export default function TerminalPanel({ onData, output }: TerminalPanelProps) {
     term.open(terminalRef.current);
     
     const tryFit = () => {
+      if (!terminalRef.current || !xtermRef.current) return;
+      
+      const { offsetWidth, offsetHeight } = terminalRef.current;
+      if (offsetWidth === 0 || offsetHeight === 0) return;
+
       try {
         fitAddon.fit();
       } catch (e) {
-        // Ignore xterm fit errors when container is 0x0 or unmounted
+        // xterm-addon-fit can throw if the terminal is not yet fully rendered
+        console.warn("Xterm fit suppressed:", e);
       }
     };
 
     // Initial fit with frame delay to ensure DOM is painted
-    requestAnimationFrame(() => {
+    const initialFit = requestAnimationFrame(() => {
       tryFit();
     });
 
@@ -88,6 +94,7 @@ export default function TerminalPanel({ onData, output }: TerminalPanelProps) {
     }
 
     return () => {
+      cancelAnimationFrame(initialFit);
       term.dispose();
       resizeObserver.disconnect();
     };

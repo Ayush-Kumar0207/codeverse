@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ActivityBar } from "@/components/ActivityBar";
 import { CommandPalette } from "@/components/CommandPalette";
+import { cn } from "@/lib/utils";
 
 function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -21,20 +22,14 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isEditorRoute) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="relative">{children}</main>
-        <CommandPalette />
-      </div>
-    );
-  }
-
   return (
     <div className="flex w-full h-screen overflow-hidden bg-background">
       <ActivityBar />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-grow relative overflow-hidden">
+        <main className={cn(
+          "flex-grow relative",
+          isEditorRoute ? "overflow-hidden" : "overflow-y-auto"
+        )}>
           {children}
         </main>
       </div>

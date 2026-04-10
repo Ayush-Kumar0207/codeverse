@@ -16,6 +16,7 @@ const errorMiddleware = require("./middlewares/error.middleware");
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
   "https://codeverse-rho.vercel.app",
   "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app",
 ];

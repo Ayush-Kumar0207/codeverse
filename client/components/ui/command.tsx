@@ -25,7 +25,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "flex size-full flex-col overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground",
+        "flex size-full flex-col overflow-hidden rounded-xl border border-white/5 bg-background/80 backdrop-blur-xl text-foreground font-inter shadow-2xl",
         className
       )}
       {...props}
@@ -55,12 +55,14 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         className={cn(
-          "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
+          "top-1/4 translate-y-0 overflow-hidden rounded-2xl border-white/10 bg-black/40 backdrop-blur-2xl p-0 shadow-[0_0_50px_-12px_rgba(99,102,241,0.3)]",
           className
         )}
         showCloseButton={showCloseButton}
       >
-        {children}
+        <Command className="[&_[data-slot=command-input-wrapper]]:border-b [&_[data-slot=command-input]]:h-12">
+          {children}
+        </Command>
       </DialogContent>
     </Dialog>
   )
@@ -71,20 +73,16 @@ function CommandInput({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
-    <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!">
-        <CommandPrimitive.Input
-          data-slot="command-input"
-          className={cn(
-            "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-            className
-          )}
-          {...props}
-        />
-        <InputGroupAddon>
-          <SearchIcon className="size-4 shrink-0 opacity-50" />
-        </InputGroupAddon>
-      </InputGroup>
+    <div data-slot="command-input-wrapper" className="flex items-center border-b border-white/5 px-4 bg-white/5">
+      <SearchIcon className="mr-3 size-4 shrink-0 text-primary animate-pulse" />
+      <CommandPrimitive.Input
+        data-slot="command-input"
+        className={cn(
+          "flex h-14 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 text-foreground font-medium",
+          className
+        )}
+        {...props}
+      />
     </div>
   )
 }
@@ -156,13 +154,20 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-muted data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-foreground",
+        "group/command-item relative flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none select-none transition-all duration-200",
+        "data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:translate-x-1",
+        "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+        "hover:bg-primary/5",
+        "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform group-data-[selected=true]/command-item:[&_svg]:scale-110",
         className
       )}
       {...props}
     >
+      {/* Selection Glow */}
+      <div className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary opacity-0 transition-opacity group-data-[selected=true]/command-item:opacity-100" />
+      
       {children}
-      <CheckIcon className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
+      <CheckIcon className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
   )
 }
@@ -175,7 +180,9 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground group-data-selected/command-item:text-foreground",
+        "ml-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground/30",
+        "px-1.5 py-0.5 rounded border border-white/5 bg-white/5 shadow-inner",
+        "group-data-[selected=true]/command-item:text-primary group-data-[selected=true]/command-item:border-primary/20",
         className
       )}
       {...props}
