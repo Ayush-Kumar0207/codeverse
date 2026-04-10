@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { 
+  ArrowLeft,
   Files, 
   Search, 
   MessageSquare, 
@@ -27,6 +28,8 @@ interface PresenceUser {
 interface PresenceHeaderProps {
   projectTitle: string;
   users?: PresenceUser[];
+  showBackButton?: boolean;
+  backHref?: string;
 }
 
 export function ActivityBar() {
@@ -49,10 +52,10 @@ export function ActivityBar() {
       </div>
 
       <div className="flex-1 flex flex-col space-y-4 w-full items-center">
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delay={0}>
           {navItems.map((item) => (
             <Tooltip key={item.id}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <button
                   className={cn(
                     "p-2 rounded-md transition-colors hover:bg-white/5",
@@ -71,9 +74,9 @@ export function ActivityBar() {
       </div>
 
       <div className="mt-auto flex flex-col space-y-4 items-center w-full">
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delay={0}>
           <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger>
               <button className="p-2 rounded-md text-muted-foreground hover:bg-white/5">
                 <Settings className="w-6 h-6" />
               </button>
@@ -84,7 +87,7 @@ export function ActivityBar() {
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger>
               <button 
                 onClick={handleLogout}
                 className="p-2 rounded-md text-muted-foreground hover:bg-white/5"
@@ -110,10 +113,25 @@ export function ActivityBar() {
   );
 }
 
-export function PresenceHeader({ projectTitle, users = [] }: PresenceHeaderProps) {
+export function PresenceHeader({
+  projectTitle,
+  users = [],
+  showBackButton = false,
+  backHref = "/",
+}: PresenceHeaderProps) {
   return (
     <header className="h-12 border-b border-[var(--sidebar-border)] bg-background/80 backdrop-blur-md flex items-center justify-between px-4 z-40">
       <div className="flex items-center space-x-3">
+        {showBackButton && (
+          <Link
+            href={backHref}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+            aria-label="Back to landing page"
+            title="Back to landing page"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        )}
         <span className="text-xs font-mono text-muted-foreground opacity-50 uppercase tracking-widest">Workspace</span>
         <span className="text-sm font-medium">{projectTitle || "Untitled Project"}</span>
       </div>
@@ -122,9 +140,9 @@ export function PresenceHeader({ projectTitle, users = [] }: PresenceHeaderProps
         {/* Presence Avatars */}
         <div className="flex -space-x-2">
           {users.slice(0, 3).map((u, i) => (
-            <TooltipProvider key={i} delayDuration={0}>
+            <TooltipProvider key={i} delay={0}>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <div 
                     className="w-7 h-7 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden ring-1 ring-primary/20"
                   >

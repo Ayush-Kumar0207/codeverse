@@ -8,7 +8,10 @@ if (!supabaseUrl || !supabaseKey) {
   console.warn("⚠️ Supabase credentials missing from .env");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase =
+  supabaseUrl && supabaseKey
+    ? createClient(supabaseUrl, supabaseKey)
+    : null;
 
 const connectDB = async () => {
   // Test connection or just log readiness

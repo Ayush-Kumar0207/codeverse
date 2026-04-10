@@ -7,20 +7,26 @@ import { useSocket } from "@/hooks/useSocket";
 import { useCodeAutoComplete } from "@/hooks/useCodeAutoComplete";
 import { useLanguageDetection, getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
+import { usePresenceCursors } from "@/hooks/usePresenceCursors";
 
-type Props = {
-  value: string;
-  onChange: (value: string) => void;
-  activeFile: string;
-  roomId: string;
-};
+interface UserIdentity {
+  username: string;
+}
 
 export type CodeEditorHandle = {
   getCode: () => string;
   setCode: (code: string) => void;
 };
 
-const CodeEditor = forwardRef<CodeEditorHandle, Props>(({ value, onChange, activeFile, roomId }, ref) => {
+type Props = {
+  value: string;
+  onChange: (value: string) => void;
+  activeFile: string;
+  roomId: string;
+  currentUser?: string;
+};
+
+const CodeEditor = forwardRef<CodeEditorHandle, Props>(({ value, onChange, activeFile, roomId, currentUser }, ref) => {
   const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof monacoType | null>(null);
   const registeredLanguages = useRef<Set<string>>(new Set());
@@ -31,6 +37,9 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(({ value, onChange, activ
 
   // Use the AI autocomplete hook
   useCodeAutoComplete(monacoRef, languageRef, registeredLanguages);
+
+  // Use the presence cursors hook
+  usePresenceCursors(editorRef.current, monacoRef.current, socket, roomId, currentUser);
 
   useImperativeHandle(ref, () => ({
     getCode: () => editorRef.current?.getValue() || "",
@@ -65,7 +74,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(({ value, onChange, activ
   };
 
   return (
-    <div className="w-full h-[80vh] border rounded-xl shadow-md">
+    <div className="w-full h-full border border-primary/20 rounded-xl shadow-2xl overflow-hidden glass-effect bg-black/20">
       <Editor
         height="100%"
         theme="vs-dark"

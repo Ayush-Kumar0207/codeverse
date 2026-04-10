@@ -13,9 +13,8 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <NavBarPublic />
-        <main className="flex-grow container mx-auto px-4 py-12">{children}</main>
+      <div className="min-h-screen bg-background text-foreground">
+        {children}
       </div>
     );
   }

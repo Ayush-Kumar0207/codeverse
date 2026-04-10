@@ -1,34 +1,10 @@
-const fs = require("fs");
-const path = require("path");
-const { exec } = require("child_process");
-const { v4: uuidv4 } = require("uuid");
+const axios = require("axios");
 const HttpError = require("../utils/httpError");
 const { SOCKET_EVENTS } = require("../../../shared/constants/socket-events");
 const { SUPPORTED_LANGUAGES } = require("../../../shared/constants/languages");
+const { getPistonRuntime } = require("../utils/languageRuntime");
 
-const filenameMap = {
-  python: "main.py",
-  cpp: "main.cpp",
-  c: "main.c",
-  java: "Main.java",
-  javascript: "main.js",
-};
-
-const dockerImageMap = {
-  python: "python:3.10-slim",
-  cpp: "gcc:latest",
-  c: "gcc:latest",
-  java: "openjdk:17",
-  javascript: "node:18-alpine",
-};
-
-const runCommandMap = {
-  python: (fileName) => `python /code/${fileName}`,
-  cpp: (fileName) => `bash -c "g++ /code/${fileName} -o /code/a.out && /code/a.out"`,
-  c: (fileName) => `bash -c "gcc /code/${fileName} -o /code/a.out && /code/a.out"`,
-  java: () => `bash -c "cd /code && javac Main.java && java Main"`,
-  javascript: (fileName) => `node /code/${fileName}`,
-};
+const PISTON_EXECUTE_URL = "https://emkc.org/api/v2/piston/execute";
 
 async function executeCode({ code, language, roomId, user }) {
   if (!code || !language) {
@@ -43,33 +19,58 @@ async function executeCode({ code, language, roomId, user }) {
     throw new HttpError(400, `Unsupported language: ${language}`);
   }
 
-  const jobId = uuidv4();
-  const tempDir = path.join(__dirname, "..", "..", "temp");
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
+  const runtime = getPistonRuntime(language);
+  if (!runtime) {
+    throw new HttpError(400, `No runtime mapping found for language: ${language}`);
   }
-
-  const fileName = language === "java" ? "Main.java" : `${jobId}-${filenameMap[language]}`;
-  const filePath = path.join(tempDir, fileName);
-  fs.writeFileSync(filePath, code);
-
-  const image = dockerImageMap[language];
-  const command = runCommandMap[language](fileName);
-  const dockerCmd = `docker run --rm --privileged -m 128m --cpus=".5" --pids-limit=64 -v "${tempDir.replace(/\\/g, "/")}:/code" ${image} ${command}`;
 
   const io = global._io;
   if (io) {
     io.to(roomId).emit(SOCKET_EVENTS.EXECUTION_START, { user });
   }
 
-  return new Promise((resolve, reject) => {
-    exec(dockerCmd, { timeout: 10000 }, (err, stdout, stderr) => {
-      if (err) {
-        return reject(new HttpError(500, stderr || err.message));
-      }
-      resolve({ output: stdout });
+  const payload = {
+    language: runtime.language,
+    version: runtime.version,
+    files: [
+      {
+        name: "main",
+        content: code,
+      },
+    ],
+  };
+
+  try {
+    const response = await axios.post(PISTON_EXECUTE_URL, payload, {
+      timeout: 15000,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
-  });
+
+    const run = response?.data?.run || {};
+    const stdout = run.stdout || "";
+    const stderr = run.stderr || "";
+    const output = stdout || stderr || "✅ No output";
+    return { output };
+  } catch (error) {
+    if (error.code === "ECONNABORTED") {
+      throw new HttpError(504, "Execution timed out. Please try again.");
+    }
+
+    const status = error?.response?.status;
+    if (status === 429) {
+      throw new HttpError(429, "Execution service is rate-limited. Please retry shortly.");
+    }
+
+    const upstreamMessage =
+      error?.response?.data?.message ||
+      error?.response?.data?.run?.stderr ||
+      error.message ||
+      "Execution failed.";
+
+    throw new HttpError(502, `Execution service error: ${upstreamMessage}`);
+  }
 }
 
 module.exports = {

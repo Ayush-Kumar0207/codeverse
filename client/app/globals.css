@@ -35,8 +35,8 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
+    --border: 222 47% 8%; /* Near-black slate #0b111d */
+    --input: 222 47% 8%;
     --ring: 239 84% 67%;
 
     /* IDE Specific */
@@ -46,7 +46,7 @@
 
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 215 20% 65%;
-    --sidebar-border: 222 47% 12%;
+    --sidebar-border: 222 47% 8%;
 
     --editor-background: 222 47% 4%;
     --editor-foreground: 210 40% 98%;
@@ -67,7 +67,7 @@
   }
 
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
   }
 
   html {
@@ -117,7 +117,7 @@
   background: hsl(var(--card) / 0.6);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--border) / 0.5);
+  border: 1px solid white/5;
 }
 
 .text-gradient {

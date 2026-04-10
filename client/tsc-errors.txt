@@ -1,0 +1,19 @@
+components/ActivityBar.tsx(52,26): error TS2322: Type '{ children: Element[]; delayDuration: number; }' is not assignable to type 'IntrinsicAttributes & TooltipProviderProps'.
+  Property 'delayDuration' does not exist on type 'IntrinsicAttributes & TooltipProviderProps'.
+components/ActivityBar.tsx(55,31): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+components/ActivityBar.tsx(74,26): error TS2322: Type '{ children: Element[]; delayDuration: number; }' is not assignable to type 'IntrinsicAttributes & TooltipProviderProps'.
+  Property 'delayDuration' does not exist on type 'IntrinsicAttributes & TooltipProviderProps'.
+components/ActivityBar.tsx(76,29): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+components/ActivityBar.tsx(87,29): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+components/ActivityBar.tsx(125,38): error TS2322: Type '{ children: Element; key: number; delayDuration: number; }' is not assignable to type 'IntrinsicAttributes & TooltipProviderProps'.
+  Property 'delayDuration' does not exist on type 'IntrinsicAttributes & TooltipProviderProps'.
+components/ActivityBar.tsx(127,33): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+components/ui/resizable.tsx(10,23): error TS2694: Namespace '"C:/Users/kumar/Desktop/CodeVerse/client/node_modules/react-resizable-panels/dist/react-resizable-panels.cjs"' has no exported member 'GroupProps'.
+components/ui/resizable.tsx(12,25): error TS2339: Property 'Group' does not exist on type 'typeof import("C:/Users/kumar/Desktop/CodeVerse/client/node_modules/react-resizable-panels/dist/react-resizable-panels.cjs")'.
+components/ui/resizable.tsx(31,23): error TS2694: Namespace '"C:/Users/kumar/Desktop/CodeVerse/client/node_modules/react-resizable-panels/dist/react-resizable-panels.cjs"' has no exported member 'SeparatorProps'.
+components/ui/resizable.tsx(35,25): error TS2339: Property 'Separator' does not exist on type 'typeof import("C:/Users/kumar/Desktop/CodeVerse/client/node_modules/react-resizable-panels/dist/react-resizable-panels.cjs")'.
+components/ui/resizable.tsx(46,26): error TS2339: Property 'Separator' does not exist on type 'typeof import("C:/Users/kumar/Desktop/CodeVerse/client/node_modules/react-resizable-panels/dist/react-resizable-panels.cjs")'.

@@ -29,13 +29,13 @@ const Atmosphere = () => (
     <div className="absolute inset-0 noise-bg" />
     <motion.div 
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      animate={{ opacity: 0.6 }}
       transition={{ duration: 2 }}
       className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] glow-orb rounded-full" 
     />
     <motion.div 
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      animate={{ opacity: 0.4 }}
       transition={{ duration: 2, delay: 0.5 }}
       className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] glow-orb-secondary rounded-full" 
     />
@@ -49,11 +49,11 @@ const IDEMockup = () => {
       initial={{ opacity: 0, y: 40, rotateX: 15 }}
       whileInView={{ opacity: 1, y: 0, rotateX: 5 }}
       transition={{ duration: 1, ease: "easeOut" }}
-      className="relative w-full max-w-5xl mx-auto aspect-video rounded-xl border border-white/10 bg-[#05070a]/80 glass-effect shadow-2xl overflow-hidden group"
+      className="relative w-full max-w-5xl mx-auto aspect-video rounded-xl border border-primary/20 bg-[#020617]/90 glass-effect shadow-2xl overflow-hidden group"
       style={{ perspective: "1000px" }}
     >
       {/* OS Header */}
-      <div className="h-9 w-full bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+      <div className="h-9 w-full bg-black/40 border-b border-white/5 flex items-center px-4 gap-2">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
@@ -201,29 +201,32 @@ export default function HomePage() {
       <Atmosphere />
 
       {/* --- Sticky Header --- */}
-      <nav 
-        className={cn(
-          "fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b",
-          scrolled ? "py-3 bg-background/80 backdrop-blur-md border-white/10 shadow-2xl" : "py-6 bg-transparent border-transparent"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-2">
+      <header className="fixed top-0 inset-x-0 mx-auto z-50 p-4">
+        <nav className="glass-effect rounded-2xl px-6 py-4 flex flex-wrap items-center justify-between border-white/5 bg-black/20 backdrop-blur-md">
+          <Link href="/" className="flex items-center gap-2 group order-1 md:order-none">
             <div className="w-8 h-8 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
               <Command className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-black tracking-tighter text-white font-outfit">CodeVerse</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
-            {["Technology", "Collaboration", "Pricing", "Enterprise"].map((link) => (
-              <Link key={link} href="#" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
-                {link}
-              </Link>
-            ))}
-          </div>
+            <div className="flex flex-wrap items-center gap-4 md:gap-8 justify-center w-full md:w-auto mt-4 md:mt-0 order-3 md:order-none">
+              {[
+                { label: "Technology", href: "#technology" },
+                { label: "Features", href: "#features" },
+                { label: "Collaboration", href: "#collaboration" }
+              ].map((link) => (
+                <Link 
+                  key={link.label} 
+                  href={link.href} 
+                  className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground hover:text-primary transition-all hover:scale-105 active:scale-95"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 order-2 md:order-none ml-auto md:ml-0">
             {!user ? (
                <Link href="/login">
                 <Button variant="ghost" className="text-white hover:bg-white/5">Sign In</Button>
@@ -239,12 +242,12 @@ export default function HomePage() {
                </Button>
             </Link>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       <main className="relative z-10 pt-32 pb-20">
         {/* --- Hero Section --- */}
-        <section className="max-w-7xl mx-auto px-6 text-center mb-32">
+        <section className="max-w-7xl mx-auto px-6 text-center mb-32 pt-20">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -299,11 +302,13 @@ export default function HomePage() {
           </motion.div>
 
           {/* Software Showcase */}
-          <IDEMockup />
+          <section id="technology" className="pt-24 mt-20">
+            <IDEMockup />
+          </section>
         </section>
 
         {/* --- Active Now Section --- */}
-        <section className="max-w-4xl mx-auto px-6 mb-40 text-center">
+        <section id="collaboration" className="max-w-4xl mx-auto px-6 mb-40 text-center pt-20">
             <h2 className="text-xs font-bold text-primary uppercase tracking-[0.4em] mb-12">Active Now</h2>
             <div className="flex flex-wrap justify-center gap-6">
                {[
@@ -337,7 +342,7 @@ export default function HomePage() {
         </section>
 
         {/* --- Features Grid --- */}
-        <section className="max-w-7xl mx-auto px-6 mb-40">
+        <section id="features" className="max-w-7xl mx-auto px-6 mb-40 pt-32">
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((f, i) => (
                 <motion.div
@@ -346,7 +351,7 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   whileHover={{ scale: 1.05, y: -5 }}
                   transition={{ delay: i * 0.05 }}
-                  className="p-8 rounded-2xl glass-effect group cursor-pointer relative overflow-hidden"
+                  className="p-8 rounded-2xl glass-effect group cursor-pointer relative overflow-hidden border-white/5 bg-black/40"
                 >
                   {/* Icon Glow */}
                   <div className={cn("absolute -top-10 -left-10 w-32 h-32 blur-[40px] opacity-20 transition-opacity group-hover:opacity-40", f.bg)} />
@@ -389,22 +394,25 @@ export default function HomePage() {
       </main>
 
       {/* --- Footer --- */}
-      <footer className="border-t border-white/5 py-12 px-6">
+      <footer className="border-t border-primary/10 py-12 px-6 bg-black/40">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
            <div className="flex items-center gap-2">
               <Command className="w-6 h-6 text-primary" />
-              <span className="text-lg font-black tracking-tighter text-white">CodeVerse</span>
+              <span className="text-lg font-black tracking-tighter text-white font-outfit uppercase">CodeVerse</span>
            </div>
            
-           <div className="flex gap-8 text-sm text-muted-foreground font-medium">
-             <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-             <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-             <Link href="#" className="hover:text-white transition-colors">Status</Link>
-             <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
+           <div className="flex gap-8 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+             <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
+             <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
+             <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
+             <Link href="https://github.com" className="hover:text-primary transition-colors flex items-center gap-1">
+               <Github className="w-3 h-3" />
+               Source
+             </Link>
            </div>
 
-           <div className="text-xs text-muted-foreground/50 font-mono">
-              © {new Date().getFullYear()} CODEVERSE_SYSTEMS v2.0
+           <div className="text-[10px] text-muted-foreground/30 font-mono tracking-tighter">
+              © {new Date().getFullYear()} CODEVERSE_SYSTEMS_INTL v2.0.4-STABLE
            </div>
         </div>
       </footer>
