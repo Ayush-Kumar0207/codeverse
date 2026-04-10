@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { useDynamicTextarea } from "@/hooks/useDynamicTextarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +18,31 @@ export default function ChatBox({ roomId }: Props) {
   const { messageEndRef, chatContainerRef } = useAutoScroll([messages]);
   const { textareaRef, resizeTextarea } = useDynamicTextarea();
   const [input, setInput] = useState("");
+
+  useEffect(() => {
+    const handleAskAIEvent = (e: any) => {
+      const { stateContext, question } = e.detail;
+      
+      // Filter out huge structures to prevent payload explosion, but keep arrays simple
+      const safeContext = Object.entries(stateContext).map(([k, v]) => {
+        if (Array.isArray(v) && v.length > 20) return `${k}: [Array with ${v.length} elements]`;
+        if (typeof v === 'object') return `${k}: ${JSON.stringify(v).slice(0, 100)}`;
+        return `${k}: ${v}`;
+      }).join('\\n');
+
+      const fullPrompt = `${question}\\n\\n[AlgoTrace Context Snapshot]:\\n${safeContext}`;
+      setInput(fullPrompt);
+      
+      // Attempt to find the AI Assistant Tab trigger globally and click it to switch tabs instantly
+      const aiTabButton = document.querySelector('[value="assistant"]') as HTMLButtonElement | null;
+      if (aiTabButton) aiTabButton.click();
+      
+      setTimeout(() => resizeTextarea(), 50);
+    };
+
+    window.addEventListener('algotrace:ask_ai', handleAskAIEvent);
+    return () => window.removeEventListener('algotrace:ask_ai', handleAskAIEvent);
+  }, [resizeTextarea]);
 
   const handleSend = async () => {
     if (!input.trim()) return;

@@ -55,7 +55,7 @@ import {
 import { ThemeToggleSimple } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { PresenceHeader } from "@/components/ActivityBar";
-import AlgoTraceCanvas from "@/components/AlgoTraceCanvas";
+import AlgoTraceCanvas from "@/components/algotrace/AlgoTraceCanvas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Icons
@@ -637,7 +637,7 @@ export default function EditorPage() {
                 </TabsContent>
 
                 <TabsContent value="algotrace" className="h-full m-0">
-                  <AlgoTraceCanvas />
+                  <AlgoTraceCanvas editorCode={code} />
                 </TabsContent>
               </div>
             </Tabs>

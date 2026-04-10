@@ -13,7 +13,8 @@ import {
   Github, 
   LogOut,
   Command,
-  LayoutGrid
+  LayoutGrid,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -43,6 +44,7 @@ export function ActivityBar() {
   const navItems = [
     { icon: Search, label: "Search / Commands", id: "search", href: "#" },
     { icon: Files, label: "Dashboard", id: "dashboard", href: "/dashboard" },
+    { icon: BookOpen, label: "Algorithm Encyclopedia", id: "encyclopedia", href: "/encyclopedia" },
     { icon: MessageSquare, label: "Editor", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
