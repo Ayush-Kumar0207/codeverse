@@ -1,4 +1,5 @@
-const { supabase } = require("../../config/db");
+const { supabase } = require("../config/db");
+const asyncHandler = require("../middlewares/asyncHandler");
 
 const testUser = asyncHandler(async (req, res) => {
   const { data: savedUser, error } = await supabase

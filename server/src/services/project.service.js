@@ -1,4 +1,4 @@
-const { supabase } = require("../../config/db");
+const { supabase } = require("../config/db");
 const HttpError = require("../utils/httpError");
 
 async function createProject({ title, language, owner }) {

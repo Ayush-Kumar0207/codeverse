@@ -1,4 +1,4 @@
-const { supabase } = require("../../config/db");
+const { supabase } = require("../config/db");
 const HttpError = require("../utils/httpError");
 
 async function saveCodeVersion({ code, userId, fileName }) {
