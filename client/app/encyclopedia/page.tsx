@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { AT_ALGORITHMS, AlgorithmEntry, AlgorithmApproach } from "@/data/algorithms";
+import { AT_ALGORITHMS, AlgorithmEntry, AlgorithmApproach } from "@/data/algos";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, BookOpen, Code2, Link as LinkIcon, Cpu, HardDrive, Maximize2, Minimize2 } from "lucide-react";
+import { Sparkles, BookOpen, Code2, Link as LinkIcon, Cpu, HardDrive, Maximize2, Minimize2, ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
@@ -16,8 +16,27 @@ export default function EncyclopediaPage() {
 
   const filteredAlgos = AT_ALGORITHMS.filter(a => 
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    a.category.toLowerCase().includes(searchTerm.toLowerCase())
+    (a.topic && a.topic.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const groupedAlgos = filteredAlgos.reduce((acc, algo) => {
+    const topic = algo.topic || "Uncategorized";
+    if (!acc[topic]) acc[topic] = [];
+    acc[topic].push(algo);
+    return acc;
+  }, {} as Record<string, AlgorithmEntry[]>);
+
+  const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    if (AT_ALGORITHMS.length > 0 && AT_ALGORITHMS[0].topic) {
+        initial[AT_ALGORITHMS[0].topic] = true;
+    }
+    return initial;
+  });
+
+  const toggleTopic = (topic: string) => {
+    setExpandedTopics(prev => ({ ...prev, [topic]: !prev[topic] }));
+  };
 
   // When switching algorithms, reset approach to 0
   const handleSelectAlgo = (algo: AlgorithmEntry) => {
@@ -47,33 +66,58 @@ export default function EncyclopediaPage() {
             />
           </div>
           
-          <ScrollArea className="flex-1">
+          <div className="flex-1 overflow-y-auto pb-32">
             <div className="p-3 space-y-1.5">
-              {filteredAlgos.map((algo) => {
-                const isActive = activeAlgo.id === algo.id;
-                const difficultyColor = 
-                  algo.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                  algo.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                  "bg-rose-500/20 text-rose-400 border-rose-500/30";
-                  
-                return (
-                  <button
-                    key={algo.id}
-                    onClick={() => handleSelectAlgo(algo)}
-                    className={"w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex flex-col gap-2 " + (isActive ? "bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]" : "hover:bg-white/5 border border-transparent")}
+              {Object.entries(groupedAlgos).map(([topic, algos]) => (
+                <div key={topic} className="mb-2">
+                  <button 
+                    onClick={() => toggleTopic(topic)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors"
                   >
-                    <div className="flex justify-between items-center w-full gap-2">
-                      <span className={"text-xs font-bold leading-tight " + (isActive ? "text-indigo-300" : "text-slate-300")}>{algo.title}</span>
-                      <span className={"text-[9px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 " + difficultyColor}>
-                        {algo.difficulty}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-medium tracking-wide">{algo.category} • Fre: {algo.frequencyLevel}</span>
+                    <span className="truncate">{topic}</span>
+                    {expandedTopics[topic] ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
                   </button>
-                );
-              })}
+                  
+                  <AnimatePresence>
+                    {expandedTopics[topic] && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden mt-1 space-y-1 pl-2 border-l border-white/5 ml-2"
+                      >
+                        {algos.map((algo) => {
+                          const isActive = activeAlgo.id === algo.id;
+                          const difficultyColor = 
+                            algo.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                            algo.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                            "bg-rose-500/20 text-rose-400 border-rose-500/30";
+                            
+                          return (
+                            <button
+                              key={algo.id}
+                              onClick={() => handleSelectAlgo(algo)}
+                              className={"w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex flex-col gap-1.5 " + (isActive ? "bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]" : "hover:bg-white/5 border border-transparent")}
+                            >
+                              <div className="flex justify-between items-start w-full gap-2">
+                                <span className={"text-xs font-bold leading-tight " + (isActive ? "text-indigo-300" : "text-slate-300")}>{algo.title}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={"text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 " + difficultyColor}>
+                                  {algo.difficulty}
+                                </span>
+                                <span className="text-[9px] text-slate-500 font-medium tracking-wide">Fre: {algo.frequencyLevel}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       )}
 

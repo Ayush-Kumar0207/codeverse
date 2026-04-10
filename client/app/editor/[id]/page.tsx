@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { AT_ALGORITHMS } from "@/data/algos";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
@@ -90,6 +91,9 @@ interface PresenceUser {
 
 export default function EditorPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const algoId = searchParams?.get("algo");
+  
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const roomId = id || "room1";
   const editorRef = useRef<CodeEditorHandle>(null);
@@ -192,13 +196,23 @@ export default function EditorPage() {
     if (!id) return;
 
     if (id === "demo-sandbox") {
+      let initialCode = "// --- CodeVerse Simulation Mode ---\n\nfunction boot() {\n  console.log('System initialized.');\n  return 'GOD-LEVEL UI DETECTED';\n}\n\nboot();";
+      
+      // Dynamic Encyclopedia Payload Injection
+      if (algoId) {
+        const algo = AT_ALGORITHMS.find(a => a.id === algoId);
+        if (algo && algo.visualizerCode) {
+           initialCode = algo.visualizerCode;
+        }
+      }
+
       // Initialize with High-Fidelity Demo State
       const demoProject: SharedProject = {
         _id: "demo-sandbox",
         title: "Simulation Environment",
         language: "javascript",
         isDemo: true,
-        code: "// --- CodeVerse Simulation Mode ---\n\nfunction boot() {\n  console.log('System initialized.');\n  return 'GOD-LEVEL UI DETECTED';\n}\n\nboot();",
+        code: initialCode,
       };
       setProject(demoProject);
       initializeProjectFiles(demoProject);

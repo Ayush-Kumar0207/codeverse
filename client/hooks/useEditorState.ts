@@ -23,8 +23,8 @@ export function useEditorState() {
     };
 
     const languageFile = LANGUAGE_FILE_MAP[nextProject.language];
-    if (languageFile && !baseFiles[languageFile]) {
-      baseFiles[languageFile] = DEFAULT_LANGUAGE_FILES[languageFile] || "";
+    if (languageFile) {
+      baseFiles[languageFile] = nextProject.code || baseFiles[languageFile] || DEFAULT_LANGUAGE_FILES[languageFile] || "";
     }
 
     setFiles(baseFiles);
