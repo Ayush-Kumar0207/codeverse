@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { 
-  Terminal, 
-  Users, 
   Cpu, 
   History, 
   MessageSquare, 
@@ -14,7 +12,6 @@ import {
   ChevronRight, 
   Command,
   Layout,
-  Code2,
   Globe,
   Plus
 } from "lucide-react";
@@ -22,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import NewProjectModal from "@/components/NewProjectModal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // --- Atmosphere Component ---
 const Atmosphere = () => (
@@ -143,13 +141,6 @@ const ArrowCursor = ({ color }: { color: string }) => (
 export default function HomePage() {
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const features = [
     {
@@ -197,6 +188,7 @@ export default function HomePage() {
   ];
 
   return (
+    <TooltipProvider>
     <div className="relative min-h-screen bg-background font-sans selection:bg-primary/30 scroll-smooth">
       <Atmosphere />
 
@@ -429,5 +421,6 @@ export default function HomePage() {
         .font-inter { font-family: 'Inter', sans-serif; }
       `}</style>
     </div>
+    </TooltipProvider>
   );
 }

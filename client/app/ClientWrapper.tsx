@@ -1,13 +1,15 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
+import { usePathname } from "next/navigation";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import NavBarPublic from "@/components/NavBarPublic";
 import { ActivityBar } from "@/components/ActivityBar";
 import { CommandPalette } from "@/components/CommandPalette";
 
 function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const isEditorRoute = pathname?.startsWith("/editor/");
   
   if (loading) return null;
 
@@ -19,11 +21,20 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (!isEditorRoute) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="relative">{children}</main>
+        <CommandPalette />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden">
+    <div className="flex w-full h-screen overflow-hidden bg-background">
       <ActivityBar />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-grow overflow-hidden relative">
+        <main className="flex-grow relative overflow-hidden">
           {children}
         </main>
       </div>

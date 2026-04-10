@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   ArrowLeft,
   Files, 
@@ -35,12 +36,14 @@ interface PresenceHeaderProps {
 export function ActivityBar() {
   const { handleLogout } = useNavigationMenu();
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const navItems = [
-    { icon: Files, label: "Explorer", id: "explorer" },
-    { icon: Search, label: "Search", id: "search" },
-    { icon: MessageSquare, label: "AI Assistant", id: "ai" },
-    { icon: LayoutGrid, label: "Extensions", id: "extensions" },
+    { icon: Files, label: "Dashboard", id: "dashboard", href: "/dashboard" },
+    { icon: Search, label: "Projects", id: "projects", href: "/" },
+    { icon: MessageSquare, label: "Editor", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
+    { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
 
   return (
@@ -55,15 +58,23 @@ export function ActivityBar() {
         <TooltipProvider delay={0}>
           {navItems.map((item) => (
             <Tooltip key={item.id}>
-              <TooltipTrigger>
-                <button
-                  className={cn(
-                    "p-2 rounded-md transition-colors hover:bg-white/5",
-                    item.id === "explorer" ? "text-primary" : "text-muted-foreground"
-                  )}
-                >
-                  <item.icon className="w-6 h-6" />
-                </button>
+              <TooltipTrigger
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(item.href);
+                }}
+                aria-label={item.label}
+                className={cn(
+                  "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-white/5",
+                  pathname === item.href || (item.id === "editor" && pathname?.startsWith("/editor"))
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                <item.icon className="w-6 h-6" />
               </TooltipTrigger>
               <TooltipContent side="right">
                 <p>{item.label}</p>
@@ -76,10 +87,17 @@ export function ActivityBar() {
       <div className="mt-auto flex flex-col space-y-4 items-center w-full">
         <TooltipProvider delay={0}>
           <Tooltip>
-            <TooltipTrigger>
-              <button className="p-2 rounded-md text-muted-foreground hover:bg-white/5">
-                <Settings className="w-6 h-6" />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push("/profile");
+              }}
+              className="h-10 w-10 flex items-center justify-center rounded-md text-muted-foreground hover:bg-white/5"
+            >
+              <Settings className="w-6 h-6" />
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>Settings</p>
@@ -87,13 +105,17 @@ export function ActivityBar() {
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger>
-              <button 
-                onClick={handleLogout}
-                className="p-2 rounded-md text-muted-foreground hover:bg-white/5"
-              >
-                <LogOut className="w-6 h-6 text-destructive/80" />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleLogout();
+              }}
+              className="h-10 w-10 flex items-center justify-center rounded-md text-muted-foreground hover:bg-white/5"
+            >
+              <LogOut className="w-6 h-6 text-destructive/80" />
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>Logout</p>
