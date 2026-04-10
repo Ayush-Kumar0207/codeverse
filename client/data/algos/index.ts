@@ -15,8 +15,8 @@ import { sortingAlgorithms } from "./sorting";
 import { stackQueueAlgorithms } from "./stacks_queues";
 import { generatedStriverAlgorithms } from "./generated_striver_algos";
 
-// Aggregator registry for all algorithm modules
-export const AT_ALGORITHMS: AlgorithmEntry[] = [
+// Base curated algorithms across all standard topics
+const curatedAlgorithms: AlgorithmEntry[] = [
   ...arraysAlgorithms,
   ...binarySearchAlgorithms,
   ...treesAlgorithms,
@@ -31,7 +31,15 @@ export const AT_ALGORITHMS: AlgorithmEntry[] = [
   ...triesAlgorithms,
   ...sortingAlgorithms,
   ...stackQueueAlgorithms,
-  ...generatedStriverAlgorithms
+];
+
+// Create a lookup Set to guarantee O(1) deduplication of IDs
+const curatedIds = new Set(curatedAlgorithms.map(a => a.id));
+
+// Aggregator registry for all algorithm modules, filtering out any generated ones that have been curated
+export const AT_ALGORITHMS: AlgorithmEntry[] = [
+  ...curatedAlgorithms,
+  ...generatedStriverAlgorithms.filter(a => !curatedIds.has(a.id))
 ];
 
 export * from "./types";

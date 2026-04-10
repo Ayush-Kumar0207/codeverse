@@ -14,9 +14,11 @@ export const triesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Node Dictionary Architecture)",
-          description: "### 🧠 The Core Concept\nIf you store 10,000 words in an array, searching to see if a word exists takes $O(N)$ time. \n\nA **Trie** is a specialized tree where every node represents a single letter. To spell the word \"CAT\", you start at the root, go down the branch `C`, then `A`, then `T`. \n\nIf you also want to add \"CAR\", you don't rebuild the whole word. You follow `C` and `A`, and simply add a new branch `R`. This dramatically saves memory and makes searches insanely fast.\n\n### 🛠️ Execution Strategy\n1. **The Node**: Every `TrieNode` needs two things: A dictionary mapping characters to other `TrieNode` instances, and a boolean `is_end_of_word` flag.\n2. **Insert**: Iterate heavily through the target string. If a letter doesn't exist in the current node's dictionary, create a new node and link it. Then step *into* that node.\n3. **Search**: Iterate heavily through the target string. If at any point the letter is missing from the dictionary, return False. If you safely traverse the entire word, return `is_end_of_word` to guarantee it's a full word, not just a prefix!",
+          description: "### 🧠 The Core Concept\nIf you store 10,000 words in an array, searching to see if a word exists takes $O(N)$ time. \n\nA **Trie** is a specialized tree where every node represents a single letter. To spell the word \"CAT\", you start at the root, go down the branch `C`, then `A`, then `T`. \n\nIf you also want to add \"CAR\", you don't rebuild the whole word. You follow `C` and `A`, and simply add a new branch `R`. This dramatically saves memory and makes searches insanely fast.\n\n### 🛠️ Execution Strategy\n1. **The Node**: Every `TrieNode` needs two things: A dictionary wrapping characters to other `TrieNode` instances, and a boolean `is_end_of_word` flag.\n2. **Insert**: Iterate heavily through the target string. If a letter doesn't exist in the current node's dictionary, create a new node and link it. Then step *into* that node.\n3. **Search**: Iterate heavily through the target string. If at any point the letter is missing from the dictionary, return False. If you safely traverse the entire word, return `is_end_of_word` to guarantee it's a full word, not just a prefix!",
           timeComplexity: "O(L) per word (L = length of word)",
-          spaceComplexity: "O(T) (T = Total number of characters)",
+          timeComplexityExplanation: "Search execution is strictly proportional to the number of characters in the string being looked up, irrespective of total database size.",
+          spaceComplexity: "O(T) (T = Total characters)",
+          spaceComplexityExplanation: "The total alphanumeric occupancy correlates to every unique character sequence mapped into the structure.",
           implementations: [
              {
                 language: "Python",
@@ -33,6 +35,37 @@ export const triesAlgorithms: AlgorithmEntry[] = [
              {
                 language: "C++",
                 code: "class TrieNode {\npublic:\n    TrieNode* children[26];\n    bool isEndOfWord;\n    TrieNode() {\n        isEndOfWord = false;\n        for(int i = 0; i < 26; i++) children[i] = nullptr;\n    }\n};\n\nclass Trie {\nprivate:\n    TrieNode* root;\npublic:\n    Trie() {\n        root = new TrieNode();\n    }\n    \n    void insert(string word) {\n        TrieNode* curr = root;\n        for(char c : word) {\n            int index = c - 'a';\n            if(curr->children[index] == nullptr) {\n                curr->children[index] = new TrieNode();\n            }\n            curr = curr->children[index];\n        }\n        curr->isEndOfWord = true;\n    }\n    \n    bool search(string word) {\n        TrieNode* curr = root;\n        for(char c : word) {\n            int index = c - 'a';\n            if(curr->children[index] == nullptr) return false;\n            curr = curr->children[index];\n        }\n        return curr->isEndOfWord;\n    }\n    \n    bool startsWith(string prefix) {\n        TrieNode* curr = root;\n        for(char c : prefix) {\n            int index = c - 'a';\n            if(curr->children[index] == nullptr) return false;\n            curr = curr->children[index];\n        }\n        return true;\n    }\n};"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "word-search-ii",
+    title: "Word Search II",
+    topic: "Tries - Backtracking",
+    category: "Tries",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Given a board of characters and a list of words, find all words on the board. Each word must be constructed from letters of sequentially adjacent cells.",
+    leetcodeLink: "https://leetcode.com/problems/word-search-ii/",
+    useCases: ["Boggle software solvers", "Complex pattern recognition in genomes", "OCR text extraction correction"],
+    approaches: [
+       {
+          name: "Optimal (Trie + DFS Backtracking)",
+          description: "### 🧠 The Core Concept\nIf you have 1,000 target words, and you run a separate Grid DFS for every single word, the computation is massive. \n\nInstead, you store all target words in a **Trie**. Then, you run a SINGLE DFS starting from every cell in the grid. As you move across the board, you simultaneously step through the Trie branches. If you move from 'C' to 'A' on the board, and your Trie also has a branch from 'C' to 'A', you keep going! If not, you immediately 'prune' that branch and stop checking. \n\n### 🛠️ Execution Strategy\n1. **Build Trie**: Insert all target words into a Trie structure.\n2. **Grid Traversal**: Iterate through every cell $(r, c)$ in the grid.\n3. **Backtracking DFS**:\n   - Check bounds and if the current character is in the Trie branch of your current node.\n   - If found, mark the cell as 'visited' (to prevent reusing it in the same word).\n   - Check if that Trie node marks the `endOfWord`. If yes, you found a word! Save it.\n   - Recursively call DFS in all four directions.\n   - **Crucial**: After the recursion, unmark the cell (backtrack) and potentially 'prune' the Trie (delete words as you find them) to prevent redundant searches.",
+          timeComplexity: "O(M * (4 * 3^(L-1)))",
+          timeComplexityExplanation: "We start a DFS from every cell in the grid. Due to Trie pruning, we only explore paths that represent valid word prefixes in the dictionary.",
+          spaceComplexity: "O(T)",
+          spaceComplexityExplanation: "The structural storage for the Trie is the primary memory overhead, Scaling with total dictionary characters $T$.",
+          implementations: [
+             {
+                language: "Python",
+                code: "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.word = None\n\nclass Solution:\n    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:\n        root = TrieNode()\n        for w in words:\n            curr = root\n            for c in w:\n                curr = curr.children.setdefault(c, TrieNode())\n            curr.word = w\n            \n        res = []\n        rows, cols = len(board), len(board[0])\n        \n        def dfs(r, c, node):\n            char = board[r][c]\n            if char not in node.children: return\n            \n            curr_node = node.children[char]\n            if curr_node.word:\n                res.append(curr_node.word)\n                curr_node.word = None  # Prevent duplicates\n            \n            board[r][c] = \"#\"\n            for dr, dc in [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]:\n                if 0 <= dr < rows and 0 <= dc < cols:\n                    dfs(dr, dc, curr_node)\n            board[r][c] = char\n            \n        for r in range(rows):\n            for c in range(cols):\n                dfs(r, c, root)\n        return res"
+             },
+             {
+                language: "JavaScript",
+                code: "class TrieNode {\n  constructor() {\n    this.children = {};\n    this.word = null;\n  }\n}\n\nvar findWords = function(board, words) {\n  let root = new TrieNode();\n  for (let w of words) {\n    let curr = root;\n    for (let c of w) {\n      if (!curr.children[c]) curr.children[c] = new TrieNode();\n      curr = curr.children[c];\n    }\n    curr.word = w;\n  }\n\n  let res = [];\n  let rows = board.length, cols = board[0].length;\n\n  function dfs(r, c, node) {\n    let char = board[r][c];\n    if (!node.children[char]) return;\n\n    let currNode = node.children[char];\n    if (currNode.word) {\n      res.push(currNode.word);\n      currNode.word = null; // Duplicate prevention\n    }\n\n    board[r][c] = '#'; // Mark visited\n    const directions = [[r + 1, c], [r - 1, c], [r, c + 1], [r, c - 1]];\n    for (let [dr, dc] of directions) {\n      if (dr >= 0 && dr < rows && dc >= 0 && dc < cols) {\n        dfs(dr, dc, currNode);\n      }\n    }\n    board[r][c] = char; // Backtrack\n  }\n\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      dfs(r, c, root);\n    }\n  }\n  return res;\n};"
              }
           ]
        }

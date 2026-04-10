@@ -457,11 +457,12 @@ for (let i = 1; i < lines.length; i++) {
   });
 }
 
-const tsContent = [
-  'import { AlgorithmEntry } from "./types";',
-  '',
-  'export const generatedStriverAlgorithms: AlgorithmEntry[] = ['
-].concat(items.map(item => [
+const prefix = `import { AlgorithmEntry } from "./types";
+
+export const generatedStriverAlgorithms: AlgorithmEntry[] = [
+`;
+
+const itemsStr = items.map(item => [
   '  {',
   '    id: "' + item.id + '",',
   '    title: "' + item.title + '",',
@@ -481,25 +482,27 @@ const tsContent = [
   '          implementations: [',
   '             {',
   '                language: "Python",',
-  '                code: "# TODO: Implement ' + item.title + '\\n\\ndef solve():\\n    pass"',
+  '                code: `# TODO: Implement ' + item.title + '\\n\\ndef solve():\\n    pass`',
   '             },',
   '             {',
   '                language: "JavaScript",',
-  '                code: "// TODO: Implement ' + item.title + '\\n\\nfunction solve() {\\n    // logic\\n}"',
+  '                code: `// TODO: Implement ' + item.title + '\\n\\nfunction solve() {\\n    // logic\\n}`',
   '             },',
   '             {',
   '                language: "Java",',
-  '                code: "// TODO: Implement ' + item.title + '\\nclass Solution {\\n    public void solve() {\\n\\n    }\\n}"',
+  '                code: `// TODO: Implement ' + item.title + '\\nclass Solution {\\n    public void solve() {\\n\\n    }\\n}`',
   '             },',
   '             {',
   '                language: "C++",',
-  '                code: "// TODO: Implement ' + item.title + '\\nvoid solve() {\\n    // logic\\n}"',
+  '                code: `// TODO: Implement ' + item.title + '\\nvoid solve() {\\n    // logic\\n}`',
   '             }',
   '          ]',
   '       }',
   '    ]',
   '  }'
-].join('\\n'))).join(',\\n') + '\\n];';
+].join('\n')).join(',\n');
+
+const tsContent = prefix + itemsStr + '\n];';
 
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'algos', 'generated_striver_algos.ts'), tsContent);
 

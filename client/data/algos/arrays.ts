@@ -17,7 +17,9 @@ export const arraysAlgorithms: AlgorithmEntry[] = [
         name: "Brute Force",
         description: "### 🧠 The Core Concept\nImagine you have a stack of cards laid out in front of you.\nYour task? Find two cards that add up exactly to the target.\n\n### 🚨 The Naive Method\nThe absolute most obvious way to solve this is to pick up the very first card, and then test it against every single other card on the table.\n\nBecause if you have 100,000 cards, you are performing a nested loop resulting in N × N operations. That's **10 Billion checks!** O(N²) Time Complexity.",
         timeComplexity: "O(N²)",
+        timeComplexityExplanation: "We perform a nested loop checking every single card against every other remaining card. For N elements, it executes roughly N*(N-1)/2 operations.",
         spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "We are only using two simple integer pointers `i` and `j` to track our position. No extra arrays or data structures are allocated.",
         implementations: [
           {
             language: "Python",
@@ -41,7 +43,9 @@ export const arraysAlgorithms: AlgorithmEntry[] = [
         name: "Optimal (Two Pointers / Sorting approach)",
         description: "### ✨ The Pointer Magic\nIf the array is sorted, we place one finger on the **SMALLEST** number (left edge), and one finger on the **LARGEST** number (right edge).\n\nIf the sum is too big, move the right finger inward. If too small, move the left finger inward. Time Complexity drops spectacularly down into O(N). Pure magic!",
         timeComplexity: "O(N)",
+        timeComplexityExplanation: "We process each element exactly once by pulling the pointers inwards. The while loop gracefully shrinks the window in purely linear time.",
         spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "The two pointers physically collapse inward using constant overhead. We don't employ any HashMaps or auxiliary sorting grids.",
         implementations: [
           {
             language: "Python",
@@ -78,7 +82,9 @@ export const arraysAlgorithms: AlgorithmEntry[] = [
           name: "Optimal (Kadane's Dynamic Approach)",
           description: "### 🧠 The Train Analogy\nImagine you are picking up passengers sequentially along a train route. Each passenger you pick up pays you money (positive numbers), but some stops cost you a massive toll fee (negative numbers).\n\nIf your total cash in hand drops into the **negatives**, would you carry that debt forward? No! You throw it away and reset your count to zero, starting fresh from the next stop. But you always remember the *highest amount of money you ever held at any point*.\n\n### 🛠️ Step-by-Step\n1. Iterate through every number.\n2. Add the number to your `currentSum`.\n3. Update your `maxSum` if `currentSum` is the highest you've ever seen.\n4. If `currentSum` drops below 0, reset it to 0!\nOnly $O(N)$ running time. Flawless.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "The algorithm effortlessly loops through the numeric data exactly one single time. There is absolute zero backtracking; once you pass a station, you never look behind you.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only two variables (maxSum and currentSum) are tracked in memory. You don't need a DP array or Hash cache. Perfect efficiency.",
           implementations: [
              {
                 language: "Python",

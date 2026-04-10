@@ -196,17 +196,60 @@ export default function EditorPage() {
     if (!id) return;
 
     if (id === "demo-sandbox") {
-      let initialCode = "// --- CodeVerse Simulation Mode ---\n\nfunction boot() {\n  console.log('System initialized.');\n  return 'GOD-LEVEL UI DETECTED';\n}\n\nboot();";
-      
-      // Dynamic Encyclopedia Payload Injection
+      // Dynamic Encyclopedia Payload Extraction
+      let resolvedAlgo = null;
       if (algoId) {
-        const algo = AT_ALGORITHMS.find(a => a.id === algoId);
-        if (algo && algo.visualizerCode) {
-           initialCode = algo.visualizerCode;
-        }
+         resolvedAlgo = AT_ALGORITHMS.find(a => a.id === algoId);
       }
 
-      // Initialize with High-Fidelity Demo State
+      if (resolvedAlgo) {
+         // Seed the editor with all Algorithm representations
+         const demoProject: SharedProject = {
+            _id: `algo-${resolvedAlgo.id}`,
+            title: resolvedAlgo.title,
+            language: "javascript",
+            isDemo: true,
+            code: ""
+         };
+         setProject(demoProject);
+         
+         const firstApproach = resolvedAlgo.approaches[0];
+         let algoFiles: Record<string, string> = {};
+         
+         // Top priority: Visualizer hook if exists
+         let firstFileName = "";
+         if (resolvedAlgo.visualizerCode) {
+             algoFiles["tracer.js"] = resolvedAlgo.visualizerCode;
+             firstFileName = "tracer.js";
+         }
+         
+         if (firstApproach && firstApproach.implementations) {
+            const preferredLang = typeof window !== 'undefined' ? localStorage.getItem("algo-trace-preferred-lang") : null;
+            
+            firstApproach.implementations.forEach(impl => {
+                const ext = impl.language === "Python" ? "py" :
+                            impl.language === "C++" ? "cpp" :
+                            impl.language === "Java" ? "java" : "js";
+                const filename = `solution.${ext}`;
+                algoFiles[filename] = impl.code;
+                
+                // Prioritize the user's preferred language for the active file
+                if (!firstFileName || (preferredLang && impl.language.toLowerCase() === preferredLang.toLowerCase())) {
+                    firstFileName = filename;
+                }
+            });
+         }
+         
+         algoFiles["PROBLEM.md"] = `# ${resolvedAlgo.title}\n\n${resolvedAlgo.overview}\n\n## Use Cases\n${resolvedAlgo.useCases.join("\\n- ")}`;
+         
+         setFiles(algoFiles);
+         setActiveFile(firstFileName || "PROBLEM.md");
+         return;
+      }
+
+      // Standard Fallback Demo
+      const initialCode = "// --- CodeVerse Simulation Mode ---\n\nfunction boot() {\n  console.log('System initialized.');\n  return 'GOD-LEVEL UI DETECTED';\n}\n\nboot();";
+      
       const demoProject: SharedProject = {
         _id: "demo-sandbox",
         title: "Simulation Environment",

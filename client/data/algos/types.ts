@@ -11,7 +11,9 @@ export interface AlgorithmApproach {
   name: string;
   description: string;
   timeComplexity: string;
+  timeComplexityExplanation?: string;
   spaceComplexity: string;
+  spaceComplexityExplanation?: string;
   implementations: CodeImplementation[];
 }
 

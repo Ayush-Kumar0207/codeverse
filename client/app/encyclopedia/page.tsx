@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AT_ALGORITHMS, AlgorithmEntry, AlgorithmApproach } from "@/data/algos";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, BookOpen, Code2, Link as LinkIcon, Cpu, HardDrive, Maximize2, Minimize2, ChevronDown, ChevronRight } from "lucide-react";
+import { Sparkles, BookOpen, Code2, Link as LinkIcon, Cpu, HardDrive, Maximize2, Minimize2, ChevronDown, ChevronRight, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
@@ -12,6 +12,21 @@ export default function EncyclopediaPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeApproachIdx, setActiveApproachIdx] = useState(0);
   const [selectedLang, setSelectedLang] = useState("JavaScript");
+
+  // Load preferred language from localStorage on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem("algo-trace-preferred-lang");
+    if (savedLang) {
+      setSelectedLang(savedLang);
+    }
+  }, []);
+
+  // Save preferred language whenever it changes
+  const handleLangChange = (lang: string) => {
+    setSelectedLang(lang);
+    localStorage.setItem("algo-trace-preferred-lang", lang);
+  };
+
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const filteredAlgos = AT_ALGORITHMS.filter(a => 
@@ -44,7 +59,18 @@ export default function EncyclopediaPage() {
     setActiveApproachIdx(0);
   };
 
+  const getComplexityColor = (complexity: string) => {
+    const comp = complexity.toLowerCase();
+    if (comp.includes("2^") || comp.includes("n^") || comp.includes("factorial")) return "bg-rose-500/20 text-rose-400 border-rose-500/30";
+    if (comp.includes("n log n")) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+    if (comp.includes("log n") || comp === "o(1)") return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+    if (comp.includes("n")) return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+    return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  };
+
   const activeApproach = activeAlgo.approaches[activeApproachIdx] || activeAlgo.approaches[0];
+
+  const isSearchActive = searchTerm.trim().length > 0;
 
   return (
     <div className="h-screen flex w-full bg-slate-950 text-foreground font-sans overflow-hidden">
@@ -57,65 +83,88 @@ export default function EncyclopediaPage() {
               <BookOpen className="w-4 h-4 text-indigo-400" />
               Algorithm Codex
             </h2>
-            <input 
-              type="text" 
-              placeholder="Search algorithms..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 shadow-inner max-w-full truncate flex-1 focus:ring-1"
-            />
+            <div className="relative">
+               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+               <input 
+                 type="text" 
+                 placeholder="Search algorithms..." 
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+                 className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 shadow-inner max-w-full truncate flex-1 focus:ring-1 transition-all"
+               />
+               {searchTerm && (
+                 <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                   <Minimize2 className="w-3 h-3" />
+                 </button>
+               )}
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto pb-32">
             <div className="p-3 space-y-1.5">
-              {Object.entries(groupedAlgos).map(([topic, algos]) => (
-                <div key={topic} className="mb-2">
-                  <button 
-                    onClick={() => toggleTopic(topic)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors"
-                  >
-                    <span className="truncate">{topic}</span>
-                    {expandedTopics[topic] ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
-                  </button>
-                  
-                  <AnimatePresence>
-                    {expandedTopics[topic] && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden mt-1 space-y-1 pl-2 border-l border-white/5 ml-2"
-                      >
-                        {algos.map((algo) => {
-                          const isActive = activeAlgo.id === algo.id;
-                          const difficultyColor = 
-                            algo.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                            algo.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                            "bg-rose-500/20 text-rose-400 border-rose-500/30";
-                            
-                          return (
-                            <button
-                              key={algo.id}
-                              onClick={() => handleSelectAlgo(algo)}
-                              className={"w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex flex-col gap-1.5 " + (isActive ? "bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]" : "hover:bg-white/5 border border-transparent")}
-                            >
-                              <div className="flex justify-between items-start w-full gap-2">
-                                <span className={"text-xs font-bold leading-tight " + (isActive ? "text-indigo-300" : "text-slate-300")}>{algo.title}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className={"text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 " + difficultyColor}>
-                                  {algo.difficulty}
-                                </span>
-                                <span className="text-[9px] text-slate-500 font-medium tracking-wide">Fre: {algo.frequencyLevel}</span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+              
+              {Object.keys(groupedAlgos).length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center opacity-50">
+                   <h3 className="text-sm font-bold text-white mb-2">No algorithms found</h3>
+                   <p className="text-xs text-slate-400">Try tweaking your search term to find what you're looking for.</p>
                 </div>
-              ))}
+              ) : (
+                Object.entries(groupedAlgos).map(([topic, algos]) => {
+                  const isExpanded = isSearchActive || expandedTopics[topic];
+                  
+                  return (
+                    <div key={topic} className="mb-2">
+                      <button 
+                        onClick={() => toggleTopic(topic)}
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors"
+                      >
+                        <span className="truncate">{topic}</span>
+                        {isExpanded ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden mt-1 space-y-1 pl-2 border-l border-white/5 ml-2"
+                          >
+                            {algos.map((algo) => {
+                              const isActive = activeAlgo.id === algo.id;
+                              const difficultyColor = 
+                                algo.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                                algo.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                                "bg-rose-500/20 text-rose-400 border-rose-500/30";
+                                
+                              return (
+                                <button
+                                  key={algo.id}
+                                  onClick={() => handleSelectAlgo(algo)}
+                                  className={"w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex flex-col gap-1.5 " + (isActive ? "bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]" : "hover:bg-white/5 border border-transparent")}
+                                >
+                                  <div className="flex justify-between items-start w-full gap-2">
+                                    <span className={"text-xs font-bold leading-tight " + (isActive ? "text-indigo-300" : "text-slate-300")}>{algo.title}</span>
+                                    <span className={"text-[9px] font-mono px-1.5 py-0.5 rounded border " + getComplexityColor(algo.approaches[0].timeComplexity)}>
+                                      {algo.approaches[0].timeComplexity}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={"text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 " + difficultyColor}>
+                                      {algo.difficulty}
+                                    </span>
+                                    <span className="text-[9px] text-slate-500 font-medium tracking-wide">Fre: {algo.frequencyLevel}</span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -245,24 +294,38 @@ export default function EncyclopediaPage() {
                           </div>
                           
                           <div className="space-y-4 flex flex-col justify-center">
-                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-center gap-4">
-                               <div className={"p-3 rounded-lg " + (activeApproach.timeComplexity.includes("2^") || activeApproach.timeComplexity.includes("N^") ? "bg-rose-500/10 text-rose-400" : activeApproach.timeComplexity.includes("log") ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400")}>
-                                  <Cpu className="w-5 h-5" />
+                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-start flex-col gap-3">
+                               <div className="flex items-center gap-4">
+                                 <div className={"p-3 rounded-lg flex-none " + (activeApproach.timeComplexity.includes("2^") || activeApproach.timeComplexity.includes("N^") ? "bg-rose-500/10 text-rose-400" : activeApproach.timeComplexity.includes("log") ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400")}>
+                                    <Cpu className="w-5 h-5" />
+                                 </div>
+                                 <div>
+                                    <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Time Complexity</div>
+                                    <div className="font-mono font-bold text-white text-base">{activeApproach.timeComplexity}</div>
+                                 </div>
                                </div>
-                               <div>
-                                  <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Time Complexity</div>
-                                  <div className="font-mono font-bold text-white text-base">{activeApproach.timeComplexity}</div>
-                               </div>
+                               {activeApproach.timeComplexityExplanation && (
+                                  <div className="text-xs text-slate-400 mt-1 leading-relaxed border-t border-white/5 pt-2 w-full">
+                                    {activeApproach.timeComplexityExplanation}
+                                  </div>
+                               )}
                              </div>
                              
-                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-center gap-4">
-                               <div className={"p-3 rounded-lg " + (activeApproach.spaceComplexity.includes("N") ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400")}>
-                                  <HardDrive className="w-5 h-5" />
+                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-start flex-col gap-3">
+                               <div className="flex items-center gap-4">
+                                 <div className={"p-3 rounded-lg flex-none " + (activeApproach.spaceComplexity.includes("N") ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400")}>
+                                    <HardDrive className="w-5 h-5" />
+                                 </div>
+                                 <div>
+                                    <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Space Complexity</div>
+                                    <div className="font-mono font-bold text-white text-base">{activeApproach.spaceComplexity}</div>
+                                 </div>
                                </div>
-                               <div>
-                                  <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Space Complexity</div>
-                                  <div className="font-mono font-bold text-white text-base">{activeApproach.spaceComplexity}</div>
-                               </div>
+                               {activeApproach.spaceComplexityExplanation && (
+                                  <div className="text-xs text-slate-400 mt-1 leading-relaxed border-t border-white/5 pt-2 w-full">
+                                    {activeApproach.spaceComplexityExplanation}
+                                  </div>
+                               )}
                              </div>
                           </div>
                        </div>
@@ -278,7 +341,7 @@ export default function EncyclopediaPage() {
                               {activeApproach.implementations.map((impl) => (
                                 <button
                                   key={impl.language}
-                                  onClick={() => setSelectedLang(impl.language)}
+                                  onClick={() => handleLangChange(impl.language)}
                                   className={"px-3 py-1.5 text-[10px] font-bold rounded flex-1 sm:flex-none uppercase tracking-wider transition-all " + (
                                     selectedLang === impl.language
                                     ? "bg-indigo-500 text-white shadow-md"
