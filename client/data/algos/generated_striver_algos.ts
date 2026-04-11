@@ -9390,29 +9390,116 @@ int solve_the_celebrity_problem(const std::vector<std::vector<int>>& knows) {
           implementations: [
              {
                 language: "Python",
-                code: `def solve_lru_cache(*args):
-    # Optimized LRU Cache Logic
-    pass` 
+                code: `from collections import OrderedDict
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_lru_cache(...args) {
-    // Optimal LRU Cache Implementation
-}` 
+                code: `class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) return -1;
+        const value = this.cache.get(key);
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+    }
+
+    put(key, value) {
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+        }
+        this.cache.set(key, value);
+        if (this.cache.size > this.capacity) {
+            const oldest = this.cache.keys().next().value;
+            this.cache.delete(oldest);
+        }
+    }
+}`
              },
              {
                 language: "Java",
-                code: `class Solution {
-    public void solve_lru_cache() {
-        // Logic for LRU Cache
+                code: `import java.util.LinkedHashMap;
+import java.util.Map;
+
+class LRUCache extends LinkedHashMap<Integer, Integer> {
+    private final int capacity;
+
+    public LRUCache(int capacity) {
+        super(capacity, 0.75f, true);
+        this.capacity = capacity;
     }
-}` 
+
+    public int get(int key) {
+        return super.getOrDefault(key, -1);
+    }
+
+    public void put(int key, int value) {
+        super.put(key, value);
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+        return size() > capacity;
+    }
+}`
              },
              {
                 language: "C++",
-                code: `void solve_lru_cache() {
-    // High-performance LRU Cache routine
-}` 
+                code: `#include <list>
+#include <unordered_map>
+#include <utility>
+
+class LRUCache {
+    int cap;
+    std::list<std::pair<int, int>> dll;
+    std::unordered_map<int, std::list<std::pair<int, int>>::iterator> cache;
+public:
+    LRUCache(int capacity) : cap(capacity) {}
+
+    int get(int key) {
+        auto it = cache.find(key);
+        if (it == cache.end()) return -1;
+        dll.splice(dll.begin(), dll, it->second);
+        return it->second->second;
+    }
+
+    void put(int key, int value) {
+        if (cap == 0) return;
+        auto it = cache.find(key);
+        if (it != cache.end()) {
+            dll.splice(dll.begin(), dll, it->second);
+            it->second->second = value;
+            return;
+        }
+        if (dll.size() == cap) {
+            cache.erase(dll.back().first);
+            dll.pop_back();
+        }
+        dll.emplace_front(key, value);
+        cache[key] = dll.begin();
+    }
+}`
              }
           ]
        }
@@ -9437,29 +9524,234 @@ int solve_the_celebrity_problem(const std::vector<std::vector<int>>& knows) {
           implementations: [
              {
                 language: "Python",
-                code: `def solve_lfu_cache(*args):
-    # Optimized LFU Cache Logic
-    pass` 
+                code: `from collections import defaultdict, OrderedDict
+
+class LFUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.min_freq = 0
+        self.key_to_val = {}
+        self.key_to_freq = {}
+        self.freq_to_keys = defaultdict(OrderedDict)
+
+    def _touch(self, key, value=None):
+        freq = self.key_to_freq[key]
+        val = self.key_to_val[key] if value is None else value
+        del self.freq_to_keys[freq][key]
+        if not self.freq_to_keys[freq]:
+            del self.freq_to_keys[freq]
+            if self.min_freq == freq:
+                self.min_freq += 1
+        self.key_to_freq[key] = freq + 1
+        self.freq_to_keys[freq + 1][key] = val
+        self.key_to_val[key] = val
+
+    def get(self, key):
+        if key not in self.key_to_val:
+            return -1
+        self._touch(key)
+        return self.key_to_val[key]
+
+    def put(self, key, value):
+        if self.capacity == 0:
+            return
+        if key in self.key_to_val:
+            self._touch(key, value)
+            return
+        if len(self.key_to_val) == self.capacity:
+            oldest, _ = self.freq_to_keys[self.min_freq].popitem(last=False)
+            del self.key_to_val[oldest]
+            del self.key_to_freq[oldest]
+        self.key_to_val[key] = value
+        self.key_to_freq[key] = 1
+        self.freq_to_keys[1][key] = value
+        self.min_freq = 1`
              },
              {
                 language: "JavaScript",
-                code: `function solve_lfu_cache(...args) {
-    // Optimal LFU Cache Implementation
-}` 
+                code: `class LFUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.minFreq = 0;
+        this.keyToVal = new Map();
+        this.keyToFreq = new Map();
+        this.freqToKeys = new Map();
+    }
+
+    _increaseFreq(key, value) {
+        const freq = this.keyToFreq.get(key);
+        const bucket = this.freqToKeys.get(freq);
+        bucket.delete(key);
+        if (!bucket.size) {
+            this.freqToKeys.delete(freq);
+            if (this.minFreq === freq) {
+                this.minFreq++;
+            }
+        }
+        const nextFreq = freq + 1;
+        if (!this.freqToKeys.has(nextFreq)) {
+            this.freqToKeys.set(nextFreq, new Map());
+        }
+        this.freqToKeys.get(nextFreq).set(key, value ?? this.keyToVal.get(key));
+        this.keyToFreq.set(key, nextFreq);
+        this.keyToVal.set(key, value ?? this.keyToVal.get(key));
+    }
+
+    get(key) {
+        if (!this.keyToVal.has(key)) return -1;
+        this._increaseFreq(key);
+        return this.keyToVal.get(key);
+    }
+
+    put(key, value) {
+        if (this.capacity === 0) return;
+        if (this.keyToVal.has(key)) {
+            this._increaseFreq(key, value);
+            return;
+        }
+        if (this.keyToVal.size === this.capacity) {
+            const bucket = this.freqToKeys.get(this.minFreq);
+            const oldest = bucket.keys().next().value;
+            bucket.delete(oldest);
+            if (!bucket.size) {
+                this.freqToKeys.delete(this.minFreq);
+            }
+            this.keyToVal.delete(oldest);
+            this.keyToFreq.delete(oldest);
+        }
+        this.minFreq = 1;
+        this.keyToVal.set(key, value);
+        this.keyToFreq.set(key, 1);
+        if (!this.freqToKeys.has(1)) {
+            this.freqToKeys.set(1, new Map());
+        }
+        this.freqToKeys.get(1).set(key, value);
+    }
+}`
              },
              {
                 language: "Java",
-                code: `class Solution {
-    public void solve_lfu_cache() {
-        // Logic for LFU Cache
+                code: `import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+
+class LFUCache {
+    private final int capacity;
+    private int minFreq;
+    private final Map<Integer, Integer> values;
+    private final Map<Integer, Integer> freqs;
+    private final Map<Integer, LinkedHashSet<Integer>> freqToKeys;
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        this.minFreq = 0;
+        this.values = new HashMap<>();
+        this.freqs = new HashMap<>();
+        this.freqToKeys = new HashMap<>();
     }
-}` 
+
+    private void updateFrequency(int key) {
+        int freq = freqs.get(key);
+        freqToKeys.get(freq).remove(key);
+        if (freqToKeys.get(freq).isEmpty()) {
+            freqToKeys.remove(freq);
+            if (minFreq == freq) {
+                minFreq++;
+            }
+        }
+        freqs.put(key, freq + 1);
+        freqToKeys.computeIfAbsent(freq + 1, ignore -> new LinkedHashSet<>()).add(key);
+    }
+
+    public int get(int key) {
+        if (!values.containsKey(key)) {
+            return -1;
+        }
+        updateFrequency(key);
+        return values.get(key);
+    }
+
+    public void put(int key, int value) {
+        if (capacity == 0) return;
+        if (values.containsKey(key)) {
+            values.put(key, value);
+            updateFrequency(key);
+            return;
+        }
+        if (values.size() == capacity) {
+            int evict = freqToKeys.get(minFreq).iterator().next();
+            freqToKeys.get(minFreq).remove(evict);
+            if (freqToKeys.get(minFreq).isEmpty()) {
+                freqToKeys.remove(minFreq);
+            }
+            values.remove(evict);
+            freqs.remove(evict);
+        }
+        values.put(key, value);
+        freqs.put(key, 1);
+        freqToKeys.computeIfAbsent(1, ignore -> new LinkedHashSet<>()).add(key);
+        minFreq = 1;
+    }
+}`
              },
              {
                 language: "C++",
-                code: `void solve_lfu_cache() {
-    // High-performance LFU Cache routine
-}` 
+                code: `#include <list>
+#include <unordered_map>
+#include <vector>
+
+class LFUCache {
+    int capacity;
+    int minFreq;
+    std::unordered_map<int, std::pair<int, int>> keyValFreq;
+    std::unordered_map<int, std::list<int>> freqList;
+    std::unordered_map<int, std::list<int>::iterator> iterators;
+
+    void touch(int key) {
+        int freq = keyValFreq[key].second;
+        freqList[freq].erase(iterators[key]);
+        if (freqList[freq].empty()) {
+            freqList.erase(freq);
+            if (minFreq == freq) {
+                minFreq++;
+            }
+        }
+        keyValFreq[key].second++;
+        freqList[freq + 1].push_back(key);
+        iterators[key] = --freqList[freq + 1].end();
+    }
+
+public:
+    LFUCache(int capacity) : capacity(capacity), minFreq(0) {}
+
+    int get(int key) {
+        if (capacity == 0 || keyValFreq.find(key) == keyValFreq.end()) return -1;
+        touch(key);
+        return keyValFreq[key].first;
+    }
+
+    void put(int key, int value) {
+        if (capacity == 0) return;
+        if (keyValFreq.count(key)) {
+            keyValFreq[key].first = value;
+            touch(key);
+            return;
+        }
+        if (keyValFreq.size() == capacity) {
+            int evict = freqList[minFreq].front();
+            freqList[minFreq].pop_front();
+            if (freqList[minFreq].empty()) {
+                freqList.erase(minFreq);
+            }
+            keyValFreq.erase(evict);
+            iterators.erase(evict);
+        }
+        minFreq = 1;
+        keyValFreq[key] = {value, 1};
+        freqList[1].push_back(key);
+        iterators[key] = --freqList[1].end();
+    }
+}`
              }
           ]
        }
