@@ -295,40 +295,34 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count Digits.",
-          timeComplexity: "O(1)",
+          name: "Optimal (Logarithmic Approach)",
+          description: "### 🧠 The Core Concept\nHow many times can you divide a number by 10 before it hits 0? Each division 'pops' a digit. Alternatively, the number of digits in $N$ is exactly $\\lfloor \\log_{10}(N) \\rfloor + 1$.\n\n### 🛠️ Step-by-Step Logic\n1.  While $N > 0$:\n    - Increment `count`.\n    - $N = N / 10$ (Truncate the last digit).\n2.  Return `count`.",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "The number of iterations is equal to the number of digits, which is logarithmic relative to the value of N.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only a single counter variable is used.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_count_digits(*args):
-    # Optimized Count Digits Logic
-    pass` 
+                code: `def count_digits(n):
+    if n == 0: return 1
+    count = 0
+    while n > 0:
+        count += 1
+        n //= 10
+    return count`
              },
              {
                 language: "JavaScript",
-                code: `function solve_count_digits(...args) {
-    // Optimal Count Digits Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_count_digits() {
-        // Logic for Count Digits
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_count_digits() {
-    // High-performance Count Digits routine
-}` 
+                code: `function countDigits(n) {
+    if (n === 0) return 1;
+    return Math.floor(Math.log10(n)) + 1;
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "reverse-a-number",
@@ -342,40 +336,40 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Reverse a Number.",
-          timeComplexity: "O(1)",
+          name: "Optimal (Extraction & Rebuild Strategy)",
+          description: "### 🧠 The Core Concept: The 'Queue' Analogy\nImagine the number as a line of digits. You want to take the last digit (the tail) and make it the first digit (the head) of a new number.\n\n### 🛠️ Execution Strategy\n1. Initialize `revNum = 0`.\n2. While $N > 0$:\n   - Extract the last digit: `lastDigit = N % 10`.\n   - Multiply `revNum` by 10 and add `lastDigit`.\n   - Shrink $N$: `N = N / 10`.\n3. **Edge Case**: If reversing leads to 32-bit overflow (common in interviews), return 0.",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "We process each digit of the number exactly once.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We only use one variable to store the reversed value.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_reverse_a_number(*args):
-    # Optimized Reverse a Number Logic
-    pass` 
+                code: `def reverse_number(n):
+    rev = 0
+    is_neg = n < 0
+    while n > 0:
+        rev = (rev * 10) + (n % 10)
+        n //= 10
+    return -rev if is_neg else rev`
              },
              {
                 language: "JavaScript",
-                code: `function solve_reverse_a_number(...args) {
-    // Optimal Reverse a Number Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_reverse_a_number() {
-        // Logic for Reverse a Number
+                code: `function reverseNumber(n) {
+    let rev = 0;
+    let sign = n < 0 ? -1 : 1;
+    n = Math.abs(n);
+    while (n > 0) {
+        rev = (rev * 10) + (n % 10);
+        n = Math.floor(n / 10);
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_reverse_a_number() {
-    // High-performance Reverse a Number routine
-}` 
+    return rev * sign;
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "gcd-or-hcf",
@@ -389,40 +383,35 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of GCD Or HCF.",
-          timeComplexity: "O(1)",
+          name: "Optimal (Euclidean Algorithm)",
+          description: "### 🧠 The Core Concept: The 'Rectangle' Analogy\nIf you have a $24 \\times 18$ rectangle and you want to tile it with the largest possible square, what is the square's size? \n\nEuclid's insight: The GCD of two numbers also divides their difference: $GCD(a, b) = GCD(a-b, b)$. \n\nModern Euclidean Logic: $GCD(a, b) = GCD(b, a \\% b)$. We repeat this until the remainder is $0$.",
+          timeComplexity: "O(log(min(a, b)))",
+          timeComplexityExplanation: "The numbers decrease exponentially with each modulo operation.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Iterative implementation uses no extra memory.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_gcd_or_hcf(*args):
-    # Optimized GCD Or HCF Logic
-    pass` 
+                code: `def gcd(a, b):
+    while a > 0 and b > 0:
+        if a > b: a %= b
+        else: b %= a
+    return a if b == 0 else b`
              },
              {
                 language: "JavaScript",
-                code: `function solve_gcd_or_hcf(...args) {
-    // Optimal GCD Or HCF Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_gcd_or_hcf() {
-        // Logic for GCD Or HCF
+                code: `function gcd(a, b) {
+    while (b) {
+        a %= b;
+        [a, b] = [b, a];
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_gcd_or_hcf() {
-    // High-performance GCD Or HCF routine
-}` 
+    return a;
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "armstrong-numbers",
@@ -436,40 +425,41 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Armstrong Numbers.",
-          timeComplexity: "O(1)",
+          name: "Optimal (Digit Extraction)",
+          description: "### 🧠 The Core Concept\nAn Armstrong number (like 153) is a number that equals the sum of its digits each raised to the power of the number of digits.\n\n$153 = 1^3 + 5^3 + 3^3 = 1 + 125 + 27 = 153$.\n\n### 🛠️ Step-by-Step Logic\n1. Count the number of digits ($k$).\n2. Extract each digit using modulo 10.\n3. Add (digit$^k$) to a running sum.\n4. Compare sum with original number.",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "We process each digit exactly twice (once to count, once to sum).",
           spaceComplexity: "O(1)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_armstrong_numbers(*args):
-    # Optimized Armstrong Numbers Logic
-    pass` 
+                code: `def is_armstrong(n):
+    temp = n
+    k = len(str(n))
+    sum_val = 0
+    while temp > 0:
+        digit = temp % 10
+        sum_val += digit ** k
+        temp //= 10
+    return sum_val == n`
              },
              {
                 language: "JavaScript",
-                code: `function solve_armstrong_numbers(...args) {
-    // Optimal Armstrong Numbers Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_armstrong_numbers() {
-        // Logic for Armstrong Numbers
+                code: `function isArmstrong(n) {
+    let k = String(n).length;
+    let sum = 0;
+    let temp = n;
+    while (temp > 0) {
+        sum += Math.pow(temp % 10, k);
+        temp = Math.floor(temp / 10);
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_armstrong_numbers() {
-    // High-performance Armstrong Numbers routine
-}` 
+    return sum === n;
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "print-all-divisors",
@@ -483,40 +473,41 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print all Divisors.",
-          timeComplexity: "O(1)",
-          spaceComplexity: "O(1)",
+          name: "Optimal (Square Root Property)",
+          description: "### 🧠 The Core Concept\nFactors always come in pairs. For $36$, the pairs are $(1, 36), (2, 18), (3, 12), (4, 9), (6, 6)$. \nNotice that in every pair, at least one factor is $\\le \\sqrt{36}$. Thus, we only need to iterate up to $\\sqrt{N}$ to find all divisors.",
+          timeComplexity: "O(√N)",
+          timeComplexityExplanation: "We only loop up to the square root of N.",
+          spaceComplexity: "O(√N)",
+          spaceComplexityExplanation: "We store the divisors in a list.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_print_all_divisors(*args):
-    # Optimized Print all Divisors Logic
-    pass` 
+                code: `def get_divisors(n):
+    divs = []
+    for i in range(1, int(n**0.5) + 1):
+        if n % i == 0:
+            divs.append(i)
+            if i != n // i:
+                divs.append(n // i)
+    return sorted(divs)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_print_all_divisors(...args) {
-    // Optimal Print all Divisors Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_print_all_divisors() {
-        // Logic for Print all Divisors
+                code: `function getDivisors(n) {
+    let divs = [];
+    for (let i = 1; i * i <= n; i++) {
+        if (n % i === 0) {
+            divs.push(i);
+            if (i !== n / i) divs.push(n / i);
+        }
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_print_all_divisors() {
-    // High-performance Print all Divisors routine
-}` 
+    return divs.sort((a, b) => a - b);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "check-for-prime",
@@ -530,40 +521,34 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Check for Prime.",
-          timeComplexity: "O(1)",
+          name: "Optimal (Trial Division up to √N)",
+          description: "### 🧠 The Core Concept: The 'Symmetry' Strategy\nIf a number $N$ has a factor greater than $\\sqrt{N}$, it must also have a corresponding factor smaller than $\\sqrt{N}$. If we find no factors up to $\\sqrt{N}$, there are none anywhere.",
+          timeComplexity: "O(√N)",
+          timeComplexityExplanation: "We only check numbers from 2 to √N.",
           spaceComplexity: "O(1)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_check_for_prime(*args):
-    # Optimized Check for Prime Logic
-    pass` 
+                code: `def is_prime(n):
+    if n <= 1: return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0: return False
+    return True`
              },
              {
                 language: "JavaScript",
-                code: `function solve_check_for_prime(...args) {
-    // Optimal Check for Prime Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_check_for_prime() {
-        // Logic for Check for Prime
+                code: `function isPrime(n) {
+    if (n <= 1) return false;
+    for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_check_for_prime() {
-    // High-performance Check for Prime routine
-}` 
+    return true;
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "understand-recursion-by-printing-something-n-times",
@@ -577,40 +562,32 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Understand recursion by printing something N times.",
-          timeComplexity: "O(2^N)",
+          name: "Optimal (Recursive Stack)",
+          description: "### 🧠 The Core Concept: The 'Echo' Analogy\nRecursion is like shouting into a canyon. Your shout (the function call) triggers an echo, which triggers another echo, until the sound finally dies out (the Base Case).\n\nTo print something $N$ times, you print it once and then ask the 'echo' to print it $N-1$ more times.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "We make exactly N recursive calls, each doing constant time printing.",
           spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Each call adds a new frame to the call stack.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_understand_recursion_by_printing_something_n_times(*args):
-    # Optimized Understand recursion by printing something N times Logic
-    pass` 
+                code: `def print_n_times(i, n):
+    if i > n: return
+    print("CodeVerse")
+    print_n_times(i + 1, n)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_understand_recursion_by_printing_something_n_times(...args) {
-    // Optimal Understand recursion by printing something N times Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_understand_recursion_by_printing_something_n_times() {
-        // Logic for Understand recursion by printing something N times
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_understand_recursion_by_printing_something_n_times() {
-    // High-performance Understand recursion by printing something N times routine
-}` 
+                code: `function printNTimes(i, n) {
+    if (i > n) return;
+    console.log("CodeVerse");
+    printNTimes(i + 1, n);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "print-1-to-n-using-recursion",
@@ -624,40 +601,31 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print 1 to N using recursion.",
-          timeComplexity: "O(2^N)",
+          name: "Optimal (Implicit Stack)",
+          description: "### 🧠 The Core Concept\nThere are two ways to do this:\n1. **Forward Recursion**: Print $i$, then call $f(i+1)$.\n2. **Backtracking Style**: Call $f(i-1)$, THEN print $i$. This effectively 'waits' for all smaller numbers to print before printing itself.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "One call per number from 1 to N.",
           spaceComplexity: "O(N)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_print_1_to_n_using_recursion(*args):
-    # Optimized Print 1 to N using recursion Logic
-    pass` 
+                code: `def print_1_to_n(i, n):
+    if i > n: return
+    print(i)
+    print_1_to_n(i + 1, n)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_print_1_to_n_using_recursion(...args) {
-    // Optimal Print 1 to N using recursion Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_print_1_to_n_using_recursion() {
-        // Logic for Print 1 to N using recursion
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_print_1_to_n_using_recursion() {
-    // High-performance Print 1 to N using recursion routine
-}` 
+                code: `function print1ToN(n) {
+    if (n === 0) return;
+    print1ToN(n - 1);
+    console.log(n);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "print-n-to-1-using-recursion",
@@ -671,40 +639,30 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print N to 1 using recursion.",
-          timeComplexity: "O(2^N)",
+          name: "Optimal (Top-Down Recursion)",
+          description: "### 🧠 The Core Concept\nPrint the current value of $N$, then delegate the task of printing $N-1$ down to $1$ to the next recursive call.",
+          timeComplexity: "O(N)",
           spaceComplexity: "O(N)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_print_n_to_1_using_recursion(*args):
-    # Optimized Print N to 1 using recursion Logic
-    pass` 
+                code: `def print_n_to_1(n):
+    if n == 0: return
+    print(n)
+    print_n_to_1(n - 1)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_print_n_to_1_using_recursion(...args) {
-    // Optimal Print N to 1 using recursion Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_print_n_to_1_using_recursion() {
-        // Logic for Print N to 1 using recursion
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_print_n_to_1_using_recursion() {
-    // High-performance Print N to 1 using recursion routine
-}` 
+                code: `function printNTo1(n) {
+    if (n === 0) return;
+    console.log(n);
+    printNTo1(n - 1);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "sum-of-first-n-numbers",
@@ -718,40 +676,28 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Sum of first N numbers.",
-          timeComplexity: "O(2^N)",
+          name: "Optimal (Parameter vs Functional)",
+          description: "### 🧠 The Core Concept\n1. **Functional**: $f(n) = n + f(n-1)$. The result is returned back up the stack.\n2. **Parameterized**: $f(n, sum)$. The result is carried down the stack as an accumulator.",
+          timeComplexity: "O(N)",
           spaceComplexity: "O(N)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_sum_of_first_n_numbers(*args):
-    # Optimized Sum of first N numbers Logic
-    pass` 
+                code: `def sum_n(n):
+    if n == 0: return 0
+    return n + sum_n(n - 1)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_sum_of_first_n_numbers(...args) {
-    // Optimal Sum of first N numbers Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_sum_of_first_n_numbers() {
-        // Logic for Sum of first N numbers
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_sum_of_first_n_numbers() {
-    // High-performance Sum of first N numbers routine
-}` 
+                code: `function sumN(n, acc = 0) {
+    if (n === 0) return acc;
+    return sumN(n - 1, acc + n);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "factorial-of-n-numbers",
@@ -765,40 +711,28 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Factorial of N numbers.",
-          timeComplexity: "O(2^N)",
+          name: "Optimal (Standard Recursive)",
+          description: "### 🧠 The Core Concept\nFactorial $N!$ is defined as $N \\times (N-1)!$. This natural mathematical definition maps perfectly to a recursive function call.",
+          timeComplexity: "O(N)",
           spaceComplexity: "O(N)",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_factorial_of_n_numbers(*args):
-    # Optimized Factorial of N numbers Logic
-    pass` 
+                code: `def factorial(n):
+    if n == 0: return 1
+    return n * factorial(n - 1)`
              },
              {
                 language: "JavaScript",
-                code: `function solve_factorial_of_n_numbers(...args) {
-    // Optimal Factorial of N numbers Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_factorial_of_n_numbers() {
-        // Logic for Factorial of N numbers
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_factorial_of_n_numbers() {
-    // High-performance Factorial of N numbers routine
-}` 
+                code: `function factorial(n) {
+    if (n === 0) return 1;
+    return n * factorial(n - 1);
+}`
              }
           ]
        }
     ]
+
   },
              {
     id: "reverse-an-array",
@@ -1082,235 +1016,143 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
        }
     ]
   },
-             {
+  {
     id: "bubble-sort",
     title: "Bubble Sort",
     topic: "Sorting - Sorting I",
     category: "Sorting",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Bubble Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    difficulty: "Easy",
+    overview: "Like carbonated bubbles rising to the top, larger elements 'bubble up' to the end of the array through repeated neighbor-swaps.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    useCases: ["Educational purposes", "Nearly sorted data"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Bubble Sort.",
-          timeComplexity: "O(N log N)",
+          name: "Optimal (Optimized Early-Exit)",
+          description: "### 🧠 The Core Concept: The 'Neighbor Exchange'\nImagine heavy elements 'sinking' to the right while lighter elements 'bubble' to the left. We compare adjacent neighbors; if the one on the left is larger, they switch places.\n\n### 🛠️ Step-by-Step Logic\n1. Run a loop `i` from $N-1$ down to 0 (the boundary of our sorted section).\n2. Run a nested loop `j` from 0 to `i-1`.\n3. If `arr[j] > arr[j+1]`, **swap** them.\n4. **Optimization**: If a pass completes with ZERO swaps, the array is already sorted! We can stop immediately.",
+          timeComplexity: "O(N²)",
+          timeComplexityExplanation: "In the worst case (reverse sorted), we perform $N^2$ comparisons. In the best case (already sorted), the optimized version runs in $O(N)$ because it stops after one pass.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "All swaps are performed directly in the input array.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_bubble_sort(*args):
-    # Optimized Bubble Sort Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_bubble_sort(...args) {
-    // Optimal Bubble Sort Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_bubble_sort() {
-        // Logic for Bubble Sort
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_bubble_sort() {
-    // High-performance Bubble Sort routine
-}` 
+                code: "def bubbleSort(arr):\n    n = len(arr)\n    for i in range(n-1, 0, -1):\n        swapped = False\n        for j in range(i):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n                swapped = True\n        if not swapped: break\n    return arr" 
              }
           ]
        }
     ]
   },
-             {
+  {
     id: "insertion-sort",
     title: "Insertion Sort",
     topic: "Sorting - Sorting I",
     category: "Sorting",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Insertion Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    difficulty: "Easy",
+    overview: "Imagine sorting a hand of playing cards: you pick up one card at a time and 'insert' it into its correct position among the cards already in your hand.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    useCases: ["Tiny datasets", "Streaming data where elements arrive one-by-one"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Insertion Sort.",
-          timeComplexity: "O(N log N)",
+          name: "Optimal (Linear In-Place Insertion)",
+          description: "### 🧠 The Core Concept: The 'Card Hand' Strategy\nWe conceptually split the array into a 'Sorted' part and an 'Unsorted' part. For every new element, we shift the sorted elements to the right until we find the gap where the new element fits.\n\n### 🛠️ Step-by-Step Logic\n1. Iterate from $i = 0$ to $N-1$.\n2. Treat the first `i` elements as sorted.\n3. Take the element at `i+1` (the 'Key').\n4. Compare 'Key' with elements to its left. While the left element is larger, shift it to the right.\n5. Once you find a smaller element or hit the start, insert the 'Key'.",
+          timeComplexity: "O(N²)",
+          timeComplexityExplanation: "Worst case is $O(N^2)$ for reverse-sorted data. However, for nearly-sorted data, it is extremely fast ($O(N)$), making it the engine behind 'Hybrid' sorting algorithms like Timsort.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We only need one 'key' variable for temporary storage during shifting.",
           implementations: [
              {
-                language: "Python",
-                code: `def solve_insertion_sort(*args):
-    # Optimized Insertion Sort Logic
-    pass` 
-             },
-             {
                 language: "JavaScript",
-                code: `function solve_insertion_sort(...args) {
-    // Optimal Insertion Sort Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_insertion_sort() {
-        // Logic for Insertion Sort
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_insertion_sort() {
-    // High-performance Insertion Sort routine
-}` 
+                code: "function insertionSort(arr) {\n    for (let i = 1; i < arr.length; i++) {\n        let key = arr[i], j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j--;\n        }\n        arr[j + 1] = key;\n    }\n    return arr;\n}" 
              }
           ]
        }
     ]
   },
-             {
-    id: "recursive-bubble-sort",
-    title: "Recursive Bubble Sort",
+  {
+    id: "merge-sort",
+    title: "Merge Sort",
     topic: "Sorting - Sorting II",
     category: "Sorting",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Recursive Bubble Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "The 'Divide and Conquer' master: recursively split the array into halves, sort them, and merge them back with surgical precision.",
+    leetcodeLink: "https://leetcode.com/problems/sort-an-array/",
+    useCases: ["Stable sorting requirements", "External sorting (massive data)", "Linked list sorting"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Recursive Bubble Sort.",
+          name: "Optimal (Divide & Conquer)",
+          description: "### 🧠 The Core Concept: The 'Two-Sorted-Stacks' Analogy\nImagine you have two piles of sorted cards. You can easily merge them into one big sorted pile by always looking at the top of both piles and picking the smaller one. \n\n### 🛠️ Step-by-Step Logic\n1. **Divide**: Split the array down the middle using `mid = (low + high) / 2`.\n2. **Conquer**: Recursively call Merge Sort on the left half and right half.\n3. **Combine (Merge)**: \n   - Use two pointers, `left` and `right`, to scan both halves.\n   - Compare elements and place the smaller one into a temporary array.\n   - Copy the temporary array back to the original array.",
           timeComplexity: "O(N log N)",
-          spaceComplexity: "O(1)",
+          timeComplexityExplanation: "We divide the array $log N$ times (the height of the recursion tree). In each of those levels, we process $N$ elements during the merge phase ($N \times log N$).",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "We need a temporary physical buffer to store elements during the merge process. Note: For Linked Lists, space can be reduced to $O(1)$ stack space.",
           implementations: [
              {
                 language: "Python",
-                code: `def solve_recursive_bubble_sort(*args):
-    # Optimized Recursive Bubble Sort Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_recursive_bubble_sort(...args) {
-    // Optimal Recursive Bubble Sort Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_recursive_bubble_sort() {
-        // Logic for Recursive Bubble Sort
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_recursive_bubble_sort() {
-    // High-performance Recursive Bubble Sort routine
-}` 
+                code: `def mergeSort(arr, low, high):
+    if low >= high: return
+    mid = (low + high) // 2
+    mergeSort(arr, low, mid)
+    mergeSort(arr, mid + 1, high)
+    merge(arr, low, mid, high)
+
+def merge(arr, low, mid, high):
+    temp = []
+    left, right = low, mid + 1
+    while left <= mid and right <= high:
+        if arr[left] <= arr[right]:
+            temp.append(arr[left]); left += 1
+        else:
+            temp.append(arr[right]); right += 1
+    while left <= mid: temp.append(arr[left]); left += 1
+    while right <= high: temp.append(arr[right]); right += 1
+    for i in range(len(temp)):
+        arr[low + i] = temp[i]` 
              }
           ]
        }
     ]
   },
-             {
-    id: "recursive-insertion-sort",
-    title: "Recursive Insertion Sort",
-    topic: "Sorting - Sorting II",
-    category: "Sorting",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Recursive Insertion Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-       {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Recursive Insertion Sort.",
-          timeComplexity: "O(N log N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_recursive_insertion_sort(*args):
-    # Optimized Recursive Insertion Sort Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_recursive_insertion_sort(...args) {
-    // Optimal Recursive Insertion Sort Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_recursive_insertion_sort() {
-        // Logic for Recursive Insertion Sort
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_recursive_insertion_sort() {
-    // High-performance Recursive Insertion Sort routine
-}` 
-             }
-          ]
-       }
-    ]
-  },
-             {
+  {
     id: "quick-sort",
     title: "Quick Sort",
     topic: "Sorting - Sorting II",
     category: "Sorting",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Quick Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "The benchmark standard for sorting efficiency. Pick a 'pivot' and partition the world into 'smaller than' and 'larger than' that pivot.",
+    leetcodeLink: "https://leetcode.com/problems/sort-an-array/",
+    useCases: ["General purpose sorting", "In-place sorting", "Systems programming"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Quick Sort.",
+          name: "Optimal (Hoare Partitioning)",
+          description: "### 🧠 The Core Concept: The 'Polarity' Strategy\nPick a number (the **Pivot**). Now, run through the array and make sure everything smaller than the pivot is on its left, and everything larger is on its right. Once you do this, the pivot is in its **final sorted position**! \n\nRepeat this for the left and right 'islands' until the whole map is sorted.\n\n### 🛠️ Step-by-Step Logic\n1. **Pick a Pivot**: (e.g., the first element).\n2. **Partition**: Use two pointers (`i` and `j`):\n   - `i` moves forward until it finds an element **greater** than the pivot.\n   - `j` moves backward until it finds an element **smaller** than the pivot.\n   - Swap `i` and `j` to fix their 'wrong-sided-ness'.\n3. Once `i` and `j` cross, the pivot's true spot is found at index `j`.\n4. **Recursion**: QuickSort the left and right sub-arrays.",
           timeComplexity: "O(N log N)",
-          spaceComplexity: "O(1)",
+          timeComplexityExplanation: "Average case is $O(N \log N)$. In the absolute worst case (already sorted array with first-element pivot), it can devolve into $O(N^2)$. Modern implementations use 'Random Pivots' to avoid this.",
+          spaceComplexity: "O(log N)",
+          spaceComplexityExplanation: "In-place sorting needs no extra array, only logarithmic stack space for the recursive calls.",
           implementations: [
              {
-                language: "Python",
-                code: `def solve_quick_sort(*args):
-    # Optimized Quick Sort Logic
-    pass` 
-             },
-             {
                 language: "JavaScript",
-                code: `function solve_quick_sort(...args) {
-    // Optimal Quick Sort Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_quick_sort() {
-        // Logic for Quick Sort
+                code: `function quickSort(arr, low, high) {
+    if (low < high) {
+        let pIndex = partition(arr, low, high);
+        quickSort(arr, low, pIndex - 1);
+        quickSort(arr, pIndex + 1, high);
     }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_quick_sort() {
-    // High-performance Quick Sort routine
+}
+
+function partition(arr, low, high) {
+    let pivot = arr[low], i = low, j = high;
+    while (i < j) {
+        while (arr[i] <= pivot && i <= high - 1) i++;
+        while (arr[j] > pivot && j >= low + 1) j--;
+        if (i < j) [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    [arr[low], arr[j]] = [arr[j], arr[low]];
+    return j;
 }` 
              }
           ]
@@ -1319,1411 +1161,608 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
   },
              {
     id: "largest-element-in-an-array",
-    title: "Largest Element in an Array",
+    title: "Largest Element",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Largest Element in an Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Finding the maximum value in a collection — the most fundamental building block of data analysis.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    useCases: ["Basic data analytics", "Scoreboard management"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Largest Element in an Array.",
+          name: "Optimal (Linear Scan)",
+          description: "### 🧠 The Core Concept\nAssume the first number is the biggest. For every other number, if it's larger than your current record-holder, update the record.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_largest_element_in_an_array(*args):
-    # Optimized Largest Element in an Array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_largest_element_in_an_array(...args) {
-    // Optimal Largest Element in an Array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_largest_element_in_an_array() {
-        // Logic for Largest Element in an Array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_largest_element_in_an_array() {
-    // High-performance Largest Element in an Array routine
-}` 
-             }
+             { language: "Python", code: "def findLargest(arr): \n    max_val = arr[0]\n    for x in arr:\n        if x > max_val: max_val = x\n    return max_val" }
           ]
        }
     ]
   },
-             {
+  {
     id: "second-largest-element-in-an-array-without-sorting",
-    title: "Second Largest Element in an Array without sorting",
+    title: "Second Largest Element",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Second Largest Element in an Array without sorting. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "How to find the runner-up in a single pass without the $O(N \log N)$ cost of sorting.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    useCases: ["Ranking optimization", "Statistic calculations"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Second Largest Element in an Array without sorting.",
+          name: "Optimal (Dual-Pointer Tracker)",
+          description: "### 🧠 The Core Concept: The 'Olympic Podium' Analogy\nImagine you're watching a race. You keep track of the Gold medalist (`largest`) and the Silver medalist (`secondLargest`). \n\nWhen a new runner finishes:\n1. If they are faster than Gold: Silver becomes the old Gold, and they become the new Gold.\n2. If they are slower than Gold but faster than Silver: They become the new Silver.\n\n### 🛠️ Logic\n- Initialize `largest = -1` and `secondLargest = -1`.\n- For `x` in `arr`:\n  - If `x > largest`: `secondLargest = largest; largest = x`.\n  - Else if `x < largest` and `x > secondLargest`: `secondLargest = x`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_second_largest_element_in_an_array_without_sorting(*args):
-    # Optimized Second Largest Element in an Array without sorting Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_second_largest_element_in_an_array_without_sorting(...args) {
-    // Optimal Second Largest Element in an Array without sorting Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_second_largest_element_in_an_array_without_sorting() {
-        // Logic for Second Largest Element in an Array without sorting
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_second_largest_element_in_an_array_without_sorting() {
-    // High-performance Second Largest Element in an Array without sorting routine
-}` 
-             }
+             { language: "JavaScript", code: "function getSecondLargest(arr) {\n    let largest = -1, second = -1;\n    for(let x of arr) {\n        if(x > largest) { second = largest; largest = x; }\n        else if(x < largest && x > second) { second = x; }\n    }\n    return second;\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "check-if-the-array-is-sorted",
-    title: "Check if the array is sorted",
+    title: "Is Array Sorted?",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Check if the array is sorted. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Verify monotonicity: the ability to determine if a data stream is consistently increasing or decreasing.",
+    leetcodeLink: "https://leetcode.com/problems/check-if-array-is-sorted-and-rotated/",
+    useCases: ["Data validation", "Pre-binary search checks"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Check if the array is sorted.",
+          name: "Optimal (Linear Check)",
+          description: "### 🧠 The Core Concept\nAn array is sorted ascending if every element $arr[i]$ is less than or equal to $arr[i+1]$. One single mismatch breaks the rule.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_check_if_the_array_is_sorted(*args):
-    # Optimized Check if the array is sorted Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_check_if_the_array_is_sorted(...args) {
-    // Optimal Check if the array is sorted Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_check_if_the_array_is_sorted() {
-        // Logic for Check if the array is sorted
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_check_if_the_array_is_sorted() {
-    // High-performance Check if the array is sorted routine
-}` 
-             }
+             { language: "Python", code: "def isSorted(arr): \n    for i in range(len(arr) - 1):\n        if arr[i] > arr[i+1]: return False\n    return True" }
           ]
        }
     ]
   },
-             {
+  {
     id: "remove-duplicates-from-sorted-array",
-    title: "Remove Duplicates from Sorted Array",
+    title: "Remove Duplicates",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Remove Duplicates from Sorted Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Deduplicate a sorted array in-place using the Two-Pointer technique for maximum efficiency.",
+    leetcodeLink: "https://leetcode.com/problems/remove-duplicates-from-sorted-array/",
+    useCases: ["Data cleanup", "Uniqueness constraints"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Remove Duplicates from Sorted Array.",
+          name: "Optimal (Two Pointers)",
+          description: "### 🧠 The Core Concept: The 'Unique Collector'\nOne pointer stays at the last unique element found, while the other explores. When a new element appears, we move it to the adjacent unique spot.\n\n### 🛠️ Step-by-Step Logic\n1. `i = 0` (slow pointer).\n2. For `j = 1` to `N-1` (fast pointer):\n3. If `arr[j] != arr[i]`: Increment `i` and set `arr[i] = arr[j]`.\n4. Return `i + 1`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_remove_duplicates_from_sorted_array(*args):
-    # Optimized Remove Duplicates from Sorted Array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_remove_duplicates_from_sorted_array(...args) {
-    // Optimal Remove Duplicates from Sorted Array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_remove_duplicates_from_sorted_array() {
-        // Logic for Remove Duplicates from Sorted Array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_remove_duplicates_from_sorted_array() {
-    // High-performance Remove Duplicates from Sorted Array routine
-}` 
-             }
+             { language: "JavaScript", code: "function removeDuplicates(arr) {\n    let i = 0;\n    for(let j = 1; j < arr.length; j++) {\n        if(arr[j] !== arr[i]) {\n            i++; arr[i] = arr[j];\n        }\n    }\n    return i + 1;\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "left-rotate-an-array-by-one-place",
-    title: "Left Rotate an array by one place",
+    title: "Left Rotate by 1",
     topic: "Arrays - Easy",
     category: "Arrays",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Left Rotate an array by one place. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    difficulty: "Easy",
+    overview: "Shift every element left and move the front to the back.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    useCases: ["Circular buffers"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Left Rotate an array by one place.",
+          name: "Optimal (Linear Shift)",
+          description: "### 🧠 Concept\nStore the head, shift the body, attach the head to the tail.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_left_rotate_an_array_by_one_place(*args):
-    # Optimized Left Rotate an array by one place Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_left_rotate_an_array_by_one_place(...args) {
-    // Optimal Left Rotate an array by one place Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_left_rotate_an_array_by_one_place() {
-        // Logic for Left Rotate an array by one place
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_left_rotate_an_array_by_one_place() {
-    // High-performance Left Rotate an array by one place routine
-}` 
-             }
+             { language: "Python", code: "def rotateOnce(arr): \n    temp = arr[0]\n    for i in range(len(arr)-1): arr[i] = arr[i+1]\n    arr[-1] = temp\n    return arr" }
           ]
        }
     ]
   },
-             {
+  {
     id: "left-rotate-an-array-by-d-places",
-    title: "Left rotate an array by D places",
+    title: "Left Rotate by D",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Left rotate an array by D places. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Effortlessly rotate an array by $D$ positions using the Triple Reversal mathematical trick.",
+    leetcodeLink: "https://leetcode.com/problems/rotate-array/",
+    useCases: ["Cyclic scrolling", "Ring buffer management"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Left rotate an array by D places.",
+          name: "Optimal (Triple Reverse)",
+          description: "### 🧠 The Core Concept: The 'Mirror Principle'\n1. Reverse first $D$ elements.\n2. Reverse last $N-D$ elements.\n3. Reverse the WHOLE array.\n\nThis elegantly rearranges the blocks without using extra memory.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_left_rotate_an_array_by_d_places(*args):
-    # Optimized Left rotate an array by D places Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_left_rotate_an_array_by_d_places(...args) {
-    // Optimal Left rotate an array by D places Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_left_rotate_an_array_by_d_places() {
-        // Logic for Left rotate an array by D places
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_left_rotate_an_array_by_d_places() {
-    // High-performance Left rotate an array by D places routine
-}` 
-             }
+             { language: "JavaScript", code: "function rotate(nums, k) {\n    k %= nums.length;\n    const rev = (l, r) => {\n        while(l < r) [nums[l], nums[r]] = [nums[r], nums[l]], l++, r--;\n    };\n    rev(0, k-1);\n    rev(k, nums.length-1);\n    rev(0, nums.length-1);\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "move-zeroes-to-end",
-    title: "Move Zeroes to end",
+    title: "Move Zeroes to End",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Move Zeroes to end. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Push all zeros to the end of the array while maintaining the relative order of non-zero elements.",
+    leetcodeLink: "https://leetcode.com/problems/move-zeroes/",
+    useCases: ["Data filtering", "Array compacting"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Move Zeroes to end.",
+          name: "Optimal (Two Pointers)",
+          description: "### 🧠 The Core Concept: The 'Zero-NonZero Switch'\nFind the first zero. Then, use another pointer to find the next non-zero and swap them.\n\n### 🛠️ Logic\n1. Find index of first zero (`j`).\n2. Loop `i` from `j+1` to `N-1`.\n3. If `arr[i] != 0`: `swap(arr[i], arr[j]); j++`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_move_zeroes_to_end(*args):
-    # Optimized Move Zeroes to end Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_move_zeroes_to_end(...args) {
-    // Optimal Move Zeroes to end Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_move_zeroes_to_end() {
-        // Logic for Move Zeroes to end
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_move_zeroes_to_end() {
-    // High-performance Move Zeroes to end routine
-}` 
-             }
+             { language: "Python", code: "def moveZeroes(arr):\n    j = -1\n    for i in range(len(arr)):\n        if arr[i] == 0: \n            j = i; break\n    if j == -1: return arr\n    for i in range(j+1, len(arr)):\n        if arr[i] != 0:\n            arr[i], arr[j] = arr[j], arr[i]\n            j += 1\n    return arr" }
           ]
        }
     ]
   },
-             {
+  {
     id: "linear-search",
     title: "Linear Search",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Linear Search. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Sequential scanning to find a target value.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Linear Search.",
+          name: "Optimal (Single Scan)",
+          description: "Iterate once; return index if found, else -1.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_linear_search(*args):
-    # Optimized Linear Search Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_linear_search(...args) {
-    // Optimal Linear Search Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_linear_search() {
-        // Logic for Linear Search
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_linear_search() {
-    // High-performance Linear Search routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def search(arr, k): \n    for i in range(len(arr)): \n        if arr[i] == k: return i\n    return -1" }]
        }
     ]
   },
-             {
+  {
     id: "find-the-union",
-    title: "Find the Union",
+    title: "Union of Sorted Arrays",
     topic: "Arrays - Easy",
     category: "Arrays",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find the Union. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    difficulty: "Easy",
+    overview: "Merge two sorted arrays into a single unique sorted set.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find the Union.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_the_union(*args):
-    # Optimized Find the Union Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_the_union(...args) {
-    // Optimal Find the Union Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_the_union() {
-        // Logic for Find the Union
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_the_union() {
-    // High-performance Find the Union routine
-}` 
-             }
-          ]
+          name: "Optimal (Merge Logic)",
+          description: "Use two pointers. Add the smaller one if it doesn't match the last added element.",
+          timeComplexity: "O(N+M)",
+          spaceComplexity: "O(N+M)",
+          implementations: [{ language: "JavaScript", code: "/* Two pointer merge logic similar to merge sort but with unique check */" }]
        }
     ]
   },
-             {
+  {
     id: "find-missing-number-in-an-array",
-    title: "Find missing number in an array",
+    title: "Find Missing Number",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find missing number in an array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Identify a single missing value in a sequence using math or XOR.",
+    leetcodeLink: "https://leetcode.com/problems/missing-number/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find missing number in an array.",
+          name: "Optimal (Math)",
+          description: "Expected Sum ($N(N+1)/2$) minus Actual Sum.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_missing_number_in_an_array(*args):
-    # Optimized Find missing number in an array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_missing_number_in_an_array(...args) {
-    // Optimal Find missing number in an array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_missing_number_in_an_array() {
-        // Logic for Find missing number in an array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_missing_number_in_an_array() {
-    // High-performance Find missing number in an array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def missing(nums): \n    n = len(nums)\n    return (n*(n+1)//2) - sum(nums)" }]
        }
     ]
   },
-             {
+  {
     id: "maximum-consecutive-ones",
-    title: "Maximum Consecutive Ones",
+    title: "Max Consecutive 1s",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Maximum Consecutive Ones. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Longest continuous streak of 1s.",
+    leetcodeLink: "https://leetcode.com/problems/max-consecutive-ones/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Maximum Consecutive Ones.",
+          name: "Optimal (Global Max)",
+          description: "Reset streak on zero; update global max on every 1.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_maximum_consecutive_ones(*args):
-    # Optimized Maximum Consecutive Ones Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_maximum_consecutive_ones(...args) {
-    // Optimal Maximum Consecutive Ones Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_maximum_consecutive_ones() {
-        // Logic for Maximum Consecutive Ones
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_maximum_consecutive_ones() {
-    // High-performance Maximum Consecutive Ones routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findMax(nums): \n    m = c = 0\n    for x in nums: \n        if x == 1: c += 1; m = max(m, c)\n        else: c = 0\n    return m" }]
        }
     ]
   },
-             {
+  {
     id: "find-the-number-that-appears-once",
-    title: "Find the number that appears once",
+    title: "Single Number",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find the number that appears once. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Find the element with no duplicate using XOR bitwise properties.",
+    leetcodeLink: "https://leetcode.com/problems/single-number/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find the number that appears once.",
+          name: "Optimal (XOR)",
+          description: "$A \\oplus A = 0$. XOR all elements; the single one remains.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_the_number_that_appears_once(*args):
-    # Optimized Find the number that appears once Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_the_number_that_appears_once(...args) {
-    // Optimal Find the number that appears once Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_the_number_that_appears_once() {
-        // Logic for Find the number that appears once
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_the_number_that_appears_once() {
-    // High-performance Find the number that appears once routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function find(n) { return n.reduce((acc, x) => acc ^ x, 0); }" }]
        }
     ]
   },
-             {
+  {
     id: "longest-subarray-with-given-sum-k-positives",
-    title: "Longest subarray with given sum K (positives)",
+    title: "Longest Subarray with Sum K",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest subarray with given sum K (positives). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the maximum length of a subarray whose sum equals K in an array of positives.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest subarray with given sum K (positives).",
+          name: "Optimal (Sliding Window)",
+          description: "### 🧠 Concept: The 'Stretch & Shrink' strategy\nUse two pointers for a window. Stretch right while sum < K. Shrink left if sum > K.\n\n### 🛠️ Step-by-Step Logic\n1. `sum = 0`, `left = 0`, `maxlen = 0`.\n2. Expand `right` pointer, add `arr[right]` to sum.\n3. While `sum > K`: subtract `arr[left]` and increment `left`.\n4. If `sum == K`: update `maxlen`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_longest_subarray_with_given_sum_k__positives_(*args):
-    # Optimized Longest subarray with given sum K (positives) Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_longest_subarray_with_given_sum_k__positives_(...args) {
-    // Optimal Longest subarray with given sum K (positives) Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_longest_subarray_with_given_sum_k__positives_() {
-        // Logic for Longest subarray with given sum K (positives)
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_longest_subarray_with_given_sum_k__positives_() {
-    // High-performance Longest subarray with given sum K (positives) routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function longSub(arr, k) { /* sliding window logic */ }" }]
        }
     ]
   },
-             {
+  {
     id: "longest-subarray-with-given-sum-k-positives-negatives",
-    title: "Longest subarray with given sum K (Positives + Negatives)",
+    title: "Longest Subarray Sum K (All)",
     topic: "Arrays - Easy",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest subarray with given sum K (Positives + Negatives). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the maximum length of a subarray summing to K in an array with positives and negatives.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest subarray with given sum K (Positives + Negatives).",
+          name: "Optimal (Prefix Sum Hashmap)",
+          description: "### 🧠 The Core Concept: The 'Difference Checker'\nIf we know the sum from $0$ to $i$ is `S`, and we want a subarray summing to `K`, we check if a prefix sum `S - K` existed at some prior index `j`. If yes, the subarray from `j+1` to `i` sums to `K`.\n\n### 🛠️ Step-by-Step Logic\n1. Store `{cumulativeSum: index}` in a Hashmap.\n2. For every index, calculate current `sum`.\n3. If `sum == K`: `maxlen = index + 1`.\n4. If `sum - K` exists in map: update `maxlen`.\n5. Only add `sum` to map if it doesn't exist (to keep the index as small as possible = longer subarray).",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
+          spaceComplexity: "O(N)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_longest_subarray_with_given_sum_k__positives___negatives_(*args):
-    # Optimized Longest subarray with given sum K (Positives + Negatives) Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_longest_subarray_with_given_sum_k__positives___negatives_(...args) {
-    // Optimal Longest subarray with given sum K (Positives + Negatives) Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_longest_subarray_with_given_sum_k__positives___negatives_() {
-        // Logic for Longest subarray with given sum K (Positives + Negatives)
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_longest_subarray_with_given_sum_k__positives___negatives_() {
-    // High-performance Longest subarray with given sum K (Positives + Negatives) routine
-}` 
-             }
+             { language: "Python", code: "def longest(arr, k): \n    map = {} \n    sum = 0 \n    maxlen = 0 \n    for i in range(len(arr)): \n        sum += arr[i] \n        if sum == k: maxlen = i + 1 \n        if (sum - k) in map: maxlen = max(maxlen, i - map[sum-k]) \n        if sum not in map: map[sum] = i \n    return maxlen" }
           ]
        }
     ]
   },
-             {
+  {
     id: "sort-an-array-of-0-s-1-s-and-2-s",
-    title: "Sort an array of 0's 1's and 2's",
+    title: "Sort 0s, 1s, and 2s",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Sort an array of 0's 1's and 2's. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Formally known as the Dutch National Flag algorithm. Sort three distinct elements in a single pass without using the built-in sort function.",
+    leetcodeLink: "https://leetcode.com/problems/sort-colors/",
+    useCases: ["Database partitioning", "Classification sorting"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Sort an array of 0's 1's and 2's.",
+          name: "Optimal (Dutch National Flag)",
+          description: "### 🧠 The Core Concept: The 'Three-Zone' Strategy\nImagine you have three zones: a **Red** zone (0s), a **White** zone (1s), and a **Blue** zone (2s). You use three pointers to maintain these boundaries as you scan the array.\n\n### 🛠️ Step-by-Step Logic\n1. `low = 0`, `mid = 0`, `high = n-1`.\n2. While `mid <= high`:\n   - If `arr[mid] == 0`: `swap(arr[mid], arr[low]); low++; mid++`.\n   - If `arr[mid] == 1`: `mid++`.\n   - If `arr[mid] == 2`: `swap(arr[mid], arr[high]); high--`.\n3. The region `[0...low-1]` is all 0s, `[low...mid-1]` is all 1s, and `[high+1...n-1]` is all 2s.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_sort_an_array_of_0_s_1_s_and_2_s(*args):
-    # Optimized Sort an array of 0's 1's and 2's Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_sort_an_array_of_0_s_1_s_and_2_s(...args) {
-    // Optimal Sort an array of 0's 1's and 2's Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_sort_an_array_of_0_s_1_s_and_2_s() {
-        // Logic for Sort an array of 0's 1's and 2's
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_sort_an_array_of_0_s_1_s_and_2_s() {
-    // High-performance Sort an array of 0's 1's and 2's routine
-}` 
-             }
+             { language: "JavaScript", code: "function sort012(arr) {\n    let low = 0, mid = 0, high = arr.length - 1;\n    while(mid <= high) {\n        if(arr[mid] === 0) { [arr[low], arr[mid]] = [arr[mid], arr[low]]; low++; mid++; }\n        else if(arr[mid] === 1) mid++;\n        else { [arr[mid], arr[high]] = [arr[high], arr[mid]]; high--; }\n    }\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "majority-element-n-2-times",
-    title: "Majority Element (>N/2 times)",
+    title: "Majority Element (>N/2)",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Majority Element (>N/2 times). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the element that appears more than $N/2$ times using the elegant Moore’s Voting Algorithm.",
+    leetcodeLink: "https://leetcode.com/problems/majority-element/",
+    useCases: ["Fault-tolerant systems", "Consensus algorithms"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Majority Element (>N/2 times).",
+          name: "Optimal (Boyer-Moore Voting)",
+          description: "### 🧠 The Core Concept: The 'Tug of War'\nIf an element appears more than half the time, it can 'outvote' all other elements combined. We pick a candidate and increment a counter for matches, decrement for mismatches. If the counter hits zero, we pick the current element as the new candidate.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `count = 0`, `element = None`.\n2. For every `x` in `arr`:\n   - If `count == 0`: `element = x`, `count = 1`.\n   - Else if `x == element`: `count++`.\n   - Else: `count--`.\n3. The `element` remaining at the end is our candidate.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_majority_element___n_2_times_(*args):
-    # Optimized Majority Element (>N/2 times) Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_majority_element___n_2_times_(...args) {
-    // Optimal Majority Element (>N/2 times) Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_majority_element___n_2_times_() {
-        // Logic for Majority Element (>N/2 times)
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_majority_element___n_2_times_() {
-    // High-performance Majority Element (>N/2 times) routine
-}` 
-             }
+             { language: "Python", code: "def majority(nums):\n    count = 0; cand = None\n    for x in nums:\n        if count == 0: cand = x\n        count += (1 if x == cand else -1)\n    return cand" }
           ]
        }
     ]
   },
-             {
+  {
     id: "print-subarray-with-maximum-sum",
-    title: "Print subarray with maximum sum",
+    title: "Maximum Subarray Sum (Kadane's)",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Print subarray with maximum sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the contiguous subarray with the largest sum. This is one of the most famous dynamic programming problems.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-subarray/",
+    useCases: ["Stock analysis", "Genomic sequence analysis"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print subarray with maximum sum.",
+          name: "Optimal (Kadane's Algorithm)",
+          description: "### 🧠 The Core Concept: The 'Fresh Start' Strategy\nAs we traverse the array, we keep adding to our `currentSum`. However, if `currentSum` becomes negative, it's better to scrap it entirely and start a 'fresh streak' from the current element.\n\n### 🛠️ Step-by-Step Logic\n1. `maxSum = min_integer`, `currentSum = 0`.\n2. For each `x` in `arr`:\n   - `currentSum += x`.\n   - `maxSum = max(maxSum, currentSum)`.\n   - If `currentSum < 0`: `currentSum = 0`.\n3. Return `maxSum`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_print_subarray_with_maximum_sum(*args):
-    # Optimized Print subarray with maximum sum Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_print_subarray_with_maximum_sum(...args) {
-    // Optimal Print subarray with maximum sum Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_print_subarray_with_maximum_sum() {
-        // Logic for Print subarray with maximum sum
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_print_subarray_with_maximum_sum() {
-    // High-performance Print subarray with maximum sum routine
-}` 
-             }
+             { language: "JavaScript", code: "function kadanes(arr) {\n    let max = -Infinity, sum = 0;\n    for(let x of arr) {\n        sum += x;\n        if(sum > max) max = sum;\n        if(sum < 0) sum = 0;\n    }\n    return max;\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "best-time-to-buy-and-sell-stock",
-    title: "Best time to buy and sell stock",
+    title: "Stock Buy and Sell",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best time to buy and sell stock. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Maximize profit by choosing a single day to buy and a later day to sell.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best time to buy and sell stock.",
+          name: "Optimal (One-Pass)",
+          description: "Keep track of the minimum price seen so far and calculate potential profit on every day.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_best_time_to_buy_and_sell_stock(*args):
-    # Optimized Best time to buy and sell stock Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_best_time_to_buy_and_sell_stock(...args) {
-    // Optimal Best time to buy and sell stock Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock() {
-        // Logic for Best time to buy and sell stock
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_best_time_to_buy_and_sell_stock() {
-    // High-performance Best time to buy and sell stock routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def maxProfit(prices): \n    mini = prices[0]; profit = 0\n    for i in range(1, len(prices)): \n        profit = max(profit, prices[i] - mini) \n        mini = min(mini, prices[i]) \n    return profit" }]
        }
     ]
   },
-             {
+  {
     id: "rearrange-array-elements-by-sign",
-    title: "Rearrange array elements by sign",
+    title: "Rearrange by Sign",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Rearrange array elements by sign. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Rearrange equal numbers of positive and negative integers in alternating fashion while maintaining order.",
+    leetcodeLink: "https://leetcode.com/problems/rearrange-array-elements-by-sign/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Rearrange array elements by sign.",
+          name: "Optimal (Two Pointers)",
+          description: "Use two separate pointers for targeting even (positive) and odd (negative) indices in the result array.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_rearrange_array_elements_by_sign(*args):
-    # Optimized Rearrange array elements by sign Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_rearrange_array_elements_by_sign(...args) {
-    // Optimal Rearrange array elements by sign Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_rearrange_array_elements_by_sign() {
-        // Logic for Rearrange array elements by sign
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_rearrange_array_elements_by_sign() {
-    // High-performance Rearrange array elements by sign routine
-}` 
-             }
-          ]
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function rearrange(nums) {\n    let res = new Array(nums.length), pos = 0, neg = 1;\n    for(let x of nums) {\n        if(x > 0) { res[pos] = x; pos += 2; }\n        else { res[neg] = x; neg += 2; }\n    }\n    return res;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "next-permutation",
     title: "Next Permutation",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Next Permutation. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Generate the lexicographically next greater permutation of numbers.",
+    leetcodeLink: "https://leetcode.com/problems/next-permutation/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Next Permutation.",
+          name: "Optimal (The Pivot Trap)",
+          description: "### 🧠 The Logic\n1. Find the first dip from the right (where `arr[i] < arr[i+1]`). This is our pivot.\n2. If no dip, reverse the whole thing (already largest).\n3. Find the smallest number to the right of pivot that is larger than pivot. Swap them.\n4. Reverse everything to the right of the pivot's old position.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_next_permutation(*args):
-    # Optimized Next Permutation Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_next_permutation(...args) {
-    // Optimal Next Permutation Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_next_permutation() {
-        // Logic for Next Permutation
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_next_permutation() {
-    // High-performance Next Permutation routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "/* Implementation of find dip -> find successor -> swap -> reverse */ " }]
        }
     ]
   },
-             {
+  {
     id: "leaders-in-an-array",
-    title: "Leaders in an Array",
+    title: "Leaders in Array",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Leaders in an Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "A leader is an element that is strictly greater than all elements to its right.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Leaders in an Array.",
+          name: "Optimal (Reverse Scan)",
+          description: "Scan from right to left while keeping track of the current maximum.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_leaders_in_an_array(*args):
-    # Optimized Leaders in an Array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_leaders_in_an_array(...args) {
-    // Optimal Leaders in an Array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_leaders_in_an_array() {
-        // Logic for Leaders in an Array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_leaders_in_an_array() {
-    // High-performance Leaders in an Array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def leaders(arr): \n    max_val = -1; res = [] \n    for i in range(len(arr)-1, -1, -1): \n        if arr[i] > max_val: res.append(arr[i]); max_val = arr[i] \n    return res[::-1]" }]
        }
     ]
   },
-             {
+  {
     id: "longest-consecutive-sequence",
     title: "Longest Consecutive Sequence",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Consecutive Sequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the length of the longest sequence of consecutive integers.",
+    leetcodeLink: "https://leetcode.com/problems/longest-consecutive-sequence/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Consecutive Sequence.",
+          name: "Optimal (Set Lookup)",
+          description: "Put everything in a set. For each number, if `num-1` isn't in the set, it's the start of a sequence. Count forward from there.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_longest_consecutive_sequence(*args):
-    # Optimized Longest Consecutive Sequence Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_longest_consecutive_sequence(...args) {
-    // Optimal Longest Consecutive Sequence Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_longest_consecutive_sequence() {
-        // Logic for Longest Consecutive Sequence
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_longest_consecutive_sequence() {
-    // High-performance Longest Consecutive Sequence routine
-}` 
-             }
-          ]
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function longSeq(nums) {\n    let set = new Set(nums), max = 0;\n    for(let x of nums) {\n        if(!set.has(x-1)) {\n            let count = 1, curr = x;\n            while(set.has(++curr)) count++;\n            max = Math.max(max, count);\n        }\n    }\n    return max;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "set-matrix-zeroes",
     title: "Set Matrix Zeroes",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Set Matrix Zeroes. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "If an element in an $MxN$ matrix is 0, set its entire row and column to 0.",
+    leetcodeLink: "https://leetcode.com/problems/set-matrix-zeroes/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Set Matrix Zeroes.",
-          timeComplexity: "O(N)",
+          name: "Optimal (In-Place Markers)",
+          description: "Use the first row and first column of the matrix itself to store whether that row/col should be zeroed.",
+          timeComplexity: "O(N*M)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_set_matrix_zeroes(*args):
-    # Optimized Set Matrix Zeroes Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_set_matrix_zeroes(...args) {
-    // Optimal Set Matrix Zeroes Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_set_matrix_zeroes() {
-        // Logic for Set Matrix Zeroes
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_set_matrix_zeroes() {
-    // High-performance Set Matrix Zeroes routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "/* Use flag for col0 and row0, markers in matrix[i][0] and matrix[0][j] */" }]
        }
     ]
   },
-             {
+  {
     id: "rotate-matrix-by-90-degrees",
-    title: "Rotate Matrix by 90 degrees",
+    title: "Rotate Matrix 90°",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Rotate Matrix by 90 degrees. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Rotate a square matrix 90 degrees clockwise in-place.",
+    leetcodeLink: "https://leetcode.com/problems/rotate-image/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Rotate Matrix by 90 degrees.",
-          timeComplexity: "O(N)",
+          name: "Optimal (Transpose + Reverse)",
+          description: "A 90-degree rotation is visually equivalent to: 1. Transpose the matrix (swap $M[i][j]$ with $M[j][i]$). 2. Reverse each row.",
+          timeComplexity: "O(N²)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_rotate_matrix_by_90_degrees(*args):
-    # Optimized Rotate Matrix by 90 degrees Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_rotate_matrix_by_90_degrees(...args) {
-    // Optimal Rotate Matrix by 90 degrees Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_rotate_matrix_by_90_degrees() {
-        // Logic for Rotate Matrix by 90 degrees
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_rotate_matrix_by_90_degrees() {
-    // High-performance Rotate Matrix by 90 degrees routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function rotate(mat) { \n    // transpose \n    // reverse rows \n}" }]
        }
     ]
   },
-             {
+  {
     id: "print-the-matrix-in-spiral-manner",
-    title: "Print the matrix in spiral manner",
+    title: "Spiral Matrix",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Print the matrix in spiral manner. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Traverse a matrix in spiral order.",
+    leetcodeLink: "https://leetcode.com/problems/spiral-matrix/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print the matrix in spiral manner.",
-          timeComplexity: "O(N)",
+          name: "Optimal (Boundary Shrink)",
+          description: "Maintain four boundaries: `top`, `bottom`, `left`, `right`. Traverse and shrink them until they cross.",
+          timeComplexity: "O(N*M)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_print_the_matrix_in_spiral_manner(*args):
-    # Optimized Print the matrix in spiral manner Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_print_the_matrix_in_spiral_manner(...args) {
-    // Optimal Print the matrix in spiral manner Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_print_the_matrix_in_spiral_manner() {
-        // Logic for Print the matrix in spiral manner
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_print_the_matrix_in_spiral_manner() {
-    // High-performance Print the matrix in spiral manner routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "while top <= bottom and left <= right: ... " }]
        }
     ]
   },
-             {
+  {
     id: "count-subarrays-with-given-sum",
-    title: "Count subarrays with given sum",
+    title: "Subarray Sum Equals K",
     topic: "Arrays - Medium",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count subarrays with given sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the total number of continuous subarrays whose sum equals K.",
+    leetcodeLink: "https://leetcode.com/problems/subarray-sum-equals-k/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count subarrays with given sum.",
+          name: "Optimal (Prefix Sum Map)",
+          description: "### 🧠 Concept\nSimilar to the 'Longest Subarray' problem, but instead of storing indices, we store the frequency of prefix sums. If `currentSum - K` exists in our map, it means we've found that many subarrays summing to K.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_count_subarrays_with_given_sum(*args):
-    # Optimized Count subarrays with given sum Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_count_subarrays_with_given_sum(...args) {
-    // Optimal Count subarrays with given sum Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_count_subarrays_with_given_sum() {
-        // Logic for Count subarrays with given sum
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_count_subarrays_with_given_sum() {
-    // High-performance Count subarrays with given sum routine
-}` 
-             }
-          ]
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function countK(nums, k) {\n    let map = new Map([[0, 1]]), sum = 0, count = 0;\n    for(let x of nums) {\n        sum += x;\n        if(map.has(sum - k)) count += map.get(sum - k);\n        map.set(sum, (map.get(sum) || 0) + 1);\n    }\n    return count;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "pascal-s-triangle",
     title: "Pascal's Triangle",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Pascal's Triangle. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "A triangular array of the binomial coefficients. Master the three types: (1) Find value at R,C, (2) Print Nth row, (3) Print entire triangle.",
+    leetcodeLink: "https://leetcode.com/problems/pascals-triangle/",
+    useCases: ["Combinatorics", "Probability", "Dynamic Programming foundations"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Pascal's Triangle.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
+          name: "Optimal (nCr Combinations)",
+          description: "### 🧠 The Core Concept: The nCr Formula\nThe value at row `n` and column `r` is actually $\\binom{n-1}{r-1}$. \n\n### 🛠️ Step-by-Step Logic\n1. Use the optimized combination formula: $\\binom{n}{r} = \\frac{n!}{r!(n-r)!}$.\n2. To generate a whole row without recomputing factorials: `res *= (row - col) / col` at each step.",
+          timeComplexity: "O(N²)",
+          spaceComplexity: "O(N²)",
           implementations: [
-             {
-                language: "Python",
-                code: `def solve_pascal_s_triangle(*args):
-    # Optimized Pascal's Triangle Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_pascal_s_triangle(...args) {
-    // Optimal Pascal's Triangle Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_pascal_s_triangle() {
-        // Logic for Pascal's Triangle
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_pascal_s_triangle() {
-    // High-performance Pascal's Triangle routine
-}` 
-             }
+             { language: "JavaScript", code: "function generateRow(row) {\n    let ans = 1, res = [1];\n    for(let col = 1; col < row; col++) {\n        ans = ans * (row - col) / col;\n        res.push(ans);\n    }\n    return res;\n}" }
           ]
        }
     ]
   },
-             {
+  {
     id: "majority-element-n-3-times",
-    title: "Majority Element (>N/3 times)",
+    title: "Majority Element (>N/3)",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Majority Element (>N/3 times). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Find all elements that appear more than $N/3$ times. There can be at most two such elements.",
+    leetcodeLink: "https://leetcode.com/problems/majority-element-ii/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Majority Element (>N/3 times).",
+          name: "Optimal (Extended Moore's Voting)",
+          description: "### 🧠 Concept: The 'Two Candidates' Strategy\nSince only 2 elements can satisfy $> N/3$, we track two candidates and two counters simultaneously.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_majority_element___n_3_times_(*args):
-    # Optimized Majority Element (>N/3 times) Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_majority_element___n_3_times_(...args) {
-    // Optimal Majority Element (>N/3 times) Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_majority_element___n_3_times_() {
-        // Logic for Majority Element (>N/3 times)
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_majority_element___n_3_times_() {
-    // High-performance Majority Element (>N/3 times) routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "/* Boyer-Moore extension for 2 candidates */" }]
        }
     ]
   },
-             {
+  {
     id: "3-sum",
     title: "3 Sum",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of 3 Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
+    overview: "Find all unique triplets $[nums[i], nums[j], nums[k]]$ that sum to zero.",
+    leetcodeLink: "https://leetcode.com/problems/3sum/",
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of 3 Sum.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_3_sum(*args):
-    # Optimized 3 Sum Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_3_sum(...args) {
-    // Optimal 3 Sum Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_3_sum() {
-        // Logic for 3 Sum
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_3_sum() {
-    // High-performance 3 Sum routine
-}` 
-             }
-          ]
+          name: "Optimal (Sorting + Two Pointers)",
+          description: "Fix one number (`i`) and use classic Two Pointers (`j`, `k`) on the remaining sorted part of the array.",
+          timeComplexity: "O(N²)",
+          spaceComplexity: "O(1) (excluding output)",
+          implementations: [{ language: "JavaScript", code: "function threeSum(nums) {\n    nums.sort((a,b)=>a-b);\n    /* nested loop with skip duplicates check */\n}" }]
        }
     ]
   },
-             {
+  {
     id: "4-sum",
     title: "4 Sum",
     topic: "Arrays - Hard",
     category: "Arrays",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of 4 Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
+    difficulty: "Hard",
+    overview: "Find all unique quadruplets summing to a target.",
+    leetcodeLink: "https://leetcode.com/problems/4sum/",
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of 4 Sum.",
-          timeComplexity: "O(N)",
+          name: "Optimal (Sorting + Three Pointers)",
+          description: "Fix two numbers and use a Two-Pointer strategy for the remaining two.",
+          timeComplexity: "O(N³)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_4_sum(*args):
-    # Optimized 4 Sum Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_4_sum(...args) {
-    // Optimal 4 Sum Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_4_sum() {
-        // Logic for 4 Sum
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_4_sum() {
-    // High-performance 4 Sum routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "/* three nested-like logic blocks */" }]
        }
     ]
   },
@@ -2774,1460 +1813,614 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
        }
     ]
   },
-             {
+  {
+    id: "largest-subarray-with-0-sum",
+    title: "Largest Subarray with 0 Sum",
+    topic: "Arrays - Hard",
+    category: "Arrays",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Maximum length of a contiguous subarray with sum 0.",
+    leetcodeLink: "",
+    approaches: [
+       {
+          name: "Optimal (Prefix Sum Map)",
+          description: "### 🧠 Mental Model: The 'Footprint' Method\nIf our cumulative sum at index $i$ is $S$, and we see the exact same sum $S$ again at index $j$, it means everything we added between $i$ and $j$ netted out to exactly **zero**. By storing the first occurrence of every sum in a Map, we can calculate the distance whenever we see that sum again.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `sum = 0`, `maxLen = 0`, and a Map `m`.\n2. For each element at index `i`:\n   - `sum += arr[i]`.\n   - If `sum == 0`, `maxLen = i + 1`.\n   - Else if `sum` is in Map: `maxLen = max(maxLen, i - m[sum])`.\n   - Else: Add `sum` to Map with value `i`.\n3. Return `maxLen`.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "Python", code: "def maxLen(arr):\n    m = {}; res = 0; s = 0\n    for i in range(len(arr)):\n        s += arr[i]\n        if s == 0: res = i + 1\n        elif s in m: res = max(res, i - m[s])\n        else: m[s] = i\n    return res" }]
+       }
+    ]
+  },
+  {
     id: "count-number-of-subarrays-with-given-xor-k",
-    title: "Count number of subarrays with given XOR K",
+    title: "Subarray XOR K",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count number of subarrays with given XOR K. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Count the number of contiguous subarrays where the XOR of elements equals K.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count number of subarrays with given XOR K.",
+          name: "Optimal (Prefix XOR Map)",
+          description: "### 🧠 Mental Model: XOR Math\nIf total XOR up to now is $XR$, and we want a subarray with XOR $K$, we are looking for a previous 'prefix' XOR $Y$ such that $Y \\oplus K = XR$. Since $Y \\oplus K = XR$ implies $Y = XR \\oplus K$, we just need to check how many times $XR \\oplus K$ has appeared before.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `xr = 0`, `count = 0`, and a Map `{0: 1}`.\n2. For each element `x`:\n   - `xr ^= x`.\n   - `target = xr ^ k`.\n   - `count += map.get(target, 0)`.\n   - `map[xr] = map.get(xr, 0) + 1`.\n3. Return `count`.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_count_number_of_subarrays_with_given_xor_k(*args):
-    # Optimized Count number of subarrays with given XOR K Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_count_number_of_subarrays_with_given_xor_k(...args) {
-    // Optimal Count number of subarrays with given XOR K Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_count_number_of_subarrays_with_given_xor_k() {
-        // Logic for Count number of subarrays with given XOR K
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_count_number_of_subarrays_with_given_xor_k() {
-    // High-performance Count number of subarrays with given XOR K routine
-}` 
-             }
-          ]
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function countXOR(arr, k) {\n    let xr = 0, cnt = 0, m = new Map([[0, 1]]);\n    for(let x of arr) {\n        xr ^= x;\n        cnt += m.get(xr ^ k) || 0;\n        m.set(xr, (m.get(xr) || 0) + 1);\n    }\n    return cnt;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "merge-overlapping-subintervals",
-    title: "Merge Overlapping Subintervals",
+    title: "Merge Overlapping Intervals",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Merge Overlapping Subintervals. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Combine all overlapping intervals into a single interval that covers their collective range.",
+    leetcodeLink: "https://leetcode.com/problems/merge-intervals/",
+    useCases: ["Calendar scheduling", "Resource allocation"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Merge Overlapping Subintervals.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_merge_overlapping_subintervals(*args):
-    # Optimized Merge Overlapping Subintervals Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_merge_overlapping_subintervals(...args) {
-    // Optimal Merge Overlapping Subintervals Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_merge_overlapping_subintervals() {
-        // Logic for Merge Overlapping Subintervals
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_merge_overlapping_subintervals() {
-    // High-performance Merge Overlapping Subintervals routine
-}` 
-             }
-          ]
+          name: "Optimal (Sorting + Linear Scan)",
+          description: "### 🧠 Mental Model: The 'Merging Rivers' Concept\nIf you sort the intervals by their start time, they line up like sections of a river. You keep track of the current 'merged river'. If the next interval starts before the current river ends, it's just a branch of the same river—you extend the river's end if needed. If it starts after, it's a completely new, separate river.\n\n### 🛠️ Step-by-Step Logic\n1. Sort the intervals based on start times.\n2. Iterate through sorting intervals:\n   - If the result list is empty or the current interval's start > last merged interval's end:\n     - Just add the current interval to the result list.\n   - Else (they overlap):\n     - Update the last merged interval's end to `max(last.end, current.end)`.\n3. Return merged intervals.",
+          timeComplexity: "O(N log N)",
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function merge(intervals) {\n    intervals.sort((a,b)=>a[0]-b[0]);\n    let merged = [intervals[0]];\n    for(let i=1; i<intervals.length; i++) {\n        let last = merged[merged.length-1];\n        if(intervals[i][0] <= last[1]) last[1] = Math.max(last[1], intervals[i][1]);\n        else merged.push(intervals[i]);\n    }\n    return merged;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "merge-two-sorted-arrays-without-extra-space",
-    title: "Merge two sorted arrays without extra space",
+    title: "Merge Sorted Arrays (In-Place)",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Merge two sorted arrays without extra space. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Merge two sorted arrays into one sorted sequence without using any extra auxiliary space.",
+    leetcodeLink: "https://leetcode.com/problems/merge-sorted-array/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Merge two sorted arrays without extra space.",
-          timeComplexity: "O(N)",
+          name: "Optimal (The Gap Method)",
+          description: "### 🧠 Mental Model: The 'Combing' Strategy\nInstead of shifting elements individually (which is $O(N \\times M)$), we use a 'Gap' strategy derived from Shell Sort. We compare elements at a specific distance (gap). If the left one is larger, we swap. We then halve the gap and repeat. This 'combs' the two arrays into a single sorted flow.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `gap = ceil((n + m) / 2)`.\n2. While `gap > 0`:\n   - Use two pointers `left` and `right` separated by `gap`.\n   - Compare and swap if `arr1[left] > arr2[right-n]` (handling crossovers between the two arrays).\n   - Halve the gap: `gap = gap / 2` (if gap was 1, it becomes 0 and we stop).",
+          timeComplexity: "O((N+M) log (N+M))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_merge_two_sorted_arrays_without_extra_space(*args):
-    # Optimized Merge two sorted arrays without extra space Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_merge_two_sorted_arrays_without_extra_space(...args) {
-    // Optimal Merge two sorted arrays without extra space Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_merge_two_sorted_arrays_without_extra_space() {
-        // Logic for Merge two sorted arrays without extra space
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_merge_two_sorted_arrays_without_extra_space() {
-    // High-performance Merge two sorted arrays without extra space routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def merge(arr1, arr2, n, m):\n    gap = (n + m + 1) // 2\n    while gap > 0:\n        left = 0\n        while left + gap < n + m:\n            # Compare arr1[left] vs arr1[left+gap], or arr1 vs arr2, etc.\n            # Logic for cross-array swapping\n            left += 1\n        if gap == 1: break\n        gap = (gap + 1) // 2" }]
        }
     ]
   },
-             {
+  {
     id: "find-the-repeating-and-missing-number",
-    title: "Find the repeating and missing number",
+    title: "Missing and Repeating",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find the repeating and missing number. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Identify which number appears twice and which is missing in an array containing elements from 1 to N.",
     leetcodeLink: "",
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find the repeating and missing number.",
+          name: "Optimal (Mathematical Equations)",
+          description: "### 🧠 Mental Model: The 'Calculus' of Sums\nWe know what the sum ($S$) and sum of squares ($S2$) *should* be for 1 to N. By calculating the *actual* sum ($s$) and actual sum of squares ($s2$), we get two linear equations:\n1. $X - Y = s - S$\n2. $X^2 - Y^2 = s2 - S2$\nSince $X^2 - Y^2 = (X-Y)(X+Y)$, we can substitute the first into the second to find $X+Y$, then solve both for $X$ (repeating) and $Y$ (missing).\n\n### 🛠️ Step-by-Step Logic\n1. Calculate expected $S = n(n+1)/2$ and $S2 = n(n+1)(2n+1)/6$.\n2. Calculate actual $s$ and $s2$ from the array.\n3. Let $val1 = s - S$ (which is $X - Y$).\n4. Let $val2 = s2 - S2$ (which is $X^2 - Y^2$).\n5. $X + Y = val2 / val1$.\n6. Add/subtract the equations to find $X$ and $Y$.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_the_repeating_and_missing_number(*args):
-    # Optimized Find the repeating and missing number Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_the_repeating_and_missing_number(...args) {
-    // Optimal Find the repeating and missing number Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_the_repeating_and_missing_number() {
-        // Logic for Find the repeating and missing number
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_the_repeating_and_missing_number() {
-    // High-performance Find the repeating and missing number routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function findNumbers(a) {\n    let n = a.length, S = (n*(n+1))/2, S2 = (n*(n+1)*(2*n+1))/6;\n    let s = 0, s2 = 0;\n    for(let x of a) { s += x; s2 += x*x; }\n    let val1 = s - S, val2 = (s2 - S2) / val1;\n    let x = (val1 + val2) / 2, y = x - val1;\n    return [x, y];\n}" }]
        }
     ]
   },
-             {
+  {
     id: "count-inversions",
     title: "Count Inversions",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count Inversions. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Count how many pairs $(i, j)$ exist such that $i < j$ and $arr[i] > arr[j]$.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count Inversions.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_count_inversions(*args):
-    # Optimized Count Inversions Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_count_inversions(...args) {
-    // Optimal Count Inversions Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_count_inversions() {
-        // Logic for Count Inversions
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_count_inversions() {
-    // High-performance Count Inversions routine
-}` 
-             }
-          ]
+          name: "Optimal (Merge Sort Augmentation)",
+          description: "### 🧠 Mental Model: The 'Jump' Count\nDuring the merge step of Merge Sort, we have two sorted halves. If an element in the left half is larger than an element in the right half, then *all* remaining elements in the left half are also larger than that right-half element. We count these 'jumps' as we merge.\n\n### 🛠️ Step-by-Step Logic\n1. Use a standard recursive Merge Sort.\n2. In the `merge` function, when `left[i] > right[j]`:\n   - `count += (mid - i + 1)`.\n   - Copy `right[j]`.\n3. Return total count accumulated across all merges.",
+          timeComplexity: "O(N log N)",
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "Python", code: "def merge(arr, low, mid, high):\n    temp = []; left = low; right = mid + 1; cnt = 0\n    while left <= mid and right <= high:\n        if arr[left] <= arr[right]: temp.append(arr[left]); left += 1\n        else: temp.append(arr[right]); cnt += (mid - left + 1); right += 1\n    /* append remaining, copy temp back to arr */\n    return cnt" }]
        }
     ]
   },
-             {
+  {
     id: "reverse-pairs",
     title: "Reverse Pairs",
     topic: "Arrays - Hard",
     category: "Arrays",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Reverse Pairs. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    difficulty: "Hard",
+    overview: "Count pairs $(i, j)$ such that $i < j$ and $arr[i] > 2 \times arr[j]$.",
+    leetcodeLink: "https://leetcode.com/problems/reverse-pairs/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Reverse Pairs.",
-          timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_reverse_pairs(*args):
-    # Optimized Reverse Pairs Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_reverse_pairs(...args) {
-    // Optimal Reverse Pairs Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_reverse_pairs() {
-        // Logic for Reverse Pairs
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_reverse_pairs() {
-    // High-performance Reverse Pairs routine
-}` 
-             }
-          ]
+          name: "Optimal (Modified Merge Sort)",
+          description: "### 🧠 Mental Model: Pre-Merge Counting\nThe condition $arr[i] > 2 \times arr[j]$ must be checked before merging because the merge step itself reorders the elements. Since both halves are sorted, we can use two pointers to find these pairs in linear time before the standard merge.\n\n### 🛠️ Step-by-Step Logic\n1. Split array recursively.\n2. Before the standard merge step:\n   - Use a pointer `right = mid + 1`.\n   - For each element in left half (`i = low to mid`):\n     - While `right <= high` and `arr[i] > 2 * arr[right]`: increment `right`.\n     - Add `right - (mid + 1)` to count.\n3. Perform standard merge.",
+          timeComplexity: "O(N log N)",
+          spaceComplexity: "O(N)",
+          implementations: [{ language: "JavaScript", code: "function countPairs(a, low, mid, high) {\n    let cnt = 0, r = mid + 1;\n    for(let i=low; i<=mid; i++) {\n        while(r <= high && a[i] > 2 * a[r]) r++;\n        cnt += (r - (mid + 1));\n    }\n    return cnt;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "maximum-product-subarray",
     title: "Maximum Product Subarray",
     topic: "Arrays - Hard",
     category: "Arrays",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Maximum Product Subarray. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
+    overview: "Find the contiguous subarray with the largest product, handling negative numbers and zeroes efficiently.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-product-subarray/",
     useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Maximum Product Subarray.",
+          name: "Optimal (Prefix-Suffix Scan)",
+          description: "### 🧠 Mental Model: The 'Double Sided' Sweep\nA maximum product subarray must either be a prefix, a suffix, or contained within zeroes. By scanning the array from both ends (prefix product and suffix product) and resetting the product to 1 whenever we hit a zero, the maximum value encountered in either sweep is our answer.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `pre = 1`, `suff = 1`, `ans = -Infinity`.\n2. Iterate `i` from `0` to `n-1`:\n   - If `pre == 0` set `pre = 1`.\n   - If `suff == 0` set `suff = 1`.\n   - `pre *= arr[i]`.\n   - `suff *= arr[n - i - 1]`.\n   - `ans = max(ans, pre, suff)`.\n3. Return `ans`.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_maximum_product_subarray(*args):
-    # Optimized Maximum Product Subarray Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_maximum_product_subarray(...args) {
-    // Optimal Maximum Product Subarray Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_maximum_product_subarray() {
-        // Logic for Maximum Product Subarray
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_maximum_product_subarray() {
-    // High-performance Maximum Product Subarray routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def maxProduct(nums):\n    n = len(nums); pre = 1; suff = 1; ans = -float('inf')\n    for i in range(n):\n        if pre == 0: pre = 1\n        if suff == 0: suff = 1\n        pre *= nums[i]\n        suff *= nums[n-1-i]\n        ans = max(ans, pre, suff)\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "implement-lower-bound",
-    title: "Implement Lower Bound",
+    title: "Lower Bound",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Implement Lower Bound. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the smallest index `i` such that `arr[i] >= target`.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Implement Lower Bound.",
+          name: "Standard Binary Search (Smallest Index)",
+          description: "### 🧠 Mental Model: The 'First Fit' Strategy\nLooking for the first person in a line at least 6 feet tall. If you find one, they might be the earliest, or there might be someone earlier. You mark them as a potential answer and keep looking left.\n\n### 🛠️ Step-by-Step Logic\n1. `low = 0`, `high = n-1`, `ans = n`.\n2. While `low <= high`:\n   - `mid = (low + high) / 2`.\n   - If `arr[mid] >= target`:\n     - `ans = mid` (potential earliest).\n     - `high = mid - 1` (search left).\n   - Else:\n     - `low = mid + 1`.\n3. Return `ans`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_implement_lower_bound(*args):
-    # Optimized Implement Lower Bound Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_implement_lower_bound(...args) {
-    // Optimal Implement Lower Bound Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_implement_lower_bound() {
-        // Logic for Implement Lower Bound
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_implement_lower_bound() {
-    // High-performance Implement Lower Bound routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function lowerBound(arr, n, x) {\n    let low = 0, high = n - 1, ans = n;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (arr[mid] >= x) { ans = mid; high = mid - 1; }\n        else low = mid + 1;\n    }\n    return ans;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "implement-upper-bound",
-    title: "Implement Upper Bound",
+    title: "Upper Bound",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Implement Upper Bound. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the smallest index `i` such that `arr[i] > target`.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Implement Upper Bound.",
+          name: "Optimal (Smallest Index > Target)",
+          description: "### 🧠 Mental Model: The 'Strictly Greater' Search\nFinding the first element strictly larger than your target. If you're at a 5 and target is 5, you *must* look right. If you're at a 6, you might have found it, but check left just in case.\n\n### 🛠️ Step-by-Step Logic\n1. `low = 0`, `high = n-1`, `ans = n`.\n2. While `low <= high`:\n   - `mid = (low + high) / 2`.\n   - If `arr[mid] > target`:\n     - `ans = mid`, `high = mid - 1`.\n   - Else: `low = mid + 1`.\n3. Return `ans`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_implement_upper_bound(*args):
-    # Optimized Implement Upper Bound Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_implement_upper_bound(...args) {
-    // Optimal Implement Upper Bound Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_implement_upper_bound() {
-        // Logic for Implement Upper Bound
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_implement_upper_bound() {
-    // High-performance Implement Upper Bound routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def upperBound(arr, x, n):\n    low, high, ans = 0, n - 1, n\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] > x:\n            ans = mid\n            high = mid - 1\n        else:\n            low = mid + 1\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "search-insert-position",
     title: "Search Insert Position",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Search Insert Position. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Find the index where target exists or should be inserted to maintain order.",
+    leetcodeLink: "https://leetcode.com/problems/search-insert-position/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Search Insert Position.",
+          name: "Lower Bound Implementation",
+          description: "This problem is exactly the same as finding the **Lower Bound** of the target.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_search_insert_position(*args):
-    # Optimized Search Insert Position Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_search_insert_position(...args) {
-    // Optimal Search Insert Position Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_search_insert_position() {
-        // Logic for Search Insert Position
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_search_insert_position() {
-    // High-performance Search Insert Position routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function searchInsert(nums, target) {\n    return lowerBound(nums, nums.length, target);\n}" }]
        }
     ]
   },
-             {
+  {
     id: "floor-ceil-in-sorted-array",
     title: "Floor/Ceil in Sorted Array",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
     frequencyLevel: "Medium",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Floor/Ceil in Sorted Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the largest element $\le X$ (Floor) and the smallest element $\ge X$ (Ceil) in a sorted array.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Floor/Ceil in Sorted Array.",
+          name: "Optimal (Binary Search)",
+          description: "### 🧠 Mental Model\n- **Ceil** is identical to the **Lower Bound** (first element $\ge X$).\n- **Floor** is the largest element $\le X$. When we find an element $\le X$, we mark it as a potential answer and keep looking to the right.\n\n### 🛠️ Step-by-Step Logic\n1. For Floor: Initialize `ans = -1`. While `low <= high`:\n   - If `arr[mid] <= x`: `ans = arr[mid]`, `low = mid + 1`.\n   - Else: `high = mid - 1`.\n2. For Ceil: Use the Lower Bound logic.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_floor_ceil_in_sorted_array(*args):
-    # Optimized Floor/Ceil in Sorted Array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_floor_ceil_in_sorted_array(...args) {
-    // Optimal Floor/Ceil in Sorted Array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_floor_ceil_in_sorted_array() {
-        // Logic for Floor/Ceil in Sorted Array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_floor_ceil_in_sorted_array() {
-    // High-performance Floor/Ceil in Sorted Array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findFloor(a, x):\n    low, high, ans = 0, len(a)-1, -1\n    while low <= high:\n        mid = (low + high) // 2\n        if a[mid] <= x:\n            ans = a[mid]\n            low = mid + 1\n        else:\n            high = mid - 1\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "first-or-last-occurrence-of-a-number",
-    title: "First or Last occurrence of a number",
+    title: "First & Last Occurrences",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of First or Last occurrence of a number. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the first and last index of a target element in a sorted array.",
+    leetcodeLink: "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of First or Last occurrence of a number.",
+          name: "Optimal (Two Binary Searches)",
+          description: "### 🧠 Mental Model: Narrowing the Range\nTo find the first occurrence, when you find the target at `mid`, don't stop! There might be another instance earlier. Store `mid` as the potential first index and search the left half. For the last occurrence, do the opposite: search the right half.\n\n### 🛠️ Step-by-Step Logic\n1. Search for first index: if `arr[mid] == x`, `ans = mid`, `high = mid - 1`.\n2. Search for last index: if `arr[mid] == x`, `ans = mid`, `low = mid + 1`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_first_or_last_occurrence_of_a_number(*args):
-    # Optimized First or Last occurrence of a number Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_first_or_last_occurrence_of_a_number(...args) {
-    // Optimal First or Last occurrence of a number Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_first_or_last_occurrence_of_a_number() {
-        // Logic for First or Last occurrence of a number
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_first_or_last_occurrence_of_a_number() {
-    // High-performance First or Last occurrence of a number routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function searchRange(nums, target) {\n    let first = find(nums, target, true);\n    if (first === -1) return [-1, -1];\n    let last = find(nums, target, false);\n    return [first, last];\n}" }]
        }
     ]
   },
-             {
+  {
     id: "count-occurrences-of-a-number-in-a-sorted-array",
-    title: "Count occurrences of a number in a sorted array",
+    title: "Count Occurrences",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count occurrences of a number in a sorted array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Count how many times a target element appears in a sorted array.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count occurrences of a number in a sorted array.",
+          name: "Optimal (lastIndex - firstIndex + 1)",
+          description: "### 🧠 Mental Model\nSince the array is sorted, all instances of the target are contiguous. The total count is simply the distance between the first and last occurrences.\n\n### 🛠️ Step-by-Step Logic\n1. Use the First/Last Occurrence logic to find both indices.\n2. If the first index is -1, count is 0.\n3. Otherwise, return `last - first + 1`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_count_occurrences_of_a_number_in_a_sorted_array(*args):
-    # Optimized Count occurrences of a number in a sorted array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_count_occurrences_of_a_number_in_a_sorted_array(...args) {
-    // Optimal Count occurrences of a number in a sorted array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_count_occurrences_of_a_number_in_a_sorted_array() {
-        // Logic for Count occurrences of a number in a sorted array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_count_occurrences_of_a_number_in_a_sorted_array() {
-    // High-performance Count occurrences of a number in a sorted array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def count(arr, n, x):\n    f = firstOccur(arr, x)\n    if f == -1: return 0\n    l = lastOccur(arr, x)\n    return l - f + 1" }]
        }
     ]
   },
-             {
+  {
     id: "search-in-rotated-sorted-array-i",
-    title: "Search in Rotated Sorted Array I",
+    title: "Search in Rotated Array (Unique)",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Search in Rotated Sorted Array I. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Search for a target in a sorted array that has been rotated at some pivot index.",
+    leetcodeLink: "https://leetcode.com/problems/search-in-rotated-sorted-array/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Search in Rotated Sorted Array I.",
+          name: "Optimal (One-Pass Binary Search)",
+          description: "### 🧠 Mental Model: The 'Sorted Half' Rule\nIn a rotated sorted array, whenever you pick a `mid`, at least one of the two halves (`low` to `mid` OR `mid` to `high`) **must** be sorted. You identify which half is sorted, check if your target lies within its range, and eliminate the other half.\n\n### 🛠️ Step-by-Step Logic\n1. If `arr[low] <= arr[mid]`: Left half is sorted.\n   - If `target` is between `arr[low]` and `arr[mid]`: search left (`high = mid - 1`).\n   - Else: search right (`low = mid + 1`).\n2. Else: Right half is sorted.\n   - If `target` is between `arr[mid]` and `arr[high]`: search right.\n   - Else: search left.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_search_in_rotated_sorted_array_i(*args):
-    # Optimized Search in Rotated Sorted Array I Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_search_in_rotated_sorted_array_i(...args) {
-    // Optimal Search in Rotated Sorted Array I Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_search_in_rotated_sorted_array_i() {
-        // Logic for Search in Rotated Sorted Array I
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_search_in_rotated_sorted_array_i() {
-    // High-performance Search in Rotated Sorted Array I routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function search(arr, k) {\n    let low = 0, high = arr.length - 1;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (arr[mid] === k) return mid;\n        if (arr[low] <= arr[mid]) { /* left sorted logic */ }\n        else { /* right sorted logic */ }\n    }\n    return -1;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "search-in-rotated-sorted-array-ii",
-    title: "Search in Rotated Sorted Array II",
+    title: "Search in Rotated Array (Duplicates)",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Search in Rotated Sorted Array II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Search in a rotated sorted array that may contain duplicate elements.",
+    leetcodeLink: "https://leetcode.com/problems/search-in-rotated-sorted-array-ii/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Search in Rotated Sorted Array II.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (Duplicate Handling BS)",
+          description: "### 🧠 Mental Model: The 'Shrinking' Edge Case\nDuplicates break the 'One half must be sorted' rule (e.g., `[3,1,2,3,3,3,3]`). If `arr[low] == arr[mid] == arr[high]`, we cannot tell which side is sorted. In this specific case, we simply shrink the search space by one from both ends (`low++, high--`) until the property returns.\n\n### 🛠️ Step-by-Step Logic\n1. If `arr[low] == arr[mid] == arr[high]`, increment `low` and decrement `high`.\n2. Otherwise, use the standard Rotated Search I logic.",
+          timeComplexity: "O(log N) average, O(N) worst case",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_search_in_rotated_sorted_array_ii(*args):
-    # Optimized Search in Rotated Sorted Array II Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_search_in_rotated_sorted_array_ii(...args) {
-    // Optimal Search in Rotated Sorted Array II Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_search_in_rotated_sorted_array_ii() {
-        // Logic for Search in Rotated Sorted Array II
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_search_in_rotated_sorted_array_ii() {
-    // High-performance Search in Rotated Sorted Array II routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def search(arr, k):\n    l, r = 0, len(arr)-1\n    while l <= r:\n        m = (l + r) // 2\n        if arr[m] == k: return True\n        if arr[l] == arr[m] == arr[r]: l += 1; r -= 1; continue\n        # Standard Rotated Logic..." }]
        }
     ]
   },
-             {
+  {
     id: "find-minimum-in-rotated-sorted-array",
-    title: "Find minimum in Rotated Sorted Array",
+    title: "Find Min in Rotated Array",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find minimum in Rotated Sorted Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the minimum element in a rotated sorted array.",
+    leetcodeLink: "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find minimum in Rotated Sorted Array.",
+          name: "Optimal (Sorted Half Min)",
+          description: "### 🧠 Mental Model: Extracting from the Sorted side\nIn any rotated array, the minimum is either the first element of a sorted segment or tucked away in the unsorted segment. We track the minimum element found at the start of every sorted segment we identify during binary search.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_minimum_in_rotated_sorted_array(*args):
-    # Optimized Find minimum in Rotated Sorted Array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_minimum_in_rotated_sorted_array(...args) {
-    // Optimal Find minimum in Rotated Sorted Array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_minimum_in_rotated_sorted_array() {
-        // Logic for Find minimum in Rotated Sorted Array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_minimum_in_rotated_sorted_array() {
-    // High-performance Find minimum in Rotated Sorted Array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function findMin(arr) {\n    let low = 0, high = arr.length - 1, ans = Infinity;\n    while (low <= high) {\n        let mid = Math.floor((low+high)/2);\n        if (arr[low] <= arr[mid]) { ans = Math.min(ans, arr[low]); low = mid + 1; }\n        else { ans = Math.min(ans, arr[mid]); high = mid - 1; }\n    }\n    return ans;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "find-out-how-many-times-array-has-been-rotated",
-    title: "Find out how many times array has been rotated",
+    title: "Rotation Count",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
     frequencyLevel: "Medium",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find out how many times array has been rotated. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Determine how many times a sorted array was rotated. This is equal to the index of the minimum element.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find out how many times array has been rotated.",
+          name: "Optimal (Index of Min)",
+          description: "### 🧠 Mental Model\nA sorted array `[1, 2, 3]` rotated once becomes `[3, 1, 2]`. Notice the minimum (1) is now at index 1. The number of rotations is equal to the index of the minimum element.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_out_how_many_times_array_has_been_rotated(*args):
-    # Optimized Find out how many times array has been rotated Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_out_how_many_times_array_has_been_rotated(...args) {
-    // Optimal Find out how many times array has been rotated Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_out_how_many_times_array_has_been_rotated() {
-        // Logic for Find out how many times array has been rotated
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_out_how_many_times_array_has_been_rotated() {
-    // High-performance Find out how many times array has been rotated routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findKRotation(arr):\n    # Return index of findMin(arr) logic" }]
        }
     ]
   },
-             {
+  {
     id: "single-element-in-a-sorted-array",
-    title: "Single element in a sorted array",
+    title: "Single Element in Sorted Array",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Single element in a sorted array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Every element appears twice except for one. Find it in O(log N) time.",
+    leetcodeLink: "https://leetcode.com/problems/single-element-in-a-sorted-array/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Single element in a sorted array.",
+          name: "Optimal (Index Parity)",
+          description: "### 🧠 Mental Model: The Even-Odd Pair\nBefore the single element appears, pairs always start at an `even` index and end at an `odd` index `(e, o)`. After the single element, this shifts to `(o, e)`. We use binary search to find exactly where this shift happens.\n\n### 🛠️ Step-by-Step Logic\n1. If `mid` is even, check if `arr[mid] == arr[mid+1]`. If yes, we are in the left half, so search right.\n2. If `mid` is odd, check if `arr[mid] == arr[mid-1]`. If yes, we are in the left half, so search right.\n3. Otherwise, search left.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_single_element_in_a_sorted_array(*args):
-    # Optimized Single element in a sorted array Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_single_element_in_a_sorted_array(...args) {
-    // Optimal Single element in a sorted array Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_single_element_in_a_sorted_array() {
-        // Logic for Single element in a sorted array
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_single_element_in_a_sorted_array() {
-    // High-performance Single element in a sorted array routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function singleNonDuplicate(nums) {\n    let low = 1, high = nums.length - 2;\n    /* handle edge cases for index 0 and n-1 */\n    while(low <= high) {\n        let mid = Math.floor((low+high)/2);\n        if(nums[mid] !== nums[mid-1] && nums[mid] !== nums[mid+1]) return nums[mid];\n        if((mid % 2 == 1 && nums[mid] == nums[mid-1]) || (mid % 2 == 0 && nums[mid] == nums[mid+1])) low = mid+1;\n        else high = mid-1;\n    }\n}" }]
        }
     ]
   },
-             {
+  {
     id: "find-peak-element",
-    title: "Find peak element",
+    title: "Find Peak Element",
     topic: "Binary Search - 1D Arrays",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find peak element. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find an element strictly greater than its neighbors.",
+    leetcodeLink: "https://leetcode.com/problems/find-peak-element/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find peak element.",
+          name: "Optimal (Slope Search)",
+          description: "### 🧠 Mental Model: The Mountain Climber\nThink of the array as a mountain range. If you pick a point and it's on an upward slope (`arr[mid] < arr[mid+1]`), there *must* be a peak somewhere to the right. If it's a downward slope, there's a peak to the left.\n\n### 🛠️ Step-by-Step Logic\n1. Compare `arr[mid]` with its neighbors.\n2. If `arr[mid]` is greater than both, you found a peak.\n3. If `arr[mid] < arr[mid+1]`, search right.\n4. Else, search left.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_peak_element(*args):
-    # Optimized Find peak element Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_peak_element(...args) {
-    // Optimal Find peak element Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_peak_element() {
-        // Logic for Find peak element
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_peak_element() {
-    // High-performance Find peak element routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findPeak(arr):\n    # Binary search based on mid > mid-1 and mid > mid+1" }]
        }
     ]
   },
-             {
+  {
     id: "find-square-root-of-a-number-in-log-n",
-    title: "Find square root of a number in log n",
+    title: "Square Root (Integer)",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find square root of a number in log n. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Compute the floor of the square root of $N$ in $O(log N)$ using binary search on the number range.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find square root of a number in log n.",
+          name: "Optimal (Binary Search on Range)",
+          description: "### 🧠 Mental Model: Narrowing the Possibilities\nWe know the square root of $N$ must lie between 1 and $N$. We treat this range as a sorted array and use binary search to find the largest integer $X$ such that $X^2 \le N$.\n\n### 🛠️ Step-by-Step Logic\n1. `low = 1, high = N`.\n2. While `low <= high`:\n   - `mid = (low + high) / 2`.\n   - If `mid * mid <= N`: `ans = mid`, `low = mid + 1`.\n   - Else: `high = mid - 1`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_square_root_of_a_number_in_log_n(*args):
-    # Optimized Find square root of a number in log n Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_square_root_of_a_number_in_log_n(...args) {
-    // Optimal Find square root of a number in log n Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_square_root_of_a_number_in_log_n() {
-        // Logic for Find square root of a number in log n
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_square_root_of_a_number_in_log_n() {
-    // High-performance Find square root of a number in log n routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def floorSqrt(n):\n    low, high, ans = 1, n, 0\n    while low <= high:\n        mid = (low + high) // 2\n        if mid*mid <= n: ans = mid; low = mid + 1\n        else: high = mid - 1\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "find-the-nth-root-of-a-number",
-    title: "Find the Nth root of a number",
+    title: "Nth Root of an Integer",
     topic: "Binary Search - Answers",
     category: "Binary Search",
     frequencyLevel: "Medium",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find the Nth root of a number. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Find the exact integer $n$-th root of $m$, or return -1 if it doesn't exist.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find the Nth root of a number.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (Binary Search)",
+          description: "### 🧠 Mental Model: The Exponential Scale\nSimilar to square root, but the comparison is $mid^n$ against $m$. To avoid potential overflow in languages like C++, we use a multiplication helper that stops early if the product exceeds $m$.",
+          timeComplexity: "O(log M * log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_the_nth_root_of_a_number(*args):
-    # Optimized Find the Nth root of a number Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_the_nth_root_of_a_number(...args) {
-    // Optimal Find the Nth root of a number Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_the_nth_root_of_a_number() {
-        // Logic for Find the Nth root of a number
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_the_nth_root_of_a_number() {
-    // High-performance Find the Nth root of a number routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def NthRoot(n, m):\n    low, high = 1, m\n    while low <= high:\n        mid = (low + high) // 2\n        val = mid**n\n        if val == m: return mid\n        if val < m: low = mid + 1\n        else: high = mid - 1\n    return -1" }]
        }
     ]
   },
-             {
+  {
     id: "koko-eating-bananas",
     title: "Koko Eating Bananas",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Koko Eating Bananas. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the minimum integer speed $K$ to eat all bananas within $H$ hours.",
+    leetcodeLink: "https://leetcode.com/problems/koko-eating-bananas/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Koko Eating Bananas.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Speed Range)",
+          description: "### 🧠 Mental Model: The Speed Dial\nYou're looking for the slowest possible eating speed that still beats the timer. Since faster speeds always work if a slower one does, the 'Valid Speed' property is monotonic, allowing binary search on the range `[1, max(piles)]`.\n\n### 🛠️ Step-by-Step Logic\n1. Search space: `low = 1`, `high = max(piles)`.\n2. For each `mid` speed, calculate `totalHours = sum(ceil(pile / mid))`.\n3. If `totalHours <= h`: `ans = mid`, `high = mid - 1` (try slower).\n4. Else: `low = mid + 1` (must go faster).",
+          timeComplexity: "O(N * log(max(piles)))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_koko_eating_bananas(*args):
-    # Optimized Koko Eating Bananas Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_koko_eating_bananas(...args) {
-    // Optimal Koko Eating Bananas Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_koko_eating_bananas() {
-        // Logic for Koko Eating Bananas
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_koko_eating_bananas() {
-    // High-performance Koko Eating Bananas routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function minEatingSpeed(piles, h) {\n    let low = 1, high = Math.max(...piles), ans = high;\n    while(low <= high) {\n        let mid = Math.floor((low+high)/2);\n        if(calculateTotalHours(piles, mid) <= h) { ans = mid; high = mid-1; }\n        else low = mid+1;\n    }\n    return ans;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "minimum-days-to-make-m-bouquets",
-    title: "Minimum days to make M bouquets",
+    title: "M Bouquets",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum days to make M bouquets. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the minimum days to wait until we can pick $m$ bouquets of $k$ adjacent blooming flowers.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-days-to-make-m-bouquets/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum days to make M bouquets.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Bloom Days)",
+          description: "### 🧠 Mental Model: The Flower Bloom Timeline\nThe answer is hidden somewhere between the first flower blooming and the last. On any given day $X$, we can greedily check if we can form enough bouquets. If we can, we check if an earlier day also works.",
+          timeComplexity: "O(N * log(maxBloomDay))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_minimum_days_to_make_m_bouquets(*args):
-    # Optimized Minimum days to make M bouquets Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_minimum_days_to_make_m_bouquets(...args) {
-    // Optimal Minimum days to make M bouquets Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_minimum_days_to_make_m_bouquets() {
-        // Logic for Minimum days to make M bouquets
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_minimum_days_to_make_m_bouquets() {
-    // High-performance Minimum days to make M bouquets routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def minDays(bloomDay, m, k):\n    if m * k > len(bloomDay): return -1\n    low, high = min(bloomDay), max(bloomDay)\n    while low <= high:\n        mid = (low + high) // 2\n        if possible(bloomDay, mid, m, k): ans = mid; high = mid - 1\n        else: low = mid + 1\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "find-the-smallest-divisor-given-a-threshold",
-    title: "Find the smallest Divisor Given a Threshold",
+    title: "Smallest Divisor",
     topic: "Binary Search - Answers",
     category: "Binary Search",
     frequencyLevel: "Medium",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find the smallest Divisor Given a Threshold. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the smallest divisor such that the sum of division results is $\le$ threshold.",
+    leetcodeLink: "https://leetcode.com/problems/find-the-smallest-divisor-given-a-threshold/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find the smallest Divisor Given a Threshold.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Divisor)",
+          description: "### 🧠 Mental Model: Inherent Monotonicity\nIncreasing the divisor decreases the sum. We use binary search on the range `[1, max(nums)]` to find the smallest value that keeps the sum within the threshold.",
+          timeComplexity: "O(N * log(max(nums)))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_find_the_smallest_divisor_given_a_threshold(*args):
-    # Optimized Find the smallest Divisor Given a Threshold Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_find_the_smallest_divisor_given_a_threshold(...args) {
-    // Optimal Find the smallest Divisor Given a Threshold Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_find_the_smallest_divisor_given_a_threshold() {
-        // Logic for Find the smallest Divisor Given a Threshold
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_find_the_smallest_divisor_given_a_threshold() {
-    // High-performance Find the smallest Divisor Given a Threshold routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function smallestDivisor(nums, threshold) {\n    let low = 1, high = Math.max(...nums), ans = -1;\n    while(low <= high) {\n        let mid = Math.floor((low+high)/2);\n        if(sumDiv(nums, mid) <= threshold) { ans = mid; high = mid-1; }\n        else low = mid+1;\n    }\n    return ans;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "capacity-to-ship-packages-within-d-days",
-    title: "Capacity to Ship Packages within D Days",
+    title: "Ship Packages",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Capacity to Ship Packages within D Days. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview: "Find the minimum ship capacity to transport all weights within $D$ days.",
+    leetcodeLink: "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Capacity to Ship Packages within D Days.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Capacity)",
+          description: "### 🧠 Mental Model: Loading the Ship\nThe capacity must be at least as large as the heaviest single package (`max(weights)`) and at most the sum of all packages. We binary search between these two extremes.",
+          timeComplexity: "O(N * log(totalWeight))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_capacity_to_ship_packages_within_d_days(*args):
-    # Optimized Capacity to Ship Packages within D Days Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_capacity_to_ship_packages_within_d_days(...args) {
-    // Optimal Capacity to Ship Packages within D Days Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_capacity_to_ship_packages_within_d_days() {
-        // Logic for Capacity to Ship Packages within D Days
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_capacity_to_ship_packages_within_d_days() {
-    // High-performance Capacity to Ship Packages within D Days routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def shipWithinDays(weights, days):\n    low, high = max(weights), sum(weights)\n    while low <= high:\n        mid = (low + high) // 2\n        if canShip(weights, mid, days): ans = mid; high = mid - 1\n        else: low = mid + 1\n    return ans" }]
        }
     ]
   },
-             {
+  {
     id: "kth-missing-positive-number",
-    title: "Kth Missing Positive Number",
+    title: "Kth Missing Positive",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Kth Missing Positive Number. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the $k$-th positive integer that is missing from a sorted array.",
+    leetcodeLink: "https://leetcode.com/problems/kth-missing-positive-number/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Kth Missing Positive Number.",
+          name: "Optimal (Binary Search)",
+          description: "### 🧠 Mental Model: The Gap Count\nIn a strictly increasing array of positive integers, the number of missing elements at index `i` is exactly `arr[i] - (i + 1)`. We use binary search to find the last index where the missing count is less than `k`.\n\n### 🛠️ Step-by-Step Logic\n1. `low = 0, high = n - 1`.\n2. Calculate `missing = arr[mid] - (mid + 1)`.\n3. If `missing < k`, search right (`low = mid + 1`).\n4. Else, search left.\n5. Result: `k + low`.",
           timeComplexity: "O(log N)",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_kth_missing_positive_number(*args):
-    # Optimized Kth Missing Positive Number Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_kth_missing_positive_number(...args) {
-    // Optimal Kth Missing Positive Number Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_kth_missing_positive_number() {
-        // Logic for Kth Missing Positive Number
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_kth_missing_positive_number() {
-    // High-performance Kth Missing Positive Number routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findKthPositive(arr, k):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] - (mid + 1) < k: low = mid + 1\n        else: high = mid - 1\n    return low + k" }]
        }
     ]
   },
-             {
+  {
     id: "aggressive-cows",
     title: "Aggressive Cows",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Aggressive Cows. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Place $C$ cows in $N$ stalls such that the minimum distance between any two of them is the maximum possible.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Aggressive Cows.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Distance)",
+          description: "### 🧠 Mental Model: Stretching the Gap\nYou want to keep the cows as far apart as possible. If they can stay at least $X$ distance apart and still fit in the stalls, maybe they can stay $X+1$ apart? We binary search on this 'Minimum Gap'.\n\n### 🛠️ Step-by-Step Logic\n1. Sort the stall positions.\n2. Search range: `[1, max(stalls) - min(stalls)]`.\n3. For each `mid` distance, greedily place cows. If total placed $\ge C$, distance is valid, try larger gap.",
+          timeComplexity: "O(N log N + N log(maxDist))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_aggressive_cows(*args):
-    # Optimized Aggressive Cows Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_aggressive_cows(...args) {
-    // Optimal Aggressive Cows Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_aggressive_cows() {
-        // Logic for Aggressive Cows
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_aggressive_cows() {
-    // High-performance Aggressive Cows routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function aggressiveCows(stalls, k) {\n    stalls.sort((a,b) => a-b);\n    let low = 1, high = stalls[n-1] - stalls[0], ans = 1;\n    while(low <= high) {\n        let mid = Math.floor((low+high)/2);\n        if(canPlace(stalls, k, mid)) { ans = mid; low = mid + 1; }\n        else high = mid - 1;\n    }\n    return ans;\n}" }]
        }
     ]
   },
-             {
+  {
     id: "book-allocation-problem",
-    title: "Book Allocation Problem",
+    title: "Book Allocation",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Book Allocation Problem. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    frequencyLevel: "Very High",
+    difficulty: "Hard",
+    overview: "Allocate books with varying pages to $M$ students such that the maximum number of pages read by a student is minimized.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Book Allocation Problem.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Pages)",
+          description: "### 🧠 Mental Model: Minimizing the Burden\nYou want to be as fair as possible. The heaviest student's load should be as light as can be. This 'Fair Limit' lies between the largest single book and the sum of all pages.\n\n### 🛠️ Step-by-Step Logic\n1. Range: `low = max(pages)`, `high = sum(pages)`.\n2. For each `limit`, greedily assign books to students. If count of students used $\le M$, limit is valid.",
+          timeComplexity: "O(N * log(sum - max))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_book_allocation_problem(*args):
-    # Optimized Book Allocation Problem Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_book_allocation_problem(...args) {
-    // Optimal Book Allocation Problem Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_book_allocation_problem() {
-        // Logic for Book Allocation Problem
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_book_allocation_problem() {
-    // High-performance Book Allocation Problem routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def findPages(A, N, M):\n    if M > N: return -1\n    low, high = max(A), sum(A)\n    # Binary search for min limit" }]
        }
     ]
   },
-             {
+  {
     id: "split-array-largest-sum",
-    title: "Split Array - Largest Sum",
+    title: "Split Array Largest Sum",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Split Array - Largest Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Split an array into $K$ non-empty contiguous subarrays such that the largest sum among these subarrays is minimized.",
+    leetcodeLink: "https://leetcode.com/problems/split-array-largest-sum/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Split Array - Largest Sum.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Sum)",
+          description: "### 🧠 Mental Model\nThis is mathematically identical to the **Book Allocation Problem**. Students = Subarrays, Pages = Array values.",
+          timeComplexity: "O(N * log(sum))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_split_array___largest_sum(*args):
-    # Optimized Split Array - Largest Sum Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_split_array___largest_sum(...args) {
-    // Optimal Split Array - Largest Sum Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_split_array___largest_sum() {
-        // Logic for Split Array - Largest Sum
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_split_array___largest_sum() {
-    // High-performance Split Array - Largest Sum routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function splitArray(nums, k) {\n    return bookAllocation(nums, nums.length, k);\n}" }]
        }
     ]
   },
-             {
+  {
     id: "painter-s-partition-problem",
-    title: "Painter's Partition Problem",
+    title: "Painter's Partition",
     topic: "Binary Search - Answers",
     category: "Binary Search",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Painter's Partition Problem. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
+    overview: "Partition a series of boards among $K$ painters such that the maximum total time taken by any painter is minimized.",
     leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Painter's Partition Problem.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Time)",
+          description: "### 🧠 Mental Model\nIdentical to **Book Allocation** and **Split Array Sum**. Boards = Books, Painters = Students.",
+          timeComplexity: "O(N * log(sum))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_painter_s_partition_problem(*args):
-    # Optimized Painter's Partition Problem Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_painter_s_partition_problem(...args) {
-    // Optimal Painter's Partition Problem Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_painter_s_partition_problem() {
-        // Logic for Painter's Partition Problem
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_painter_s_partition_problem() {
-    // High-performance Painter's Partition Problem routine
-}` 
-             }
-          ]
+          implementations: [{ language: "Python", code: "def paintersPartition(boards, k):\n    return findPages(boards, len(boards), k)" }]
        }
     ]
   },
-             {
+  {
     id: "minimize-max-distance-to-gas-station",
-    title: "Minimize Max Distance to Gas Station",
+    title: "Gas Station Distance",
     topic: "Binary Search - Answers",
     category: "Binary Search",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimize Max Distance to Gas Station. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    difficulty: "Hard",
+    overview: "Add $K$ new gas stations to minimize the maximum distance between adjacent stations.",
+    leetcodeLink: "https://leetcode.com/problems/minimize-max-distance-to-gas-station/",
     approaches: [
        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimize Max Distance to Gas Station.",
-          timeComplexity: "O(log N)",
+          name: "Optimal (BS on Double)",
+          description: "### 🧠 Mental Model: Floating Point Search\nInstead of searching for an integer, we binary search on the minimum possible distance (a double). We run the loop for a fixed number of iterations (e.g., 100) to achieve high precision.\n\n### 🛠️ Step-by-Step Logic\n1. Range: `low = 0`, `high = max(initialDistances)`.\n2. For each `mid` distance, count how many new stations are needed: `stationsNeed += floor(dist / mid)`.\n3. If `stationsNeed <= k`, try smaller distance.",
+          timeComplexity: "O(N * log(precision))",
           spaceComplexity: "O(1)",
-          implementations: [
-             {
-                language: "Python",
-                code: `def solve_minimize_max_distance_to_gas_station(*args):
-    # Optimized Minimize Max Distance to Gas Station Logic
-    pass` 
-             },
-             {
-                language: "JavaScript",
-                code: `function solve_minimize_max_distance_to_gas_station(...args) {
-    // Optimal Minimize Max Distance to Gas Station Implementation
-}` 
-             },
-             {
-                language: "Java",
-                code: `class Solution {
-    public void solve_minimize_max_distance_to_gas_station() {
-        // Logic for Minimize Max Distance to Gas Station
-    }
-}` 
-             },
-             {
-                language: "C++",
-                code: `void solve_minimize_max_distance_to_gas_station() {
-    // High-performance Minimize Max Distance to Gas Station routine
-}` 
-             }
-          ]
+          implementations: [{ language: "JavaScript", code: "function minMaxDist(stations, k) {\n    let low = 0, high = stations[n-1]-stations[0];\n    for(let i=0; i<100; i++) {\n        let mid = (low+high)/2;\n        if(canKeepDist(mid, stations, k)) high = mid;\n        else low = mid;\n    }\n    return high;\n}" }]
        }
     ]
   },

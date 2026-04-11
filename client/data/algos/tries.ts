@@ -84,14 +84,49 @@ export const triesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Counter Nodes)",
-          description: "### 🧠 The Core Concept\nEach node stores `countPrefix` (how many words pass through) and `countEnd` (how many words end exactly here).",
+          description: "### 🧠 The Core Concept: The 'Footprint' Strategy\nStandard Tries tell you *if* a word exists. This enhanced Trie tells you *how many* times it exists and how many others shared its path. \n\nEvery time we pass through a node, we increment a `cntPrefix` counter (like counting footprints in a corridor). When we reach the final node of a word, we increment a `cntEnd` counter.\n\n### 🛠️ Step-by-Step Logic\n1. **Node Schema**: Add `countEnd` and `countPrefix` integers to every node.\n2. **Insert**: For each char, `node.countPrefix++`. At the end, `node.countEnd++`.\n3. **Delete**: Follow the word back: `node.countPrefix--`. At the end, `node.countEnd--`.",
           timeComplexity: "O(L)",
+          timeComplexityExplanation: "L is the length of the string. Every operation (insert, count, delete) is linear.",
           spaceComplexity: "O(T)",
+          spaceComplexityExplanation: "T is total characters across all unique strings.",
           implementations: [
-             { language: "Python", code: "class Node:\n    def __init__(self):\n        self.children = {}\n        self.cntEnd = 0\n        self.cntPrefix = 0\n\nclass Trie:\n    def __init__(self):\n        self.root = Node()\n    def insert(self, word):\n        curr = self.root\n        for c in word:\n            curr = curr.children.setdefault(c, Node())\n            curr.cntPrefix += 1\n        curr.cntEnd += 1" }
+             {
+                language: "Python",
+                code: `class Node:
+    def __init__(self):
+        self.children = {}
+        self.cntEnd = 0
+        self.cntPrefix = 0
+
+class Trie:
+    def __init__(self):
+        self.root = Node()
+
+    def insert(self, word):
+        curr = self.root
+        for c in word:
+            curr = curr.children.setdefault(c, Node())
+            curr.cntPrefix += 1
+        curr.cntEnd += 1
+
+    def countWordsEqualTo(self, word):
+        curr = self.root
+        for c in word:
+            if c not in curr.children: return 0
+            curr = curr.children[c]
+        return curr.cntEnd
+
+    def countWordsStartingWith(self, prefix):
+        curr = self.root
+        for c in prefix:
+            if c not in curr.children: return 0
+            curr = curr.children[c]
+        return curr.cntPrefix`
+             }
           ]
        }
     ]
+
   },
   {
     id: "number-of-distinct-substrings-in-a-string",
@@ -106,14 +141,33 @@ export const triesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Trie Node Counting)",
-          description: "### 🧠 The Core Concept\nEvery single path in a Trie starting from the root represents a distinct substring. Insert all suffixes of the string into the Trie; the total number of nodes created (minus root) is the answer!\n\n### 🛠️ Execution Strategy\nFor `s = \"abab\"`, insert suffixes: `\"abab\"`, `\"bab\"`, `\"ab\"`, `\"b\"`.",
-          timeComplexity: "O(N^2)",
-          spaceComplexity: "O(N^2)",
+          description: "### 🧠 The Core Concept: The 'Unique Path' Analogy\nEvery substring of `s` is actually a **Prefix of some Suffix** of `s`. \n\nIf we insert every possible suffix of `s` (e.g., for 'abc', insert 'abc', 'bc', 'c') into a Trie, every single node in that Trie (except the root) represents exactly one unique substring of the original word.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `count = 0` and an empty `root` node.\n2. Iterate through index $i$ from $0$ to $n-1$.\n3. For each suffix starting at $i$, move through the Trie char by char.\n4. If a character node doesn't exist, create it and `count++`.\n5. Return `count + 1` (to include the empty substring) or just `count` as per definition.",
+          timeComplexity: "O(N²)",
+          timeComplexityExplanation: "We process N suffixes, each with a max length of N.",
+          spaceComplexity: "O(N²)",
+          spaceComplexityExplanation: "In the worst case (all unique chars), we store O(N^2) nodes.",
           implementations: [
-             { language: "JavaScript", code: "function countDistinctSubstrings(s) {\n    let root = {}, count = 0;\n    for(let i=0; i<s.length; i++) {\n        let curr = root;\n        for(let j=i; j<s.length; j++) {\n            if(!curr[s[j]]) {\n                curr[s[j]] = {};\n                count++;\n            }\n            curr = curr[s[j]];\n        }\n    }\n    return count + 1; // +1 for empty string\n}" }
+             {
+                language: "JavaScript",
+                code: `function countDistinctSubstrings(s) {
+    let root = {}, count = 0;
+    for (let i = 0; i < s.length; i++) {
+        let curr = root;
+        for (let j = i; j < s.length; j++) {
+            if (!curr[s[j]]) {
+                curr[s[j]] = {};
+                count++;
+            }
+            curr = curr[s[j]];
+        }
+    }
+    return count + 1; // Including empty substring ""
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "maximum-xor-of-two-numbers-in-an-array",
@@ -128,13 +182,47 @@ export const triesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Bitwise Trie)",
-          description: "### 🧠 The Core Concept\nTo maximize XOR, for every bit of a number, we want to find another number that has the **Opposite** bit at that position. \n\nWe store binary representations of all numbers in a 0/1 Trie. For each number, we traverse the Trie and 'greedy' choose the opposite bit whenever possible.",
+          description: "### 🧠 The Core Concept: The 'Greedy Mirror' Strategy\nAn XOR result is maximized when bits at the same position are different (0 XOR 1 = 1). \n\nTo find the best partner for a number `X`, we convert all numbers to binary and store them in a Trie. For each bit in `X`, we try to follow the **Opposite** bit in the Trie. If `X` has a `1` at the $31^{st}$ bit, we look for a number with `0`. If successful, our XOR result gets a `1` at that spot!\n\n### 🛠️ Step-by-Step Logic\n1. **Binary Trie**: Every node has exactly two children: `0` and `1`.\n2. **Insert**: Push all numbers into the Trie as 32-bit binary strings (padding with leading zeros).\n3. **Query**: For each number $N$, traverse the Trie. At each bit, check if the *inverted bit* exists as a child. If yes, take it and update your `maxForN`. If not, you're forced to take the current bit.\n4. **Final Max**: Return the best `maxForN` found.",
           timeComplexity: "O(N * 32)",
+          timeComplexityExplanation: "Each number is inserted and queried in constant bit-depth (32).",
           spaceComplexity: "O(N * 32)",
+          spaceComplexityExplanation: "Total nodes capped at N * 32 bits.",
           implementations: [
-             { language: "Python", code: "class TrieNode:\n    def __init__(self):\n        self.children = [None, None]\n\ndef findMaxXOR(nums):\n    root = TrieNode()\n    for n in nums:\n        curr = root\n        for i in range(31, -1, -1):\n            bit = (n >> i) & 1\n            if not curr.children[bit]: curr.children[bit] = TrieNode()\n            curr = curr.children[bit]\n    \n    res = 0\n    for n in nums:\n        curr, total = root, 0\n        for i in range(31, -1, -1):\n            bit = (n >> i) & 1\n            if curr.children[1 - bit]:\n                total |= (1 << i)\n                curr = curr.children[1 - bit]\n            else: curr = curr.children[bit]\n        res = max(res, total)\n    return res" }
+             {
+                language: "Python",
+                code: `class TrieNode:
+    def __init__(self):
+        self.children = [None, None]
+
+def findMaxXOR(nums):
+    root = TrieNode()
+    # Build Trie
+    for n in nums:
+        curr = root
+        for i in range(31, -1, -1):
+            bit = (n >> i) & 1
+            if not curr.children[bit]: 
+                curr.children[bit] = TrieNode()
+            curr = curr.children[bit]
+    
+    max_xor = 0
+    # Query Trie
+    for n in nums:
+        curr, current_xor = root, 0
+        for i in range(31, -1, -1):
+            bit = (n >> i) & 1
+            # Greedy search for opposite bit
+            if curr.children[1 - bit]:
+                current_xor |= (1 << i)
+                curr = curr.children[1 - bit]
+            else:
+                curr = curr.children[bit]
+        max_xor = max(max_xor, current_xor)
+    return max_xor`
+             }
           ]
        }
     ]
+
   }
 ];

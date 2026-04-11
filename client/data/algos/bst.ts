@@ -115,14 +115,45 @@ export const bstAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Pruned Vertical Scan)",
-          description: "### 🧠 The Core Concept\nIf root is $\le$ X, then the ceil could only be root itself or something in the Right subtree. If root is $>$ X, root is a potential ceil, but we should check the Left subtree for a 'tighter' fit.",
+          description: "### 🧠 The Core Concept: The 'Tightening Upper Bound'\nSearching for a Ceil is like hunting for the smallest hat that still fits your head. If the current hat (node) is too small, you MUST look for larger ones (go Right). If it fits but might be too loose, you remember its size as a candidate and look for a tighter fit (go Left).\n\n### 🛠️ Execution Strategy\n1. Initialize `ceil = -1`.\n2. Traverse from the root:\n   - If `node.val == X`, the ceil is exactly X. Return immediately.\n   - If `node.val < X`, the current node is too small. Move to `node.right` to find larger values.\n   - If `node.val > X`, the current node is a potential ceil! Save it and move to `node.left` to see if a smaller value still satisfies the condition.",
           timeComplexity: "O(H)",
+          timeComplexityExplanation: "We traverse a single path from root to leaf.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only a single pointer and a variable are used.",
           implementations: [
-             { language: "JavaScript", code: "function findCeil(root, key) {\n    let ceil = -1;\n    while (root) {\n        if (root.val === key) return root.val;\n        if (key > root.val) root = root.right;\n        else {\n            ceil = root.val;\n            root = root.left;\n        }\n    }\n    return ceil;\n}" }
+             {
+                language: "JavaScript",
+                code: `function findCeil(root, key) {
+    let ceil = -1;
+    while (root) {
+        if (root.val === key) return root.val;
+        if (key > root.val) {
+            root = root.right;
+        } else {
+            ceil = root.val;
+            root = root.left;
+        }
+    }
+    return ceil;
+}`
+             },
+             {
+                language: "Python",
+                code: `def findCeil(root, key):
+    ceil = -1
+    while root:
+        if root.val == key: return root.val
+        if key > root.val:
+            root = root.right
+        else:
+            ceil = root.val
+            root = root.left
+    return ceil`
+             }
           ]
        }
     ]
+
   },
   {
     id: "floor-in-a-bst",
@@ -137,14 +168,43 @@ export const bstAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Pruned Vertical Scan)",
-          description: "### 🧠 The Core Concept\nSimilar to Ceil, but tracking the last node seen that was smaller than X.",
+          description: "### 🧠 The Core Concept: The 'Safe Lower Bound'\nSearching for a Floor is like finding the highest diving board you are brave enough to jump from (below your max limit). If a board is too high (node > X), you must go lower (Right subtree is useless). If it's safe (node <= X), it's a candidate, but there might be a higher one further Right.\n\n### 🛠️ Step-by-Step Logic\n1. Initialize `floor = -1`.\n2. While traversing:\n   - If `node.val == X`, it's the perfect floor.\n   - If `node.val > X`, look in the Left subtree.\n   - If `node.val < X`, save current as candidate and look in the Right subtree.",
           timeComplexity: "O(H)",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "Python", code: "def findFloor(root, key):\n    res = -1\n    while root:\n        if root.val == key: return root.val\n        if key < root.val: root = root.left\n        else:\n            res = root.val\n            root = root.right\n    return res" }
+             {
+                language: "Python",
+                code: `def findFloor(root, key):
+    res = -1
+    while root:
+        if root.val == key: return root.val
+        if key < root.val: 
+            root = root.left
+        else:
+            res = root.val
+            root = root.right
+    return res`
+             },
+             {
+                language: "JavaScript",
+                code: `function findFloor(root, key) {
+    let res = -1;
+    while (root) {
+        if (root.val === key) return root.val;
+        if (key < root.val) {
+            root = root.left;
+        } else {
+            res = root.val;
+            root = root.right;
+        }
+    }
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "inorder-successor-predecessor-in-bst",
@@ -159,14 +219,41 @@ export const bstAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Standard Search Logic)",
-          description: "### 🧠 The Core Concept\nFor successor: if target has a right child, successor is the leftmost node of the right child. If not, successor is the lowest ancestor such that target is in its left subtree.",
+          description: "### 🧠 The Core Concept: The 'Next Largest' Hunting\nHow do you find the next larger number in a BST without sorting the whole thing? \nUse the BST property: any node larger than our target must be in the **Right subtree** or be one of its **Ancestors**.\n\n### 🛠️ Step-by-Step Logic (Successor)\n1. Initialize `successor = null`.\n2. While searching for the node:\n   - If `current.val > target.val`: This could be the successor! Save it and move Left to see if there's a smaller one that's still larger than target.\n   - If `current.val <= target.val`: This node is too small. Move Right.",
           timeComplexity: "O(H)",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "JavaScript", code: "function successor(root, p) {\n    let res = null;\n    while (root) {\n        if (p.val < root.val) {\n            res = root;\n            root = root.left;\n        } else root = root.right;\n    }\n    return res;\n}" }
+             {
+                language: "JavaScript",
+                code: `function successor(root, p) {
+    let res = null;
+    while (root) {
+        if (p.val < root.val) {
+            res = root;
+            root = root.left;
+        } else {
+            root = root.right;
+        }
+    }
+    return res;
+}`
+             },
+             {
+                language: "Python",
+                code: `def getSuccessor(root, p):
+    res = None
+    while root:
+        if p.val < root.val:
+            res = root
+            root = root.left
+        else:
+            root = root.right
+    return res`
+             }
           ]
        }
     ]
+
   },
   {
     id: "recover-bst",

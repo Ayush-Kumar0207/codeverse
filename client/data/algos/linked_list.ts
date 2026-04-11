@@ -235,15 +235,37 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     useCases: ["Arbitrary precision arithmetic"],
     approaches: [
        {
-          name: "Optimal (Backtracking/Recursion)",
-          description: "### 🧠 The Core Concept\nRecursively reach the end. Add 1 to the last node. Carry the result back up.",
+          name: "Optimal (Recursive Backtracking)",
+          description: "### 🧠 The Core Concept: The 'Bottom-Up' Approach\nAdding $1$ is easy at the tail of the list, but carries can propagate all the way back to the head (e.g., $999 \\to 1000$). Using recursion allows us to travel to the end first, add $1$, and handle 'carries' as we climb back up the recursive stack.\n\n### 🛠️ Execution Strategy\n1. Use a recursive function `addHelper(node)` that returns the **carry** (0 or 1).\n2. **Base Case**: If node is null, return 1 (this is the '+1' we are initially adding).\n3. **Climb Up**: Each node's value becomes `(current.val + carryFromNextNode) % 10`.\n4. **Final Step**: If the very first call returns a carry of 1, create a new head node.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(N) (Rec stack)",
+          timeComplexityExplanation: "We visit each node once on the way down and once on the way up the stack.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "The recursion stack will have $N$ frames for a list of length $N$.",
           implementations: [
-             { language: "JavaScript", code: "function addOne(head) {\n    let carry = addHelper(head);\n    if (carry) { let newNode = new ListNode(1); newNode.next = head; return newNode; }\n    return head;\n}\nfunction addHelper(node) {\n    if (!node) return 1;\n    let res = node.val + addHelper(node.next);\n    node.val = res % 10;\n    return Math.floor(res / 10);\n}" }
+             {
+                language: "JavaScript",
+                code: `function addOne(head) {
+    let carry = addHelper(head);
+    if (carry) {
+        let newNode = new ListNode(1);
+        newNode.next = head;
+        return newNode;
+    }
+    return head;
+}
+
+function addHelper(node) {
+    if (!node) return 1;
+    let carry = addHelper(node.next);
+    let sum = node.val + carry;
+    node.val = sum % 10;
+    return Math.floor(sum / 10);
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "find-intersection-point-of-y-ll",
@@ -257,15 +279,30 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     useCases: ["Data deduplication", "Shared resource detection"],
     approaches: [
        {
-          name: "Optimal (Difference in Length)",
-          description: "### 🧠 The Core Concept\nFind lengths L1 and L2. Advance the pointer of the longer list by `abs(L1-L2)`. Then move both until they meet.",
+          name: "Optimal (The 'Infinite Loop' Sync Technique)",
+          description: "### 🧠 The Core Concept: The 'Equalizer' Intuition\nIf two lists intersect, they share a common suffix. The only reason they wouldn't meet at the start is because of a length difference ($L1$ vs $L2$).\n\nBy having each pointer switch to the **other** list's head after finishing its own, both pointers will eventually travel exactly `L1 + L2 + IntersectionLength` steps. This mathematically synchronizes them at the intersection point!\n\n### 🛠️ Execution Strategy\n1. Start pointer `a` at `headA` and `b` at `headB`.\n2. **The Walk**: Move both by $1$ step.\n3. **The Switch**: If `a` hits null, redirect it to `headB`. If `b` hits null, redirect it to `headA`.\n4. **The Meeting**: The moment `a === b`, you've found the intersection.",
           timeComplexity: "O(N + M)",
+          timeComplexityExplanation: "In the worst case, each pointer travels the length of both lists once.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only two pointers are tracked.",
           implementations: [
-             { language: "Python", code: "def getIntersectionNode(headA, headB):\n    a, b = headA, headB\n    while a != b:\n        a = a.next if a else headB\n        b = b.next if b else headA\n    return a" }
+             {
+                language: "Python",
+                code: `def getIntersectionNode(headA, headB):
+    if not headA or not headB: return None
+    a, b = headA, headB
+    
+    # In the second iteration, they will be synchronized
+    while a != b:
+        a = headB if a is None else a.next
+        b = headA if b is None else b.next
+        
+    return a`
+             }
           ]
        }
     ]
+
   },
   {
     id: "reverse-nodes-in-k-group",
@@ -279,15 +316,47 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     useCases: ["Batch processing in buffers", "Packet reordering logic"],
     approaches: [
        {
-          name: "Optimal (Iterative Reversal)",
-          description: "### 🧠 The Core Concept\nFind the k-th node. If it exists, reverse that group and link with the next recursive call.",
+          name: "Optimal (Iterative Fragment Reversal)",
+          description: "### 🧠 The Core Concept: Batch Reversal\nThis is a generalized version of 'Reverse a Linked List'. We divide the list into chunks of size $K$. If a chunk has at least $K$ nodes, we flip it. If it has fewer, we leave it untouched (based on LeetCode rules).\n\n### 🛠️ Execution Strategy\n1. **Count Nodes**: Check if there are $K$ nodes available.\n2. **Flip Phase**: Within a loop that runs $K$ times, perform standard 3-pointer reversal logic.\n3. **Recursive Link**: Connect the tail of the newly flipped group to the result of flipping the next group.\n4. **Persistence**: Use a `dummy` node to cleanly track the new head.",
           timeComplexity: "O(N)",
-          spaceComplexity: "O(1)",
+          timeComplexityExplanation: "We visit every node exactly once during our processing loop.",
+          spaceComplexity: "O(N/K) or O(1)",
+          spaceComplexityExplanation: "Recursive implementations take $N/K$ stack space. Iterative versions can achieve $O(1)$.",
           implementations: [
-             { language: "JavaScript", code: "function reverseKGroup(head, k) {\n    // Implementation logic for iterative reversal in blocks\n}" }
+             {
+                language: "JavaScript",
+                code: `function reverseKGroup(head, k) {
+    if (!head || k === 1) return head;
+    
+    let dummy = new ListNode(0);
+    dummy.next = head;
+    let curr = dummy, nex = dummy, pre = dummy;
+    let count = 0;
+    
+    while(curr.next) {
+        curr = curr.next;
+        count++;
+    }
+    
+    while(count >= k) {
+        curr = pre.next;
+        nex = curr.next;
+        for(let i = 1; i < k; i++) {
+            curr.next = nex.next;
+            nex.next = pre.next;
+            pre.next = nex;
+            nex = curr.next;
+        }
+        pre = curr;
+        count -= k;
+    }
+    return dummy.next;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "flattening-of-ll",
@@ -301,15 +370,44 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     useCases: ["Sparse matrix storage", "Multi-dimensional sequence flattening"],
     approaches: [
        {
-          name: "Optimal (Merge Pattern)",
-          description: "### 🧠 The Core Concept\nRecursively reach the last two columns. Merge them using the standard 'Merge Two Sorted Lists' logic, but using the 'bottom' pointer.",
-          timeComplexity: "O(N * M) (N=total nodes)",
-          spaceComplexity: "O(1)",
+          name: "Optimal (Recursion + Merge Pattern)",
+          description: "### 🧠 The Core Concept: The 'Column-by-Column' Strategy\nThink of the structure as multiple vertical linked lists (branches) coming off a horizontal main line. \n\nWe start from the last two vertical branches on the right and merge them into a single sorted branch. We then take this 'merged branch' and merge it with the branch to its left. We repeat this until only one giant vertical sorted list remains.\n\n### 🛠️ Step-by-Step Logic\n1. **Base Case**: If root or root.next is null, return root.\n2. **Recursion**: Recursively call `flatten` on `root.next`. This clears the right side.\n3. **Merge**: Combine the current `root` and the result of the recursive call using the 'Merge Two Sorted Lists' logic, but using the **bottom** pointer instead of **next**.",
+          timeComplexity: "O(N * M)",
+          timeComplexityExplanation: "Where $N$ is the number of vertical lists and $M$ is the average nodes per list.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Recursion stack depth equals the number of vertical lists.",
           implementations: [
-             { language: "Python", code: "def flatten(root):\n    if not root or not root.next: return root\n    root.next = flatten(root.next)\n    root = merge(root, root.next)\n    return root" }
+             {
+                language: "Python",
+                code: `def merge(a, b):
+    if not a: return b
+    if not b: return a
+    
+    res = None
+    if a.data < b.data:
+        res = a
+        res.bottom = merge(a.bottom, b)
+    else:
+        res = b
+        res.bottom = merge(a, b.bottom)
+    return res
+
+def flatten(root):
+    if not root or not root.next:
+        return root
+    
+    # Recurse for the list on the right
+    root.next = flatten(root.next)
+    
+    # Merge current list with the flattened right list
+    root = merge(root, root.next)
+    
+    return root`
+             }
           ]
        }
     ]
+
   },
   {
     id: "clone-a-linked-list-with-random-and-next-pointer",
@@ -323,14 +421,49 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     useCases: ["Deep copying complex graph structures", "State persistence with pointers"],
     approaches: [
        {
-          name: "Optimal (Interweaving Nodes)",
-          description: "### 🧠 The Core Concept\nInstead of a HashMap, insert a copy of each node directly after the original. Then assign random pointers. Finally, separate them.\n\n### 🛠️ Step-by-Step\n1. `1 -> 2` becomes `1 -> 1' -> 2 -> 2'`\n2. `1'.random = 1.random.next`\n3. Extract copies.",
+          name: "Optimal (The 'DNA Splice' Strategy)",
+          description: "### 🧠 The Core Concept: The 'Shadow Node' Analogy\nDirectly cloning nodes with random pointers is hard because the 'target' of a random pointer might not exist yet. \nInstead of using a Map ($O(N)$ space), we can 'splice' the copies directly into the original list!\n\n### 🛠️ Execution Strategy\n1. **Iteration 1**: Create a copy of each node and insert it between original nodes. \n   (e.g., $A \\to B$ becomes $A \\to A' \\to B \\to B'$).\n2. **Iteration 2**: Assign `random` pointers. `A'.random` is simply `A.random.next`.\n3. **Iteration 3**: 'Unweave' the lists to restore the original and extract the clone.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "We make three distinct linear passes: one to double the list, one for random pointers, and one to extract.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We don't use any auxiliary storage like a Hash Map; we use the existing list structure temporarily.",
           implementations: [
-             { language: "JavaScript", code: "function copyRandomList(head) {\n    // Step 1: Insert copy\n    // Step 2: Assign random\n    // Step 3: Extract\n}" }
+             {
+                language: "JavaScript",
+                code: `function copyRandomList(head) {
+    if (!head) return null;
+    
+    // 1. Double the list
+    let curr = head;
+    while(curr) {
+        let copy = new Node(curr.val, curr.next, null);
+        curr.next = copy;
+        curr = copy.next;
+    }
+    
+    // 2. Assign random pointers
+    curr = head;
+    while(curr) {
+        if(curr.random) curr.next.random = curr.random.next;
+        curr = curr.next.next;
+    }
+    
+    // 3. Unweave
+    let dummy = new Node(0);
+    let copyIter = dummy;
+    curr = head;
+    while(curr) {
+        copyIter.next = curr.next;
+        curr.next = curr.next.next;
+        copyIter = copyIter.next;
+        curr = curr.next;
+    }
+    return dummy.next;
+}`
+             }
           ]
        }
     ]
+
   }
 ];

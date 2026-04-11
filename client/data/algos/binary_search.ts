@@ -334,15 +334,42 @@ export const binarySearchAlgorithms: AlgorithmEntry[] = [
     useCases: ["Wireless sensor placement", "Conflict-free scheduling"],
     approaches: [
        {
-          name: "Optimal (BS on Distance)",
-          description: "### 🧠 The Core Concept\nBinary search the minimum distance. For each mid, check if we can place all cows with at least 'mid' distance apart.",
+          name: "Optimal (Binary Search on Answer Range)",
+          description: "### 🧠 The Core Concept: The 'Social Distancing' Analogy\nYou have $N$ aggressive cows and a set of stalls. You want to place the cows such that the **minimum distance between any two cows is as large as possible**.\n\nThink of this as finding the perfect 'Social Distancing' rule. If we try a distance of $100$, and we can't fit all cows, the rule is too strict! If we try a distance of $2$, and we fit them easily with room to spare, we can probably be more ambitious.\n\n### 🛠️ Execution Strategy\n1. **Sort** the stalls to allow for linear placement checking.\n2. **Binary Search the Gap**: The answer must be between $1$ and $(\text{max\_stall} - \text{min\_stall})$.\n3. **Validation Function (`canPlace`)**: \n   - Place the first cow in the first stall.\n   - For every subsequent stall, if `stall[i] - last_placed_stall >= gap`, place another cow.\n   - If you successfully place all $K$ cows, the gap is possible!\n4. **Optimization**: If `canPlace(mid)` is true, try a LARGER gap (`low = mid + 1`). Otherwise, try a smaller one (`high = mid - 1`).",
           timeComplexity: "O(N log N + N log(MaxDist))",
+          timeComplexityExplanation: "Sorting takes $N \log N$. The binary search on the distance range takes $\log(\text{MaxDist})$ steps, with a linear $O(N)$ placement check at each step.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We strictly utilize constant auxiliary space beyond the input array.",
           implementations: [
-             { language: "Python", code: "def aggressiveCows(stalls, k):\n    stalls.sort()\n    l, r, ans = 1, stalls[-1] - stalls[0], 1\n    while l <= r:\n        mid = (l + r) // 2\n        if canPlace(mid): ans = mid; l = mid + 1\n        else: r = mid - 1\n    return ans" }
+             {
+                language: "Python",
+                code: `def canPlace(stalls, dist, cows):
+    count = 1
+    last = stalls[0]
+    for i in range(1, len(stalls)):
+        if stalls[i] - last >= dist:
+            count += 1
+            last = stalls[i]
+    return count >= cows
+
+def aggressiveCows(stalls, k):
+    stalls.sort()
+    low, high = 1, stalls[-1] - stalls[0]
+    res = 1
+    
+    while low <= high:
+        mid = (low + high) // 2
+        if canPlace(stalls, mid, k):
+            res = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+    return res`
+             }
           ]
        }
     ]
+
   },
   {
     id: "book-allocation-problem",
@@ -356,15 +383,50 @@ export const binarySearchAlgorithms: AlgorithmEntry[] = [
     useCases: ["Workload balancing", "Parallel process allocation"],
     approaches: [
        {
-          name: "Optimal (BS on Max Pages)",
-          description: "### 🧠 The Core Concept\nThis is identical to 'Split Array Largest Sum' and 'Painter's Partition'. Binary search the max pages threshold.",
-          timeComplexity: "O(N log(Sum))",
+          name: "Optimal (Binary Search on Capacity)",
+          description: "### 🧠 The Core Concept: The 'Workload Cap' Analogy\nYou need to assign books to students such that the student who reads the MOST reads as FEW pages as possible. \n\nImagine you set a 'Daily Reading Limit' for every student. If the limit is too low, you'll need more students than you have. If the limit is huge, one student will do all the work. We use Binary Search to find the exact 'Sweet Spot' limit.\n\n### 🛠️ Step-by-Step Logic\n1. **Establish Range**: \n   - `low` = `max(pages)` (A student MUST be able to read the largest book).\n   - `high` = `sum(pages)` (One student reads everything).\n2. **Test the Limit**: For `mid` limit, count how many students are needed. \n   - If `studentsNeeded <= availableStudents`, the limit works! Try a lower limit to see if we can be more efficient.\n   - Otherwise, the limit is too small; we must increase it.",
+          timeComplexity: "O(N * log(SumOfPages))",
+          timeComplexityExplanation: "We binary search through the total sum of pages, performing a linear pass ($N$) to validate each potential limit.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "No additional data structures are required.",
           implementations: [
-             { language: "JavaScript", code: "function allocateBooks(A, B) {\n    if (B > A.length) return -1;\n    let l = Math.max(...A), r = A.reduce((a,b)=>a+b, 0);\n    while (l <= r) {\n        let mid = Math.floor((l+r)/2);\n        if (countStudents(mid) <= B) r = mid - 1;\n        else l = mid + 1;\n    }\n    return l;\n}" }
+             {
+                language: "JavaScript",
+                code: `function countStudents(arr, pages) {
+    let students = 1, studentPages = 0;
+    for (let i = 0; i < arr.length; i++) {
+        if (studentPages + arr[i] <= pages) {
+            studentPages += arr[i];
+        } else {
+            students++;
+            studentPages = arr[i];
+        }
+    }
+    return students;
+}
+
+function findPages(arr, n, m) {
+    if (m > n) return -1;
+    let low = Math.max(...arr);
+    let high = arr.reduce((a, b) => a + b, 0);
+    let res = -1;
+
+    while (low <= high) {
+        let mid = Math.floor((low + high) / 2);
+        if (countStudents(arr, mid) <= m) {
+            res = mid;
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "find-the-row-with-maximum-number-of-1s",
@@ -466,14 +528,45 @@ export const binarySearchAlgorithms: AlgorithmEntry[] = [
     useCases: ["Statistical analysis on partitioned data"],
     approaches: [
        {
-          name: "Optimal (BS on Number Range)",
-          description: "### 🧠 The Core Concept\nBinary search the range [min, max]. For each mid, count elements $\le$ mid in the matrix using `upperBound` on each row. Median is the first value where count $> (M*N)/2$.",
-          timeComplexity: "O(Rows * log(Cols) * log(2^31))",
+          name: "Optimal (Binary Search on Number Range)",
+          description: "### 🧠 The Core Concept: Virtual Median\nFinding a median in a matrix where every row is sorted is a classic 'Nested' Binary Search problem. \n\nA **Median** is simply a value $X$ such that at least half of the total elements are $\le X$. \n\n### 🛠️ Execution Strategy\n1. Find the range of numbers in the matrix (usually $1$ to $10^9$ or `min` to `max` of the matrix).\n2. **Outer Binary Search**: Try a candidate value `mid`.\n3. **Inner Binary Search**: For each row, use `upperBound` to find how many elements are $\le mid$.\n4. **Counter Check**: If the total count of elements across all rows is $> (Rows \times Cols) / 2$, then `mid` could be our median. Try smaller values to find the exact threshold.",
+          timeComplexity: "O(Rows * log(Cols) * log(MaxVal))",
+          timeComplexityExplanation: "We perform a binary search on the value range ($\log 10^9 \approx 30$). In each step, we iterate through each row and perform a binary search on its columns ($\log \text{Cols}$).",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Calculations are performed purely through pointer math on the existing matrix.",
           implementations: [
-             { language: "JavaScript", code: "function median(matrix) {\n    let low = 1, high = 1e9;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (countLessEqual(matrix, mid) <= (R*C)/2) low = mid + 1;\n        else high = mid - 1;\n    }\n    return low;\n}" }
+             {
+                language: "JavaScript",
+                code: `function countLessEqual(row, x) {
+    let low = 0, high = row.length - 1;
+    while (low <= high) {
+        let mid = (low + high) >> 1;
+        if (row[mid] <= x) low = mid + 1;
+        else high = mid - 1;
+    }
+    return low;
+}
+
+function findMedian(matrix) {
+    let low = 1, high = 1e9;
+    const TOTAL = matrix.length * matrix[0].length;
+    const REQ = Math.floor(TOTAL / 2);
+
+    while (low <= high) {
+        let mid = (low + high) >> 1;
+        let count = 0;
+        for (let row of matrix) {
+            count += countLessEqual(row, mid);
+        }
+        if (count <= REQ) low = mid + 1;
+        else high = mid - 1;
+    }
+    return low;
+}`
+             }
           ]
        }
     ]
+
   }
 ];

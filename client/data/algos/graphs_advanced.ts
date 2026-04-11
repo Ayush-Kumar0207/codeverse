@@ -53,7 +53,7 @@ export const graphsAdvancedAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: "from collections import deque\ndef updateMatrix(mat):\n    rows, cols = len(mat), len(mat[0])\n    q = deque()\n    for r in range(rows):\n        for c in range(cols):\n            if mat[r][c] == 0: q.append((r, c))\n            else: mat[r][c] = -1\n            \n    while q:\n        r, c = q.popleft()\n        for dr, dc in [(1,0),(-1,0),(0,1),(0,-1)]:\n            nr, nc = r+dr, c+dc\n            if 0 <= nr < rows and 0 <= nc < cols and mat[nr][nc] == -1:\n                mat[nr][nc] = mat[r][c] + 1\n                q.append((nr, nc))\n    return mat"
+                code: "from collections import deque\n\ndef updateMatrix(mat):\n    rows, cols = len(mat), len(mat[0])\n    q = deque()\n    for r in range(rows):\n        for c in range(cols):\n            if mat[r][c] == 0: q.append((r, c))\n            else: mat[r][c] = -1\n            \n    while q:\n        r, c = q.popleft()\n        for dr, dc in [(1,0),(-1,0),(0,1),(0,-1)]:\n            nr, nc = r+dr, c+dc\n            if 0 <= nr < rows and 0 <= nc < cols and mat[nr][nc] == -1:\n                mat[nr][nc] = mat[r][c] + 1\n                q.append((nr, nc))\n    return mat"
              },
              {
                 language: "JavaScript",
@@ -84,7 +84,7 @@ export const graphsAdvancedAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: "def solve(board):\n    if not board: return\n    rows, cols = len(board), len(board[0])\n    \n    def dfs(r, c):\n        if r < 0 or r >= rows or c < 0 or c >= cols or board[r][c] != 'O': return\n        board[r][c] = 'S'\n        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1)\n        \n    for r in range(rows):\n        dfs(r, 0); dfs(r, cols-1)\n    for c in range(cols):\n        dfs(0, c); dfs(rows-1, c)\n        \n    for r in range(rows):\n        for c in range(cols):\n            if board[r][c] == 'O': board[r][c] = 'X'\n            elif board[r][c] == 'S': board[r][c] = 'O'"
+                code: "def solve(board):\n    if not board: return\n    \n    rows, cols = len(board), len(board[0])\n    \n    def dfs(r, c):\n        if r < 0 or r >= rows or c < 0 or c >= cols or board[r][c] != 'O': return\n        board[r][c] = 'S'\n        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1)\n    \n    for r in range(rows):\n        dfs(r, 0); dfs(r, cols-1)\n    for c in range(cols):\n        dfs(0, c); dfs(rows-1, c)\n    \n    for r in range(rows):\n        for c in range(cols):\n            if board[r][c] == 'O': board[r][c] = 'X'\n            elif board[r][c] == 'S': board[r][c] = 'O'"
              }
           ]
        }
@@ -111,7 +111,7 @@ export const graphsAdvancedAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "JavaScript",
-                code: "function numEnclaves(grid) {\n    const rows = grid.length, cols = grid[0].length;\n    function dfs(r, c) {\n        if (r < 0 || r >= rows || c < 0 || c >= cols || grid[r][c] === 0) return;\n        grid[r][c] = 0;\n        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1);\n    }\n    for (let r = 0; r < rows; r++) { dfs(r, 0); dfs(r, cols-1); }\n    for (let c = 0; c < cols; c++) { dfs(0, c); dfs(rows-1, c); }\n    \n    let count = 0;\n    for (let r = 0; r < rows; r++) {\n        for (let c = 0; c < cols; c++) {\n            if (grid[r][c] === 1) count++;\n        }\n    }\n    return count;\n}"
+                code: "function numEnclaves(grid) {\n    const rows = grid.length, cols = grid[0].length;\n    \n    function dfs(r, c) {\n        if (r < 0 || r >= rows || c < 0 || c >= cols || grid[r][c] === 0) return;\n        grid[r][c] = 0;\n        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1);\n    }\n    \n    for (let r = 0; r < rows; r++) { dfs(r, 0); dfs(r, cols-1); }\n    for (let c = 0; c < cols; c++) { dfs(0, c); dfs(rows-1, c); }\n    \n    let count = 0;\n    for (let r = 0; r < rows; r++) {\n        for (let c = 0; c < cols; c++) {\n            if (grid[r][c] === 1) count++;\n        }\n    }\n    return count;\n}"
              }
           ]
        }
@@ -138,7 +138,7 @@ export const graphsAdvancedAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: "from collections import deque\ndef ladderLength(beginWord, endWord, wordList):\n    wordSet = set(wordList)\n    if endWord not in wordSet: return 0\n    \n    q = deque([(beginWord, 1)])\n    while q:\n        word, length = q.popleft()\n        if word == endWord: return length\n        \n        for i in range(len(word)):\n            for char in 'abcdefghijklmnopqrstuvwxyz':\n                next_word = word[:i] + char + word[i+1:]\n                if next_word in wordSet:\n                    wordSet.remove(next_word)\n                    q.append((next_word, length + 1))\n    return 0"
+                code: "from collections import deque\n\ndef ladderLength(beginWord, endWord, wordList):\n    wordSet = set(wordList)\n    if endWord not in wordSet: return 0\n    \n    q = deque([(beginWord, 1)])\n    while q:\n        word, length = q.popleft()\n        if word == endWord: return length\n        \n        for i in range(len(word)):\n            for char in 'abcdefghijklmnopqrstuvwxyz':\n                next_word = word[:i] + char + word[i+1:]\n                if next_word in wordSet:\n                    wordSet.remove(next_word)\n                    q.append((next_word, length + 1))\n    return 0"
              }
           ]
        }
@@ -165,7 +165,7 @@ export const graphsAdvancedAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: "from collections import deque, defaultdict\ndef findLadders(beginWord, endWord, wordList):\n    wordSet = set(wordList)\n    if endWord not in wordSet: return []\n    \n    adj = defaultdict(list)\n    dist = {beginWord: 0}\n    q = deque([beginWord])\n    found = False\n    \n    while q and not found:\n        visited_this_level = set()\n        for _ in range(len(q)):\n            word = q.popleft()\n            for i in range(len(word)):\n                for c in 'abcdefghijklmnopqrstuvwxyz':\n                    next_w = word[:i] + c + word[i+1:]\n                    if next_w in wordSet:\n                        if next_w not in dist or dist[next_w] == dist[word] + 1:\n                            adj[word].append(next_w)\n                            if next_w not in dist:\n                                dist[next_w] = dist[word] + 1\n                                q.append(next_w)\n                                visited_this_level.add(next_w)\n                            if next_w == endWord: found = True\n\n    res = []\n    def backtrack(word, path):\n        if word == endWord:\n            res.append(list(path))\n            return\n        for next_w in adj[word]:\n            path.append(next_w)\n            backtrack(next_w, path)\n            path.pop()\n            \n    backtrack(beginWord, [beginWord])\n    return res"
+                code: "from collections import deque, defaultdict\n\ndef findLadders(beginWord, endWord, wordList):\n    wordSet = set(wordList)\n    if endWord not in wordSet: return []\n    \n    adj = defaultdict(list)\n    dist = {beginWord: 0}\n    q = deque([beginWord])\n    found = False\n    \n    while q and not found:\n        visited_this_level = set()\n        for _ in range(len(q)):\n            word = q.popleft()\n            for i in range(len(word)):\n                for c in 'abcdefghijklmnopqrstuvwxyz':\n                    next_w = word[:i] + c + word[i+1:]\n                    if next_w in wordSet:\n                        if next_w not in dist or dist[next_w] == dist[word] + 1:\n                            adj[word].append(next_w)\n                            if next_w not in dist:\n                                dist[next_w] = dist[word] + 1\n                                q.append(next_w)\n                                visited_this_level.add(next_w)\n                            if next_w == endWord: found = True\n\n    res = []\n    def backtrack(word, path):\n        if word == endWord:\n            res.append(list(path))\n            return\n        for next_w in adj[word]:\n            path.append(next_w)\n            backtrack(next_w, path)\n            path.pop()\n\n    backtrack(beginWord, [beginWord])\n    return res"
              }
           ]
        }

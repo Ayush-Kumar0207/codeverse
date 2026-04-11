@@ -22,19 +22,58 @@ export const dpAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: "def climbStairs(n: int) -> int:\n    if n <= 2: return n\n    prev2, prev1 = 1, 2\n    for i in range(3, n + 1):\n        curr = prev1 + prev2\n        prev2 = prev1\n        prev1 = curr\n    return prev1"
+                code: `def climbStairs(n: int) -> int:
+    if n <= 2: return n
+    prev2, prev1 = 1, 2
+    for i in range(3, n + 1):
+        curr = prev1 + prev2
+        prev2 = prev1
+        prev1 = curr
+    return prev1`
              },
              {
                 language: "JavaScript",
-                code: "function climbStairs(n) {\n    if (n <= 2) return n;\n    let prev2 = 1, prev1 = 2;\n    for (let i = 3; i <= n; i++) {\n        let curr = prev1 + prev2;\n        prev2 = prev1;\n        prev1 = curr;\n    }\n    return prev1;\n}"
+                code: `function climbStairs(n) {
+    if (n <= 2) return n;
+    let prev2 = 1, prev1 = 2;
+    for (let i = 3; i <= n; i++) {
+        let curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    return prev1;
+}`
              },
              {
                 language: "Java",
-                code: "class Solution {\n    public int climbStairs(int n) {\n        if (n <= 2) return n;\n        int prev2 = 1, prev1 = 2;\n        for (int i = 3; i <= n; i++) {\n            int curr = prev1 + prev2;\n            prev2 = prev1;\n            prev1 = curr;\n        }\n        return prev1;\n    }\n}"
+                code: `class Solution {
+    public int climbStairs(int n) {
+        if (n <= 2) return n;
+        int prev2 = 1, prev1 = 2;
+        for (int i = 3; i <= n; i++) {
+            int curr = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = curr;
+        }
+        return prev1;
+    }
+}`
              },
              {
-                 language: "C++",
-                 code: "class Solution {\npublic:\n    int climbStairs(int n) {\n        if(n <= 2) return n;\n        int prev2 = 1, prev1 = 2;\n        for(int i = 3; i <= n; i++){\n            int curr = prev1 + prev2;\n            prev2 = prev1;\n            prev1 = curr;\n        }\n        return prev1;\n    }\n};"
+                language: "C++",
+                code: `class Solution {
+public:
+    int climbStairs(int n) {
+        if(n <= 2) return n;
+        int prev2 = 1, prev1 = 2;
+        for(int i = 3; i <= n; i++){
+            int curr = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = curr;
+        }
+        return prev1;
+    }
+};`
              }
           ]
        }
@@ -157,20 +196,42 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     useCases: ["Autocorrect engines", "DNA sequence similarity", "Git diff calculations"],
     approaches: [
        {
-          name: "Optimal (2D Tabulation)",
-          description: "### 🧠 The Core Concept\nImagine you are converting 'HORSE' to 'ROS'. \nFor every character pair $(i, j)$:\n- If they match: Cost is 0, Move diagonally.\n- If they mismatch: We must choose the minimum cost among:\n  1. **Insert**: $1 + dp[i][j-1]$\n  2. **Delete**: $1 + dp[i-1][j]$\n  3. **Replace**: $1 + dp[i-1][j-1]$ (classic substitution).\n\n### 🛠️ Execution Strategy\nBuild a grid where `dp[i][j]` is the distance between `word1[:i]` and `word2[:j]`. Fill it based on the min-cost of surrounding cells.",
+          name: "Optimal (2D Tabulation: The Edit Grid)",
+          description: "### 🧠 The Core Concept: The 'Word Evolution' Analogy\nImagine you are transforming one word into another using a limited set of magical operations. Every operation (insert, delete, or replace) costs $1$ energy point. Your goal is to find the path with the **least total energy**.\n\n### 🛠️ The Strategy: Three-Way Decision Making\nAt any point where the characters `word1[i]` and `word2[j]` don't match, you have three choices:\n1. **Replace**: Swap the character ($1 + dp[i-1][j-1]$).\n2. **Insert**: Add a character ($1 + dp[i][j-1]$).\n3. **Delete**: Remove a character ($1 + dp[i-1][j]$).\n\nIf they **do match**, it costs $0$ energy, and you just inherit the score from the previous sub-problem ($dp[i-1][j-1]$).\n\n### 🚀 Why 2D DP?\nBy building a grid, we solve every possible sub-transformation once and store it. The final answer at the bottom-right corner represents the globally optimal sequence of edits.",
           timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "Every cell in the matrix is computed once.",
+          timeComplexityExplanation: "We fill every cell in an $N \times M$ matrix exactly once, performing a constant-time comparison in each cell.",
           spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "Storage for the distance matrix.",
+          spaceComplexityExplanation: "We store the entire distance matrix. This can be optimized to $O(\text{min}(N, M))$ using a rolling row strategy.",
           implementations: [
              {
                 language: "JavaScript",
-                code: "function minDistance(w1, w2) {\n    const m = w1.length, n = w2.length;\n    let dp = Array(m+1).fill().map(() => Array(n+1).fill(0));\n    for(let i=0; i<=m; i++) dp[i][0] = i;\n    for(let j=0; j<=n; j++) dp[0][j] = j;\n    for(let i=1; i<=m; i++) {\n        for(let j=1; j<=n; j++) {\n            if(w1[i-1] === w2[j-1]) dp[i][j] = dp[i-1][j-1];\n            else dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);\n        }\n    }\n    return dp[m][n];\n}"
+                code: `function minDistance(word1, word2) {
+    const m = word1.length, n = word2.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (word1[i - 1] === word2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + Math.min(
+                    dp[i - 1][j - 1], // Replace
+                    dp[i - 1][j],     // Delete
+                    dp[i][j - 1]      // Insert
+                );
+            }
+        }
+    }
+    return dp[m][n];
+}`
              }
           ]
        }
     ]
+
   },
   {
     id: "longest-increasing-subsequence",
@@ -255,15 +316,39 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     useCases: ["Limited liquidity trading"],
     approaches: [
        {
-          name: "Optimal (Tabulation)",
-          description: "### 🧠 The Core Concept\nWe use a 2D DP where `dp[i][j]` represents the max profit with exactly `i` transactions up to day `j`.",
+          name: "Optimal (K-Transaction DP)",
+          description: "### 🧠 The Core Concept: The 'Parallel Universes' Analogy\nInstead of just tracking 'buy' and 'sell', we track the maximum profit we can have for every possible transaction count from $1$ to $K$.\n\nEach day, for every transaction $i$, we make a choice:\n1. **Do Nothing**: Keep the profit we had yesterday for the same number of transactions.\n2. **Sell Today**: Take the 'best possible buy' state we recorded previously for transaction $i$ and add today's price.\n\n### 🛠️ Step-by-Step Logic\n1. **Recursive State**: `dp[i][j]` = max profit with at most `i` transactions up to day `j`.\n2. **Optimization**: Calculating the best day to buy for every day would be $O(N^2)$. Instead, we carry a `maxDiff` variable that tracks `dp[i-1][j] - prices[j]` (the leftover cash after buying a stock for the $i$-th time).\n3. **Result**: `dp[K][N-1]` is our final targeted fortune.",
           timeComplexity: "O(K * N)",
+          timeComplexityExplanation: "We have two nested loops: one for the number of transactions ($K$) and one for the days ($N$).",
           spaceComplexity: "O(K * N)",
+          spaceComplexityExplanation: "We store a 2D table of size $K \times N$. (Note: Can be optimized to $O(N)$ as we only need the previous transaction's row).",
           implementations: [
-             { language: "Python", code: "def maxProfit(k, prices):\n    if not prices: return 0\n    n = len(prices)\n    dp = [[0] * n for _ in range(k + 1)]\n    for i in range(1, k + 1):\n        max_diff = -prices[0]\n        for j in range(1, n):\n            dp[i][j] = max(dp[i][j-1], prices[j] + max_diff)\n            max_diff = max(max_diff, dp[i-1][j] - prices[j])\n    return dp[k][n-1]" }
+             {
+                language: "Python",
+                code: `def maxProfit(k, prices):
+    if not prices or k == 0: return 0
+    n = len(prices)
+    
+    # If k is very large, it's equivalent to infinite transactions
+    if k >= n // 2:
+        return sum(max(prices[i+1] - prices[i], 0) for i in range(n-1))
+        
+    dp = [[0] * n for _ in range(k + 1)]
+    for i in range(1, k + 1):
+        # max_diff tracks: profit from prev transaction - current buy price
+        max_diff = -prices[0]
+        for j in range(1, n):
+            # Option 1: Don't sell today. Option 2: Sell today
+            dp[i][j] = max(dp[i][j-1], prices[j] + max_diff)
+            # Update best buying potential for tomorrow
+            max_diff = max(max_diff, dp[i-1][j] - prices[j])
+            
+    return dp[k][n-1]`
+             }
           ]
        }
     ]
+
   },
   {
     id: "best-time-to-buy-and-sell-stock-with-cooldown",
@@ -277,15 +362,41 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     useCases: ["Trading with settlement latency"],
     approaches: [
        {
-          name: "Optimal (State Machine)",
-          description: "### 🧠 The Core Concept\nStates: `Buying`, `Selling`, `Resting`. \nYou can only buy if you weren't in 'Selling' state yesterday.",
+          name: "Optimal (State Machine DP)",
+          description: "### 🧠 The Core Concept: The 'Three Statuses' Analogy\nIn a world with cooldowns, a trader can only be in one of three states at the end of any day:\n1. **Holding**: You currently own a stock. You either bought it today or were already holding it.\n2. **Selled**: You just sold a stock today. This state triggers a MANDATORY cooldown for tomorrow.\n3. **Resting**: You don't own a stock and you didn't just sell one. You are free to buy whenever you like.\n\n### 🛠️ The Transitions\n- To be **Holding** today: Either you were already holding yesterday, or you were resting and decided to buy today.\n- To be **Selled** today: You must have been holding yesterday and sold today.\n- To be **Resting** today: Either you were resting yesterday, or you were in 'Selled' state yesterday (cooldown).",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "We make one single linear pass through the price array, updating three variables per step.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We only need to remember the states from 'yesterday', requiring constant space regardless of time horizon.",
           implementations: [
-             { language: "JavaScript", code: "function maxProfit(prices) {\n    let sold = 0, rest = 0, hold = -Infinity;\n    for (let p of prices) {\n        let prev_sold = sold;\n        sold = hold + p;\n        hold = Math.max(hold, rest - p);\n        rest = Math.max(rest, prev_sold);\n    }\n    return Math.max(sold, rest);\n}" }
+             {
+                language: "JavaScript",
+                code: `function maxProfit(prices) {
+    if (!prices.length) return 0;
+    
+    // Initial states
+    let hold = -prices[0]; // Profit after buying on day 0
+    let selled = 0;        // Can't sell on day 0
+    let rest = 0;          // Doing nothing
+    
+    for (let i = 1; i < prices.length; i++) {
+        let prevHold = hold;
+        let prevSelled = selled;
+        let prevRest = rest;
+        
+        // Update states for today
+        hold = Math.max(prevHold, prevRest - prices[i]);
+        selled = prevHold + prices[i];
+        rest = Math.max(prevRest, prevSelled);
+    }
+    
+    return Math.max(selled, rest);
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "print-longest-common-subsequence",
@@ -300,14 +411,35 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Backtrack thru DP Table)",
-          description: "### 🧠 The Core Concept\nOnce the 2D DP table is filled, start from `dp[m][n]`. If `s1[i-1] == s2[j-1]`, this char was part of LCS (move diagonally). Otherwise, move to the neighbor with the larger value.",
-          timeComplexity: "O(N * M)",
+          description: "### 🧠 The Core Concept: Moving Backwards\nFinding the string itself involves a 'Reverse Walk' through the 2D DP table generated for LCS length.\n\n### 🛠️ Step-by-Step Logistics\n1. Start at the bottom-right corner ($i=M, j=N$).\n2. **If characters match** (`s1[i-1] == s2[j-1]`):\n   - This character is part of our LCS! \n   - Add it to the result and move diagonally up-left ($i-1, j-1$).\n3. **If they mismatch**:\n   - Move to whichever neighboring cell (Up or Left) has the larger DP value. This effectively follows the path of the 'Max' function we used during the build phase.\n4. **Final Step**: Reverse the collected characters (since we collected them from end to start).",
+          timeComplexity: "O(N + M)",
+          timeComplexityExplanation: "After the $O(N \times M)$ build step, the backtracking walkthrough only takes linear time relative to total string length.",
           spaceComplexity: "O(N * M)",
+          spaceComplexityExplanation: "We must keep the entire 2D table in memory to perform the walk-back.",
           implementations: [
-             { language: "Python", code: "def printLCS(s1, s2, dp):\n    m, n = len(s1), len(s2); i, j = m, n; res = []\n    while i > 0 and j > 0:\n        if s1[i-1] == s2[j-1]: res.append(s1[i-1]); i-=1; j-=1\n        elif dp[i-1][j] > dp[i][j-1]: i-=1\n        else: j-=1\n    return ''.join(reversed(res))" }
+             {
+                language: "Python",
+                code: `def printLCS(s1, s2, dp):
+    m, n = len(s1), len(s2)
+    i, j = m, n
+    result = []
+    
+    while i > 0 and j > 0:
+        if s1[i-1] == s2[j-1]:
+            result.append(s1[i-1])
+            i -= 1
+            j -= 1
+        elif dp[i-1][j] > dp[i][j-1]:
+            i -= 1
+        else:
+            j -= 1
+            
+    return "".join(reversed(result))`
+             }
           ]
        }
     ]
+
   },
   {
     id: "longest-common-substring",
@@ -326,7 +458,7 @@ export const dpAlgorithms: AlgorithmEntry[] = [
           timeComplexity: "O(N * M)",
           spaceComplexity: "O(N * M)",
           implementations: [
-             { language: "JavaScript", code: "function longestCommonSubstring(s1, s2) {\n    let m = s1.length, n = s2.length, res = 0;\n    let dp = Array(m+1).fill().map(() => Array(n+1).fill(0));\n    for(let i=1; i<=m; i++) {\n        for(let j=1; j<=n; j++) {\n            if(s1[i-1] === s2[j-1]) {\n                dp[i][j] = 1 + dp[i-1][j-1];\n                res = Math.max(res, dp[i][j]);\n            } else dp[i][j] = 0;\n        }\n    }\n    return res;\n}" }
+             { language: "JavaScript", code: "function longestCommonSubstring(s1, s2) {\n    let m = s1.length, n = s2.length, res = 0;\n    let dp = Array(m+1).fill().map(() => Array(n+1).fill(0));\n    for(let i=1; i<=m; i++) {\n        for(let j=1; j<=n; j++) {\n            if(s1[i-1] === s2[j-1]) {\n                dp[i][j] = 1 + dp[i-1][j-1];\n                res = Math.max(res, dp[i][j]);\n            } else {\n                dp[i][j] = 0;\n            }\n        }\n    }\n    return res;\n}" }
           ]
        }
     ]
@@ -340,15 +472,15 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     difficulty: "Medium",
     overview: "A robot is located at the top-left corner of a m x n grid. Find the number of possible unique paths to reach the bottom-right corner.",
     leetcodeLink: "https://leetcode.com/problems/unique-paths/",
-    useCases: ["Route calculating in constrained grids", "Probability modeling"],
+    useCases: ["Robotics path planning", "Grid-based navigation"],
     approaches: [
        {
-          name: "Optimal (Top-Down Tabulation)",
-          description: "### 🧠 The Core Concept\nTo reach a cell $(i, j)$, the robot could only have come from the **Top** $(i-1, j)$ or the **Left** $(i, j-1)$. \nThus, `Ways(i, j) = Ways(i-1, j) + Ways(i, j-1)`.\n\n### 🛠️ Execution Strategy\n1. Initialize a 1D row array to save space.\n2. Fill the first row with 1s.\n3. For each row, update values: `row[j] = row[j] + row[j-1]`.",
+          name: "Optimal (DP Tabulation)",
+          description: "### The Core Concept\nTo reach any cell (i, j), you can only come from the cell above (i-1, j) or the cell to the left (i, j-1). Therefore, the number of ways to reach (i, j) is the sum of ways to reach those two cells. We build a DP table where dp[i][j] represents the number of unique paths to reach cell (i, j). The first row and first column can only be reached in one way (all right moves or all down moves), so we initialize them to 1. For all other cells, we sum the values from the cell above and the cell to the left.",
           timeComplexity: "O(N * M)",
-          spaceComplexity: "O(N)",
+          spaceComplexity: "O(N * M)",
           implementations: [
-             { language: "JavaScript", code: "function uniquePaths(m, n) {\n    let row = new Array(n).fill(1);\n    for (let i = 1; i < m; i++) {\n        for (let j = 1; j < n; j++) {\n            row[j] += row[j - 1];\n        }\n    }\n    return row[n - 1];\n}" }
+             { language: "Python", code: "def uniquePaths(m, n):\n    dp = [[1]*n for _ in range(m)]\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    return dp[-1][-1]" }
           ]
        }
     ]
@@ -366,7 +498,7 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Tabulation)",
-          description: "### 🧠 The Core Concept\nMin cost to reach $(i, j)$ is simply the cell's value plus the minimum of the cost to reach its top or left neighbor.",
+          description: "### The Core Concept\nThis problem asks for the minimum sum path from the top-left corner to the bottom-right corner of a grid, where you can only move down or right. The key insight is that to reach any cell (i, j), you must have come from either the cell above (i-1, j) or the cell to the left (i, j-1). Therefore, the minimum sum to reach (i, j) is the value of the current cell plus the minimum of the minimum sums to reach those two predecessor cells. We fill a DP table where dp[i][j] represents the minimum sum to reach cell (i, j) from the start. For the first row and first column, there is only one way to reach each cell (all right moves or all down moves respectively), so we handle those as base cases. The final answer is dp[m-1][n-1].",
           timeComplexity: "O(N * M)",
           spaceComplexity: "O(1) (In-place)",
           implementations: [
@@ -387,15 +519,30 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     useCases: ["Financial balancing", "Package selection"],
     approaches: [
        {
-          name: "Optimal (Boolean Tabulation)",
-          description: "### 🧠 The Core Concept\nFor each number, we check if we can achieve target `T` by either including it (check target `T-num`) or excluding it (check target `T`).",
+          name: "Optimal (1D DP: The 'Can I Make This?' Table)",
+          description: "### 🧠 The Core Concept: The 'Unlock' Analogy\nImagine you have a row of target boxes labeled from $0$ to $K$. Initially, only Box $0$ is 'unlocked' (because it's always possible to make a sum of $0$ using no numbers).\n\nWhen we pick up a new number (e.g., $5$), we walk backwards from the end and ask: *\"If Box 10 was locked, but Box 5 was already unlocked, can I now unlock Box 10?\"* Yes! (By adding our new $5$ to the subset that made the old $5$).\n\n### 🛠️ Execution Strategy\n1. **Initialize** a boolean array `dp` of size `target + 1`. set `dp[0] = True`.\n2. **Iterate** through each number in the input array.\n3. **Backwards Scan**: For each number $N$, iterate from `target` down to $N$. \n   - Update: `dp[i] = dp[i] OR dp[i - N]`.\n   - **Why backwards?** To ensure we only use each number once. Scanning forwards would allow the same number to be reused multiple times in the same row.",
           timeComplexity: "O(N * K)",
+          timeComplexityExplanation: "We process $N$ integers, and for each, we perform a linear scan of size $K$ (our target sum).",
           spaceComplexity: "O(K)",
+          spaceComplexityExplanation: "We compressed a 2D matrix ($N \times K$) into a single 1D array by only keeping the current achievable sums.",
           implementations: [
-             { language: "JavaScript", code: "function subsetSum(nums, k) {\n    let dp = new Array(k + 1).fill(false);\n    dp[0] = true;\n    for (let num of nums) {\n        for (let i = k; i >= num; i--) {\n            dp[i] = dp[i] || dp[i - num];\n        }\n    }\n    return dp[k];\n}" }
+             {
+                language: "JavaScript",
+                code: `function subsetSum(nums, k) {
+    let dp = new Array(k + 1).fill(false);
+    dp[0] = true;
+    for (let num of nums) {
+        for (let i = k; i >= num; i--) {
+            dp[i] = dp[i] || dp[i - num];
+        }
+    }
+    return dp[k];
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "0-1-knapsack",
@@ -409,15 +556,27 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     useCases: ["Resource allocation", "Selection optimization"],
     approaches: [
        {
-          name: "Optimal (1D DP Optimization)",
-          description: "### 🧠 The Core Concept\nWe iterate through items. For each weight capacity from `W` down to `itemWeight`, we decide whether to take the item.",
+          name: "Optimal (1D Space-Optimized DP)",
+          description: "### 🧠 The Core Concept: Value vs. Weight\nIn 0/1 Knapsack, each item is a choice: to 'Take' or 'Leave'. \n\nIf we decide to TAKE an item with weight $W$ and value $V$, our new total value is $V$ + (the maximum value we already found for a knapsack with capacity `Total - W`).\n\n### 🛠️ The Strategy\n- Like Subset Sum, we use a 1D array to store the maximum value achievable for every possible capacity up to the limit.\n- **Crucial**: We scan **backwards** through the weights. This prevents us from including the same item multiple times (which would be 'Unbounded Knapsack').",
           timeComplexity: "O(N * W)",
+          timeComplexityExplanation: "We evaluate every item across every possible weight capacity exactly once.",
           spaceComplexity: "O(W)",
+          spaceComplexityExplanation: "By only storing the results of the current 'best' values for each capacity, we avoid the $O(N \times W)$ matrix overhead.",
           implementations: [
-             { language: "Python", code: "def knapsack(wt, val, W, n):\n    dp = [0] * (W + 1)\n    for i in range(n):\n        for w in range(W, wt[i] - 1, -1):\n            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])\n    return dp[W]" }
+             {
+                language: "Python",
+                code: `def knapsack(wt, val, W, n):
+    dp = [0] * (W + 1)
+    for i in range(n):
+        # Scan BACKWARDS to ensure each item is used exactly once
+        for w in range(W, wt[i] - 1, -1):
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])
+    return dp[W]`
+             }
           ]
        }
     ]
+
   },
   {
     id: "triangle",
@@ -430,16 +589,19 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     leetcodeLink: "https://leetcode.com/problems/triangle/",
     useCases: ["Pathfinding in pyramid structures"],
     approaches: [
-       {
-          name: "Optimal (Bottom-Up Tabulation)",
-          description: "### 🧠 The Core Concept\nStarting from the second to last row, each cell's min path sum is its value plus the minimum of the two cells directly below it.",
-          timeComplexity: "O(N^2)",
-          spaceComplexity: "O(N)",
-          implementations: [
-             { language: "Python", code: "def minimumTotal(triangle):\n    dp = triangle[-1]\n    for i in range(len(triangle)-2, -1, -1):\n        for j in range(len(triangle[i])):\n            dp[j] = triangle[i][j] + min(dp[j], dp[j+1])\n    return dp[0]" }
-          ]
-       }
-    ]
+      {
+        name: "Optimal (Bottom-Up Tabulation)",
+        description: "### 🧠 The Core Concept\nStarting from the second to last row, each cell's min path sum is its value plus the minimum of the two cells directly below it.",
+        timeComplexity: "O(N^2)",
+        spaceComplexity: "O(N)",
+        implementations: [
+          {
+            language: "Python",
+            code: "def minimumTotal(triangle):\n    dp = triangle[-1]\n    for i in range(len(triangle)-2, -1, -1):\n        for j in range(len(triangle[i])):\n            dp[j] = triangle[i][j] + min(dp[j], dp[j+1])\n    return dp[0]",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "rod-cutting-problem",
@@ -452,16 +614,19 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     leetcodeLink: "",
     useCases: ["Material utilization optimization"],
     approaches: [
-       {
-          name: "Optimal (Unbounded Knapsack variant)",
-          description: "### 🧠 The Core Concept\nWe treat lengths as 'weights' and prices as 'values'. Since we can use any length multiple times, it's an Unbounded Knapsack problem.",
-          timeComplexity: "O(Length * N)",
-          spaceComplexity: "O(Length)",
-          implementations: [
-             { language: "JavaScript", code: "function cutRod(price, n) {\n    let dp = new Array(n + 1).fill(0);\n    for (let i = 1; i <= n; i++) {\n        for (let j = 0; j < i; j++) {\n            dp[i] = Math.max(dp[i], price[j] + dp[i - j - 1]);\n        }\n    }\n    return dp[n];\n}" }
-          ]
-       }
-    ]
+      {
+        name: "Optimal (Unbounded Knapsack variant)",
+        description: "### 🧠 The Core Concept\nWe treat lengths as 'weights' and prices as 'values'. Since we can use any length multiple times, it's an Unbounded Knapsack problem.",
+        timeComplexity: "O(Length * N)",
+        spaceComplexity: "O(Length)",
+        implementations: [
+          {
+            language: "JavaScript",
+            code: "function cutRod(price, n) {\n    let dp = new Array(n + 1).fill(0);\n    for (let i = 1; i <= n; i++) {\n        for (let j = 0; j < i; j++) {\n            dp[i] = Math.max(dp[i], price[j] + dp[i - j - 1]);\n        }\n    }\n    return dp[n];\n}",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "matrix-chain-multiplication",
@@ -474,15 +639,35 @@ export const dpAlgorithms: AlgorithmEntry[] = [
     leetcodeLink: "",
     useCases: ["Compiler optimization", "Robotics kinematics chains"],
     approaches: [
-       {
-          name: "Optimal (MCM Tabulation)",
-          description: "### 🧠 The Core Concept\nDivide the problem into sub-problems: *\"What is the min cost to multiply matrices from index i to j?\"* \nTry all possible split points `k` between `i` and `j`.",
-          timeComplexity: "O(N^3)",
-          spaceComplexity: "O(N^2)",
-          implementations: [
-             { language: "Python", code: "def matrixMultiplication(arr, n):\n    dp = [[0]*n for _ in range(n)]\n    for length in range(2, n):\n        for i in range(1, n - length + 1):\n            j = i + length - 1\n            dp[i][j] = float('inf')\n            for k in range(i, j):\n                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j] + arr[i-1]*arr[k]*arr[j])\n    return dp[1][n-1]" }
-          ]
-       }
-    ]
-  }
+      {
+        name: "Optimal (MCM Partitioning)",
+        description: "### 🧠 The Core Concept: The 'Parentheses Puzzle'\nWhen multiplying matrices $A, B, C$, you can do $(AB)C$ or $A(BC)$. While both give the same result, the number of multiplications (cost) can be vastly different.\n\nThis is **Partition DP**. We solve for the minimum cost of all possible 'sub-chains' and use them to find the cost of larger chains.\n\n### 🛠️ Execution Strategy\n1. Use a 2D `dp` table where `dp[i][j]` is the min cost to multiply matrices from index $i$ to $j$.\n2. **Smallest Sub-problems**: Chains of length 1 (a single matrix) cost $0$ to multiply.\n3. **Growing Chains**: Solve for chains of length 2, then 3, all the way to $N$.\n4. **The Split**: For a chain from $i$ to $j$, try every possible split point $k$ ($i \\le k < j$). \n   - Total Cost = `Cost(i to k)` + `Cost(k+1 to j)` + `Cost(Merging the two resulting matrices)`.\n   - Merging cost is defined by dimensions: `dim[i-1] * dim[k] * dim[j]`.",
+        timeComplexity: "O(N³)",
+        timeComplexityExplanation: "We have three nested loops: one for chain length, one for the start index, and one for the split point $k$.",
+        spaceComplexity: "O(N²)",
+        spaceComplexityExplanation: "We store an $N \times N$ table of minimum costs for all possible sub-chains.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def matrixMultiplication(arr, n):
+    # dp[i][j] = min multiplications for matrices i through j
+    dp = [[0] * n for _ in range(n)]
+    
+    # L is chain length
+    for L in range(2, n):
+        for i in range(1, n - L + 1):
+            j = i + L - 1
+            dp[i][j] = float('inf')
+            # Try all partition points k
+            for k in range(i, j):
+                q = dp[i][k] + dp[k+1][j] + (arr[i-1] * arr[k] * arr[j])
+                if q < dp[i][j]:
+                    dp[i][j] = q
+                    
+    return dp[1][n-1]`,
+          },
+        ],
+      },
+    ],
+  },
 ];

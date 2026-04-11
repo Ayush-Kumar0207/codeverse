@@ -185,14 +185,52 @@ export const greedyAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Greedy Choice)",
-          description: "### 🧠 The Core Concept\nAlways prioritize giving a $10 bill and a $5 bill as change for a $20 bill, rather than three $5 bills. $5 bills are more 'valuable' for future change.",
+          description: "### 🧠 The Core Concept: The 'Bill Scarcity' Strategy\nWhy is this greedy? Because a $5 bill is more 'flexible' than a $10 bill. You can use a $5 bill to give change for both $10 and $20, but a $10 bill only works for a $20.\n\n### 🛠️ Step-by-Step Logic\n1. If customer gives $5: keep it.\n2. If customer gives $10: must give back $5. (Decrease $5 count, increase $10 count).\n3. If customer gives $20: \n   - **Option A (Greedy)**: Give one $10 and one $5. \n   - **Option B**: Give three $5 bills.\n   - Always try Option A first to save your precious $5 bills!",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "We process each customer exactly once in a single pass.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We only track the count of $5 and $10 bills.",
           implementations: [
-             { language: "JavaScript", code: "function lemonadeChange(bills) {\n    let five = 0, ten = 0;\n    for (let x of bills) {\n        if (x === 5) five++;\n        else if (x === 10) { if (five === 0) return false; five--; ten++; }\n        else {\n            if (ten > 0 && five > 0) { ten--; five--; }\n            else if (five >= 3) five -= 3;\n            else return false;\n        }\n    }\n    return true;\n}" }
+             {
+                language: "Python",
+                code: `def lemonadeChange(bills):
+    five = ten = 0
+    for b in bills:
+        if b == 5: five += 1
+        elif b == 10:
+            if not five: return False
+            five -= 1; ten += 1
+        else:
+            if ten > 0 and five > 0:
+                ten -= 1; five -= 1
+            elif five >= 3:
+                five -= 3
+            else:
+                return False
+    return True`
+             },
+             {
+                language: "JavaScript",
+                code: `function lemonadeChange(bills) {
+    let five = 0, ten = 0;
+    for (let x of bills) {
+        if (x === 5) five++;
+        else if (x === 10) { 
+            if (five === 0) return false; 
+            five--; ten++; 
+        } else {
+            if (ten > 0 && five > 0) { ten--; five--; }
+            else if (five >= 3) five -= 3;
+            else return false;
+        }
+    }
+    return true;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "valid-parenthesis-string",
@@ -206,15 +244,44 @@ export const greedyAlgorithms: AlgorithmEntry[] = [
     useCases: ["Flexible syntax validation"],
     approaches: [
        {
-          name: "Optimal (Min/Max Balance)",
-          description: "### 🧠 The Core Concept\nKeep track of the range of possible open brackets. `minOpen` ignores `*` as `)`, `maxOpen` treats `*` as `(`.",
+          name: "Optimal (Range of Possibility)",
+          description: "### 🧠 The Core Concept: The 'Elastic' Balance\nBecause `*` can be anything, the count of open brackets isn't a single number—it's a **Range**. \n- `minOpen`: The minimum possible open brackets (treating `*` as `)` if possible).\n- `maxOpen`: The maximum possible open brackets (treating `*` as `(` if possible).\n\nIf at any point `maxOpen < 0`, the string is impossible. If at the end `minOpen == 0`, the string is valid.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "Python", code: "def checkValidString(s):\n    mi = ma = 0\n    for c in s:\n        if c == '(': mi += 1; ma += 1\n        elif c == ')': mi -= 1; ma -= 1\n        else: mi -= 1; ma += 1\n        if ma < 0: return False\n        if mi < 0: mi = 0\n    return mi == 0" }
+             {
+                language: "Python",
+                code: `def checkValidString(s):
+    low = high = 0
+    for char in s:
+        if char == '(':
+            low += 1; high += 1
+        elif char == ')':
+            low -= 1; high -= 1
+        else:
+            low -= 1; high += 1
+        if high < 0: return False
+        if low < 0: low = 0
+    return low == 0`
+             },
+             {
+                language: "JavaScript",
+                code: `function checkValidString(s) {
+    let low = 0, high = 0;
+    for (let char of s) {
+        if (char === '(') { low++; high++; }
+        else if (char === ')') { low--; high--; }
+        else { low--; high++; }
+        if (high < 0) return false;
+        if (low < 0) low = 0;
+    }
+    return low === 0;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "jump-game-ii",
@@ -229,14 +296,41 @@ export const greedyAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Greedy Range Expansion)",
-          description: "### 🧠 The Core Concept\nJump as far as possible within the current reach. When you reach the boundary of your current jump, increment jump count and update the boundary to the farthest point found.",
+          description: "### 🧠 The Core Concept: The 'Ladders' Analogy\nImagine you are navigating a dark hallway. Each spot has a lantern (the jump distance). You want to reach the end with minimum steps.\n\nYou stand at your current reach and look at all the spots you can jump to. You ask: *'Which of these spots has the longest lantern that lets me see the farthest into the hallway?'*\n\nYou take one 'jump' and move your boundary to that farthest spot.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "JavaScript", code: "function jump(nums) {\n    let jumps = 0, curEnd = 0, curFarthest = 0;\n    for (let i = 0; i < nums.length - 1; i++) {\n        curFarthest = Math.max(curFarthest, i + nums[i]);\n        if (i === curEnd) { jumps++; curEnd = curFarthest; }\n    }\n    return jumps;\n}" }
+             {
+                language: "Python",
+                code: `def jump(nums):
+    jumps = 0
+    current_end = 0
+    farthest = 0
+    for i in range(len(nums) - 1):
+        farthest = max(farthest, i + nums[i])
+        if i == current_end:
+            jumps += 1
+            current_end = farthest
+    return jumps`
+             },
+             {
+                language: "JavaScript",
+                code: `function jump(nums) {
+    let jumps = 0, curEnd = 0, curFarthest = 0;
+    for (let i = 0; i < nums.length - 1; i++) {
+        curFarthest = Math.max(curFarthest, i + nums[i]);
+        if (i === curEnd) { 
+            jumps++; 
+            curEnd = curFarthest; 
+        }
+    }
+    return jumps;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "candy",
@@ -250,15 +344,44 @@ export const greedyAlgorithms: AlgorithmEntry[] = [
     useCases: ["Incentive alignment"],
     approaches: [
        {
-          name: "Optimal (Two-Pass Greedy)",
-          description: "### 🧠 The Core Concept\n1. Left-to-Right: Ensure child $i$ gets more than $i-1$ if rating is higher.\n2. Right-to-Left: Ensure child $i$ gets more than $i+1$ if rating is higher.",
+          name: "Optimal (Two-Pass Greedy Sweep)",
+          description: "### 🧠 The Core Concept: The 'Local Influence' Analogy\nEach child's candy count is only influenced by their immediate neighbors. \n1. **Forward Pass**: Ensure every child with a higher rating than their *left* neighbor gets more candy than them.\n2. **Backward Pass**: Ensure every child with a higher rating than their *right* neighbor gets more candy than them.\n\nBy taking the maximum of these two constraints, we satisfy all requirements with minimum total candy.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(N)",
           implementations: [
-             { language: "Python", code: "def candy(ratings):\n    n = len(ratings); res = [1] * n\n    for i in range(1, n):\n        if ratings[i] > ratings[i-1]: res[i] = res[i-1] + 1\n    for i in range(n-2, -1, -1):\n        if ratings[i] > ratings[i+1]: res[i] = max(res[i], res[i+1] + 1)\n    return sum(res)" }
+             {
+                language: "Python",
+                code: `def candy(ratings):
+    n = len(ratings)
+    candies = [1] * n
+    for i in range(1, n):
+        if ratings[i] > ratings[i-1]:
+            candies[i] = candies[i-1] + 1
+    for i in range(n-2, -1, -1):
+        if ratings[i] > ratings[i+1]:
+            candies[i] = max(candies[i], candies[i+1] + 1)
+    return sum(candies)`
+             },
+             {
+                language: "JavaScript",
+                code: `function candy(ratings) {
+    const n = ratings.length;
+    let res = new Array(n).fill(1);
+    for (let i = 1; i < n; i++) {
+        if (ratings[i] > ratings[i-1]) res[i] = res[i-1] + 1;
+    }
+    for (let i = n - 2; i >= 0; i--) {
+        if (ratings[i] > ratings[i+1]) {
+            res[i] = Math.max(res[i], res[i+1] + 1);
+        }
+    }
+    return res.reduce((a, b) => a + b, 0);
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "fractional-knapsack",

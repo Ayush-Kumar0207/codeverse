@@ -91,16 +91,41 @@ export const sortingAlgorithms: AlgorithmEntry[] = [
     useCases: ["Educational basics", "Small data sets"],
     approaches: [
        {
-          name: "Standard Implementation",
-          description: "### 🧠 The Core Concept\nFind the smallest element in the unsorted part and swap it with the first element of the unsorted part.",
+          name: "Standard Optimal",
+          description: "### 🧠 The Core Concept: The 'Mini-Scan' Strategy\nImagine you have a messy shelf of books. You start at the left, scan the entire shelf for the thinnest book, and swap it with the book in the first position. Now the first position is perfect. Then you scan the rest of the shelf for the second thinnest, and so on.\n\n### 🛠️ Execution Strategy\n1. Iterate from $i = 0$ to $n-1$.\n2. For each $i$, find the index of the minimum element in the range $[i, n-1]$.\n3. Swap that minimum element with the element at index $i$.\n4. The sorted boundary moves forward one step.",
           timeComplexity: "O(N²)",
-          timeComplexityExplanation: "Nested loops: for each N, search remaining N-i.",
+          timeComplexityExplanation: "Regardless of whether the array is sorted or not, we always perform the same number of comparisons to find the minimum: $N + (N-1) + (N-2) ... + 1 = N(N+1)/2$.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We sort the array in-place without any extra storage.",
           implementations: [
-             { language: "JavaScript", code: "function selectionSort(arr) {\n    for (let i = 0; i < arr.length - 1; i++) {\n        let min = i;\n        for (let j = i + 1; j < arr.length; j++) {\n            if (arr[j] < arr[min]) min = j;\n        }\n        [arr[i], arr[min]] = [arr[min], arr[i]];\n    }\n}" }
+             {
+                language: "Python",
+                code: `def selectionSort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        mini = i
+        for j in range(i + 1, n):
+            if arr[j] < arr[mini]:
+                mini = j
+        arr[i], arr[mini] = arr[mini], arr[i]`
+             },
+             {
+                language: "JavaScript",
+                code: `function selectionSort(arr) {
+    let n = arr.length;
+    for (let i = 0; i < n - 1; i++) {
+        let mini = i;
+        for (let j = i + 1; j < n; j++) {
+            if (arr[j] < arr[mini]) mini = j;
+        }
+        [arr[i], arr[mini]] = [arr[mini], arr[i]];
+    }
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "bubble-sort",
@@ -115,15 +140,43 @@ export const sortingAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (With Early Exit)",
-          description: "### 🧠 The Core Concept\nLargest elements 'bubble' up to the end. If no swaps occur in a pass, the array is already sorted.",
+          description: "### 🧠 The Core Concept: The 'Weight' Analogy\nImagine elements as bubbles in water. Heavier (larger) elements 'sink' to the bottom (the end of the array) while lighter ones float to the top. Every full pass guarantees that at least one more heavy element has reached its final home at the end.\n\n### 🛠️ Execution Strategy\n1. Iterate from the end of the array down to the start.\n2. In each pass, compare adjacent elements: `arr[j]` and `arr[j+1]`.\n3. If `arr[j] > arr[j+1]`, swap them.\n4. **Optimization**: If an entire pass completes without a single swap, the array is already sorted! We can stop early.",
           timeComplexity: "O(N²) (Avg), O(N) (Best)",
-          timeComplexityExplanation: "Worst case is $O(N^2)$, but sorted arrays exit in $O(N)$.",
+          timeComplexityExplanation: "Best case occurs if the array is already sorted, finishing in a single $O(N)$ pass. Average/Worst is $O(N^2)$ for reverse-sorted data.",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "Python", code: "def bubbleSort(arr):\n    n = len(arr)\n    for i in range(n):\n        swapped = False\n        for j in range(0, n - i - 1):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n                swapped = True\n        if not swapped: break" }
+             {
+                language: "Python",
+                code: `def bubbleSort(arr):
+    n = len(arr)
+    for i in range(n - 1, 0, -1):
+        didSwap = False
+        for j in range(i):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                didSwap = True
+        if not didSwap: break`
+             },
+             {
+                language: "JavaScript",
+                code: `function bubbleSort(arr) {
+    let n = arr.length;
+    for (let i = n - 1; i >= 0; i--) {
+        let didSwap = false;
+        for (let j = 0; j <= i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                didSwap = true;
+            }
+        }
+        if (!didSwap) break;
+    }
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "insertion-sort",
@@ -137,15 +190,36 @@ export const sortingAlgorithms: AlgorithmEntry[] = [
     useCases: ["Almost sorted data", "Online sorting"],
     approaches: [
        {
-          name: "Standard Implementation",
-          description: "### 🧠 The Core Concept\nTake an element and keep swapping it backward until it finds its sorted home.",
+          name: "Standard Optimal",
+          description: "### 🧠 The Core Concept: The 'Playing Cards' Analogy\nImagine you're playing cards. You pick up a new card and 'insert' it into the sorted group in your hand. You do this by comparing it with the cards on its left and shifting them right until you find the correct hole to drop the new card into.\n\n### 🛠️ Execution Strategy\n1. Start from the second element (it's the 'new card').\n2. Compare it with the element on its left.\n3. If it's smaller, 'shift' it left until it reaches a smaller element or the start of the array.\n4. Repeat for all elements in the unsorted portion.",
           timeComplexity: "O(N²) (Avg), O(N) (Best)",
-          timeComplexityExplanation: "Efficient for small or almost-sorted data.",
+          timeComplexityExplanation: "In the best case (already sorted), each element only checks one neighbor. In the worst case (reverse sorted), it checks all previously sorted elements.",
           spaceComplexity: "O(1)",
           implementations: [
-             { language: "JavaScript", code: "function insertionSort(arr) {\n    for (let i = 1; i < arr.length; i++) {\n        let j = i;\n        while (j > 0 && arr[j-1] > arr[j]) {\n            [arr[j], arr[j-1]] = [arr[j-1], arr[j]];\n            j--;\n        }\n    }\n}" }
+             {
+                language: "Python",
+                code: `def insertionSort(arr):
+    for i in range(len(arr)):
+        j = i
+        while j > 0 and arr[j - 1] > arr[j]:
+            arr[j - 1], arr[j] = arr[j], arr[j - 1]
+            j -= 1`
+             },
+             {
+                language: "JavaScript",
+                code: `function insertionSort(arr) {
+    for (let i = 0; i <= arr.length - 1; i++) {
+        let j = i;
+        while (j > 0 && arr[j - 1] > arr[j]) {
+            [arr[j - 1], arr[j]] = [arr[j], arr[j - 1]];
+            j--;
+        }
+    }
+}`
+             }
           ]
        }
     ]
+
   }
 ];

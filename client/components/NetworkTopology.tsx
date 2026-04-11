@@ -94,7 +94,7 @@ function NodeIcon({ icon: Icon, label, active, isHub }: { icon: any, label: stri
           scale: active ? 1.1 : 1,
           borderColor: active ? "var(--primary)" : "rgba(255,255,255,0.05)"
         }}
-        className={`w-12 h-12 rounded-xl border flex items-center justify-center bg-black/60 relative z-10 transition-colors ${isHub ? 'shadow-[0_0_20px_rgba(99,102,241,0.2)] border-primary/20' : ''}`}
+        className={`w-12 h-12 rounded-xl border flex items-center justify-center bg-black/60 relative z-10 transition-colors ${isHub && active ? 'shadow-[0_0_20px_rgba(99,102,241,0.2)] border-primary/20' : ''}`}
       >
         <Icon className={`w-5 h-5 ${active ? "text-primary" : "text-white/20"}`} />
         {active && (

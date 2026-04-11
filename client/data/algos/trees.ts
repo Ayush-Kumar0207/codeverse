@@ -22,19 +22,19 @@ export const treesAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "JavaScript",
-                code: "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\nvar maxDepth = function(root) {\n    if (root === null) return 0;\n    \n    let leftDepth = maxDepth(root.left);\n    let rightDepth = maxDepth(root.right);\n    \n    return Math.max(leftDepth, rightDepth) + 1;\n};"
+                code: "var maxDepth = function(root) {\n    if (root === null) return 0;\n    let leftDepth = maxDepth(root.left);\n    let rightDepth = maxDepth(root.right);\n    return Math.max(leftDepth, rightDepth) + 1;\n};"
              },
              {
                 language: "Python",
-                code: "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def maxDepth(self, root: Optional[TreeNode]) -> int:\n        if not root:\n            return 0\n            \n        left_depth = self.maxDepth(root.left)\n        right_depth = self.maxDepth(root.right)\n        \n        return max(left_depth, right_depth) + 1"
+                code: "class Solution:\n    def maxDepth(self, root: Optional[TreeNode]) -> int:\n        if not root:\n            return 0\n        left_depth = self.maxDepth(root.left)\n        right_depth = self.maxDepth(root.right)\n        return max(left_depth, right_depth) + 1"
              },
              {
                 language: "Java",
-                code: "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int maxDepth(TreeNode root) {\n        if (root == null) return 0;\n        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;\n    }\n}"
+                code: "class Solution {\n    public int maxDepth(TreeNode root) {\n        if (root == null) return 0;\n        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;\n    }\n}"
              },
              {
                 language: "C++",
-                code: "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        if (root == nullptr) return 0;\n        return max(maxDepth(root->left), maxDepth(root->right)) + 1;\n    }\n};"
+                code: "class Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        if (root == nullptr) return 0;\n        return max(maxDepth(root->left), maxDepth(root->right)) + 1;\n    }\n};"
              }
           ]
        }
@@ -61,11 +61,11 @@ export const treesAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "JavaScript",
-                code: "var invertTree = function(root) {\n    if (root === null) return null;\n    \n    // Standard pointer swap\n    let temp = root.left;\n    root.left = root.right;\n    root.right = temp;\n    \n    // Recursively flip the branches\n    invertTree(root.left);\n    invertTree(root.right);\n    \n    return root;\n};"
+                code: "var invertTree = function(root) {\n    if (root === null) return null;\n    \n    let temp = root.left;\n    root.left = root.right;\n    root.right = temp;\n    \n    invertTree(root.left);\n    invertTree(root.right);\n    \n    return root;\n};"
              },
              {
                 language: "Python",
-                code: "class Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        if not root:\n            return None\n            \n        # Python allows beautiful single-line tuple assignment swapping\n        root.left, root.right = root.right, root.left\n        \n        self.invertTree(root.left)\n        self.invertTree(root.right)\n        \n        return root"
+                code: "class Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        if not root:\n            return None\n            \n        root.left, root.right = root.right, root.left\n        \n        self.invertTree(root.left)\n        self.invertTree(root.right)\n        \n        return root"
              },
              {
                 language: "Java",
@@ -100,7 +100,7 @@ export const treesAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "JavaScript",
-                code: "var lowestCommonAncestor = function(root, p, q) {\n    let current = root;\n    \n    while (current !== null) {\n        // Both targets are strictly in the right subtree ecosystem\n        if (p.val > current.val && q.val > current.val) {\n            current = current.right;\n        } \n        // Both targets are strictly in the left subtree ecosystem\n        else if (p.val < current.val && q.val < current.val) {\n            current = current.left;\n        } \n        // Timeline structural divergence detected!\n        else {\n            return current;\n        }\n    }\n    return null;\n};"
+                code: "var lowestCommonAncestor = function(root, p, q) {\n    let current = root;\n    \n    while (current !== null) {\n        if (p.val > current.val && q.val > current.val) {\n            current = current.right;\n        } \n        else if (p.val < current.val && q.val < current.val) {\n            current = current.left;\n        } \n        else {\n            return current;\n        }\n    }\n    return null;\n};"
              },
              {
                 language: "Python",
@@ -185,14 +185,50 @@ export const treesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Queue-Based BFS)",
-          description: "### 🧠 The Core Concept\nUse a Queue to keep track of nodes. For every level, record all current nodes in the queue, then add their children for the next level.",
+          description: "### 🧠 The Core Concept: The 'Wavefront' Analogy\nImagine dropping a pebble into a pond. The ripples (levels) move outward in concentric circles. You process the entire first circle before moving to the second.\n\n### 🛠️ Step-by-Step Logic\n1. Use a **Queue** data structure to maintain the order.\n2. Add the `root` to the queue.\n3. While the queue isn't empty:\n   - Check the `size` of the queue (this is how many nodes are on the current level).\n   - Loop `size` times: Pop a node, save its value, and add its children to the back of the queue.\n   - Add the completed level list to your results.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "Every node is enqueued and dequeued exactly once.",
           spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "In the worst case (a perfect binary tree), the last level contains $N/2$ nodes, requiring $O(N)$ storage in the queue.",
           implementations: [
-             { language: "JavaScript", code: "var levelOrder = function(root) {\n    if(!root) return [];\n    let res = [], q = [root];\n    while(q.length) {\n        let size = q.length, level = [];\n        for(let i=0; i<size; i++) {\n            let node = q.shift();\n            level.push(node.val);\n            if(node.left) q.push(node.left);\n            if(node.right) q.push(node.right);\n        }\n        res.push(level);\n    }\n    return res;\n};" }
+             {
+                language: "JavaScript",
+                code: `function levelOrder(root) {
+    if (!root) return [];
+    let res = [], queue = [root];
+    while (queue.length) {
+        let size = queue.length, level = [];
+        for (let i = 0; i < size; i++) {
+            let node = queue.shift();
+            level.push(node.val);
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        res.push(level);
+    }
+    return res;
+}`
+             },
+             {
+                language: "Python",
+                code: `from collections import deque
+def levelOrder(root):
+    if not root: return []
+    res, queue = [], deque([root])
+    while queue:
+        level = []
+        for _ in range(len(queue)):
+            node = queue.popleft()
+            level.append(node.val)
+            if node.left: queue.append(node.left)
+            if node.right: queue.append(node.right)
+        res.append(level)
+    return res`
+             }
           ]
        }
     ]
+
   },
   {
     id: "iterative-inorder",
@@ -207,14 +243,45 @@ export const treesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Explicit Stack)",
-          description: "### 🧠 The Core Concept\nTraverse far left as possible, pushing nodes to stack. When you hit NULL, pop from stack, visit, and move to the right child.",
+          description: "### 🧠 The Core Concept: The 'Leftmost-First' Strategy\nRecursion uses a hidden call stack. We can do it manually by using our own **Stack**. The goal is: always try to go left, but remember the way back up.\n\n### 🛠️ Execution Strategy\n1. Maintain a pointer `curr` at the current node and an empty stack.\n2. **Drill Left**: While `curr` is not null, push `curr` to the stack and move to `curr.left`.\n3. **Backtrack & Visit**: Pop from the stack (you've reached the deepest possible left), process this node's value.\n4. **Explore Right**: Set `curr = poppedNode.right` and repeat from step 2.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "Every node is pushed and popped exactly once.",
           spaceComplexity: "O(H)",
+          spaceComplexityExplanation: "The stack stores the path from root to the current leaf, which is the height of the tree.",
           implementations: [
-             { language: "Python", code: "def inorderTraversal(root):\n    res, stack, curr = [], [], root\n    while curr or stack:\n        while curr:\n            stack.append(curr)\n            curr = curr.left\n        curr = stack.pop()\n        res.append(curr.val)\n        curr = curr.right\n    return res" }
+             {
+                language: "Python",
+                code: `def inorderTraversal(root):
+    res, stack, curr = [], [], root
+    while curr or stack:
+        while curr:
+            stack.append(curr)
+            curr = curr.left
+        curr = stack.pop()
+        res.append(curr.val)
+        curr = curr.right
+    return res`
+             },
+             {
+                language: "JavaScript",
+                code: `function inorderTraversal(root) {
+    let res = [], stack = [], curr = root;
+    while (curr || stack.length) {
+        while (curr) {
+            stack.push(curr);
+            curr = curr.left;
+        }
+        curr = stack.pop();
+        res.push(curr.val);
+        curr = curr.right;
+    }
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "top-view-of-binary-tree",
@@ -228,15 +295,30 @@ export const treesAlgorithms: AlgorithmEntry[] = [
     useCases: ["Shadow mapping", "Topological visibility"],
     approaches: [
        {
-          name: "Optimal (Vertical Level Tracking)",
-          description: "### 🧠 The Core Concept\nUse a coordinate system where root is 0, left is -1, right is +1. Perform level-order traversal and store the *first* node seen at each vertical coordinate.",
+          name: "Optimal (Vertical Line Tracker)",
+          description: "### 🧠 The Core Concept: The 'Shadow' Analogy\nImagine the tree viewed from the side. Each node casts a shadow on a vertical axis. The 'Top View' is just the first node that hits each vertical lane when looking from above.\n\n### 🛠️ Execution Strategy\n1. Use a **Horizontal Distance (HD)** coordinate: Root is $0$, Left is $-1$, Right is $+1$.\n2. Use a **Queue** for BFS (this ensures we visit top nodes before bottom nodes).\n3. Use a **Map** to store the first value found for each HD coordinate.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(N)",
           implementations: [
-             { language: "JavaScript", code: "function topView(root) {\n    if(!root) return [];\n    let map = new Map(), q = [[root, 0]];\n    while(q.length) {\n        let [node, hd] = q.shift();\n        if(!map.has(hd)) map.set(hd, node.val);\n        if(node.left) q.push([node.left, hd-1]);\n        if(node.right) q.push([node.right, hd+1]);\n    }\n    return Array.from(new Map([...map].sort((a,b) => a[0]-b[0])).values());\n}" }
+             {
+                language: "JavaScript",
+                code: `function topView(root) {
+    if (!root) return [];
+    let map = new Map(), queue = [[root, 0]];
+    while (queue.length) {
+        let [node, hd] = queue.shift();
+        if (!map.has(hd)) map.set(hd, node.val);
+        if (node.left) queue.push([node.left, hd - 1]);
+        if (node.right) queue.push([node.right, hd + 1]);
+    }
+    const sortedKeys = Array.from(map.keys()).sort((a,b) => a - b);
+    return sortedKeys.map(key => map.get(key));
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "right-left-view-of-binary-tree",
@@ -250,15 +332,42 @@ export const treesAlgorithms: AlgorithmEntry[] = [
     useCases: ["Side-profile rendering"],
     approaches: [
        {
-          name: "Optimal (Recursive DFS)",
-          description: "### 🧠 The Core Concept\nUse DFS (Root, Right, Left). The first time we reach a new depth level, the current node is the one visible from the right.",
+          name: "Optimal (DFS Level-First)",
+          description: "### 🧠 The Core Concept: The 'First Encounter' Rule\nWe want the rightmost node at each depth. If we traverse the tree while always exploring **Right subtrees first**, then for every new depth level we enter, the first node we see is guaranteed to be the rightmost one.\n\n### 🛠️ Step-by-Step Logic\n1. Maintain a `result` list.\n2. Run DFS with a `depth` parameter, following: **Root -> Right -> Left**.\n3. If `depth == result.length`, this is the first time we've reached this depth. Add the node to `result`.\n4. Recurse to Right then Left.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(H)",
           implementations: [
-             { language: "Python", code: "def rightSideView(root):\n    res = []\n    def dfs(node, depth):\n        if not node: return\n        if depth == len(res): res.append(node.val)\n        dfs(node.right, depth + 1)\n        dfs(node.left, depth + 1)\n    dfs(root, 0)\n    return res" }
+             {
+                language: "Python",
+                code: `def rightSideView(root):
+    res = []
+    def dfs(node, depth):
+        if not node: return
+        if depth == len(res):
+            res.append(node.val)
+        dfs(node.right, depth + 1)
+        dfs(node.left, depth + 1)
+    dfs(root, 0)
+    return res`
+             },
+             {
+                language: "JavaScript",
+                code: `function rightSideView(root) {
+    let res = [];
+    function dfs(node, level) {
+        if (!node) return;
+        if (level === res.length) res.push(node.val);
+        dfs(node.right, level + 1);
+        dfs(node.left, level + 1);
+    }
+    dfs(root, 0);
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "morris-preorder-traversal",
@@ -273,7 +382,7 @@ export const treesAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Threaded Binary Tree)",
-          description: "### 🧠 The Core Concept\nCreate temporary links (threads) from the current node's in-order predecessor back to the current node. This allows 'jumping back' without a stack.",
+          description: "### The Core Concept\nMorris Traversal is a brilliant algorithm that performs tree traversal without using recursion or a stack, achieving O(1) extra space complexity. The key insight is to temporarily modify the tree structure by creating threads (temporary links) from the rightmost node of the left subtree back to the current node. These threads allow us to return to the current node after exploring the left subtree without using a stack. The algorithm works by finding the inorder predecessor of each node (the rightmost node in its left subtree). If the predecessor's right child is null, we create a thread from predecessor to current and move left. If the predecessor's right child already points to current (meaning we have already visited the left subtree), we remove the thread (restore the tree structure), visit the current node, and move right. This process continues until we have visited all nodes, and the tree is restored to its original structure.",
           timeComplexity: "O(N)",
           spaceComplexity: "O(1)",
           implementations: [

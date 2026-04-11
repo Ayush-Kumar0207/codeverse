@@ -130,20 +130,31 @@ export const stringsAlgorithms: AlgorithmEntry[] = [
     useCases: ["Natural Language Processing", "Inverting display text"],
     approaches: [
        {
-          name: "Optimal (Trim & Two Pointers)",
-          description: "### 🧠 The Core Concept\nWe want to reverse the order of words, but not the characters within the words themselves. \n\nWe can split the string by spaces, filter out the empty strings (extra spaces), reverse the resulting array, and join it back up.",
+          name: "Optimal (The 'Sentence Shuffling' Strategy)",
+          description: "### 🧠 The Core Concept\nWe want to reverse the order of words, but not the characters within the words themselves. \n\nImagine a sentence as a train where each word is a carriage. We don't want to turn the carriages upside down or reverse the letters inside; we just want to rearrange the order of the carriages themselves.\n\n### 🛠️ Step-by-Step Logic\n1. **Trim & Tokenize**: Remove leading/trailing spaces and split the string into a list of words. We must ignore multiple spaces between words.\n2. **Reverse the List**: Swap the first word with the last, second with second-to-last, etc.\n3. **Reconstruct**: Join the reversed list back into a single string with a single space as a separator.",
           timeComplexity: "O(N)",
-          timeComplexityExplanation: "Linear time to scan, split, and reverse.",
+          timeComplexityExplanation: "We perform a constant number of linear passes over the string (trimming, splitting, reversing, joining).",
           spaceComplexity: "O(N)",
-          spaceComplexityExplanation: "Storing the intermediate words array.",
+          spaceComplexityExplanation: "The intermediate list of words stores each character of the string exactly once.",
           implementations: [
              {
                 language: "JavaScript",
-                code: "function reverseWords(s) {\n    return s.trim().split(/\\s+/).reverse().join(' ');\n}"
+                code: `function reverseWords(s) {
+    // Regex \\s+ matches 1 or more whitespace characters
+    return s.trim().split(/\\s+/).reverse().join(' ');
+}`
+             },
+             {
+                language: "Python",
+                code: `def reverseWords(s: str) -> str:
+    # .split() in Python automatically handles variable whitespace
+    words = s.split()
+    return " ".join(words[::-1])`
              }
           ]
        }
     ]
+
   },
   {
     id: "remove-outermost-parenthesis",
@@ -245,15 +256,36 @@ export const stringsAlgorithms: AlgorithmEntry[] = [
     useCases: ["Legacy system parsing", "Historical data processing"],
     approaches: [
        {
-          name: "Optimal (Subtraction Rule)",
-          description: "### 🧠 The Core Concept\nNormally Roman numerals are largest to smallest. If a smaller numeral comes before a larger one, subtract it.",
+          name: "Optimal (The 'Look-Ahead' Deduction)",
+          description: "### 🧠 The Core Concept: The 'Greedy Subtraction' Rule\nRoman numerals are generally written largest to smallest. However, if a smaller symbol (like `I`) appears before a larger one (like `V`), it means **subtraction** (`IV = 5 - 1 = 4`).\n\n### 🛠️ Execution Strategy\nThink of this as walking through the string and evaluating each character. \n- If the character to your **right** is bigger than you, you are a subtractor! (Subtract your value).\n- Otherwise, you are a normal addition! (Add your value).\n\nExample `MCMXCIV` ($1994$):\n- `M` (1000) $\ge$ `C` (100)? Yes $\rightarrow +1000$\n- `C` (100) < `M` (1000)? Yes $\rightarrow -100$\n- `M` (1000) $\ge$ `X` (10)? Yes $\rightarrow +1000$\n- `X` (10) < `C` (100)? Yes $\rightarrow -10$\n...",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "We perform a single linear scan from left to right.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We use a fixed-size map (7 characters) and a single integer for the result.",
           implementations: [
-             { language: "JavaScript", code: "function romanToInt(s) {\n    const map = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};\n    let res = 0;\n    for (let i = 0; i < s.length; i++) {\n        if (map[s[i]] < map[s[i+1]]) res -= map[s[i]];\n        else res += map[s[i]];\n    }\n    return res;\n}" }
+             {
+                language: "JavaScript",
+                code: `function romanToInt(s) {
+    const map = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+    let res = 0;
+    
+    for (let i = 0; i < s.length; i++) {
+        let curr = map[s[i]];
+        let next = map[s[i + 1]];
+        
+        if (curr < next) {
+            res -= curr;
+        } else {
+            res += curr;
+        }
+    }
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "implement-atoi",
@@ -267,15 +299,42 @@ export const stringsAlgorithms: AlgorithmEntry[] = [
     useCases: ["Input sanitization", "Number parsing"],
     approaches: [
        {
-          name: "Optimal (Boundary Check)",
-          description: "### 🧠 The Core Concept\nHandle whitespace, then the sign, then digit conversion while checking for overflow/underflow.",
+          name: "Optimal (State Machine Simulation)",
+          description: "### 🧠 The Core Concept: The 'Clean Parser' Strategy\nImplementing `atoi` is essentially building a simple character-by-character parser. You must strictly follow three specific stages:\n1. **Ignore** leading whitespace.\n2. **Identify** a single optional sign (`+` or `-`).\n3. **Collect** digits until a non-digit appears, converting them to an integer while ensuring we don't exceed the 32-bit signed integer limits ($[-2^{31}, 2^{31} - 1]$).\n\n### 🛠️ Execution Strategy\n- Use a pointer `i` to navigate the string.\n- Use `sign` variable initialized to `1`.\n- As you collect each digit, calculate `res = res * 10 + digit`.\n- **Clamping**: After processing, clamp the result to the 32-bit range.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "We make one single pass through the input string.",
           spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "We use only a few numeric variables regardless of the string length.",
           implementations: [
-             { language: "Python", code: "def myAtoi(s: str) -> int:\n    s = s.strip()\n    if not s: return 0\n    sign = -1 if s[0] == '-' else 1\n    if s[0] in ['-', '+']: s = s[1:]\n    res, i = 0, 0\n    while i < len(s) and s[i].isdigit():\n        res = res * 10 + int(s[i])\n        i += 1\n    res = sign * res\n    return max(-2**31, min(res, 2**31 - 1))" }
+             {
+                language: "Python",
+                code: `def myAtoi(s: str) -> int:
+    s = s.strip()
+    if not s: return 0
+    
+    sign = 1
+    start = 0
+    if s[0] == '-':
+        sign = -1
+        start = 1
+    elif s[0] == '+':
+        start = 1
+        
+    res = 0
+    for i in range(start, len(s)):
+        if not s[i].isdigit():
+            break
+        res = res * 10 + int(s[i])
+        
+    # Apply sign and 32-bit clamping
+    res = sign * res
+    INT_MIN, INT_MAX = -2**31, 2**31 - 1
+    return max(INT_MIN, min(res, INT_MAX))`
+             }
           ]
        }
     ]
+
   },
   {
     id: "sort-characters-by-frequency",
@@ -347,5 +406,54 @@ export const stringsAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "string-pattern-matching-rabin-karp",
+    title: "Rabin-Karp Algorithm",
+    topic: "Strings - Advanced",
+    category: "Hashing",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Search for a pattern in a text using rolling hash to reduce comparison overhead.",
+    leetcodeLink: "",
+    useCases: ["Plagiarism detection", "Large dataset DNA searching"],
+    approaches: [
+       {
+          name: "Optimal (Rolling Hash)",
+          description: "### 🧠 The Core Concept: The 'Fingerprint' Analogy\nInstead of comparing character by character (which takes $O(P)$ for every position), Rabin-Karp computes a **numeric hash** (fingerprint) of the pattern. \n\nWe then slide a window of size $P$ through the text. We efficiently compute the hash of the *new* window using the previous hash (Rolling Hash). If the hashes match, we perform a final character-by-character check to confirm (to avoid hash collisions).\n\n### 🛠️ Step-by-Step\n1. Calculate hash for the pattern and for the first window of text.\n2. **Rolling Hash Math**: \n   - Subtract the hash of the character leaving the window.\n   - Multiply by a base (e.g., 256 for ASCII).\n   - Add the hash of the new character entering the window.\n3. Keep the hash values within a large prime modulus to prevent overflow.",
+          timeComplexity: "O(N + M)",
+          timeComplexityExplanation: "Average case $O(N+M)$ where $N$ is text length and $M$ is pattern length. Worst case (many collisions) is $O(N \\times M)$.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "The hash values are single integers.",
+          implementations: [
+             {
+                language: "Python",
+                code: `def search(pat, txt):
+    # Prime number for hashing
+    q = 101 # A prime
+    d = 256 # Base (number of chars in alphabet)
+    m, n = len(pat), len(txt)
+    p_hash, t_hash = 0, 0
+    h = pow(d, m-1) % q
+
+    for i in range(m):
+        p_hash = (d * p_hash + ord(pat[i])) % q
+        t_hash = (d * t_hash + ord(txt[i])) % q
+
+    for i in range(n - m + 1):
+        if p_hash == t_hash:
+            if txt[i:i+m] == pat:
+                return i
+        
+        if i < n - m:
+            t_hash = (d * (t_hash - ord(txt[i]) * h) + ord(txt[i + m])) % q
+            # Handle negative result
+            if t_hash < 0: t_hash += q
+    return -1`
+             }
+          ]
+       }
+    ]
   }
 ];
+

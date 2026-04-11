@@ -354,15 +354,40 @@ export const recursionAlgorithms: AlgorithmEntry[] = [
     useCases: ["Change making", "Budget allocation"],
     approaches: [
        {
-          name: "Optimal (Pick/Don't Pick)",
-          description: "### 🧠 The Core Concept\nAt each index, you can either pick the current element (and stay at the same index because reuse is allowed) or move to the next index.",
+          name: "Optimal (The 'Infinite Supply' Pick/Don't Pick)",
+          description: "### 🧠 The Core Concept: The 'Climbing Gym' Analogy\nImagine you have a target height (Sum) and a box of infinite climbing holds of various sizes (Candidates). \n\nAt every step, you have two choices:\n1. **Take it**: Add the current hold size to your path. Crucially, because tokens are infinite, you **stay** at the same index and ask the same question again.\n2. **Pass**: Decided you have enough of the current hold size? Move to the next index in the box.\n\n### 🛠️ Execution Strategy\n1. Use recursion with `index` and `currentSum`.\n2. **Branch 1 (Include)**: If `candidates[index] <= target`, add it to path and recurse on the **same index**.\n3. **Branch 2 (Exclude)**: Simply recurse on `index + 1`.\n4. **Base Cases**:\n   - If `target == 0`: Success! Copy path to results.\n   - If `index == candidates.length`: End of the line.",
           timeComplexity: "O(2^T * K)",
-          spaceComplexity: "O(Target)",
+          timeComplexityExplanation: "Where T is the target value and K is the average length of a combination. Each step is a binary choice, and the depth is limited by the target.",
+          spaceComplexity: "O(Target / Min(Candidate))",
+          spaceComplexityExplanation: "Maximum depth of the recursion stack.",
           implementations: [
-             { language: "Python", code: "def combinationSum(candidates, target):\n    res = []\n    def backtrack(i, cur, total):\n        if total == target: res.append(list(cur)); return\n        if i >= len(candidates) or total > target: return\n        # Pick\n        cur.append(candidates[i])\n        backtrack(i, cur, total + candidates[i])\n        # Don't pick\n        cur.pop()\n        backtrack(i + 1, cur, total)\n    backtrack(0, [], 0); return res" }
+             {
+                language: "Python",
+                code: `def combinationSum(candidates, target):
+    res = []
+    
+    def backtrack(i, cur, total):
+        if total == target:
+            res.append(list(cur))
+            return
+        if i >= len(candidates) or total > target:
+            return
+            
+        # Decision 1: Inclusion (Stay at index i because reuse is allowed)
+        cur.append(candidates[i])
+        backtrack(i, cur, total + candidates[i])
+        
+        # Decision 2: Exclusion (Move to index i + 1)
+        cur.pop()
+        backtrack(i + 1, cur, total)
+        
+    backtrack(0, [], 0)
+    return res`
+             }
           ]
        }
     ]
+
   },
   {
     id: "combination-sum-ii",
@@ -376,15 +401,44 @@ export const recursionAlgorithms: AlgorithmEntry[] = [
     useCases: ["Exact constraint matching"],
     approaches: [
        {
-          name: "Optimal (Loop-based Backtracking)",
-          description: "### 🧠 The Core Concept\nSort candidates. In the recursive loop, skip duplicate elements to ensure unique combinations.",
+          name: "Optimal (The 'Unique Loop' Strategy)",
+          description: "### 🧠 The Core Concept: The 'No Double-Dipping' Rule\nUnlike Combination Sum I, you can only use each item **once**, and there might be duplicates in the input (e.g., `[1, 1, 6]`). \n\nIf we pick the first '1' and move on, that's fine. But if we skip it then pick the *second* '1', we've just created a duplicate result! \n\nTo solve this: **Sort** the input. In your recursive loop, if you see the same number twice in the same level, only pick it once.\n\n### 🛠️ Step-by-Step\n1. **Sort** the array.\n2. **The Loop**: Inside the recursion, iterate from current index `i` to the end.\n   - If `arr[i] == arr[i-1]` and `i > currentLevelIndex`, **SKIP**. This prevents duplicates at the same 'slot'.\n   - Otherwise, pick it and recurse on `i + 1`.",
           timeComplexity: "O(2^N * K)",
+          timeComplexityExplanation: "Total number of combinations is $2^N$. $K$ is the average length for copy operations.",
           spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Maximum recursion depth limited by array size.",
           implementations: [
-             { language: "JavaScript", code: "function combinationSum2(candidates, target) {\n    candidates.sort((a,b)=>a-b); let res = [];\n    function backtrack(idx, target, path) {\n        if (target === 0) { res.push([...path]); return; }\n        for (let i = idx; i < candidates.length; i++) {\n            if (i > idx && candidates[i] === candidates[i-1]) continue;\n            if (candidates[i] > target) break;\n            path.push(candidates[i]);\n            backtrack(i + 1, target - candidates[i], path);\n            path.pop();\n        }\n    }\n    backtrack(0, target, []); return res;\n}" }
+             {
+                language: "JavaScript",
+                code: `function combinationSum2(candidates, target) {
+    candidates.sort((a,b) => a - b);
+    let res = [];
+
+    function backtrack(idx, target, path) {
+        if (target === 0) {
+            res.push([...path]);
+            return;
+        }
+
+        for (let i = idx; i < candidates.length; i++) {
+            // Duplicate skipping logic
+            if (i > idx && candidates[i] === candidates[i - 1]) continue;
+            if (candidates[i] > target) break;
+
+            path.push(candidates[i]);
+            backtrack(i + 1, target - candidates[i], path);
+            path.pop();
+        }
+    }
+    
+    backtrack(0, target, []);
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "subset-sum-i",
@@ -420,15 +474,48 @@ export const recursionAlgorithms: AlgorithmEntry[] = [
     useCases: ["Decomposition algorithms"],
     approaches: [
        {
-          name: "Optimal (Backtracking)",
-          description: "### 🧠 The Core Concept\nAt each index, try taking every possible substring. If it's a palindrome, recurse for the rest of the string.",
+          name: "Optimal (Recursive Pivot-and-Check)",
+          description: "### 🧠 The Core Concept: The 'Sentence Slicing' Analogy\nImagine you have a string with no spaces (e.g., \"racecarann\"). You want to slice it so every piece is a palindrome. \n\nYou start at the beginning and try every possible slice: \n- Slice at \"r\"? Yes! It's a palindrome. Now solve for \"acecarann\".\n- Slice at \"ra\"? No. Discard.\n- Slice at \"racecar\"? Yes! Now solve for \"ann\".\n\n### 🛠️ Execution Strategy\n1. At index $I$, iterate $J$ from $I$ to `end`.\n2. If substring `s[I...J]` is a palindrome:\n   - Add it to the current partition.\n   - Recurse starting from $J+1$.\n   - **Backtrack**: Pop the substring and try the next $J$.\n3. Base Case: $I$ reaches the end of the string.",
           timeComplexity: "O(N * 2^N)",
+          timeComplexityExplanation: "There are up to $2^N$ possible ways to partition a string of length $N$. For each, we verify palindrome status in $O(N)$.",
           spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Recursion depth is limited by the length of the string.",
           implementations: [
-             { language: "JavaScript", code: "function partition(s) {\n    let res = [];\n    function backtrack(idx, path) {\n        if (idx === s.length) { res.push([...path]); return; }\n        for (let i = idx; i < s.length; i++) {\n            if (isPal(s, idx, i)) {\n                path.push(s.substring(idx, i+1));\n                backtrack(i + 1, path); path.pop();\n            }\n        }\n    }\n    backtrack(0, []); return res;\n}" }
+             {
+                language: "JavaScript",
+                code: `function partition(s) {
+    let res = [];
+    
+    function isPal(str, left, right) {
+        while (left < right) {
+            if (str[left++] !== str[right--]) return false;
+        }
+        return true;
+    }
+
+    function backtrack(idx, path) {
+        if (idx === s.length) {
+            res.push([...path]);
+            return;
+        }
+        
+        for (let i = idx; i < s.length; i++) {
+            if (isPal(s, idx, i)) {
+                path.push(s.substring(idx, i + 1));
+                backtrack(i + 1, path);
+                path.pop();
+            }
+        }
+    }
+    
+    backtrack(0, []);
+    return res;
+}`
+             }
           ]
        }
     ]
+
   },
   {
     id: "word-break",
@@ -464,14 +551,52 @@ export const recursionAlgorithms: AlgorithmEntry[] = [
     useCases: ["Constraint satisfaction", "Puzzle solving"],
     approaches: [
        {
-          name: "Optimal (Exhaustive Backtracking)",
-          description: "### 🧠 The Core Concept\nFind an empty cell. Try digits 1-9. If a digit is valid, recurse. If it fails, backtrack.",
+          name: "Optimal (Brute-Force with Strategic Pruning)",
+          description: "### 🧠 The Core Concept: The 'Trial and Error' Simulation\nSudoku solving is a classic constraint satisfaction problem. Since the search space is limited (9x9), we can simulate every possibility using recursion.\n\nThink of it as filling the board one cell at a time. If you hit a contradiction (no number works for a cell), you have to go back to the previous cell and change your choice.\n\n### 🛠️ Step-by-Step Logic\n1. Find the first empty cell (`'.'`).\n2. **Try all 9 options**: For digits 1 through 9:\n   - Check if the digit is **safe** (not in the same row, col, or 3x3 box).\n   - If safe, place it and recurse.\n   - **The Domino Effect**: if the recursion returns `true`, the problem is solved! Stop early.\n   - If the recursion returns `false`, remove the digit and try the next one.\n3. If you try all 9 and none work, the current board is invalid; backtrack.",
           timeComplexity: "O(9^(N*N))",
+          timeComplexityExplanation: "In the absolute worst case, we could explore every possibility for every cell, though most branches are pruned instantly by the safety checks.",
           spaceComplexity: "O(N*N)",
+          spaceComplexityExplanation: "The maximum stack depth is equal to the number of cells in the board (81).",
           implementations: [
-             { language: "JavaScript", code: "function solveSudoku(board) {\n    for (let i = 0; i < 9; i++) {\n        for (let j = 0; j < 9; j++) {\n            if (board[i][j] === '.') {\n                for (let c = 1; c <= 9; c++) {\n                    if (isValid(board, i, j, c.toString())) {\n                        board[i][j] = c.toString();\n                        if (solveSudoku(board)) return true;\n                        else board[i][j] = '.';\n                    }\n                }\n                return false;\n            }\n        }\n    }\n    return true;\n}" }
+             {
+                language: "JavaScript",
+                code: `function solveSudoku(board) {
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            if (board[i][j] === '.') {
+                for (let c = 1; c <= 9; c++) {
+                    const char = c.toString();
+                    if (isValid(board, i, j, char)) {
+                        board[i][j] = char;
+                        
+                        if (solveSudoku(board)) return true;
+                        else board[i][j] = '.'; // Backtrack
+                    }
+                }
+                return false; // No number fits here
+            }
+        }
+    }
+    return true; // Board full!
+}
+
+function isValid(board, row, col, char) {
+    for (let i = 0; i < 9; i++) {
+        // Row check
+        if (board[row][i] === char) return false;
+        // Col check
+        if (board[i][col] === char) return false;
+        // 3x3 Box check
+        const boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
+        const boxCol = 3 * Math.floor(col / 3) + (i % 3);
+        if (board[boxRow][boxCol] === char) return false;
+    }
+    return true;
+}`
+             }
           ]
        }
     ]
+
   }
 ];

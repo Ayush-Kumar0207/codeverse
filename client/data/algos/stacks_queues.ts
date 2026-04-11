@@ -212,11 +212,52 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
     approaches: [
        {
           name: "Optimal (Hash Map + Doubly Linked List)",
-          description: "### 🧠 The Core Concept\nWe need $O(1)$ lookup (Map) and $O(1)$ reordering (Linked List). When an item is accessed, move it to the **Head**. When the cache is full, remove from the **Tail**.",
+          description: "### 🧠 The Core Concept: The 'Desk Organizer' Analogy\nImagine you have a small desk (Cache) that can only hold $K$ files. You want to keep the files you use most often close at hand. \n\nTo do this perfectly, you need two things:\n1. **A Map (The Index)**: So you can instantly find a file by its name ($O(1)$ lookup).\n2. **A Doubly Linked List (The Pile)**: A physical stack of files where you always put the most recently used file on TOP. When the desk is full, you throw away the file at the BOTTOM.\n\n### 🛠️ Step-by-Step Logic\n1. **`get(key)`**: Look up the node in the Map.\n   - If not found, return -1.\n   - If found, **Move to Head**: Remove the node from its current spot in the list and re-insert it at the very front.\n2. **`put(key, value)`**: \n   - If the key exists, update the value and **Move to Head**.\n   - If the key is new:\n     - If the cache is full, delete the **Tail** node from both the List and the Map.\n     - Add the new node to the **Head** and register it in the Map.",
           timeComplexity: "O(1)",
+          timeComplexityExplanation: "Both hash map lookups and doubly linked list pointer updates are $O(1)$ operations.",
           spaceComplexity: "O(Capacity)",
+          spaceComplexityExplanation: "We store at most `capacity` entries in both the map and the list.",
           implementations: [
-             { language: "JavaScript", code: "class LRUCache {\n    constructor(capacity) {\n        this.cap = capacity;\n        this.cache = new Map();\n    }\n    get(key) {\n        if (!this.cache.has(key)) return -1;\n        let val = this.cache.get(key);\n        this.cache.delete(key);\n        this.cache.set(key, val);\n        return val;\n    }\n    put(key, value) {\n        this.cache.delete(key);\n        this.cache.set(key, value);\n        if (this.cache.size > this.cap) {\n            this.cache.delete(this.cache.keys().next().value);\n        }\n    }\n}" }
+             {
+                language: "Python",
+                code: `class Node:
+    def __init__(self, key, val):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.cache = {} # Map key -> Node
+        self.head, self.tail = Node(0, 0), Node(0, 0)
+        self.head.next, self.tail.prev = self.tail, self.head
+
+    def _remove(self, node):
+        p, n = node.prev, node.next
+        p.next, n.prev = n, p
+
+    def _add(self, node):
+        p, n = self.head, self.head.next
+        p.next = n.prev = node
+        node.prev, node.next = p, n
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            self._remove(self.cache[key])
+            self._add(self.cache[key])
+            return self.cache[key].val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self._remove(self.cache[key])
+        self.cache[key] = Node(key, value)
+        self._add(self.cache[key])
+        if len(self.cache) > self.cap:
+            lru = self.tail.prev
+            self._remove(lru)
+            del self.cache[lru.key]`
+             }
           ]
        }
     ]
@@ -233,15 +274,54 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
     useCases: ["Advanced caching where frequency matters more than recency"],
     approaches: [
        {
-          name: "Optimal (Min-Freq + Multi-Linked Lists)",
-          description: "### 🧠 The Core Concept\nMaintain a map of frequencies. Each frequency points to a Doubly Linked List of items. Track `minFreq` to know where to evict from.",
+          name: "Optimal (Frequency Map + Multiple DLLs)",
+          description: "### 🧠 The Core Concept: The 'Popularity Contest' Strategy\nLFU is like LRU but with an extra layer: **Frequency**. \n\nInstead of one single pile of files, we have multiple piles: \"The 1-Visit Pile\", \"The 2-Visit Pile\", etc. \nInside each pile, the files are ordered by recency (LRU).\n\nWhen you access a file, you 'promote' it. You move it from its current frequency pile to the next pile up (e.g., from freq 2 to freq 3).\n\n### 🛠️ Execution Strategy\n1. **Maps**: \n   - `vals`: `key -> [value, frequency]`\n   - `counts`: `frequency -> DoublyLinkedList(keys)`\n2. **Min Freq Tracker**: A pointer to the lowest non-empty frequency.\n3. **Promotion Logic**: When `get(key)` is called, move the key from `counts[f]` to `counts[f+1]`. If `counts[minFreq]` becomes empty, increment `minFreq`.\n4. **Eviction Logic**: Remove the **Tail** (LRU) of the `counts[minFreq]` list.",
           timeComplexity: "O(1)",
+          timeComplexityExplanation: "All operations involving hash maps and DLL nodes are constant time.",
           spaceComplexity: "O(Capacity)",
+          spaceComplexityExplanation: "Space scales linearly with cache size.",
           implementations: [
-             { language: "Python", code: "# Complex multi-map structure implementation..." }
+             {
+                language: "Python",
+                code: `from collections import defaultdict, OrderedDict
+
+class LFUCache:
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.values = {} # key -> [val, freq]
+        self.freq_map = defaultdict(OrderedDict) # freq -> {key: None}
+        self.min_freq = 0
+
+    def get(self, key: int) -> int:
+        if key not in self.values:
+            return -1
+        val, freq = self.values[key]
+        self._update(key, val, freq)
+        return val
+
+    def _update(self, key, val, freq):
+        self.freq_map[freq].pop(key)
+        if not self.freq_map[freq] and freq == self.min_freq:
+            self.min_freq += 1
+        self.values[key] = [val, freq + 1]
+        self.freq_map[freq + 1][key] = None
+
+    def put(self, key: int, value: int) -> None:
+        if self.cap <= 0: return
+        if key in self.values:
+            self._update(key, value, self.values[key][1])
+            return
+        if len(self.values) == self.cap:
+            k, _ = self.freq_map[self.min_freq].popitem(last=False)
+            del self.values[k]
+        self.values[key] = [value, 1]
+        self.freq_map[1][key] = None
+        self.min_freq = 1`
+             }
           ]
        }
     ]
+
   },
   {
     id: "sliding-window-maximum",
@@ -255,14 +335,43 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
     useCases: ["Real-time peak monitoring", "Network throughput analysis"],
     approaches: [
        {
-          name: "Optimal (Deque Monotonic Queue)",
-          description: "### 🧠 The Core Concept\nMaintain a **Deque** of indices where values are in decreasing order. When moving the window:\n1. Remove indices out of window range.\n2. Remove values smaller than the new element (they'll never be max).\n3. The `front` of the deque is always the window max.",
+          name: "Optimal (The 'Monotonic Deque' Strategy)",
+          description: "### 🧠 The Core Concept: The 'King of the Hill' Analogy\nImagine you are monitoring a moving line of competitors. You only care about the absolute strongest (the maximum).\n\nAs the window slides:\n1. **New Arrival**: If a new person arrives who is stronger than the people already in your 'top-tier list', those weaker people will NEVER be the champion again (they will expire before the new person does). So, you **purge** them from the list.\n2. **Expiration**: If the current champion's time is up (their index is out of the window), remove them.\n\n### 🛠️ Step-by-Step Logic\n1. Use a **Deque** to store indices, maintaining them such that the corresponding values are in **strictly decreasing** order.\n2. For each new element $X$:\n   - **Purge Tail**: While deque top value $\le X$, pop from back.\n   - **Purge Head**: If deque front index is outside the window $(i - k)$, pop from front.\n   - **Record**: The front of the deque is always your window's current maximum.",
           timeComplexity: "O(N)",
+          timeComplexityExplanation: "Each element is added to and removed from the deque exactly once.",
           spaceComplexity: "O(K)",
+          spaceComplexityExplanation: "The deque stores at most $K$ indices for a window of size $K$.",
           implementations: [
-             { language: "JavaScript", code: "function maxSlidingWindow(nums, k) {\n    let q = [], res = [];\n    for (let i = 0; i < nums.length; i++) {\n        while (q.length && nums[q[q.length - 1]] <= nums[i]) q.pop();\n        q.push(i);\n        if (q[0] === i - k) q.shift();\n        if (i >= k - 1) res.push(nums[q[0]]);\n    }\n    return res;\n}" }
+             {
+                language: "JavaScript",
+                code: `function maxSlidingWindow(nums, k) {
+    const q = []; // Deque of indices
+    const res = [];
+    
+    for (let i = 0; i < nums.length; i++) {
+        // 1. Maintain monotonic property: remove smaller elements
+        while (q.length && nums[q[q.length - 1]] <= nums[i]) {
+            q.pop();
+        }
+        
+        q.push(i);
+        
+        // 2. Remove element out of window
+        if (q[0] === i - k) {
+            q.shift();
+        }
+        
+        // 3. Current window max is always at the front
+        if (i >= k - 1) {
+            res.push(nums[q[0]]);
+        }
+    }
+    return res;
+}`
+             }
           ]
        }
     ]
+
   }
 ];
