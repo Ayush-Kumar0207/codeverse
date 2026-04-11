@@ -78,5 +78,74 @@ export const sortingAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "selection-sort",
+    title: "Selection Sort",
+    topic: "Sorting Algorithms",
+    category: "Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Pick the minimum element and swap it to the front. Repeat for the remaining portion.",
+    leetcodeLink: "",
+    useCases: ["Educational basics", "Small data sets"],
+    approaches: [
+       {
+          name: "Standard Implementation",
+          description: "### 🧠 The Core Concept\nFind the smallest element in the unsorted part and swap it with the first element of the unsorted part.",
+          timeComplexity: "O(N²)",
+          timeComplexityExplanation: "Nested loops: for each N, search remaining N-i.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function selectionSort(arr) {\n    for (let i = 0; i < arr.length - 1; i++) {\n        let min = i;\n        for (let j = i + 1; j < arr.length; j++) {\n            if (arr[j] < arr[min]) min = j;\n        }\n        [arr[i], arr[min]] = [arr[min], arr[i]];\n    }\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "bubble-sort",
+    title: "Bubble Sort",
+    topic: "Sorting Algorithms",
+    category: "Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Repeatedly swap adjacent elements if they are in the wrong order.",
+    leetcodeLink: "",
+    useCases: ["Educational basics"],
+    approaches: [
+       {
+          name: "Optimal (With Early Exit)",
+          description: "### 🧠 The Core Concept\nLargest elements 'bubble' up to the end. If no swaps occur in a pass, the array is already sorted.",
+          timeComplexity: "O(N²) (Avg), O(N) (Best)",
+          timeComplexityExplanation: "Worst case is $O(N^2)$, but sorted arrays exit in $O(N)$.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def bubbleSort(arr):\n    n = len(arr)\n    for i in range(n):\n        swapped = False\n        for j in range(0, n - i - 1):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n                swapped = True\n        if not swapped: break" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "insertion-sort",
+    title: "Insertion Sort",
+    topic: "Sorting Algorithms",
+    category: "Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Build the sorted array one element at a time by picking from the unsorted part and 'inserting' it into the correct spot.",
+    leetcodeLink: "",
+    useCases: ["Almost sorted data", "Online sorting"],
+    approaches: [
+       {
+          name: "Standard Implementation",
+          description: "### 🧠 The Core Concept\nTake an element and keep swapping it backward until it finds its sorted home.",
+          timeComplexity: "O(N²) (Avg), O(N) (Best)",
+          timeComplexityExplanation: "Efficient for small or almost-sorted data.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function insertionSort(arr) {\n    for (let i = 1; i < arr.length; i++) {\n        let j = i;\n        while (j > 0 && arr[j-1] > arr[j]) {\n            [arr[j], arr[j-1]] = [arr[j-1], arr[j]];\n            j--;\n        }\n    }\n}" }
+          ]
+       }
+    ]
   }
 ];

@@ -117,5 +117,86 @@ export const dpAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "partition-equal-subset-sum",
+    title: "Partition Equal Subset Sum",
+    topic: "DP on Subsequences",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Given a non-empty array nums containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.",
+    leetcodeLink: "https://leetcode.com/problems/partition-equal-subset-sum/",
+    useCases: ["Resource balancing", "Load distribution", "Subset division problems"],
+    approaches: [
+       {
+          name: "Optimal (DP on Subset Sum)",
+          description: "### 🧠 The Core Concept\nIf you want to split an array into two equal parts, each part must sum to exactly **TotalSum / 2**. \n\nThis transforms the problem into a standard 'Subset Sum' question: *\"Can we find a group of numbers that sums to this specific target?\"*\n\n### 🛠️ Execution Strategy\n1. Calculate `totalSum`. If it's odd, return `False` immediately (you can't split an odd number into two equal integers!).\n2. Solve the subset sum problem for `target = totalSum / 2`.\n3. Use a 1D DP boolean array where `dp[i]` represents *\"Is it possible to achieve sum i using a subset of the numbers we've seen?\"*.",
+          timeComplexity: "O(N * Target)",
+          timeComplexityExplanation: "We iterate through N numbers, and for each, we update a DP row of size Target.",
+          spaceComplexity: "O(Target)",
+          spaceComplexityExplanation: "We only need a single row to track achievable sums.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def canPartition(nums):\n    total = sum(nums)\n    if total % 2: return False\n    target = total // 2\n    dp = [False] * (target + 1)\n    dp[0] = True\n    for n in nums:\n        for i in range(target, n - 1, -1):\n            dp[i] = dp[i] or dp[i - n]\n    return dp[target]"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "edit-distance",
+    title: "Edit Distance (Levenshtein)",
+    topic: "DP on Strings",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Given two strings word1 and word2, return the minimum number of operations (insert, delete, replace) required to convert word1 to word2.",
+    leetcodeLink: "https://leetcode.com/problems/edit-distance/",
+    useCases: ["Autocorrect engines", "DNA sequence similarity", "Git diff calculations"],
+    approaches: [
+       {
+          name: "Optimal (2D Tabulation)",
+          description: "### 🧠 The Core Concept\nImagine you are converting 'HORSE' to 'ROS'. \nFor every character pair $(i, j)$:\n- If they match: Cost is 0, Move diagonally.\n- If they mismatch: We must choose the minimum cost among:\n  1. **Insert**: $1 + dp[i][j-1]$\n  2. **Delete**: $1 + dp[i-1][j]$\n  3. **Replace**: $1 + dp[i-1][j-1]$ (classic substitution).\n\n### 🛠️ Execution Strategy\nBuild a grid where `dp[i][j]` is the distance between `word1[:i]` and `word2[:j]`. Fill it based on the min-cost of surrounding cells.",
+          timeComplexity: "O(N * M)",
+          timeComplexityExplanation: "Every cell in the matrix is computed once.",
+          spaceComplexity: "O(N * M)",
+          spaceComplexityExplanation: "Storage for the distance matrix.",
+          implementations: [
+             {
+                language: "JavaScript",
+                code: "function minDistance(w1, w2) {\n    const m = w1.length, n = w2.length;\n    let dp = Array(m+1).fill().map(() => Array(n+1).fill(0));\n    for(let i=0; i<=m; i++) dp[i][0] = i;\n    for(let j=0; j<=n; j++) dp[0][j] = j;\n    for(let i=1; i<=m; i++) {\n        for(let j=1; j<=n; j++) {\n            if(w1[i-1] === w2[j-1]) dp[i][j] = dp[i-1][j-1];\n            else dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);\n        }\n    }\n    return dp[m][n];\n}"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "longest-increasing-subsequence",
+    title: "Longest Increasing Subsequence",
+    topic: "DP on Subsequences",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Given an integer array nums, return the length of the longest strictly increasing subsequence.",
+    leetcodeLink: "https://leetcode.com/problems/longest-increasing-subsequence/",
+    useCases: ["Trend analysis in data points", "Patience sorting", "Optimal sequence alignment"],
+    approaches: [
+       {
+          name: "Optimal (Binary Search + Greedy)",
+          description: "### 🧠 The Core Concept\nInstead of a standard $O(N^2)$ DP, we can solve this in $O(N Log N)$ by maintaining a 'tail' list of the smallest possible ending values for all increasing subsequences of length $1, 2, ... K$.\n\nWhen we see a new number:\n1. If it's larger than our current max tail, append it (increasing our LIS length).\n2. If not, find the smallest tail that is $\ge$ the number and replace it. This is 'Greedy' because a smaller ending value for a sub-sequence of length $X$ makes it easier to extend that sequence later!\n\n### 🛠️ Execution Strategy\n1. Initialize an empty list `tails`.\n2. For each number in `nums`:\n   - Use **Binary Search** to find its position in `tails`.\n   - If it's at the end, append it.\n   - Otherwise, update `tails[pos]` with the number.",
+          timeComplexity: "O(N log N)",
+          timeComplexityExplanation: "We perform N binary searches.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Storage for the tails list.",
+          implementations: [
+             {
+                language: "Python",
+                code: "import bisect\ndef lengthOfLIS(nums):\n    tails = []\n    for x in nums:\n        pos = bisect.bisect_left(tails, x)\n        if pos == len(tails): tails.append(x)\n        else: tails[pos] = x\n    return len(tails)"
+             }
+          ]
+       }
+    ]
   }
 ];

@@ -97,5 +97,381 @@ export const recursionAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "rat-in-a-maze",
+    title: "Rat in a Maze",
+    topic: "Recursion - Backtracking",
+    category: "Backtracking",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find all possible paths that a rat can take from source to destination in a maze.",
+    leetcodeLink: "",
+    useCases: ["Pathfinding in robotics", "Game level navigation"],
+    approaches: [
+       {
+          name: "Optimal (Recursive DFS with Visited Matrix)",
+          description: "### 🧠 The Core Concept\nThe rat can move in four directions: **Up, Down, Left, Right**. \nTo prevent the rat from going in circles, we must 'mark' our path as we go. If we reach the finish, we save the path. If we hit a wall or a dead end, we backtrack by unmarking the path and trying a different direction.",
+          timeComplexity: "O(4^(N^2))",
+          timeComplexityExplanation: "Worst case we explore 4 directions for every cell in an N by N grid.",
+          spaceComplexity: "O(N^2)",
+          spaceComplexityExplanation: "Recursion stack and visited matrix.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def solveMaze(maze, n):\n    res = []\n    def backtrack(r, c, path):\n        if r == n-1 and c == n-1:\n            res.append(path)\n            return\n        temp = maze[r][c]\n        maze[r][c] = 0 # Mark visited\n        for dr, dc, move in [(1,0,'D'), (-1,0,'U'), (0,1,'R'), (0,-1,'L')]:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < n and maze[nr][nc] == 1:\n                backtrack(nr, nc, path + move)\n        maze[r][c] = temp # Unmark\n    if maze[0][0] == 1: backtrack(0, 0, \"\")\n    return res"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "word-search",
+    title: "Word Search",
+    topic: "Recursion - Backtracking",
+    category: "Matrix Backtracking",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Given an m x n grid of characters board and a string word, return true if word exists in the grid.",
+    leetcodeLink: "https://leetcode.com/problems/word-search/",
+    useCases: ["Search engines in grid-based data", "Crossword validation"],
+    approaches: [
+       {
+          name: "Optimal (Matrix Backtracking)",
+          description: "### 🧠 The Core Concept\nFor every cell, if it matches the first letter of our word, we start a **DFS**. We explore neighbors attempting to match the next letter. To avoid reusing the same cell twice for the same word, we 'mask' the cell temporarily during recursion.",
+          timeComplexity: "O(N * M * 4^L)",
+          timeComplexityExplanation: "N*M starting points. L is word length.",
+          spaceComplexity: "O(L)",
+          spaceComplexityExplanation: "Recursion stack depth equals word length.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def exist(board, word):\n    rows, cols = len(board), len(board[0])\n    def dfs(r, c, i):\n        if i == len(word): return True\n        if r < 0 or c < 0 or r >= rows or c >= cols or board[r][c] != word[i]: return False\n        temp = board[r][c]\n        board[r][c] = '#'\n        found = dfs(r+1, c, i+1) or dfs(r-1, c, i+1) or dfs(r, c+1, i+1) or dfs(r, c-1, i+1)\n        board[r][c] = temp\n        return found\n    for r in range(rows):\n        for c in range(cols):\n            if dfs(r, c, 0): return True\n    return False"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "print-1-to-n-using-recursion",
+    title: "Print 1 to N using recursion",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Print numbers from 1 to N without using loops.",
+    leetcodeLink: "",
+    useCases: ["Recursion fundamentals"],
+    approaches: [
+       {
+          name: "Optimal (Backtracking / Induction)",
+          description: "### 🧠 The Core Concept\nWe push calls onto the stack until we reach N, then print as the stack unwinds.\n\n### 🛠️ Execution Strategy\n1. Base case: `if (n < 1) return`.\n2. Recurse: `print1ToN(n - 1)`.\n3. Print: `console.log(n)`.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N recursive calls.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Recursive stack depth.",
+          implementations: [
+             { language: "JavaScript", code: "function print1ToN(n) {\n    if (n < 1) return;\n    print1ToN(n - 1);\n    console.log(n);\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "print-n-to-1-using-recursion",
+    title: "Print N to 1 using recursion",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Print numbers from N to 1 without using loops.",
+    leetcodeLink: "",
+    useCases: ["Recursion fundamentals"],
+    approaches: [
+       {
+          name: "Optimal (Direct Recursion)",
+          description: "### 🧠 The Core Concept\nPrint the current number first, then recurse for N-1.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N recursive calls.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Recursive stack depth.",
+          implementations: [
+             { language: "JavaScript", code: "function printNTo1(n) {\n    if (n < 1) return;\n    console.log(n);\n    printNTo1(n - 1);\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "sum-of-first-n-numbers",
+    title: "Sum of first N numbers",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Find the sum of the first N natural numbers.",
+    leetcodeLink: "",
+    useCases: ["Arithmetic series"],
+    approaches: [
+       {
+          name: "Optimal (Parametric Recursion)",
+          description: "### 🧠 The Core Concept\n`sum(n) = n + sum(n-1)`.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N recursive calls.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack depth.",
+          implementations: [
+             { language: "Python", code: "def sumOfN(n):\n    if n == 0: return 0\n    return n + sumOfN(n - 1)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "factorial-of-n-numbers",
+    title: "Factorial of N numbers",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Find the factorial of a number N.",
+    leetcodeLink: "",
+    useCases: ["Combinatorics", "Probability"],
+    approaches: [
+       {
+          name: "Optimal (Functional Recursion)",
+          description: "### 🧠 The Core Concept\n`n! = n * (n-1)!`.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N recursive calls.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack depth.",
+          implementations: [
+             { language: "Python", code: "def factorial(n):\n    if n == 0: return 1\n    return n * factorial(n - 1)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "reverse-an-array",
+    title: "Reverse an array",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Reverse an array using recursion.",
+    leetcodeLink: "",
+    useCases: ["Array manipulation"],
+    approaches: [
+       {
+          name: "Optimal (Two Pointers Recursion)",
+          description: "### 🧠 The Core Concept\nSwap the first and last elements, then recurse for the inner array.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N/2 swaps.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack depth.",
+          implementations: [
+             { language: "Python", code: "def reverseArray(arr, l, r):\n    if l >= r: return\n    arr[l], arr[r] = arr[r], arr[l]\n    reverseArray(arr, l + 1, r - 1)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "check-if-a-string-is-palindrome-or-not",
+    title: "Check if a string is palindrome or not",
+    topic: "Basic Recursion",
+    category: "Recursion Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Check if a string reads the same forward and backward recursively.",
+    leetcodeLink: "",
+    useCases: ["String validation"],
+    approaches: [
+       {
+          name: "Optimal (Recursive Comparison)",
+          description: "### 🧠 The Core Concept\nCompare `s[i]` and `s[n-i-1]`. If they match, recurse for `i+1`.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "N/2 comparisons.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack depth.",
+          implementations: [
+             { language: "JavaScript", code: "function isPalindrome(s, i=0) {\n    if (i >= s.length / 2) return true;\n    if (s[i] !== s[s.length - i - 1]) return false;\n    return isPalindrome(s, i + 1);\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "fibonacci-number",
+    title: "Fibonacci Number",
+    topic: "Basic Recursion / DP",
+    category: "Recursion Basics",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the N-th Fibonacci number.",
+    leetcodeLink: "https://leetcode.com/problems/fibonacci-number/",
+    useCases: ["Nature patterns", "Recursive modeling"],
+    approaches: [
+       {
+          name: "Optimal (Multiple Recursion)",
+          description: "### 🧠 The Core Concept\n`f(n) = f(n-1) + f(n-2)`.",
+          timeComplexity: "O(2^N) (Unoptimized)",
+          timeComplexityExplanation: "Every call branches into two more.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack depth.",
+          implementations: [
+             { language: "Python", code: "def fib(n):\n    if n <= 1: return n\n    return fib(n-1) + fib(n-2)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "generate-all-binary-strings",
+    title: "Generate Binary Strings",
+    topic: "Recursion - Subsequences",
+    category: "Recursion",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Generate all binary strings of length N without consecutive 1s.",
+    leetcodeLink: "",
+    useCases: ["Constraint-based generation"],
+    approaches: [
+       {
+          name: "Optimal (Recursive Generation)",
+          description: "### 🧠 The Core Concept\nAt each step, we can always add '0'. We can only add '1' if the previous character was not '1'.",
+          timeComplexity: "O(2^N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function generate(n, s='', last='0') {\n    if (n === 0) { console.log(s); return; }\n    generate(n-1, s+'0', '0');\n    if (last !== '1') generate(n-1, s+'1', '1');\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "combination-sum-i",
+    title: "Combination Sum",
+    topic: "Recursion - Subsequences",
+    category: "Recursion",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find all unique combinations in candidates where the candidates sum to target.",
+    leetcodeLink: "https://leetcode.com/problems/combination-sum/",
+    useCases: ["Change making", "Budget allocation"],
+    approaches: [
+       {
+          name: "Optimal (Pick/Don't Pick)",
+          description: "### 🧠 The Core Concept\nAt each index, you can either pick the current element (and stay at the same index because reuse is allowed) or move to the next index.",
+          timeComplexity: "O(2^T * K)",
+          spaceComplexity: "O(Target)",
+          implementations: [
+             { language: "Python", code: "def combinationSum(candidates, target):\n    res = []\n    def backtrack(i, cur, total):\n        if total == target: res.append(list(cur)); return\n        if i >= len(candidates) or total > target: return\n        # Pick\n        cur.append(candidates[i])\n        backtrack(i, cur, total + candidates[i])\n        # Don't pick\n        cur.pop()\n        backtrack(i + 1, cur, total)\n    backtrack(0, [], 0); return res" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "combination-sum-ii",
+    title: "Combination Sum II",
+    topic: "Recursion - Subsequences",
+    category: "Recursion",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find all unique combinations where each number is used once.",
+    leetcodeLink: "https://leetcode.com/problems/combination-sum-ii/",
+    useCases: ["Exact constraint matching"],
+    approaches: [
+       {
+          name: "Optimal (Loop-based Backtracking)",
+          description: "### 🧠 The Core Concept\nSort candidates. In the recursive loop, skip duplicate elements to ensure unique combinations.",
+          timeComplexity: "O(2^N * K)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function combinationSum2(candidates, target) {\n    candidates.sort((a,b)=>a-b); let res = [];\n    function backtrack(idx, target, path) {\n        if (target === 0) { res.push([...path]); return; }\n        for (let i = idx; i < candidates.length; i++) {\n            if (i > idx && candidates[i] === candidates[i-1]) continue;\n            if (candidates[i] > target) break;\n            path.push(candidates[i]);\n            backtrack(i + 1, target - candidates[i], path);\n            path.pop();\n        }\n    }\n    backtrack(0, target, []); return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "subset-sum-i",
+    title: "Subset Sum I",
+    topic: "Recursion - Subsequences",
+    category: "Recursion",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Return the sums of all possible subsets.",
+    leetcodeLink: "",
+    useCases: ["Value range analysis"],
+    approaches: [
+       {
+          name: "Optimal (Recursion)",
+          description: "### 🧠 The Core Concept\nStandard pick/don't pick recursion. Accumulate sum in a list.",
+          timeComplexity: "O(2^N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "Python", code: "def subsetSums(arr, n):\n    res = []\n    def func(idx, s):\n        if idx == n: res.append(s); return\n        func(idx + 1, s + arr[idx])\n        func(idx + 1, s)\n    func(0, 0); return sorted(res)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "palindrome-partitioning",
+    title: "Palindrome Partitioning",
+    topic: "Recursion - Hard",
+    category: "Recursion",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Partition a string such that every substring is a palindrome.",
+    leetcodeLink: "https://leetcode.com/problems/palindrome-partitioning/",
+    useCases: ["Decomposition algorithms"],
+    approaches: [
+       {
+          name: "Optimal (Backtracking)",
+          description: "### 🧠 The Core Concept\nAt each index, try taking every possible substring. If it's a palindrome, recurse for the rest of the string.",
+          timeComplexity: "O(N * 2^N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function partition(s) {\n    let res = [];\n    function backtrack(idx, path) {\n        if (idx === s.length) { res.push([...path]); return; }\n        for (let i = idx; i < s.length; i++) {\n            if (isPal(s, idx, i)) {\n                path.push(s.substring(idx, i+1));\n                backtrack(i + 1, path); path.pop();\n            }\n        }\n    }\n    backtrack(0, []); return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "word-break",
+    title: "Word Break",
+    topic: "Recursion - Hard",
+    category: "Recursion",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Determine if a string can be segmented into words from a dictionary.",
+    leetcodeLink: "https://leetcode.com/problems/word-break/",
+    useCases: ["Natural language processing"],
+    approaches: [
+       {
+          name: "Optimal (Backtracking with Memo)",
+          description: "### 🧠 The Core Concept\nTry matching dictionary words at the current position. Use memoization to avoid redundant subproblems.",
+          timeComplexity: "O(N * M * K)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "Python", code: "def wordBreak(s, wordDict):\n    memo = {}\n    def dp(start):\n        if start == len(s): return True\n        if start in memo: return memo[start]\n        for word in wordDict:\n            if s.startswith(word, start) and dp(start + len(word)):\n                memo[start] = True; return True\n        memo[start] = False; return False\n    return dp(0)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "sudoku-solver",
+    title: "Sudoku Solver",
+    topic: "Recursion - Hard",
+    category: "Recursion",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Solve a Sudoku board using backtracking.",
+    leetcodeLink: "https://leetcode.com/problems/sudoku-solver/",
+    useCases: ["Constraint satisfaction", "Puzzle solving"],
+    approaches: [
+       {
+          name: "Optimal (Exhaustive Backtracking)",
+          description: "### 🧠 The Core Concept\nFind an empty cell. Try digits 1-9. If a digit is valid, recurse. If it fails, backtrack.",
+          timeComplexity: "O(9^(N*N))",
+          spaceComplexity: "O(N*N)",
+          implementations: [
+             { language: "JavaScript", code: "function solveSudoku(board) {\n    for (let i = 0; i < 9; i++) {\n        for (let j = 0; j < 9; j++) {\n            if (board[i][j] === '.') {\n                for (let c = 1; c <= 9; c++) {\n                    if (isValid(board, i, j, c.toString())) {\n                        board[i][j] = c.toString();\n                        if (solveSudoku(board)) return true;\n                        else board[i][j] = '.';\n                    }\n                }\n                return false;\n            }\n        }\n    }\n    return true;\n}" }
+          ]
+       }
+    ]
   }
 ];

@@ -117,5 +117,125 @@ export const mathAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "count-digits",
+    title: "Count Digits",
+    topic: "Basic Math",
+    category: "Math Hacks",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Count how many digits in a number evenly divide the number itself.",
+    leetcodeLink: "",
+    useCases: ["Numeric property testing", "Data validation"],
+    approaches: [
+       {
+          name: "Optimal (Extraction)",
+          description: "### 🧠 The Core Concept\nWe extract each digit one-by-one using the modulo operator and check the divisibility condition.\n\n### 🛠️ Execution Strategy\n1. Iterate through the number using `while(temp > 0)`.\n2. Extract digit: `digit = temp % 10`.\n3. If `digit > 0` and `original % digit == 0`, increment count.\n4. Divide temp by 10 to move to the next digit.",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "The number of digits in N is $\\log_{10}(N)$.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Constant integer variables used.",
+          implementations: [
+             { language: "Python", code: "def countDigits(n):\n    count = 0\n    temp = n\n    while temp > 0:\n        d = temp % 10\n        if d > 0 and n % d == 0: count += 1\n        temp //= 10\n    return count" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "reverse-a-number",
+    title: "Reverse a Number",
+    topic: "Basic Math",
+    category: "Math Hacks",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Reverse the digits of an integer.",
+    leetcodeLink: "https://leetcode.com/problems/reverse-integer/",
+    useCases: ["Digital root calculation", "Symmetry checks"],
+    approaches: [
+       {
+          name: "Optimal (Modulo extraction)",
+          description: "### 🧠 The Core Concept\nExtract the last digit and append it to a new number.\n\n### 🛠️ Execution Strategy\n`rev = (rev * 10) + (temp % 10)`",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "Logarithmic relative to the value of N.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "In-place reversal.",
+          implementations: [
+             { language: "JavaScript", code: "function reverse(n) {\n    let rev = 0, sign = n < 0 ? -1 : 1;\n    n = Math.abs(n);\n    while (n > 0) {\n        rev = rev * 10 + (n % 10);\n        n = Math.floor(n / 10);\n    }\n    return rev * sign;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "gcd-or-hcf",
+    title: "GCD Or HCF",
+    topic: "Basic Math",
+    category: "Math Hacks",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the Greatest Common Divisor of two numbers.",
+    leetcodeLink: "",
+    useCases: ["Simplifying fractions", "Frequency alignment"],
+    approaches: [
+       {
+          name: "Optimal (Euclidean Algorithm)",
+          description: "### 🧠 The Core Concept\n$GCD(A, B) = GCD(B, A \\% B)$ until $B = 0$.\n\n### 🛠️ Execution Strategy\nRecursively or iteratively replace $(A, B)$ with $(B, A \\% B)$.",
+          timeComplexity: "O(log(min(A, B)))",
+          timeComplexityExplanation: "The values drop geometrically.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Iterative approach uses constant space.",
+          implementations: [
+             { language: "Python", code: "def gcd(a, b):\n    while b: a, b = b, a % b\n    return a" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "armstrong-numbers",
+    title: "Armstrong Numbers",
+    topic: "Basic Math",
+    category: "Math Hacks",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "A number is Armstrong if the sum of its digits each raised to the power of the number of digits equals the number itself.",
+    leetcodeLink: "",
+    useCases: ["Mathematical puzzles", "Number theory basics"],
+    approaches: [
+       {
+          name: "Optimal (Digit Extraction + Power)",
+          description: "### 🧠 The Core Concept\n1. Count digits ($k$).\n2. Sum each digit raised to power $k$.",
+          timeComplexity: "O(log₁₀ N)",
+          timeComplexityExplanation: "Logarithmic passes to count and then sum digits.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Minimal overhead.",
+          implementations: [
+             { language: "JavaScript", code: "function isArmstrong(n) {\n    let k = String(n).length, sum = 0, temp = n;\n    while (temp > 0) {\n        sum += Math.pow(temp % 10, k);\n        temp = Math.floor(temp / 10);\n    }\n    return sum === n;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "check-for-prime",
+    title: "Check for Prime",
+    topic: "Basic Math",
+    category: "Math Hacks",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Check if a number is prime.",
+    leetcodeLink: "",
+    useCases: ["Cryptography", "Data distribution"],
+    approaches: [
+       {
+          name: "Optimal (Square Root Rule)",
+          description: "### 🧠 The Core Concept\nA number $N$ only needs to be checked against divisors up to $\\sqrt{N}$.",
+          timeComplexity: "O(√N)",
+          timeComplexityExplanation: "We skip testing $N - \\sqrt{N}$ values.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Constant space.",
+          implementations: [
+             { language: "Python", code: "def isPrime(n):\n    if n <= 1: return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0: return False\n    return True" }
+          ]
+       }
+    ]
   }
 ];

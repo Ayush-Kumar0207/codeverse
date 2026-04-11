@@ -117,5 +117,86 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "next-greater-element-i",
+    title: "Next Greater Element",
+    topic: "Stacks - Monotonic",
+    category: "Stacks & Queues",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "For each element in an array, find the next element to its right that is strictly greater than it.",
+    leetcodeLink: "https://leetcode.com/problems/next-greater-element-i/",
+    useCases: ["Weather forecasting (next hotter day)", "Stock market breakout detection"],
+    approaches: [
+       {
+          name: "Optimal (Monotonic Stack)",
+          description: "### 🧠 The Core Concept\nImagine you are standing in a line. You want to know who the first person to your right is who is taller than you. \n\nWe use a **Monotonic Stack** (a stack that is always sorted). We process the array from **Right to Left**.\n\n### 🛠️ Execution Strategy\n1. Iterate from end to start.\n2. **The Purge**: While the stack is not empty and the top of the stack is $\le$ current element, pop the stack. (Those people are shorter than you, so they can't be your 'next greater', and they'll never be the 'next greater' for anyone to your left either!).\n3. **The Result**: If the stack is empty, there is no greater element (-1). Otherwise, the top of the stack is your answer.\n4. **The Update**: Push yourself onto the stack.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Each element is pushed and popped exactly once.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Storage for the monotonic stack.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def nextGreaterElement(arr):\n    n = len(arr)\n    res = [-1] * n\n    stack = []\n    for i in range(n-1, -1, -1):\n        while stack and stack[-1] <= arr[i]:\n            stack.pop()\n        if stack: res[i] = stack[-1]\n        stack.append(arr[i])\n    return res"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "trapping-rain-water",
+    title: "Trapping Rain Water",
+    topic: "Stacks & Queues - Hard",
+    category: "Hard Pointers/Stacks",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.",
+    leetcodeLink: "https://leetcode.com/problems/trapping-rain-water/",
+    useCases: ["Terrain analysis", "Fluid dynamics simulations"],
+    approaches: [
+       {
+          name: "Optimal (Two Pointers)",
+          description: "### 🧠 The Core Concept\nWater trapped at any position matches: `min(maxLeft, maxRight) - currentHeight`. \n\nInstead of calculating `maxLeft` and `maxRight` arrays, we use two pointers. If `leftMax < rightMax`, the bottleneck is on the left, so we process the left pointer. Otherwise, we process the right.\n\n### 🛠️ Execution Strategy\n1. `left = 0, right = n-1`.\n2. Keep track of `leftMax` and `rightMax` seen so far.\n3. While `left < right`:\n   - Move the pointer with the smaller 'max'.\n   - Add `currentMax - height` to the result.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Single pass from both ends.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only pointers and max variables used.",
+          implementations: [
+             {
+                language: "JavaScript",
+                code: "function trap(height) {\n    let left = 0, right = height.length - 1;\n    let leftMax = 0, rightMax = 0, res = 0;\n    while (left < right) {\n        if (height[left] < height[right]) {\n            if (height[left] >= leftMax) leftMax = height[left];\n            else res += leftMax - height[left];\n            left++;\n        } else {\n            if (height[right] >= rightMax) rightMax = height[right];\n            else res += rightMax - height[right];\n            right--;\n        }\n    }\n    return res;\n}"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "largest-rectangle-in-histogram",
+    title: "Largest Rectangle in Histogram",
+    topic: "Stacks - Hard",
+    category: "Stacks & Queues",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Find the area of the largest rectangle in a histogram.",
+    leetcodeLink: "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+    useCases: ["Image processing (largest solid color block)", "Financial peak analysis"],
+    approaches: [
+       {
+          name: "Optimal (Monotonic Stack)",
+          description: "### 🧠 The Core Concept\nFor every bar in the histogram, we want to know how far it can extend to the left and right without hitting a shorter bar. \n\nWe use a stack to store indices of bars in **increasing order** of height. When we see a shorter bar, it 'limits' the bars in the stack, and we calculate their areas.\n\n### 🛠️ Execution Strategy\n1. Maintain a stack of indices.\n2. If current height < stack top height:\n   - Pop the top and treat it as the 'height' of a potential rectangle.\n   - The 'width' is the distance between the current index and the new stack top.\n3. Add a sentinel '0' at the end to force the stack to clear.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Each index is pushed and popped exactly once.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Stack storage.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def largestRectangleArea(heights):\n    heights.append(0)\n    stack = [-1]\n    max_area = 0\n    for i in range(len(heights)):\n        while heights[i] < heights[stack[-1]]:\n            h = heights[stack.pop()]\n            w = i - stack[-1] - 1\n            max_area = max(max_area, h * w)\n        stack.append(i)\n    return max_area"
+             }
+          ]
+       }
+    ]
   }
 ];

@@ -117,5 +117,235 @@ export const stringsAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "reverse-words-in-a-given-string",
+    title: "Reverse Words in a String",
+    topic: "Strings - Basic",
+    category: "Strings",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Given an input string s, reverse the order of the words.",
+    leetcodeLink: "https://leetcode.com/problems/reverse-words-in-a-string/",
+    useCases: ["Natural Language Processing", "Inverting display text"],
+    approaches: [
+       {
+          name: "Optimal (Trim & Two Pointers)",
+          description: "### 🧠 The Core Concept\nWe want to reverse the order of words, but not the characters within the words themselves. \n\nWe can split the string by spaces, filter out the empty strings (extra spaces), reverse the resulting array, and join it back up.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Linear time to scan, split, and reverse.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Storing the intermediate words array.",
+          implementations: [
+             {
+                language: "JavaScript",
+                code: "function reverseWords(s) {\n    return s.trim().split(/\\s+/).reverse().join(' ');\n}"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "remove-outermost-parenthesis",
+    title: "Remove Outermost Parenthesis",
+    topic: "Strings - Basic",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "A valid parentheses string s is primitive if it is non-empty, and there does not exist a way to split s into s = A + B. This algorithm removes the outermost parentheses of every primitive string.",
+    leetcodeLink: "https://leetcode.com/problems/remove-outermost-parentheses/",
+    useCases: ["Compiler parser logic", "LISP-style syntax cleanup"],
+    approaches: [
+       {
+          name: "Optimal (Balance Counter)",
+          description: "### 🧠 The Core Concept\nKeep track of the 'balance' of open and closed parentheses. Only add a character to the result if it's NOT an outermost one.\n\n### 🛠️ Execution Strategy\n- `count > 0` before adding `(` means it's not outermost.\n- `count > 1` before adding `)` means it's not outermost.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function removeOuterParentheses(s) {\n    let res = '', count = 0;\n    for (let c of s) {\n        if (c === '(') {\n            if (count > 0) res += c;\n            count++;\n        } else {\n            count--;\n            if (count > 0) res += c;\n        }\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "largest-odd-number-in-a-string",
+    title: "Largest Odd Number in String",
+    topic: "Strings - Basic",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Return the largest-valued odd integer (as a string) that is a non-empty substring of the input string.",
+    leetcodeLink: "https://leetcode.com/problems/largest-odd-number-in-a-string/",
+    useCases: ["Number theory basics"],
+    approaches: [
+       {
+          name: "Optimal (Scan from Right)",
+          description: "### 🧠 The Core Concept\nThe largest substring starting from index 0 that is odd is determined by the rightmost odd digit.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def largestOddNumber(num: str) -> str:\n    for i in range(len(num) - 1, -1, -1):\n        if int(num[i]) % 2 != 0: return num[:i+1]\n    return ''" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "isomorphic-strings",
+    title: "Isomorphic Strings",
+    topic: "Strings - Basic",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Two strings are isomorphic if the characters in s can be replaced to get t.",
+    leetcodeLink: "https://leetcode.com/problems/isomorphic-strings/",
+    useCases: ["Pattern matching", "Cipher analysis"],
+    approaches: [
+       {
+          name: "Optimal (Double Map)",
+          description: "### 🧠 The Core Concept\nMaintain a mapping from s to t and t to s. Each character must map to exactly one other character.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1) (Bounded by charset size)",
+          implementations: [
+             { language: "JavaScript", code: "function isIsomorphic(s, t) {\n    let mapST = {}, mapTS = {};\n    for (let i = 0; i < s.length; i++) {\n        if ((mapST[s[i]] && mapST[s[i]] !== t[i]) || (mapTS[t[i]] && mapTS[t[i]] !== s[i])) return false;\n        mapST[s[i]] = t[i]; mapTS[t[i]] = s[i];\n    }\n    return true;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "rotate-string",
+    title: "Rotate String",
+    topic: "Strings - Basic",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Check if s can become t after some number of shifts.",
+    leetcodeLink: "https://leetcode.com/problems/rotate-string/",
+    useCases: ["Circular pattern matching"],
+    approaches: [
+       {
+          name: "Optimal (Concatenation Hint)",
+          description: "### 🧠 The Core Concept\nIf s is shifted, it will always be a substring of `s + s`.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "Python", code: "def rotateString(s: str, t: str) -> bool:\n    return len(s) == len(t) and t in (s + s)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "roman-number-to-integer",
+    title: "Roman to Integer",
+    topic: "Strings - Medium",
+    category: "Strings",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Convert a roman numeral string to an integer.",
+    leetcodeLink: "https://leetcode.com/problems/roman-to-integer/",
+    useCases: ["Legacy system parsing", "Historical data processing"],
+    approaches: [
+       {
+          name: "Optimal (Subtraction Rule)",
+          description: "### 🧠 The Core Concept\nNormally Roman numerals are largest to smallest. If a smaller numeral comes before a larger one, subtract it.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function romanToInt(s) {\n    const map = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};\n    let res = 0;\n    for (let i = 0; i < s.length; i++) {\n        if (map[s[i]] < map[s[i+1]]) res -= map[s[i]];\n        else res += map[s[i]];\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "implement-atoi",
+    title: "String to Integer (atoi)",
+    topic: "Strings - Medium",
+    category: "Strings",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Implement the myAtoi(string s) function which converts a string to a 32-bit signed integer.",
+    leetcodeLink: "https://leetcode.com/problems/string-to-integer-atoi/",
+    useCases: ["Input sanitization", "Number parsing"],
+    approaches: [
+       {
+          name: "Optimal (Boundary Check)",
+          description: "### 🧠 The Core Concept\nHandle whitespace, then the sign, then digit conversion while checking for overflow/underflow.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def myAtoi(s: str) -> int:\n    s = s.strip()\n    if not s: return 0\n    sign = -1 if s[0] == '-' else 1\n    if s[0] in ['-', '+']: s = s[1:]\n    res, i = 0, 0\n    while i < len(s) and s[i].isdigit():\n        res = res * 10 + int(s[i])\n        i += 1\n    res = sign * res\n    return max(-2**31, min(res, 2**31 - 1))" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "sort-characters-by-frequency",
+    title: "Sort Characters by Frequency",
+    topic: "Strings - Medium",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Given a string s, sort it in decreasing order based on the frequency of the characters.",
+    leetcodeLink: "https://leetcode.com/problems/sort-characters-by-frequency/",
+    useCases: ["Data compression", "Huffman coding basics"],
+    approaches: [
+       {
+          name: "Optimal (Bucket Sort)",
+          description: "### 🧠 The Core Concept\nCount frequencies, then use buckets where index = frequency and value = list of chars.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function frequencySort(s) {\n    let map = new Map();\n    for (let c of s) map.set(c, (map.get(c)||0)+1);\n    let buckets = Array.from({length: s.length + 1}, () => []);\n    for (let [c, f] of map) buckets[f].push(c);\n    let res = '';\n    for (let f = buckets.length - 1; f > 0; f--) {\n        for (let c of buckets[f]) res += c.repeat(f);\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "maximum-nesting-depth-of-parentheses",
+    title: "Max Nesting Depth of Parentheses",
+    topic: "Strings - Medium",
+    category: "Strings",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Given a valid parentheses string s, return the nesting depth of s.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-nesting-depth-of-the-parentheses/",
+    useCases: ["Syntax highlighting", "Nesting metrics"],
+    approaches: [
+       {
+          name: "Optimal (Max Balance)",
+          description: "### 🧠 The Core Concept\nThe maximum value reached by the bracket balance counter is the depth.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def maxDepth(s: str) -> int:\n    res = curr = 0\n    for c in s:\n        if c == '(': curr += 1\n        elif c == ')': curr -= 1\n        res = max(res, curr)\n    return res" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "longest-common-prefix",
+    title: "Longest Common Prefix",
+    topic: "Strings - Horizontal Scanning",
+    category: "Strings",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the longest common prefix string amongst an array of strings.",
+    leetcodeLink: "https://leetcode.com/problems/longest-common-prefix/",
+    useCases: ["Autocomplete systems", "Trie-based indexing"],
+    approaches: [
+       {
+          name: "Optimal (Horizontal Scanning)",
+          description: "### 🧠 The Core Concept\nAssume the first string is the prefix. Compare it with the second string and 'shorten' it until it matches. Repeat for all strings.\n\n### 🛠️ Execution Strategy\nIf we have `flower`, `flow`, `flight`:\n1. Prefix = `flower`. \n2. Compare with `flow`. Prefix becomes `flow`.\n3. Compare with `flight`. Prefix becomes `fl`.",
+          timeComplexity: "O(S)",
+          timeComplexityExplanation: "S is the sum of all characters in all strings.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Constant space aside from the prefix output.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def longestCommonPrefix(strs):\n    if not strs: return \"\"\n    prefix = strs[0]\n    for i in range(1, len(strs)):\n        while strs[i].find(prefix) != 0:\n            prefix = prefix[:-1]\n            if not prefix: return \"\"\n    return prefix"
+             }
+          ]
+       }
+    ]
   }
 ];

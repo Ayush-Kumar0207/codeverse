@@ -117,5 +117,59 @@ export const treesAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "diameter-of-binary-tree",
+    title: "Diameter of Binary Tree",
+    topic: "Trees",
+    category: "Breadth-First Search / Depth-First Search",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Given the root of a binary tree, return the length of the diameter of the tree. The diameter is the length of the longest path between any two nodes in a tree.",
+    leetcodeLink: "https://leetcode.com/problems/diameter-of-binary-tree/",
+    useCases: ["Network reliability analysis", "Topological spanning"],
+    approaches: [
+       {
+          name: "Optimal (Global Maximum Tracker)",
+          description: "### 🧠 The Core Concept\nThe longest path in a tree doesn't necessarily go through the root. It could be hidden deep down. \n\nHowever, **for every single node**, the longest path *passing through it* is simply `LeftHeight + RightHeight`. \n\nSo, while we calculate the height of each node (standard DFS), we simultaneously update a global 'All Time Best' record for `LeftHeight + RightHeight`.\n\n### 🛠️ Execution Strategy\n1. Initialize `maxDiameter = 0`.\n2. Define a DFS that returns Height: `1 + max(L, R)`.\n3. Inside the DFS, update `maxDiameter = max(maxDiameter, L + R)`.\n4. Return `maxDiameter` after the DFS finishes.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Single DFS traversal.",
+          spaceComplexity: "O(H)",
+          spaceComplexityExplanation: "Recursive stack height.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def diameterOfBinaryTree(root):\n    res = 0\n    def dfs(node):\n        nonlocal res\n        if not node: return 0\n        l, r = dfs(node.left), dfs(node.right)\n        res = max(res, l + r)\n        return 1 + max(l, r)\n    dfs(root)\n    return res"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "balanced-binary-tree",
+    title: "Balanced Binary Tree",
+    topic: "Trees",
+    category: "Structure Check",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Determine if a binary tree is height-balanced (height difference between subtrees <= 1).",
+    leetcodeLink: "https://leetcode.com/problems/balanced-binary-tree/",
+    useCases: ["Guaranteeing O(log N) search speeds", "Tree database integrity"],
+    approaches: [
+       {
+          name: "Optimal (Bottom-Up Early Exit)",
+          description: "### 🧠 The Core Concept\nWe check height recursively. If at any point a subtree is unbalanced, we bubble up a special '-1' signal all the way to the root. If the top returns -1, the tree is broken!\n\n### 🛠️ Execution Strategy\nReturn `-1` if unbalanced, otherwise return actual height.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Single pass.",
+          spaceComplexity: "O(H)",
+          spaceComplexityExplanation: "Stack space.",
+          implementations: [
+             {
+                language: "JavaScript",
+                code: "function isBalanced(root) {\n    function dfs(node) {\n        if (!node) return 0;\n        let l = dfs(node.left);\n        if (l === -1) return -1;\n        let r = dfs(node.right);\n        if (r === -1) return -1;\n        if (Math.abs(l - r) > 1) return -1;\n        return 1 + Math.max(l, r);\n    }\n    return dfs(root) !== -1;\n}"
+             }
+          ]
+       }
+    ]
   }
 ];

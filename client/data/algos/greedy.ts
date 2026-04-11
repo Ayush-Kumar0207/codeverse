@@ -117,5 +117,169 @@ export const greedyAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "n-meetings-in-one-room",
+    title: "N Meetings in one room",
+    topic: "Greedy Algorithms",
+    category: "Interval Scheduling",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the maximum number of meetings that can be performed in a single room.",
+    leetcodeLink: "",
+    useCases: ["Scheduling CPU tasks", "Room booking systems"],
+    approaches: [
+       {
+          name: "Optimal (Sort by End Time)",
+          description: "### 🧠 The Core Concept\nTo fit the most meetings in one room, you should always pick the meeting that **finishes the earliest**. \n\nBy picking the earliest-finishing meeting, you maximize the remaining time available for future meetings.\n\n### 🛠️ Execution Strategy\n1. Store meetings as `(start, end, index)` tuples.\n2. Sort meetings primarily by their **end time**.\n3. Iterate: If the next meeting's start time > previous meeting's end time, accept it and update the 'last finish time'.",
+          timeComplexity: "O(N log N)",
+          timeComplexityExplanation: "Sorting takes N log N.",
+          spaceComplexity: "O(N)",
+          spaceComplexityExplanation: "Storage for meeting structures.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def maxMeetings(n, start, end):\n    meetings = sorted(zip(start, end, range(n)), key=lambda x: x[1])\n    count = 1\n    last_end = meetings[0][1]\n    for i in range(1, n):\n        if meetings[i][0] > last_end:\n            count += 1\n            last_end = meetings[i][1]\n    return count"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "job-sequencing-problem",
+    title: "Job Sequencing Protocol",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Given a set of jobs where each job has a deadline and profit. Every job takes 1 unit of time and only one job can be scheduled at a time. Maximize profit.",
+    leetcodeLink: "",
+    useCases: ["Profit maximization in logistics", "Task priority scheduling"],
+    approaches: [
+       {
+          name: "Optimal (Sort by Profit + Deadline Slots)",
+          description: "### 🧠 The Core Concept\nSince all jobs take equal time, we should prioritize the jobs with the **Highest Profit**.\n\nTo give other jobs a chance, we should schedule each high-profit job at the **latest possible time slot** before its deadline.\n\n### 🛠️ Execution Strategy\n1. Sort jobs by profit (Descending).\n2. Find the maximum deadline to size our 'Schedule' array.\n3. For each job, try to place it in the latest available slot $(\le deadline)$.",
+          timeComplexity: "O(N * MaxDeadline)",
+          timeComplexityExplanation: "Outer loop for jobs, inner loop to find slot.",
+          spaceComplexity: "O(MaxDeadline)",
+          spaceComplexityExplanation: "Schedule array tracking.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def JobScheduling(Jobs, n):\n    Jobs.sort(key=lambda x: x.profit, reverse=True)\n    max_d = max(j.deadline for j in Jobs)\n    slot = [-1] * (max_d + 1)\n    count, profit = 0, 0\n    for j in Jobs:\n        for k in range(j.deadline, 0, -1):\n            if slot[k] == -1:\n                slot[k] = j.id\n                count += 1\n                profit += j.profit\n                break\n    return count, profit"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "lemonade-change",
+    title: "Lemonade Change",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "Medium",
+    difficulty: "Easy",
+    overview: "Determine if you can provide change to every customer starting with no money.",
+    leetcodeLink: "https://leetcode.com/problems/lemonade-change/",
+    useCases: ["Cash flow validation"],
+    approaches: [
+       {
+          name: "Optimal (Greedy Choice)",
+          description: "### 🧠 The Core Concept\nAlways prioritize giving a $10 bill and a $5 bill as change for a $20 bill, rather than three $5 bills. $5 bills are more 'valuable' for future change.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function lemonadeChange(bills) {\n    let five = 0, ten = 0;\n    for (let x of bills) {\n        if (x === 5) five++;\n        else if (x === 10) { if (five === 0) return false; five--; ten++; }\n        else {\n            if (ten > 0 && five > 0) { ten--; five--; }\n            else if (five >= 3) five -= 3;\n            else return false;\n        }\n    }\n    return true;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "valid-parenthesis-string",
+    title: "Valid Parenthesis String",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Check if a string with '(', ')' and '*' (wildcard) is valid.",
+    leetcodeLink: "https://leetcode.com/problems/valid-parenthesis-string/",
+    useCases: ["Flexible syntax validation"],
+    approaches: [
+       {
+          name: "Optimal (Min/Max Balance)",
+          description: "### 🧠 The Core Concept\nKeep track of the range of possible open brackets. `minOpen` ignores `*` as `)`, `maxOpen` treats `*` as `(`.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def checkValidString(s):\n    mi = ma = 0\n    for c in s:\n        if c == '(': mi += 1; ma += 1\n        elif c == ')': mi -= 1; ma -= 1\n        else: mi -= 1; ma += 1\n        if ma < 0: return False\n        if mi < 0: mi = 0\n    return mi == 0" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "jump-game-ii",
+    title: "Jump Game II (Min Jumps)",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the minimum number of jumps to reach the last index.",
+    leetcodeLink: "https://leetcode.com/problems/jump-game-ii/",
+    useCases: ["Shortest path in distance-constrained graphs"],
+    approaches: [
+       {
+          name: "Optimal (Greedy Range Expansion)",
+          description: "### 🧠 The Core Concept\nJump as far as possible within the current reach. When you reach the boundary of your current jump, increment jump count and update the boundary to the farthest point found.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function jump(nums) {\n    let jumps = 0, curEnd = 0, curFarthest = 0;\n    for (let i = 0; i < nums.length - 1; i++) {\n        curFarthest = Math.max(curFarthest, i + nums[i]);\n        if (i === curEnd) { jumps++; curEnd = curFarthest; }\n    }\n    return jumps;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "candy",
+    title: "Candy Distribution",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Give candies to children such that those with higher ratings get more than neighbors.",
+    leetcodeLink: "https://leetcode.com/problems/candy/",
+    useCases: ["Incentive alignment"],
+    approaches: [
+       {
+          name: "Optimal (Two-Pass Greedy)",
+          description: "### 🧠 The Core Concept\n1. Left-to-Right: Ensure child $i$ gets more than $i-1$ if rating is higher.\n2. Right-to-Left: Ensure child $i$ gets more than $i+1$ if rating is higher.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "Python", code: "def candy(ratings):\n    n = len(ratings); res = [1] * n\n    for i in range(1, n):\n        if ratings[i] > ratings[i-1]: res[i] = res[i-1] + 1\n    for i in range(n-2, -1, -1):\n        if ratings[i] > ratings[i+1]: res[i] = max(res[i], res[i+1] + 1)\n    return sum(res)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "fractional-knapsack",
+    title: "Fractional Knapsack",
+    topic: "Greedy Algorithms",
+    category: "Greedy Patterns",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Maximize value in a knapsack by taking fractions of items.",
+    leetcodeLink: "",
+    useCases: ["Material cutting", "Portfolio optimization"],
+    approaches: [
+       {
+          name: "Optimal (Value/Weight Ratio)",
+          description: "### 🧠 The Core Concept\nSort items by density (Value/Weight). Take as much as possible of the densest item.",
+          timeComplexity: "O(N log N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function fractionalKnapsack(W, items) {\n    items.sort((a,b) => (b.val/b.wt) - (a.val/a.wt));\n    let res = 0;\n    for (let item of items) {\n        if (W >= item.wt) { res += item.val; W -= item.wt; }\n        else { res += item.val * (W / item.wt); break; }\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
   }
 ];

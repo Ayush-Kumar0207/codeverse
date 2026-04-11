@@ -117,5 +117,363 @@ export const binarySearchAlgorithms: AlgorithmEntry[] = [
         ]
       }
     ]
+  },
+  {
+    id: "implement-lower-bound",
+    title: "Lower Bound",
+    topic: "Binary Search - 1D Arrays",
+    category: "Binary Search Basics",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the smallest index $i$ such that $arr[i] \ge x$.",
+    leetcodeLink: "",
+    useCases: ["Search insert position", "Range queries"],
+    approaches: [
+       {
+          name: "Optimal (Binary Search)",
+          description: "### 🧠 The Core Concept\nSimilar to binary search, but instead of stopping when we find the target, we record the index and continue searching on the **LEFT** side to find a 'lower' index that still satisfies the condition.",
+          timeComplexity: "O(log N)",
+          timeComplexityExplanation: "Standard logarithmic bound.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function lowerBound(arr, n, x) {\n    let low = 0, high = n - 1, ans = n;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (arr[mid] >= x) { ans = mid; high = mid - 1; }\n        else low = mid + 1;\n    }\n    return ans;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "implement-upper-bound",
+    title: "Upper Bound",
+    topic: "Binary Search - 1D Arrays",
+    category: "Binary Search Basics",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the smallest index $i$ such that $arr[i] > x$.",
+    leetcodeLink: "",
+    useCases: ["Counting occurrences", "Frequency ranges"],
+    approaches: [
+       {
+          name: "Optimal (Binary Search)",
+          description: "### 🧠 The Core Concept\nRecord the index when `arr[mid] > x` and keep searching left.",
+          timeComplexity: "O(log N)",
+          timeComplexityExplanation: "Standard logarithmic bound.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def upperBound(arr, x):\n    low, high, ans = 0, len(arr) - 1, len(arr)\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] > x: ans = mid; high = mid - 1\n        else: low = mid + 1\n    return ans" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "search-insert-position",
+    title: "Search Insert Position",
+    topic: "Binary Search - 1D Arrays",
+    category: "Binary Search Basics",
+    frequencyLevel: "Very High",
+    difficulty: "Easy",
+    overview: "Find the index where target should be inserted in a sorted array.",
+    leetcodeLink: "https://leetcode.com/problems/search-insert-position/",
+    useCases: ["Maintaing sorted order", "Insertion algorithms"],
+    approaches: [
+       {
+          name: "Optimal (Lower Bound)",
+          description: "### 🧠 The Core Concept\nThis is identical to the **Lower Bound** problem. The index $i$ where $arr[i] \ge target$ is the exact insertion spot.",
+          timeComplexity: "O(log N)",
+          timeComplexityExplanation: "Standard logarithmic bound.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "var searchInsert = function(nums, target) {\n    let low = 0, high = nums.length - 1, ans = nums.length;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (nums[mid] >= target) { ans = mid; high = mid - 1; }\n        else low = mid + 1;\n    }\n    return ans;\n};" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "floor-ceil-in-sorted-array",
+    title: "Floor/Ceil in Sorted Array",
+    topic: "Binary Search - 1D Arrays",
+    category: "Binary Search Basics",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find the floor (largest element $\le x$) and ceil (smallest element $\ge x$) in a sorted array.",
+    leetcodeLink: "",
+    useCases: ["Proximity search", "Data bucketing"],
+    approaches: [
+       {
+          name: "Optimal (Dual Binary Search)",
+          description: "### 🧠 The Core Concept\nCeiling is essentially the **Lower Bound**. Floor is found by recording index when `arr[mid] <= x` and searching right.",
+          timeComplexity: "O(log N)",
+          timeComplexityExplanation: "Dual logarithmic passes.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def getFloorAndCeil(arr, n, x):\n    f, c = -1, -1\n    # Floor logic\n    l, r = 0, n - 1\n    while l <= r:\n        mid = (l + r) // 2\n        if arr[mid] <= x: f = arr[mid]; l = mid + 1\n        else: r = mid - 1\n    # Ceil is Lower Bound\n    return (f, c)" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "first-or-last-occurrence-of-a-number",
+    title: "First and Last Occurrence",
+    topic: "Binary Search - 1D Arrays",
+    category: "Binary Search Basics",
+    frequencyLevel: "Very High",
+    difficulty: "Medium",
+    overview: "Find the start and end positions of a target value in a sorted array.",
+    leetcodeLink: "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
+    useCases: ["Frequency counting", "Log analysis"],
+    approaches: [
+       {
+          name: "Optimal (Lower/Upper Bound)",
+          description: "### 🧠 The Core Concept\n1. First Occur = Lower Bound (if $arr[lb] == x$).\n2. Last Occur = Upper Bound - 1.",
+          timeComplexity: "O(log N)",
+          timeComplexityExplanation: "Dual binary searches.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function findFirstLast(nums, target) {\n    const lb = lowerBound(nums, nums.length, target);\n    if (lb === nums.length || nums[lb] !== target) return [-1, -1];\n    return [lb, upperBound(nums, nums.length, target) - 1];\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "search-in-rotated-sorted-array-ii",
+    title: "Search in Rotated Sorted Array II",
+    topic: "Binary Search - 1D Arrays",
+    category: "Divide & Conquer",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Same as version I, but the array contains duplicates.",
+    leetcodeLink: "https://leetcode.com/problems/search-in-rotated-sorted-array-ii/",
+    useCases: ["Chaotic sorted data", "Duplicate handling"],
+    approaches: [
+       {
+          name: "Optimal (Bound Compression)",
+          description: "### 🧠 The Core Concept\nIf `arr[low] == arr[mid] == arr[high]`, we can't tell which side is sorted. We simply shrink the search space by `low++` and `high--` and retry.",
+          timeComplexity: "O(log N) (avg), O(N) (worst)",
+          timeComplexityExplanation: "Worst case occurs if all elements are identical.",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def search(nums, target):\n    l, r = 0, len(nums) - 1\n    while l <= r:\n        mid = (l + r) // 2\n        if nums[mid] == target: return True\n        if nums[l] == nums[mid] == nums[r]: l += 1; r -= 1; continue\n        # ... same as Rotated BS I\n    return False" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "minimum-days-to-make-m-bouquets",
+    title: "Minimum Days for M Bouquets",
+    topic: "Binary Search - Answers",
+    category: "Binary Search",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find the minimum number of days to wait until we can make m bouquets with k adjacent flowers.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/",
+    useCases: ["Resource scheduling", "Deadline estimation"],
+    approaches: [
+       {
+          name: "Optimal (BS on Days)",
+          description: "### 🧠 The Core Concept\nThe answer lies between `min(bloomDay)` and `max(bloomDay)`. Use binary search to find the earliest day that satisfies the bouquet condition.",
+          timeComplexity: "O(N * log(MaxDay))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function minDays(bloomDay, m, k) {\n    if (m * k > bloomDay.length) return -1;\n    let low = Math.min(...bloomDay), high = Math.max(...bloomDay);\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (canMake(bloomDay, mid, m, k)) high = mid - 1;\n        else low = mid + 1;\n    }\n    return low;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "find-the-smallest-divisor-given-a-threshold",
+    title: "Smallest Divisor",
+    topic: "Binary Search - Answers",
+    category: "Binary Search",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find the smallest divisor such that the sum of the division results is less than or equal to a threshold.",
+    leetcodeLink: "https://leetcode.com/problems/find-the-smallest-divisor-given-a-threshold/",
+    useCases: ["Load balancing", "Capacity partitioning"],
+    approaches: [
+       {
+          name: "Optimal (BS on Divisor)",
+          description: "### 🧠 The Core Concept\nBinary search the range [1, max(nums)]. For each mid, check if the sum of `ceil(nums[i]/mid)` is $\le$ threshold.",
+          timeComplexity: "O(N * log(MaxNum))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def smallestDivisor(nums, threshold):\n    l, r = 1, max(nums)\n    while l <= r:\n        mid = (l + r) // 2\n        if sum((n + mid - 1) // mid for n in nums) <= threshold: r = mid - 1\n        else: l = mid + 1\n    return l" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "capacity-to-ship-packages-within-d-days",
+    title: "Ship Packages in D Days",
+    topic: "Binary Search - Answers",
+    category: "Binary Search",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the minimum weight capacity of a ship that will result in all packages being shipped within D days.",
+    leetcodeLink: "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
+    useCases: ["Logistics optimization", "Bandwidth allocation"],
+    approaches: [
+       {
+          name: "Optimal (BS on Capacity)",
+          description: "### 🧠 The Core Concept\nMin capacity = max(weights), Max capacity = sum(weights). Binary search this range.",
+          timeComplexity: "O(N * log(Sum))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function shipWithinDays(weights, days) {\n    let l = Math.max(...weights), r = weights.reduce((a,b)=>a+b, 0);\n    while (l <= r) {\n        let mid = Math.floor((l+r)/2);\n        if (canShip(mid)) r = mid - 1;\n        else l = mid + 1;\n    }\n    return l;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "aggressive-cows",
+    title: "Aggressive Cows",
+    topic: "Binary Search - Answers",
+    category: "Binary Search",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Assign cows to stalls such that the minimum distance between any two of them is as large as possible.",
+    leetcodeLink: "",
+    useCases: ["Wireless sensor placement", "Conflict-free scheduling"],
+    approaches: [
+       {
+          name: "Optimal (BS on Distance)",
+          description: "### 🧠 The Core Concept\nBinary search the minimum distance. For each mid, check if we can place all cows with at least 'mid' distance apart.",
+          timeComplexity: "O(N log N + N log(MaxDist))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def aggressiveCows(stalls, k):\n    stalls.sort()\n    l, r, ans = 1, stalls[-1] - stalls[0], 1\n    while l <= r:\n        mid = (l + r) // 2\n        if canPlace(mid): ans = mid; l = mid + 1\n        else: r = mid - 1\n    return ans" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "book-allocation-problem",
+    title: "Book Allocation Problem",
+    topic: "Binary Search - Answers",
+    category: "Binary Search",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Allocate books to students such that the maximum number of pages assigned to a student is minimized.",
+    leetcodeLink: "",
+    useCases: ["Workload balancing", "Parallel process allocation"],
+    approaches: [
+       {
+          name: "Optimal (BS on Max Pages)",
+          description: "### 🧠 The Core Concept\nThis is identical to 'Split Array Largest Sum' and 'Painter's Partition'. Binary search the max pages threshold.",
+          timeComplexity: "O(N log(Sum))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function allocateBooks(A, B) {\n    if (B > A.length) return -1;\n    let l = Math.max(...A), r = A.reduce((a,b)=>a+b, 0);\n    while (l <= r) {\n        let mid = Math.floor((l+r)/2);\n        if (countStudents(mid) <= B) r = mid - 1;\n        else l = mid + 1;\n    }\n    return l;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "find-the-row-with-maximum-number-of-1s",
+    title: "Row with Max 1s",
+    topic: "Binary Search - 2D Arrays",
+    category: "Binary Search",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "In a 2D matrix where each row is sorted, find the row index with the maximum number of 1s.",
+    leetcodeLink: "",
+    useCases: ["Feature detection", "Sparse matrix analysis"],
+    approaches: [
+       {
+          name: "Optimal (Binary Search per Row)",
+          description: "### 🧠 The Core Concept\nFor each row, find the first '1' using Lower Bound. The number of 1s is `cols - firstIndex`.",
+          timeComplexity: "O(Rows * log(Cols))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function rowWithMax1s(mat) {\n    let maxCount = 0, rowIdx = -1;\n    for (let i = 0; i < mat.length; i++) {\n        let firstOne = lowerBound(mat[i], mat[i].length, 1);\n        let count = mat[i].length - firstOne;\n        if (count > maxCount) { maxCount = count; rowIdx = i; }\n    }\n    return rowIdx;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "search-in-a-2d-matrix",
+    title: "Search in 2D Matrix",
+    topic: "Binary Search - 2D Arrays",
+    category: "Binary Search",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Search for a target value in an m x n matrix where each row is sorted and the first integer of each row is greater than the last integer of the previous row.",
+    leetcodeLink: "https://leetcode.com/problems/search-in-a-2d-matrix/",
+    useCases: ["Database table lookups", "Sorted grid search"],
+    approaches: [
+       {
+          name: "Optimal (Virtual 1D Array)",
+          description: "### 🧠 The Core Concept\nTreat the matrix as a flattened 1D array of size `m * n`. A virtual index `i` maps to `[Math.floor(i/n), i%n]`.",
+          timeComplexity: "O(log(M*N))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def searchMatrix(matrix, target):\n    m, n = len(matrix), len(matrix[0])\n    l, r = 0, m * n - 1\n    while l <= r:\n        mid = (l + r) // 2\n        val = matrix[mid // n][mid % n]\n        if val == target: return True\n        elif val < target: l = mid + 1\n        else: r = mid - 1\n    return False" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "search-in-a-2d-matrix-ii",
+    title: "Search in 2D Matrix II",
+    topic: "Binary Search - 2D Arrays",
+    category: "Binary Search",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Search in an m x n matrix where each row and each column is sorted in ascending order.",
+    leetcodeLink: "https://leetcode.com/problems/search-in-a-2d-matrix-ii/",
+    useCases: ["Multi-index database searching"],
+    approaches: [
+       {
+          name: "Optimal (Staircase Search)",
+          description: "### 🧠 The Core Concept\nStart from the Top-Right corner. If `val > target`, move left (entire column is too big). If `val < target`, move down (entire row is too small).",
+          timeComplexity: "O(M + N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function searchMatrixII(matrix, target) {\n    let row = 0, col = matrix[0].length - 1;\n    while (row < matrix.length && col >= 0) {\n        if (matrix[row][col] === target) return true;\n        if (matrix[row][col] > target) col--;\n        else row++;\n    }\n    return false;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "find-peak-element-2d-matrix",
+    title: "Peak Element in 2D Matrix",
+    topic: "Binary Search - 2D Arrays",
+    category: "Binary Search",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Find a peak element in a 2D matrix where an element is a peak if it is greater than its neighbors (left, right, top, bottom).",
+    leetcodeLink: "https://leetcode.com/problems/find-a-peak-element-ii/",
+    useCases: ["Terrain analysis", "Signal peak detection"],
+    approaches: [
+       {
+          name: "Optimal (BS on Columns)",
+          description: "### 🧠 The Core Concept\nBinary search for the column. Find the maximum element in the `midCol`. If it's smaller than its neighbor in `midCol+1`, a peak must exist on the right.",
+          timeComplexity: "O(Rows * log(Cols))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def findPeakGrid(mat):\n    l, r = 0, len(mat[0]) - 1\n    while l <= r:\n        midCol = (l + r) // 2\n        maxRow = findMaxRow(mat, midCol)\n        left = mat[maxRow][midCol-1] if midCol > 0 else -1\n        right = mat[maxRow][midCol+1] if midCol < len(mat[0])-1 else -1\n        if mat[maxRow][midCol] > left and mat[maxRow][midCol] > right: return [maxRow, midCol]\n        elif mat[maxRow][midCol] < right: l = midCol + 1\n        else: r = midCol - 1" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "median-in-a-row-wise-sorted-matrix",
+    title: "Median in Row-wise Sorted Matrix",
+    topic: "Binary Search - 2D Arrays",
+    category: "Binary Search",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Find the median of a matrix where each row is sorted.",
+    leetcodeLink: "",
+    useCases: ["Statistical analysis on partitioned data"],
+    approaches: [
+       {
+          name: "Optimal (BS on Number Range)",
+          description: "### 🧠 The Core Concept\nBinary search the range [min, max]. For each mid, count elements $\le$ mid in the matrix using `upperBound` on each row. Median is the first value where count $> (M*N)/2$.",
+          timeComplexity: "O(Rows * log(Cols) * log(2^31))",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function median(matrix) {\n    let low = 1, high = 1e9;\n    while (low <= high) {\n        let mid = Math.floor((low + high) / 2);\n        if (countLessEqual(matrix, mid) <= (R*C)/2) low = mid + 1;\n        else high = mid - 1;\n    }\n    return low;\n}" }
+          ]
+       }
+    ]
   }
 ];

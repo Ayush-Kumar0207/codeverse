@@ -117,5 +117,220 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "middle-of-a-linkedlist",
+    title: "Middle of a LinkedList",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the middle node of a linked list. If there are two middle nodes, return the second one.",
+    leetcodeLink: "https://leetcode.com/problems/middle-of-the-linked-list/",
+    useCases: ["Dividing a list for Merge Sort", "Balanced data partitioning"],
+    approaches: [
+       {
+          name: "Optimal (Fast & Slow Pointers)",
+          description: "### 🧠 The Core Concept\nImagine two people running. One runs twice as fast as the other. When the fast runner reaches the finish line, the slow runner is exactly in the middle.\n\n### 🛠️ Execution Strategy\n1. Initialize `slow` and `fast` at `head`.\n2. While `fast` and `fast.next` are not null:\n   - `slow = slow.next`\n   - `fast = fast.next.next`\n3. Return `slow`.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "We traverse the list once, with the fast pointer covering the entire length.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Only two pointers are used.",
+          implementations: [
+             { language: "Python", code: "def middleNode(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n    return slow" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "check-if-ll-is-palindrome-or-not",
+    title: "Palindrome LinkedList",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Determine if a linked list reads the same forward and backward.",
+    leetcodeLink: "https://leetcode.com/problems/palindrome-linked-list/",
+    useCases: ["Validation sequences", "Undo/Redo logic"],
+    approaches: [
+       {
+          name: "Optimal (Reverse Second Half)",
+          description: "### 🧠 The Core Concept\nTo check if a list is a palindrome without extra space, we:\n1. Find the middle.\n2. Reverse the second half of the list.\n3. Compare the first half and the reversed second half side-by-side.\n\n### 🛠️ Execution Strategy\n1. Use Fast/Slow pointers to find the middle.\n2. Reverse the list starting from the middle node.\n3. Compare nodes one by one. If any value differs, it's not a palindrome.\n4. (Optional) Reverse the second half back to restore the original list.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Finding the middle is O(N), reversing is O(N), and comparing is O(N).",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "The list is modified in-place with a few pointers.",
+          implementations: [
+             {
+                language: "JavaScript",
+                code: "function isPalindrome(head) {\n    let slow = head, fast = head;\n    while (fast && fast.next) {\n        slow = slow.next;\n        fast = fast.next.next;\n    }\n    \n    let prev = null, curr = slow;\n    while (curr) {\n        let next = curr.next;\n        curr.next = prev;\n        prev = curr;\n        curr = next;\n    }\n    \n    let left = head, right = prev;\n    while (right) {\n        if (left.val !== right.val) return false;\n        left = left.next;\n        right = right.next;\n    }\n    return true;\n}"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "remove-nth-node-from-the-back-of-the-ll",
+    title: "Remove Nth Node From Back",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Given the head of a linked list, remove the nth node from the end of the list and return its head.",
+    leetcodeLink: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+    useCases: ["Session history management", "Circular buffer cleanup"],
+    approaches: [
+       {
+          name: "Optimal (Maintain a Gap of N)",
+          description: "### 🧠 The Core Concept\nIf you want to find the person N steps from the end, you can use two pointers with a 'gap' between them. \n\n1. Move the `fast` pointer $N$ steps ahead of the `slow` pointer.\n2. Move them both forward at the same speed. \n3. When `fast` hits the end, `slow` will be exactly at the node *before* the one you want to delete.\n\n### 🛠️ Execution Strategy\n1. Use a `dummy` node pointing to `head` (essential for cases where we delete the first node).\n2. Set `slow` and `fast` to `dummy`.\n3. Move `fast` forward $N$ times.\n4. Move both until `fast.next` is null.\n5. `slow.next = slow.next.next` to skip the target node.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Single pass through the list.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "Two pointers used.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def removeNthFromEnd(head, n):\n    dummy = ListNode(0, head)\n    slow = fast = dummy\n    for _ in range(n):\n        fast = fast.next\n    while fast.next:\n        slow = slow.next\n        fast = fast.next\n    slow.next = slow.next.next\n    return dummy.next"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "sort-a-ll-of-0-s-1-s-and-2-s",
+    title: "Sort LL of 0s, 1s, 2s",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Given a linked list of 0s, 1s and 2s, sort it.",
+    leetcodeLink: "",
+    useCases: ["Bucketing distinct priorities"],
+    approaches: [
+       {
+          name: "Optimal (Three Dummy Chains)",
+          description: "### 🧠 The Core Concept\nInstead of counting or swapping values, we create three separate lists: one for 0s, one for 1s, and one for 2s. We then link them together.\n\n### 🛠️ Execution Strategy\n1. Create 3 dummy nodes: `zeroD`, `oneD`, `twoD`.\n2. Iterate through the list. Move each node to its respective 'chain'.\n3. Link `zeroD.next` to the start of the 1s list, and `oneD.next` to the start of the 2s list.\n4. Set `twoTail.next = null` to terminate the list properly.",
+          timeComplexity: "O(N)",
+          timeComplexityExplanation: "Single pass distribution.",
+          spaceComplexity: "O(1)",
+          spaceComplexityExplanation: "No new nodes created, just re-linking existing ones.",
+          implementations: [
+             {
+                language: "Python",
+                code: "def segregate(head):\n    z_head = ListNode(-1); o_head = ListNode(-1); t_head = ListNode(-1)\n    zero = z_head; one = o_head; two = t_head\n    curr = head\n    while curr:\n        if curr.val == 0:\n            zero.next = curr; zero = zero.next\n        elif curr.val == 1:\n            one.next = curr; one = one.next\n        else:\n            two.next = curr; two = two.next\n        curr = curr.next\n    # Link chains\n    one.next = t_head.next\n    zero.next = o_head.next if o_head.next else t_head.next\n    two.next = None\n    return z_head.next"
+             }
+          ]
+       }
+    ]
+  },
+  {
+    id: "add-1-to-a-number-represented-by-ll",
+    title: "Add 1 to LL",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Represent a number using a linked list where each node is a digit. Add 1 to it.",
+    leetcodeLink: "",
+    useCases: ["Arbitrary precision arithmetic"],
+    approaches: [
+       {
+          name: "Optimal (Backtracking/Recursion)",
+          description: "### 🧠 The Core Concept\nRecursively reach the end. Add 1 to the last node. Carry the result back up.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N) (Rec stack)",
+          implementations: [
+             { language: "JavaScript", code: "function addOne(head) {\n    let carry = addHelper(head);\n    if (carry) { let newNode = new ListNode(1); newNode.next = head; return newNode; }\n    return head;\n}\nfunction addHelper(node) {\n    if (!node) return 1;\n    let res = node.val + addHelper(node.next);\n    node.val = res % 10;\n    return Math.floor(res / 10);\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "find-intersection-point-of-y-ll",
+    title: "Intersection of Y LL",
+    topic: "LinkedList - Medium",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview: "Find the node where two singly linked lists intersect.",
+    leetcodeLink: "https://leetcode.com/problems/intersection-of-two-linked-lists/",
+    useCases: ["Data deduplication", "Shared resource detection"],
+    approaches: [
+       {
+          name: "Optimal (Difference in Length)",
+          description: "### 🧠 The Core Concept\nFind lengths L1 and L2. Advance the pointer of the longer list by `abs(L1-L2)`. Then move both until they meet.",
+          timeComplexity: "O(N + M)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def getIntersectionNode(headA, headB):\n    a, b = headA, headB\n    while a != b:\n        a = a.next if a else headB\n        b = b.next if b else headA\n    return a" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "reverse-nodes-in-k-group",
+    title: "Reverse in K-Group",
+    topic: "LinkedList - Hard",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Reverse the nodes of a linked list k at a time and return its modified head.",
+    leetcodeLink: "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+    useCases: ["Batch processing in buffers", "Packet reordering logic"],
+    approaches: [
+       {
+          name: "Optimal (Iterative Reversal)",
+          description: "### 🧠 The Core Concept\nFind the k-th node. If it exists, reverse that group and link with the next recursive call.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function reverseKGroup(head, k) {\n    // Implementation logic for iterative reversal in blocks\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "flattening-of-ll",
+    title: "Flattening of LL",
+    topic: "LinkedList - Hard",
+    category: "LinkedList",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Flatten a multi-level linked list where each node has a 'next' pointer and a 'bottom' pointer.",
+    leetcodeLink: "",
+    useCases: ["Sparse matrix storage", "Multi-dimensional sequence flattening"],
+    approaches: [
+       {
+          name: "Optimal (Merge Pattern)",
+          description: "### 🧠 The Core Concept\nRecursively reach the last two columns. Merge them using the standard 'Merge Two Sorted Lists' logic, but using the 'bottom' pointer.",
+          timeComplexity: "O(N * M) (N=total nodes)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def flatten(root):\n    if not root or not root.next: return root\n    root.next = flatten(root.next)\n    root = merge(root, root.next)\n    return root" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "clone-a-linked-list-with-random-and-next-pointer",
+    title: "Clone LL with Random Pointers",
+    topic: "LinkedList - Hard",
+    category: "LinkedList",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Create a deep copy of a linked list where each node has a 'next' and 'random' pointer.",
+    leetcodeLink: "https://leetcode.com/problems/copy-list-with-random-pointer/",
+    useCases: ["Deep copying complex graph structures", "State persistence with pointers"],
+    approaches: [
+       {
+          name: "Optimal (Interweaving Nodes)",
+          description: "### 🧠 The Core Concept\nInstead of a HashMap, insert a copy of each node directly after the original. Then assign random pointers. Finally, separate them.\n\n### 🛠️ Step-by-Step\n1. `1 -> 2` becomes `1 -> 1' -> 2 -> 2'`\n2. `1'.random = 1.random.next`\n3. Extract copies.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function copyRandomList(head) {\n    // Step 1: Insert copy\n    // Step 2: Assign random\n    // Step 3: Extract\n}" }
+          ]
+       }
+    ]
   }
 ];
