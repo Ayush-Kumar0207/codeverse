@@ -16,12 +16,22 @@ import {
   Code
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { useSettings, ThemeType, ScaleType, AudioProfile } from "@/context/SettingsContext";
 
 export default function SettingsHub() {
   const [activeTab, setActiveTab] = useState("appearance");
-  const { settings, updateSetting, jsonConfig, setJsonConfig, apm } = useSettings();
+  const { 
+    settings, 
+    updateSetting, 
+    jsonConfig, 
+    setJsonConfig, 
+    apm, 
+    diagnostics, 
+    toggleStressMode, 
+    flushMemory 
+  } = useSettings();
   const [showCode, setShowCode] = useState(false);
 
   return (
@@ -106,10 +116,10 @@ export default function SettingsHub() {
                         <div className="flex flex-col gap-4">
                            {(["midnight", "hacker", "solarized", "amoled"] as ThemeType[]).map((t) => (
                              <ThemeOption 
-                               key={t} 
-                               label={t} 
-                               active={settings.appearance.theme === t} 
-                               onClick={() => updateSetting("appearance", { theme: t })}
+                                key={t} 
+                                label={t} 
+                                active={settings.appearance.theme === t} 
+                                onClick={() => updateSetting("appearance", { theme: t })}
                              />
                            ))}
                         </div>
@@ -145,24 +155,24 @@ export default function SettingsHub() {
                         icon={Sliders} 
                         className="md:col-span-2"
                      >
-                         <div className="px-2 py-4">
-                            <input 
-                              type="range" 
-                              min="0.75" 
-                              max="1.25" 
-                              step="0.01"
-                              value={settings.appearance.scale}
-                              onChange={(e) => {
-                                updateSetting("appearance", { scale: parseFloat(e.target.value) });
-                              }}
-                              className="w-full accent-primary bg-white/5 rounded-lg appearance-none h-1.5 cursor-pointer" 
-                            />
-                            <div className="flex justify-between mt-2 text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-50">
-                               <span>Minimum (75%)</span>
-                               <span>Standard (100%)</span>
-                               <span>Maximum (125%)</span>
-                            </div>
-                         </div>
+                          <div className="px-2 py-4">
+                             <input 
+                               type="range" 
+                               min="0.75" 
+                               max="1.25" 
+                               step="0.01"
+                               value={settings.appearance.scale}
+                               onChange={(e) => {
+                                 updateSetting("appearance", { scale: parseFloat(e.target.value) });
+                               }}
+                               className="w-full accent-primary bg-white/5 rounded-lg appearance-none h-1.5 cursor-pointer" 
+                             />
+                             <div className="flex justify-between mt-2 text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-50">
+                                <span>Minimum (75%)</span>
+                                <span>Standard (100%)</span>
+                                <span>Maximum (125%)</span>
+                             </div>
+                          </div>
                      </ConfigCard>
                   </motion.div>
                 )}
@@ -240,33 +250,98 @@ export default function SettingsHub() {
                      exit={{ opacity: 0, x: -20 }}
                      className="flex flex-col gap-6"
                   >
-                     <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8">
-                        <div className="flex items-center justify-between">
+                     <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8 relative overflow-hidden">
+                        {/* Neural Pulse Background */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[120px] -mr-32 -mt-32 animate-pulse" />
+                        
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(99,102,241,0.2)]">
                                  <Database className="w-6 h-6" />
                               </div>
                               <div>
                                  <h3 className="text-xl font-bold font-outfit uppercase">System Health</h3>
-                                 <p className="text-xs text-muted-foreground uppercase tracking-widest">Diagnostic Report // Finalized 11:27</p>
+                                 <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Neural Heartbeat // Active</p>
                               </div>
                            </div>
+                           
+                           <div className="flex gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 onClick={toggleStressMode}
+                                 className={cn("h-8 text-[10px] font-bold uppercase tracking-widest border-white/20 text-slate-400 hover:text-white transition-all", diagnostics.stressMode && "bg-destructive/20 border-destructive/50 text-destructive")}
+                               >
+                                Trigger Heap Stress
+                              </Button>
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 onClick={flushMemory}
+                                 className="h-8 text-[10px] font-bold uppercase tracking-widest border-white/20 text-slate-400 hover:text-primary hover:border-primary/50 transition-all"
+                               >
+                                Flush Memory
+                              </Button>
+                           </div>
+
                            <div className="flex flex-col items-end">
-                              <span className="text-3xl font-black text-green-400 font-outfit uppercase tracking-tighter">Healthy</span>
+                              <span className={cn(
+                                "text-3xl font-black font-outfit uppercase tracking-tighter transition-colors duration-500",
+                                diagnostics.stressMode ? "text-destructive" : "text-green-400"
+                              )}>
+                                {diagnostics.stressMode ? "Critical" : "Healthy"}
+                              </span>
                               <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">Cluster Status</span>
                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                           <StatBar label="Node Latency" val="14ms" percent={12} color="bg-blue-400" />
-                           <StatBar label="Memory Usage" val="1.2GB" percent={45} color="bg-purple-400" />
-                           <StatBar label="Thread Load" val="Active" percent={82} color="bg-green-400" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                           <StatCard 
+                             label="Node Latency" 
+                             val={`${diagnostics.latency}ms`} 
+                             data={diagnostics.latency} 
+                             color="#60A5FA" 
+                             max={100}
+                           />
+                           <StatCard 
+                             label="Memory Usage" 
+                             val={`${(diagnostics.memory / 1024).toFixed(2)}GB`} 
+                             data={diagnostics.memory} 
+                             color="#C084FC" 
+                             max={2048}
+                           />
+                           <StatCard 
+                             label="Thread Load" 
+                             val={`${Math.round(diagnostics.load)}%`} 
+                             data={diagnostics.load} 
+                             color="#4ADE80" 
+                             max={100}
+                           />
                         </div>
 
-                        <div className="bg-black/40 p-5 rounded-2xl border border-white/5 font-mono text-[10px] space-y-2 opacity-70">
-                           <p className="text-green-400">[SYSTEM] Multi-thread cluster operational.</p>
-                           <p className="text-blue-400">[SYNC] LocalStorage bridge active.</p>
-                           <p className="text-purple-400">[NEURAL] {apm} APM detected. Flow State scaling: {(apm/300).toFixed(2)}x</p>
+                        <div className="flex flex-col gap-3 relative z-10">
+                           <div className="flex items-center gap-2 opacity-50">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Real Telemetry Log</span>
+                           </div>
+                           <div className="bg-black/60 p-5 rounded-2xl border border-white/5 font-mono text-[11px] h-40 overflow-y-auto flex flex-col gap-1 custom-scrollbar">
+                              {diagnostics.logs.map((log) => (
+                                <div key={log.id} className="flex gap-4 group">
+                                   <span className="text-white/20 shrink-0">[{new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+                                   <span className={cn(
+                                     "font-bold shrink-0 w-16",
+                                     log.type === 'sys' && "text-blue-400",
+                                     log.type === 'sync' && "text-purple-400",
+                                     log.type === 'neural' && "text-primary",
+                                     log.type === 'critical' && "text-destructive"
+                                   )}>
+                                     {log.type.toUpperCase()}
+                                   </span>
+                                   <span className="text-white/70 group-hover:text-white transition-colors">{log.msg}</span>
+                                </div>
+                              ))}
+                              <div className="pt-2 text-primary/40 animate-pulse">_ system awaiting neural pulse...</div>
+                           </div>
                         </div>
                      </div>
                   </motion.div>
@@ -365,21 +440,65 @@ function SettingToggle({ label, active, onToggle }: { label: string, active?: bo
   );
 }
 
-function StatBar({ label, val, percent, color }: { label: string, val: string, percent: number, color: string }) {
+function StatCard({ label, val, data, color, max }: { label: string, val: string, data: number, color: string, max: number }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="bg-black/20 p-5 rounded-2xl border border-white/5 flex flex-col gap-3 group hover:border-white/10 transition-all">
        <div className="flex justify-between items-end">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground">{label}</span>
-          <span className="text-sm font-black font-outfit tracking-tighter">{val}</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+          <span className="text-sm font-black font-mono text-white/90">{val}</span>
        </div>
-       <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${percent}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className={cn("h-full", color)} 
-          />
+       <div className="h-12 w-full">
+          <Sparkline data={data} color={color} max={max} />
        </div>
     </div>
   );
+}
+
+function Sparkline({ data, color, max }: { data: number, color: string, max: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dataRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    // Keep last 30 points
+    dataRef.current = [...dataRef.current, data].slice(-30);
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // Draw Line
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const step = width / 29;
+    dataRef.current.forEach((val, i) => {
+      const x = i * step;
+      const y = height - (Math.min(val, max) / max * (height - 4)) - 2;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw Gradient Area
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, `${color}44`);
+    grad.addColorStop(1, `${color}00`);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+  }, [data, color, max]);
+
+  return <canvas ref={canvasRef} width={200} height={50} className="w-full h-full" />;
 }
