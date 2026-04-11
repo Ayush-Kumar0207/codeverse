@@ -1,86 +1,74 @@
 import { useEffect, useRef } from "react";
 import { suggestCode } from "@/services/ai";
-import type { editor } from "monaco-editor";
+import * as monacoType from "monaco-editor";
+import { useSettings } from "@/context/SettingsContext";
 
 export function useCodeAutoComplete(
-  monacoRef: React.MutableRefObject<any>,
-  languageRef: React.MutableRefObject<string>,
-  registeredLanguages: React.MutableRefObject<Set<string>>
+  monacoRef: React.MutableRefObject<typeof monacoType | null>,
+  languageRef: React.MutableRefObject<string>
 ) {
-  const providerRef = useRef<any>(null);
+  const { settings } = useSettings();
+  const providerRef = useRef<monacoType.IDisposable | null>(null);
 
   useEffect(() => {
-    if (!monacoRef.current) return;
+    if (!monacoRef.current || !settings.editor.autocomplete) {
+      providerRef.current?.dispose();
+      providerRef.current = null;
+      return;
+    }
 
     const monaco = monacoRef.current;
     const language = languageRef.current;
 
-    // Only register once per language
-    if (registeredLanguages.current.has(language)) {
-      return;
-    }
-
     try {
-      // Register completion item provider for this language
-      const disposable = monaco.languages.registerCompletionItemProvider(language, {
-        provideCompletionItems: async (model: editor.ITextModel, position: any) => {
+      // Register INLINE completion provider (Ghost Text)
+      const disposable = monaco.languages.registerInlineCompletionsProvider(language, {
+        provideInlineCompletions: async (model, position) => {
           try {
-            // Get current line text
+            // Get current line text for context
             const lineText = model.getLineContent(position.lineNumber);
             const columnText = lineText.substring(0, position.column);
 
-            // Only trigger on specific patterns (comments, etc.)
-            if (!columnText.includes("//") && !columnText.includes("/*")) {
-              return { suggestions: [] };
-            }
+            // Simple heuristic for triggering AI
+            if (columnText.trim().length < 3) return { items: [] };
 
-            // Call AI service
-            const code = model.getValue();
-            const response = await suggestCode({ prompt: columnText });
+            const response = await suggestCode({ prompt: model.getValue() });
 
-            if (!response?.suggestion) {
-              return { suggestions: [] };
-            }
+            if (!response?.suggestion) return { items: [] };
 
-            // Parse markdown code blocks if present
+            // Parse suggestion
             const codeBlockMatch = response.suggestion.match(/```[\w]*\n([\s\S]*?)\n```/);
             const extractedCode = codeBlockMatch ? codeBlockMatch[1] : response.suggestion;
 
-            // Return as completion item
             return {
-              suggestions: [
+              items: [
                 {
-                  label: "AI Suggestion",
-                  kind: monaco.languages.CompletionItemKind.Snippet,
                   insertText: extractedCode,
-                  insertTextRules:
-                    monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: 1,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column,
-                  },
+                  range: new monaco.Range(
+                    position.lineNumber,
+                    position.column,
+                    position.lineNumber,
+                    position.column + extractedCode.length
+                  ),
                 },
               ],
             };
           } catch (err) {
-            console.error("Completion provider error:", err);
-            return { suggestions: [] };
+            return { items: [] };
           }
         },
+        freeInlineCompletions: () => {},
       });
 
-      registeredLanguages.current.add(language);
       providerRef.current = disposable;
 
       return () => {
-        disposable?.dispose?.();
+        disposable.dispose();
       };
     } catch (err) {
-      console.error("Failed to register completion provider:", err);
+      console.error("Failed to register inline completion provider:", err);
     }
-  }, [monacoRef, languageRef, registeredLanguages]);
+  }, [monacoRef, languageRef, settings.editor.autocomplete]);
 
   return {
     providerRef,

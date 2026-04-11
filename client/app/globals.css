@@ -236,3 +236,30 @@
   background: hsl(var(--black) / 0.2) !important;
   border: 1px solid hsl(var(--border));
 }
+
+/* ============================================
+   GOD-LEVEL EDITOR MECHANICS
+   ============================================ */
+.apm-power-gutter {
+  width: 2px !important;
+  background: linear-gradient(to bottom, transparent, hsl(var(--primary)), transparent);
+  background-size: 100% 200%;
+  animation: power-flow 2s linear infinite;
+  box-shadow: 0 0 15px hsl(var(--primary) / calc(0.2 + var(--neon-power)));
+  opacity: calc(0.1 + var(--neon-power));
+}
+
+@keyframes power-flow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 200%; }
+}
+
+.code-dimmed {
+  opacity: 0.25 !important;
+  filter: blur(0.5px);
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+.reduced-motion .apm-power-gutter {
+  animation: none;
+}

@@ -550,6 +550,15 @@ export default function EditorPage() {
                      activeFile={activeFile}
                      roomId={roomId}
                      currentUser={user?.username || "Guest"}
+                     onZoneEnter={() => {
+                        leftPanelRef.current?.collapse();
+                        rightPanelRef.current?.collapse();
+                        setBottomCollapsed(true);
+                     }}
+                     onZoneExit={() => {
+                        leftPanelRef.current?.expand();
+                        rightPanelRef.current?.expand();
+                     }}
                    />
                   
                   {/* Global Actions Overlay */}
