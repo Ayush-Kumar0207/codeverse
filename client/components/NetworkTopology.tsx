@@ -5,9 +5,10 @@ import { Cloud, Laptop, Server } from "lucide-react";
 
 interface NetworkTopologyProps {
   status: "idle" | "syncing" | "synced" | "error";
+  isSynced: boolean;
 }
 
-export function NetworkTopology({ status }: NetworkTopologyProps) {
+export function NetworkTopology({ status, isSynced }: NetworkTopologyProps) {
   return (
     <div className="w-full h-48 bg-black/40 rounded-2xl border border-white/5 relative overflow-hidden flex items-center justify-center">
       <svg width="400" height="150" viewBox="0 0 400 150" className="opacity-80">
@@ -32,20 +33,20 @@ export function NetworkTopology({ status }: NetworkTopologyProps) {
           <motion.circle
             r="3"
             fill="var(--primary)"
-            initial={{ offsetDistance: "0%" }}
+            initial={{ "--offset-dist": "0%", opacity: 0 } as any}
             animate={{ 
-               offsetDistance: ["0%", "100%"],
+               "--offset-dist": "100%",
                opacity: [0, 1, 0]
             }}
             transition={{ 
-                duration: 1.5, 
-                repeat: Infinity,
-                ease: "linear"
+                "--offset-dist": { duration: 1.5, repeat: Infinity, ease: "linear" },
+                opacity: { duration: 1.5, repeat: Infinity, ease: "linear" }
             }}
             style={{ 
                 offsetPath: "path('M 100 75 L 200 75')",
+                offsetDistance: "var(--offset-dist)",
                 filter: "drop-shadow(0 0 8px var(--primary))"
-            }}
+            } as any}
           />
         )}
 
@@ -54,29 +55,28 @@ export function NetworkTopology({ status }: NetworkTopologyProps) {
           <motion.circle
             r="3"
             fill="var(--primary)"
-            initial={{ offsetDistance: "0%" }}
+            initial={{ "--offset-dist": "0%", opacity: 0 } as any}
             animate={{ 
-               offsetDistance: ["0%", "100%"],
+               "--offset-dist": "100%",
                opacity: [0, 1, 0]
             }}
             transition={{ 
-                duration: 1.5, 
-                delay: 0.5,
-                repeat: Infinity,
-                ease: "linear"
+                "--offset-dist": { duration: 1.5, delay: 0.5, repeat: Infinity, ease: "linear" },
+                opacity: { duration: 1.5, delay: 0.5, repeat: Infinity, ease: "linear" }
             }}
             style={{ 
                 offsetPath: "path('M 200 75 L 300 75')",
+                offsetDistance: "var(--offset-dist)",
                 filter: "drop-shadow(0 0 8px var(--primary))"
-            }}
+            } as any}
           />
         )}
       </svg>
 
       {/* Node Icons */}
       <div className="absolute inset-0 flex items-center justify-between px-16">
-        <NodeIcon icon={Laptop} label="Local Node" active={status !== 'idle'} />
-        <NodeIcon icon={Cloud} label="Cloud Hub" active={status === 'synced'} isHub />
+        <NodeIcon icon={Laptop} label="Local Node" active={true} />
+        <NodeIcon icon={Cloud} label="Cloud Hub" active={isSynced} isHub />
         <NodeIcon icon={Server} label="Backup Node" active={false} />
       </div>
 

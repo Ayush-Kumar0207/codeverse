@@ -38,7 +38,8 @@ export default function SettingsHub() {
     syncStatus,
     snapshots,
     performSync,
-    rollback
+    rollback,
+    isSynced
   } = useSettings();
   const [showCode, setShowCode] = useState(false);
   const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
@@ -378,14 +379,14 @@ export default function SettingsHub() {
                             </div>
                          </div>
                          <Button 
-                            onClick={performSync} 
+                            onClick={() => performSync(true)} 
                             disabled={syncStatus === 'syncing'}
                             className="bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white uppercase font-bold text-[10px] tracking-widest h-9"
                          >
                             {syncStatus === 'syncing' ? "Synchronizing..." : "Initiate Sync"}
                          </Button>
                       </div>
-                      <NetworkTopology status={syncStatus} />
+                      <NetworkTopology status={syncStatus} isSynced={isSynced} />
                     </div>
 
                     {/* Temporal Timeline */}
@@ -444,7 +445,7 @@ export default function SettingsHub() {
                                            <pre>{JSON.stringify(snap.config, null, 2)}</pre>
                                         </div>
                                         <Button 
-                                          onClick={() => rollback(snap.id)}
+                                          onClick={() => rollback(snap.config, snap.hash)}
                                           className="w-full bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-white uppercase font-black text-[11px] tracking-[0.2em] h-10 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
                                         >
                                           Rollback to this state

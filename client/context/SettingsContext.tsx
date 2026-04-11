@@ -1,6 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from "react";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export type ThemeType = "midnight" | "hacker" | "solarized" | "amoled";
 export type ScaleType = number;
@@ -71,8 +73,11 @@ interface SettingsContextType {
   };
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   snapshots: Snapshot[];
-  performSync: () => Promise<void>;
-  rollback: (id: string) => void;
+  currentHash: string;
+  lastPushedHash: string | null;
+  isSynced: boolean;
+  performSync: (manual?: boolean) => Promise<void>;
+  rollback: (targetConfig: SettingsConfig, hash: string) => void;
   logEvent: (msg: string, type: 'sys' | 'sync' | 'neural' | 'critical') => void;
   toggleStressMode: () => void;
   flushMemory: () => void;
@@ -81,6 +86,7 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, token } = useAuth();
   const [settings, setSettingsState] = useState<SettingsConfig>(DEFAULT_SETTINGS);
   const [jsonConfig, setJsonState] = useState<string>(JSON.stringify(DEFAULT_SETTINGS, null, 2));
   const [apm, setApm] = useState(0);
@@ -93,12 +99,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const [syncStatus, setSyncStatus] = useState<SettingsContextType['syncStatus']>('idle');
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [lastPushedHash, setLastPushedHash] = useState<string | null>(null);
+
+  const currentHash = useMemo(() => btoa(JSON.stringify(settings)), [settings]);
+  const isSynced = useMemo(() => currentHash === lastPushedHash, [currentHash, lastPushedHash]);
+
   const keystrokesRef = useRef<number[]>([]);
   const lastApmRef = useRef(0);
 
   // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("codeverse-settings");
+    const savedHash = localStorage.getItem("codeverse-last-pushed-hash");
+    
+    if (savedHash) setLastPushedHash(savedHash);
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -161,35 +176,119 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     logEvent(`Snapshot created: ${newSnapshot.hash}`, 'sys');
   }, [settings, logEvent]);
 
-  const performSync = useCallback(async () => {
+  const performSync = useCallback(async (manual = false) => {
+    if (!token) return;
+    
     setSyncStatus('syncing');
-    logEvent("Network Handshake: Initializing topology sync...", "sync");
+    if (manual) logEvent("Manual Sync initiated: Committing to cloud hub...", "sync");
     
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setSyncStatus('synced');
-    logEvent("Sync Protocol: Cloud Hub handshake complete.", "sync");
-    
-    setTimeout(() => setSyncStatus('idle'), 2000);
+    try {
+      const response = await axios.post("/api/settings/sync", 
+        { config: settings },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 201) {
+        setSyncStatus('synced');
+        setLastPushedHash(currentHash);
+        localStorage.setItem("codeverse-last-pushed-hash", currentHash);
+        logEvent("Sync Protocol: Cloud Hub push verified (201).", "sync");
+        
+        // Refresh history after sync
+        const { data } = await axios.get("/api/settings/history", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (data.history) {
+          const cloudSnapshots = data.history.map((s: any) => ({
+            id: s.id,
+            timestamp: new Date(s.created_at).getTime(),
+            config: s.config,
+            hash: `CFG-${s.id.substring(0, 6).toUpperCase()}`
+          }));
+          setSnapshots(cloudSnapshots);
+        }
+      }
+    } catch (err) {
+      setSyncStatus('error');
+      logEvent("Network Error: Cloud Hub push failed.", "critical");
+    } finally {
+      if (manual) setTimeout(() => setSyncStatus('idle'), 2000);
+      else setSyncStatus('idle');
+    }
+  }, [token, settings, currentHash, logEvent]);
+
+  const rollback = useCallback((targetConfig: SettingsConfig, hash: string) => {
+    setSettingsState(targetConfig);
+    setJsonState(JSON.stringify(targetConfig, null, 2));
+    localStorage.setItem("codeverse-settings", JSON.stringify(targetConfig));
+    logEvent(`Rollback: Reverted to ${hash}`, 'critical');
   }, [logEvent]);
 
-  const rollback = useCallback((id: string) => {
-    const target = snapshots.find(s => s.id === id);
-    if (target) {
-      setSettingsState(target.config);
-      setJsonState(JSON.stringify(target.config, null, 2));
-      localStorage.setItem("codeverse-settings", JSON.stringify(target.config));
-      logEvent(`Rollback: Reverted to ${target.hash}`, 'critical');
-    }
-  }, [snapshots, logEvent]);
+  // Retroactive Sync (On Login)
+  useEffect(() => {
+    const initSync = async () => {
+      if (!token) return;
+      
+      try {
+        const { data: latestData } = await axios.get("/api/settings/latest", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-  // Debounced Auto-Snapshot
+        // Load History too
+        const { data: historyData } = await axios.get("/api/settings/history", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (historyData.history) {
+          const cloudSnapshots = historyData.history.map((s: any) => ({
+            id: s.id,
+            timestamp: new Date(s.created_at).getTime(),
+            config: s.config,
+            hash: `CFG-${s.id.substring(0, 6).toUpperCase()}`
+          }));
+          setSnapshots(cloudSnapshots);
+        }
+
+        if (latestData.snapshot) {
+          const cloudConfig = latestData.snapshot.config;
+          const cloudHash = btoa(JSON.stringify(cloudConfig));
+          const localIsFresh = JSON.stringify(settings) === JSON.stringify(DEFAULT_SETTINGS);
+
+          if (localIsFresh) {
+            // Case A: Auto-apply
+            setSettingsState(cloudConfig);
+            setJsonState(JSON.stringify(cloudConfig, null, 2));
+            setLastPushedHash(cloudHash);
+            localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
+            logEvent("Retro-Sync: Cloud config applied (Case A).", "sys");
+          } else if (cloudHash !== currentHash) {
+            // Case B: Conflict
+            logEvent("Retro-Sync: Conflict detected. Local state modified (Case B).", "critical");
+          } else {
+            // Perfectly in sync
+            setLastPushedHash(cloudHash);
+            localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
+            logEvent("Retro-Sync: Cloud hub identity verified.", "sync");
+          }
+        }
+      } catch (err) {
+        console.error("Retro-Sync failed", err);
+      }
+    };
+
+    initSync();
+  }, [token]); // Trigger on login
+
+  // Debounced Auto-Snapshot & Auto-Push (Optimistic)
   useEffect(() => {
     const timer = setTimeout(() => {
       saveSnapshot();
+      if (token && !isSynced) {
+        performSync();
+      }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [settings, saveSnapshot]);
+  }, [settings, token, isSynced, saveSnapshot, performSync]);
 
   const setJsonConfig = useCallback((json: string) => {
     setJsonState(json);
@@ -296,7 +395,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <SettingsContext.Provider value={{ 
       settings, setSettings, updateSetting, jsonConfig, setJsonConfig, apm, 
       diagnostics, logEvent, toggleStressMode, flushMemory,
-      syncStatus, snapshots, performSync, rollback
+      syncStatus, snapshots, performSync, rollback,
+      currentHash, lastPushedHash, isSynced
     }}>
       {children}
     </SettingsContext.Provider>

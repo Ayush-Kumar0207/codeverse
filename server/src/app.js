@@ -13,6 +13,7 @@ const executeRoutes = require("./routes/execute.routes");
 const versionRoutes = require("./routes/versions.routes");
 const deploymentRoutes = require("./routes/deployment.routes");
 const testRoutes = require("./routes/test.routes");
+const settingsRoutes = require("./routes/settings.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 
 const allowedOrigins = [
@@ -56,6 +57,7 @@ function createApp() {
   app.use("/api/versions", versionRoutes);
   app.use("/api/deploy", deploymentRoutes);
   app.use("/api/test", testRoutes);
+  app.use("/api/settings", settingsRoutes);
 
   app.get("/", (req, res) => {
     res.send("✅ CodeVerse Backend Running!");

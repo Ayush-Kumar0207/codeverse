@@ -61,3 +61,11 @@ CREATE TRIGGER update_files_updated_at
 BEFORE UPDATE ON public.files
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Settings Snapshots Table (Temporal History)
+CREATE TABLE IF NOT EXISTS public.setting_snapshots (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    config JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
