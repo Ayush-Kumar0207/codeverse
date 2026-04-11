@@ -6,7 +6,7 @@ export const linkedListAlgorithms: AlgorithmEntry[] = [
     title: "Reverse a Linked List",
     topic: "Linked Lists - Basics",
     category: "Linked Lists",
-    frequencyLevel: "Highest",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview: "Reverse a singly linked list so that the last node becomes the head and all pointers are reversed.",
     leetcodeLink: "https://leetcode.com/problems/reverse-linked-list/",

@@ -9,6 +9,8 @@
 
 @layer base {
   :root {
+    --ui-scale: 1rem;
+    --neon-power: 0;
     --radius: 0.75rem;
 
     /* Midnight Palette - Core */
@@ -54,16 +56,49 @@
     --editor-selection: 239 84% 67% / 30%;
   }
 
-  .dark {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 6%;
-    --card-foreground: 210 40% 98%;
+  /* Elite Themes & Variables */
+  :root, [data-theme='midnight'] {
+    --background: 222 47% 3%;
+    --foreground: 210 20% 90%;
+    --card: 222 47% 4%;
+    --card-bg: 222 47% 4%;
+    --primary: 239 84% 60%;
+    --accent: 235 50% 50%;
+  }
+
+  [data-theme='hacker'] {
+    --background: 142 40% 2%;
+    --foreground: 142 70% 45%;
+    --primary: 142 70% 45%;
+    --accent: 142 70% 30%;
+    --border: 142 70% 10%;
+    --card: 142 40% 3%;
+    --card-bg: 142 40% 3%;
+  }
+
+  [data-theme='solarized'] {
+    --background: 192 100% 10%;
+    --foreground: 192 30% 80%;
+    --primary: 175 100% 40%;
+    --accent: 175 100% 40%;
+    --border: 192 100% 15%;
+    --card: 192 100% 12%;
+    --card-bg: 192 100% 12%;
+  }
+
+  [data-theme='amoled'] {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --primary: 239 84% 67%;
-    --secondary: 222 47% 12%;
-    --muted: 222 47% 10%;
     --accent: 239 84% 67%;
-    --border: 222 47% 15%;
+    --border: 0 0% 10%;
+    --card: 0 0% 0%;
+    --card-bg: 0 0% 0%;
+  }
+
+  html {
+    font-size: var(--ui-scale);
+    transition: font-size 0.3s ease;
   }
 
   * {
@@ -144,13 +179,29 @@
 }
 
 .glow-orb {
-  background: radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle, hsl(var(--primary) / calc(0.08 + (var(--neon-power) * 0.12))), transparent 70%);
+  filter: blur(100px);
+  transform: scale(calc(1 + (var(--neon-power) * 0.5)));
+  transition: transform 0.5s ease, background 0.5s ease;
 }
 
 .glow-orb-secondary {
-  background: radial-gradient(circle, hsl(var(--accent) / 0.1), transparent 70%);
-  filter: blur(100px);
+  background: radial-gradient(circle, hsl(var(--accent) / calc(0.05 + (var(--neon-power) * 0.1))), transparent 70%);
+  filter: blur(120px);
+  transform: scale(calc(1 + (var(--neon-power) * 0.4)));
+  transition: transform 0.5s ease, background 0.5s ease;
+}
+
+/* Kinetic Utilities */
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+.glow-disabled .glow-orb,
+.glow-disabled .glow-orb-secondary {
+  display: none;
 }
 
 /* ============================================

@@ -36,7 +36,7 @@ export function useCodeAutoComplete(
 
             // Call AI service
             const code = model.getValue();
-            const response = await suggestCode(columnText);
+            const response = await suggestCode({ prompt: columnText });
 
             if (!response?.suggestion) {
               return { suggestions: [] };

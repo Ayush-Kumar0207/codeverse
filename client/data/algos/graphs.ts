@@ -117,5 +117,159 @@ export const graphsAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "dijkstra-s-algorithm",
+    title: "Dijkstra's Algorithm",
+    topic: "Graphs - Shortest Path",
+    category: "Shortest Path",
+    frequencyLevel: "Very High",
+    difficulty: "Medium",
+    overview: "Find the shortest path from a single source node to all other nodes in a weighted graph (no negative weights).",
+    leetcodeLink: "",
+    useCases: ["Google Maps routing", "Network packet routing", "Social network degree of separation"],
+    approaches: [
+       {
+          name: "Optimal (Priority Queue / Min-Heap)",
+          description: "### 🧠 The Core Concept\nAlways expand the node that has the current minimum distance from the source. This 'Greedy' choice is guaranteed to be the shortest path because we don't have negative edge weights.\n\n### 🛠️ Execution Strategy\n1. Initialize `dist` array with `Infinity`, `dist[source] = 0`.\n2. Push `[0, source]` into a Min-Heap.\n3. While Heap is not empty:\n   - Pop node with min distance.\n   - For each neighbor, if `dist[curr] + weight < dist[neighbor]`, update and push to heap.",
+          timeComplexity: "O(E * log V)",
+          spaceComplexity: "O(V + E)",
+          implementations: [
+             { language: "Python", code: "import heapq\ndef dijkstra(adj, src, n):\n    dist = [float('inf')] * n\n    dist[src] = 0\n    pq = [(0, src)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist[u]: continue\n        for v, w in adj[u]:\n            if dist[u] + w < dist[v]:\n                dist[v] = dist[u] + w\n                heapq.heappush(pq, (dist[v], v))\n    return dist" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "bellman-ford-algorithm",
+    title: "Bellman-Ford",
+    topic: "Graphs - Shortest Path",
+    category: "Shortest Path",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Calculate shortest paths from a single source to all nodes, even with negative edge weights.",
+    leetcodeLink: "",
+    useCases: ["Detecting negative cycles in financial arbitrage", "Distance vector routing"],
+    approaches: [
+       {
+          name: "Optimal (Dynamic Programming)",
+          description: "### 🧠 The Core Concept\nShortest path can have at most $V-1$ edges. Relax all edges $V-1$ times. If we can relax once more and distances still decrease, we have a **Negative Cycle**.",
+          timeComplexity: "O(V * E)",
+          spaceComplexity: "O(V)",
+          implementations: [
+             { language: "JavaScript", code: "function bellmanFord(edges, v, src) {\n    let dist = Array(v).fill(Infinity);\n    dist[src] = 0;\n    for(let i=0; i < v-1; i++) {\n        for(let [u, v_node, w] of edges) {\n            if(dist[u] != Infinity && dist[u] + w < dist[v_node])\n                dist[v_node] = dist[u] + w;\n        }\n    }\n    return dist;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "floyd-warshall-algorithm",
+    title: "Floyd-Warshall",
+    topic: "Graphs - All Pairs Shortest Path",
+    category: "Shortest Path",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find shortest paths between all pairs of vertices in a weighted graph.",
+    leetcodeLink: "",
+    useCases: ["Transitive closure in graphs", "Finding all-points reachability"],
+    approaches: [
+       {
+          name: "Optimal (DP Matrix)",
+          description: "### 🧠 The Core Concept\nFor every pair of nodes $(i, j)$, check if passing through an intermediate node `k` makes the path shorter: `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`.",
+          timeComplexity: "O(V^3)",
+          spaceComplexity: "O(V^2)",
+          implementations: [
+             { language: "Python", code: "def floydWarshall(matrix, v):\n    for k in range(v):\n        for i in range(v):\n            for j in range(v):\n                matrix[i][j] = min(matrix[i][j], matrix[i][k] + matrix[k][j])" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "kruskal-s-algorithm",
+    title: "Kruskal's Algorithm",
+    topic: "Graphs - Minimum Spanning Tree",
+    category: "MST",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the Minimum Spanning Tree (MST) of a graph using the Union-Find data structure.",
+    leetcodeLink: "",
+    useCases: ["Efficient physical network laying (cables/pipes)", "Clustering algorithms"],
+    approaches: [
+       {
+          name: "Optimal (Greedy + DSU)",
+          description: "### 🧠 The Core Concept\nSort all edges by weight. Pick the smallest edge. If it doesn't form a cycle (check via DSU), add it to the MST.",
+          timeComplexity: "O(E * log E + E * alpha(V))",
+          spaceComplexity: "O(V + E)",
+          implementations: [
+             { language: "Python", code: "def kruskal(edges, v):\n    edges.sort(key=lambda x: x[2])\n    parent = list(range(v)); mst_weight = 0\n    def find(i):\n        if parent[i] == i: return i\n        parent[i] = find(parent[i]); return parent[i]\n    for u, v_node, w in edges:\n        root_u, root_v = find(u), find(v_node)\n        if root_u != root_v:\n            mst_weight += w; parent[root_u] = root_v\n    return mst_weight" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "kosaraju-s-algorithm-strongly-connected-components",
+    title: "Kosaraju's Algorithm",
+    topic: "Graphs - Strongly Connected Components",
+    category: "Connectivity",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Find all Strongly Connected Components (SCC) in a directed graph.",
+    leetcodeLink: "",
+    useCases: ["Social community detection", "Analyzing dependency cycles in codebases"],
+    approaches: [
+       {
+          name: "Optimal (Two-Pass DFS)",
+          description: "### 🧠 The Core Concept\n1. DFS and push nodes to stack by finishing time.\n2. Reverse the graph.\n3. Pop from stack and run DFS on reversed graph to reveal SCCs.",
+          timeComplexity: "O(V + E)",
+          spaceComplexity: "O(V + E)",
+          implementations: [
+             { language: "JavaScript", code: "function kosaraju(adj, v) {\n    let stack = [], visited = new Set();\n    function dfs1(u) {\n        visited.add(u);\n        for(let v_node of adj[u]) if(!visited.has(v_node)) dfs1(v_node);\n        stack.push(u);\n    }\n    for(let i=0; i<v; i++) if(!visited.has(i)) dfs1(i);\n    // ... Reverse and DFS2 ...\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "bridges-in-graph-tarjan-s-algorithm",
+    title: "Bridges in Graph",
+    topic: "Graphs - Connectivity",
+    category: "Tarjan's Algorithm",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "A bridge is an edge in an undirected graph whose removal increases the number of connected components.",
+    leetcodeLink: "https://leetcode.com/problems/critical-connections-in-a-network/",
+    useCases: ["Network reliability analysis", "Identifying single points of failure in infrastructure"],
+    approaches: [
+       {
+          name: "Optimal (One-pass DFS / Tarjan's)",
+          description: "### 🧠 The Core Concept\nWe track the time of insertion (`tin`) and the lowest time reachable (`low`). If for an edge `u -> v`, the lowest point reachable from `v` is STILL greater than the time we reached `u`, it means there is NO back-edge. Thus, `u-v` is a Bridge.",
+          timeComplexity: "O(V + E)",
+          spaceComplexity: "O(V + E)",
+          implementations: [
+             { language: "Python", code: "def findBridges(n, adj):\n    tin, low = [-1]*n, [-1]*n\n    timer, bridges = 0, []\n    def dfs(u, p=-1):\n        nonlocal timer\n        tin[u] = low[u] = timer; timer += 1\n        for v in adj[u]:\n            if v == p: continue\n            if tin[v] != -1: low[u] = min(low[u], tin[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], low[v])\n                if low[v] > tin[u]: bridges.append([u, v])\n    dfs(0); return bridges" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "articulation-point",
+    title: "Articulation Points",
+    topic: "Graphs - Connectivity",
+    category: "Tarjan's Algorithm",
+    frequencyLevel: "Niche",
+    difficulty: "Hard",
+    overview: "A vertex whose removal increases the number of connected components.",
+    leetcodeLink: "",
+    useCases: ["Power grid vulnerability mapping", "Social network key-influencer detection"],
+    approaches: [
+       {
+          name: "Optimal (Tarjan's variant)",
+          description: "### 🧠 The Core Concept\nSimilar to bridges, but we check if `low[v] >= tin[u]`. For the root node, it is an articulation point if it has more than one child in the DFS tree.",
+          timeComplexity: "O(V + E)",
+          spaceComplexity: "O(V + E)",
+          implementations: [
+             { language: "JavaScript", code: "function findArticulationPoints(n, adj) {\n    let tin = Array(n).fill(-1), low = Array(n).fill(-1);\n    let timer = 0, res = new Set();\n    function dfs(u, p = -1) {\n        tin[u] = low[u] = timer++;\n        let children = 0;\n        for(let v of adj[u]) {\n            if(v === p) continue;\n            if(tin[v] !== -1) low[u] = Math.min(low[u], tin[v]);\n            else {\n                dfs(v, u);\n                low[u] = Math.min(low[u], low[v]);\n                if(low[v] >= tin[u] && p !== -1) res.add(u);\n                children++;\n            }\n        }\n        if(p === -1 && children > 1) res.add(u);\n    }\n    dfs(0); return Array.from(res);\n}" }
+          ]
+       }
+    ]
   }
 ];

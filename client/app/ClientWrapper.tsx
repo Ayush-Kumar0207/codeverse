@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
+import { SettingsProvider } from "@/context/SettingsContext";
 import { usePathname } from "next/navigation";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ActivityBar } from "@/components/ActivityBar";
@@ -40,10 +40,10 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <SettingsProvider>
       <AuthProvider>
         <AuthenticatedShell>{children}</AuthenticatedShell>
       </AuthProvider>
-    </ThemeProvider>
+    </SettingsProvider>
   );
 }

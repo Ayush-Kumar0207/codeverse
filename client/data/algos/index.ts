@@ -15,6 +15,9 @@ import { triesAlgorithms } from "./tries";
 import { sortingAlgorithms } from "./sorting";
 import { stackQueueAlgorithms } from "./stacks_queues";
 import { graphsAdvancedAlgorithms } from "./graphs_advanced";
+import { heapAlgorithms } from "./heaps";
+import { advancedDsAlgorithms } from "./advanced_ds";
+import { patternsAlgorithms } from "./patterns";
 import { generatedStriverAlgorithms } from "./generated_striver_algos";
 
 // Base curated algorithms across all standard topics
@@ -35,6 +38,9 @@ const curatedAlgorithms: AlgorithmEntry[] = [
   ...stackQueueAlgorithms,
   ...graphsAdvancedAlgorithms,
   ...bitManipulationAlgorithms,
+  ...heapAlgorithms,
+  ...advancedDsAlgorithms,
+  ...patternsAlgorithms,
 ];
 
 // Create a lookup Set to guarantee O(1) deduplication of IDs

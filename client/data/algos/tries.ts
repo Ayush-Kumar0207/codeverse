@@ -70,5 +70,71 @@ export const triesAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "implement-trie-ii",
+    title: "Implement Trie II",
+    topic: "Tries",
+    category: "Tries",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Extend Trie to support counting: how many times a word was inserted and how many words start with a prefix.",
+    leetcodeLink: "",
+    useCases: ["Frequency-based autocomplete", "Dataset statistics"],
+    approaches: [
+       {
+          name: "Optimal (Counter Nodes)",
+          description: "### 🧠 The Core Concept\nEach node stores `countPrefix` (how many words pass through) and `countEnd` (how many words end exactly here).",
+          timeComplexity: "O(L)",
+          spaceComplexity: "O(T)",
+          implementations: [
+             { language: "Python", code: "class Node:\n    def __init__(self):\n        self.children = {}\n        self.cntEnd = 0\n        self.cntPrefix = 0\n\nclass Trie:\n    def __init__(self):\n        self.root = Node()\n    def insert(self, word):\n        curr = self.root\n        for c in word:\n            curr = curr.children.setdefault(c, Node())\n            curr.cntPrefix += 1\n        curr.cntEnd += 1" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "number-of-distinct-substrings-in-a-string",
+    title: "Distinct Substrings",
+    topic: "Tries",
+    category: "Hard Tries",
+    frequencyLevel: "Niche",
+    difficulty: "Hard",
+    overview: "Count the number of distinct substrings present in a given string.",
+    leetcodeLink: "",
+    useCases: ["Suffix tree analysis", "Bioinformatics sequence counting"],
+    approaches: [
+       {
+          name: "Optimal (Trie Node Counting)",
+          description: "### 🧠 The Core Concept\nEvery single path in a Trie starting from the root represents a distinct substring. Insert all suffixes of the string into the Trie; the total number of nodes created (minus root) is the answer!\n\n### 🛠️ Execution Strategy\nFor `s = \"abab\"`, insert suffixes: `\"abab\"`, `\"bab\"`, `\"ab\"`, `\"b\"`.",
+          timeComplexity: "O(N^2)",
+          spaceComplexity: "O(N^2)",
+          implementations: [
+             { language: "JavaScript", code: "function countDistinctSubstrings(s) {\n    let root = {}, count = 0;\n    for(let i=0; i<s.length; i++) {\n        let curr = root;\n        for(let j=i; j<s.length; j++) {\n            if(!curr[s[j]]) {\n                curr[s[j]] = {};\n                count++;\n            }\n            curr = curr[s[j]];\n        }\n    }\n    return count + 1; // +1 for empty string\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "maximum-xor-of-two-numbers-in-an-array",
+    title: "Maximum XOR of Two Numbers",
+    topic: "Bitwise Tries",
+    category: "Hard Tries",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Given an integer array, find the maximum result of num1 XOR num2.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/",
+    useCases: ["Cryptography", "Optimizing bitwise operations"],
+    approaches: [
+       {
+          name: "Optimal (Bitwise Trie)",
+          description: "### 🧠 The Core Concept\nTo maximize XOR, for every bit of a number, we want to find another number that has the **Opposite** bit at that position. \n\nWe store binary representations of all numbers in a 0/1 Trie. For each number, we traverse the Trie and 'greedy' choose the opposite bit whenever possible.",
+          timeComplexity: "O(N * 32)",
+          spaceComplexity: "O(N * 32)",
+          implementations: [
+             { language: "Python", code: "class TrieNode:\n    def __init__(self):\n        self.children = [None, None]\n\ndef findMaxXOR(nums):\n    root = TrieNode()\n    for n in nums:\n        curr = root\n        for i in range(31, -1, -1):\n            bit = (n >> i) & 1\n            if not curr.children[bit]: curr.children[bit] = TrieNode()\n            curr = curr.children[bit]\n    \n    res = 0\n    for n in nums:\n        curr, total = root, 0\n        for i in range(31, -1, -1):\n            bit = (n >> i) & 1\n            if curr.children[1 - bit]:\n                total |= (1 << i)\n                curr = curr.children[1 - bit]\n            else: curr = curr.children[bit]\n        res = max(res, total)\n    return res" }
+          ]
+       }
+    ]
   }
 ];

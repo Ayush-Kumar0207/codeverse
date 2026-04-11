@@ -101,5 +101,115 @@ export const bstAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "ceil-in-a-bst",
+    title: "Ceil in BST",
+    topic: "Binary Search Trees",
+    category: "BST Operations",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the smallest node value that is greater than or equal to a target value X.",
+    leetcodeLink: "",
+    useCases: ["Range search indexing", "Finding smallest upper bound in data"],
+    approaches: [
+       {
+          name: "Optimal (Pruned Vertical Scan)",
+          description: "### 🧠 The Core Concept\nIf root is $\le$ X, then the ceil could only be root itself or something in the Right subtree. If root is $>$ X, root is a potential ceil, but we should check the Left subtree for a 'tighter' fit.",
+          timeComplexity: "O(H)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function findCeil(root, key) {\n    let ceil = -1;\n    while (root) {\n        if (root.val === key) return root.val;\n        if (key > root.val) root = root.right;\n        else {\n            ceil = root.val;\n            root = root.left;\n        }\n    }\n    return ceil;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "floor-in-a-bst",
+    title: "Floor in BST",
+    topic: "Binary Search Trees",
+    category: "BST Operations",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the largest node value that is smaller than or equal to a target value X.",
+    leetcodeLink: "",
+    useCases: ["Finding largest lower bound"],
+    approaches: [
+       {
+          name: "Optimal (Pruned Vertical Scan)",
+          description: "### 🧠 The Core Concept\nSimilar to Ceil, but tracking the last node seen that was smaller than X.",
+          timeComplexity: "O(H)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def findFloor(root, key):\n    res = -1\n    while root:\n        if root.val == key: return root.val\n        if key < root.val: root = root.left\n        else:\n            res = root.val\n            root = root.right\n    return res" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "inorder-successor-predecessor-in-bst",
+    title: "BST Successor / Predecessor",
+    topic: "Binary Search Trees",
+    category: "BST Operations",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the node that comes immediately after (successor) or before (predecessor) a given node in an in-order traversal.",
+    leetcodeLink: "https://leetcode.com/problems/inorder-successor-in-bst/",
+    useCases: ["Iterating through BSTs like a linked list"],
+    approaches: [
+       {
+          name: "Optimal (Standard Search Logic)",
+          description: "### 🧠 The Core Concept\nFor successor: if target has a right child, successor is the leftmost node of the right child. If not, successor is the lowest ancestor such that target is in its left subtree.",
+          timeComplexity: "O(H)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function successor(root, p) {\n    let res = null;\n    while (root) {\n        if (p.val < root.val) {\n            res = root;\n            root = root.left;\n        } else root = root.right;\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "recover-bst",
+    title: "Recover BST",
+    topic: "Binary Search Trees",
+    category: "Hard BST",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Two nodes of a BST are swapped by mistake. Recover the tree without changing its structure.",
+    leetcodeLink: "https://leetcode.com/problems/recover-binary-search-tree/",
+    useCases: ["Corrupt tree database recovery"],
+    approaches: [
+       {
+          name: "Optimal (One-Pass Inorder)",
+          description: "### 🧠 The Core Concept\nAn inorder traversal of a BST should be strictly increasing. If we find two anomalies (where `prev.val > curr.val`), those are our two swapped nodes.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(H)",
+          implementations: [
+             { language: "Python", code: "def recoverTree(root):\n    first = second = prev = None\n    def dfs(node):\n        nonlocal first, second, prev\n        if not node: return\n        dfs(node.left)\n        if prev and prev.val > node.val:\n            if not first: first = prev\n            second = node\n        prev = node\n        dfs(node.right)\n    dfs(root)\n    first.val, second.val = second.val, first.val" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "largest-bst-in-binary-tree",
+    title: "Largest BST in BT",
+    topic: "Binary Search Trees",
+    category: "Hard BST",
+    frequencyLevel: "Niche",
+    difficulty: "Hard",
+    overview: "Given a binary tree, find the size of the largest subtree that is a valid BST.",
+    leetcodeLink: "",
+    useCases: ["Maximizing sorted components in a graph"],
+    approaches: [
+       {
+          name: "Optimal (Post-order Info Bubbling)",
+          description: "### 🧠 The Core Concept\nEach node returns: `(isValid, size, min, max)`. A node is a BST if its left and right subtrees are BSTs AND its value is within their min/max bounds.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(H)",
+          implementations: [
+             { language: "JavaScript", code: "function largestBST(root) {\n    let res = 0;\n    function traverse(node) {\n        if(!node) return [true, 0, Infinity, -Infinity];\n        let [lVal, lSize, lMin, lMax] = traverse(node.left);\n        let [rVal, rSize, rMin, rMax] = traverse(node.right);\n        if(lVal && rVal && node.val > lMax && node.val < rMin) {\n            let size = 1 + lSize + rSize;\n            res = Math.max(res, size);\n            return [true, size, Math.min(node.val, lMin), Math.max(node.val, rMax)];\n        }\n        return [false, 0, 0, 0];\n    }\n    traverse(root);\n    return res;\n}" }
+          ]
+       }
+    ]
   }
 ];

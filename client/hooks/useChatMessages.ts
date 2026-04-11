@@ -49,7 +49,7 @@ export function useChatMessages(roomId: string) {
           const prompt = text.replace(/^(@ai |ask: )/, "");
 
           try {
-            const response = await suggestCode(prompt);
+            const response = await suggestCode({ prompt });
             const aiReply: ChatMessage = {
               id: Date.now().toString(),
               user: "AI Assistant",

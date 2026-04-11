@@ -6,7 +6,7 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
     title: "Valid Parentheses",
     topic: "Stacks - String Patterns",
     category: "Stacks & Queues",
-    frequencyLevel: "Highest",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview: "Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
     leetcodeLink: "https://leetcode.com/problems/valid-parentheses/",
@@ -195,6 +195,72 @@ export const stackQueueAlgorithms: AlgorithmEntry[] = [
                 language: "Python",
                 code: "def largestRectangleArea(heights):\n    heights.append(0)\n    stack = [-1]\n    max_area = 0\n    for i in range(len(heights)):\n        while heights[i] < heights[stack[-1]]:\n            h = heights[stack.pop()]\n            w = i - stack[-1] - 1\n            max_area = max(max_area, h * w)\n        stack.append(i)\n    return max_area"
              }
+          ]
+       }
+    ]
+  },
+  {
+    id: "lru-cache",
+    title: "LRU Cache",
+    topic: "Stacks & Queues - Design",
+    category: "Data Structure Design",
+    frequencyLevel: "Very High",
+    difficulty: "Medium",
+    overview: "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.",
+    leetcodeLink: "https://leetcode.com/problems/lru-cache/",
+    useCases: ["Browser history", "Database buffer pools", "Redis cache eviction"],
+    approaches: [
+       {
+          name: "Optimal (Hash Map + Doubly Linked List)",
+          description: "### 🧠 The Core Concept\nWe need $O(1)$ lookup (Map) and $O(1)$ reordering (Linked List). When an item is accessed, move it to the **Head**. When the cache is full, remove from the **Tail**.",
+          timeComplexity: "O(1)",
+          spaceComplexity: "O(Capacity)",
+          implementations: [
+             { language: "JavaScript", code: "class LRUCache {\n    constructor(capacity) {\n        this.cap = capacity;\n        this.cache = new Map();\n    }\n    get(key) {\n        if (!this.cache.has(key)) return -1;\n        let val = this.cache.get(key);\n        this.cache.delete(key);\n        this.cache.set(key, val);\n        return val;\n    }\n    put(key, value) {\n        this.cache.delete(key);\n        this.cache.set(key, value);\n        if (this.cache.size > this.cap) {\n            this.cache.delete(this.cache.keys().next().value);\n        }\n    }\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "lfu-cache",
+    title: "LFU Cache",
+    topic: "Stacks & Queues - Design",
+    category: "Data Structure Design",
+    frequencyLevel: "Very High",
+    difficulty: "Hard",
+    overview: "Least Frequently Used (LFU) cache design.",
+    leetcodeLink: "https://leetcode.com/problems/lfu-cache/",
+    useCases: ["Advanced caching where frequency matters more than recency"],
+    approaches: [
+       {
+          name: "Optimal (Min-Freq + Multi-Linked Lists)",
+          description: "### 🧠 The Core Concept\nMaintain a map of frequencies. Each frequency points to a Doubly Linked List of items. Track `minFreq` to know where to evict from.",
+          timeComplexity: "O(1)",
+          spaceComplexity: "O(Capacity)",
+          implementations: [
+             { language: "Python", code: "# Complex multi-map structure implementation..." }
+          ]
+       }
+    ]
+  },
+  {
+    id: "sliding-window-maximum",
+    title: "Sliding Window Maximum",
+    topic: "Stacks & Queues - Advanced",
+    category: "Monotonic Queue",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Find the maximum for each sliding window of size k.",
+    leetcodeLink: "https://leetcode.com/problems/sliding-window-maximum/",
+    useCases: ["Real-time peak monitoring", "Network throughput analysis"],
+    approaches: [
+       {
+          name: "Optimal (Deque Monotonic Queue)",
+          description: "### 🧠 The Core Concept\nMaintain a **Deque** of indices where values are in decreasing order. When moving the window:\n1. Remove indices out of window range.\n2. Remove values smaller than the new element (they'll never be max).\n3. The `front` of the deque is always the window max.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(K)",
+          implementations: [
+             { language: "JavaScript", code: "function maxSlidingWindow(nums, k) {\n    let q = [], res = [];\n    for (let i = 0; i < nums.length; i++) {\n        while (q.length && nums[q[q.length - 1]] <= nums[i]) q.pop();\n        q.push(i);\n        if (q[0] === i - k) q.shift();\n        if (i >= k - 1) res.push(nums[q[0]]);\n    }\n    return res;\n}" }
           ]
        }
     ]

@@ -198,5 +198,291 @@ export const dpAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "best-time-to-buy-and-sell-stock-ii",
+    title: "Buy and Sell Stock II",
+    topic: "DP on Stocks",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "You are given an integer array prices where prices[i] is the price of a given stock on the ith day. You can buy and sell multiple times.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
+    useCases: ["Day trading modeling", "Yield optimization"],
+    approaches: [
+       {
+          name: "Optimal (Greedy/Peak-Valley)",
+          description: "### 🧠 The Core Concept\nSince we can buy and sell as many times as we want, we should capture every single 'uptick' in the price. If price tomorrow is higher than price today, just buy today and sell tomorrow!\n\nMathematically, the total profit is the sum of all positive differences $P[i] - P[i-1]$.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def maxProfit(prices):\n    profit = 0\n    for i in range(1, len(prices)):\n        if prices[i] > prices[i-1]:\n            profit += prices[i] - prices[i-1]\n    return profit" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "best-time-to-buy-and-sell-stock-iii",
+    title: "Buy and Sell Stock III",
+    topic: "DP on Stocks",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Find the maximum profit you can achieve with at most TWO transactions.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/",
+    useCases: ["Portfolio rebalancing constraints"],
+    approaches: [
+       {
+          name: "Optimal (DP with State Machine)",
+          description: "### 🧠 The Core Concept\nAt any day, we can be in one of 4 states:\n1. First buy (trying to minimize cost)\n2. First sell (trying to maximize profit)\n3. Second buy (trying to minimize net reinvestment cost)\n4. Second sell (trying to maximize total net profit)\n\nWe update these states sequentially for every price.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function maxProfit(prices) {\n    let b1 = -Infinity, s1 = 0, b2 = -Infinity, s2 = 0;\n    for (let p of prices) {\n        b1 = Math.max(b1, -p);\n        s1 = Math.max(s1, b1 + p);\n        b2 = Math.max(b2, s1 - p);\n        s2 = Math.max(s2, b2 + p);\n    }\n    return s2;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "best-time-to-buy-and-sell-stock-iv",
+    title: "Buy and Sell Stock IV",
+    topic: "DP on Stocks",
+    category: "Dynamic Programming",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Maximum profit with at most K transactions.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/",
+    useCases: ["Limited liquidity trading"],
+    approaches: [
+       {
+          name: "Optimal (Tabulation)",
+          description: "### 🧠 The Core Concept\nWe use a 2D DP where `dp[i][j]` represents the max profit with exactly `i` transactions up to day `j`.",
+          timeComplexity: "O(K * N)",
+          spaceComplexity: "O(K * N)",
+          implementations: [
+             { language: "Python", code: "def maxProfit(k, prices):\n    if not prices: return 0\n    n = len(prices)\n    dp = [[0] * n for _ in range(k + 1)]\n    for i in range(1, k + 1):\n        max_diff = -prices[0]\n        for j in range(1, n):\n            dp[i][j] = max(dp[i][j-1], prices[j] + max_diff)\n            max_diff = max(max_diff, dp[i-1][j] - prices[j])\n    return dp[k][n-1]" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "best-time-to-buy-and-sell-stock-with-cooldown",
+    title: "Stock with Cooldown",
+    topic: "DP on Stocks",
+    category: "Dynamic Programming",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find max profit with unlimited transactions but a one-day cooldown after selling.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+    useCases: ["Trading with settlement latency"],
+    approaches: [
+       {
+          name: "Optimal (State Machine)",
+          description: "### 🧠 The Core Concept\nStates: `Buying`, `Selling`, `Resting`. \nYou can only buy if you weren't in 'Selling' state yesterday.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "JavaScript", code: "function maxProfit(prices) {\n    let sold = 0, rest = 0, hold = -Infinity;\n    for (let p of prices) {\n        let prev_sold = sold;\n        sold = hold + p;\n        hold = Math.max(hold, rest - p);\n        rest = Math.max(rest, prev_sold);\n    }\n    return Math.max(sold, rest);\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "print-longest-common-subsequence",
+    title: "Print LCS",
+    topic: "DP on Strings",
+    category: "Dynamic Programming",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Return the actual string content of the LCS (not just the length).",
+    leetcodeLink: "",
+    useCases: ["Detailed diff visualization"],
+    approaches: [
+       {
+          name: "Optimal (Backtrack thru DP Table)",
+          description: "### 🧠 The Core Concept\nOnce the 2D DP table is filled, start from `dp[m][n]`. If `s1[i-1] == s2[j-1]`, this char was part of LCS (move diagonally). Otherwise, move to the neighbor with the larger value.",
+          timeComplexity: "O(N * M)",
+          spaceComplexity: "O(N * M)",
+          implementations: [
+             { language: "Python", code: "def printLCS(s1, s2, dp):\n    m, n = len(s1), len(s2); i, j = m, n; res = []\n    while i > 0 and j > 0:\n        if s1[i-1] == s2[j-1]: res.append(s1[i-1]); i-=1; j-=1\n        elif dp[i-1][j] > dp[i][j-1]: i-=1\n        else: j-=1\n    return ''.join(reversed(res))" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "longest-common-substring",
+    title: "Longest Common Substring",
+    topic: "DP on Strings",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find the maximum length of a contiguous substring present in both strings.",
+    leetcodeLink: "",
+    useCases: ["Plagiarism detection", "DNA local alignment"],
+    approaches: [
+       {
+          name: "Optimal (2D Tabulation)",
+          description: "### 🧠 The Core Concept\nUnlike LCS, substrings must be contiguous. If `s1[i-1] == s2[j-1]`, then `dp[i][j] = 1 + dp[i-1][j-1]`. If they mismatch, `dp[i][j] = 0`! We track the maximum value ever placed in the grid.",
+          timeComplexity: "O(N * M)",
+          spaceComplexity: "O(N * M)",
+          implementations: [
+             { language: "JavaScript", code: "function longestCommonSubstring(s1, s2) {\n    let m = s1.length, n = s2.length, res = 0;\n    let dp = Array(m+1).fill().map(() => Array(n+1).fill(0));\n    for(let i=1; i<=m; i++) {\n        for(let j=1; j<=n; j++) {\n            if(s1[i-1] === s2[j-1]) {\n                dp[i][j] = 1 + dp[i-1][j-1];\n                res = Math.max(res, dp[i][j]);\n            } else dp[i][j] = 0;\n        }\n    }\n    return res;\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "grid-unique-paths",
+    title: "Unique Paths",
+    topic: "DP on Grids",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "A robot is located at the top-left corner of a m x n grid. Find the number of possible unique paths to reach the bottom-right corner.",
+    leetcodeLink: "https://leetcode.com/problems/unique-paths/",
+    useCases: ["Route calculating in constrained grids", "Probability modeling"],
+    approaches: [
+       {
+          name: "Optimal (Top-Down Tabulation)",
+          description: "### 🧠 The Core Concept\nTo reach a cell $(i, j)$, the robot could only have come from the **Top** $(i-1, j)$ or the **Left** $(i, j-1)$. \nThus, `Ways(i, j) = Ways(i-1, j) + Ways(i, j-1)`.\n\n### 🛠️ Execution Strategy\n1. Initialize a 1D row array to save space.\n2. Fill the first row with 1s.\n3. For each row, update values: `row[j] = row[j] + row[j-1]`.",
+          timeComplexity: "O(N * M)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function uniquePaths(m, n) {\n    let row = new Array(n).fill(1);\n    for (let i = 1; i < m; i++) {\n        for (let j = 1; j < n; j++) {\n            row[j] += row[j - 1];\n        }\n    }\n    return row[n - 1];\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "minimum-path-sum-in-grid",
+    title: "Min Path Sum",
+    topic: "DP on Grids",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Find a path from top-left to bottom-right which minimizes the sum of all numbers along its path.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-path-sum/",
+    useCases: ["Logistics cost minimization", "PCB routing"],
+    approaches: [
+       {
+          name: "Optimal (Tabulation)",
+          description: "### 🧠 The Core Concept\nMin cost to reach $(i, j)$ is simply the cell's value plus the minimum of the cost to reach its top or left neighbor.",
+          timeComplexity: "O(N * M)",
+          spaceComplexity: "O(1) (In-place)",
+          implementations: [
+             { language: "Python", code: "def minPathSum(grid):\n    m, n = len(grid), len(grid[0])\n    for i in range(m):\n        for j in range(n):\n            if i == 0 and j > 0: grid[i][j] += grid[i][j-1]\n            elif j == 0 and i > 0: grid[i][j] += grid[i-1][j]\n            elif i > 0 and j > 0: grid[i][j] += min(grid[i-1][j], grid[i][j-1])\n    return grid[-1][-1]" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "subset-sum-equal-to-k",
+    title: "Subset Sum = K",
+    topic: "DP on Subsequences",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Check if there exists a subset with a sum equal to target.",
+    leetcodeLink: "",
+    useCases: ["Financial balancing", "Package selection"],
+    approaches: [
+       {
+          name: "Optimal (Boolean Tabulation)",
+          description: "### 🧠 The Core Concept\nFor each number, we check if we can achieve target `T` by either including it (check target `T-num`) or excluding it (check target `T`).",
+          timeComplexity: "O(N * K)",
+          spaceComplexity: "O(K)",
+          implementations: [
+             { language: "JavaScript", code: "function subsetSum(nums, k) {\n    let dp = new Array(k + 1).fill(false);\n    dp[0] = true;\n    for (let num of nums) {\n        for (let i = k; i >= num; i--) {\n            dp[i] = dp[i] || dp[i - num];\n        }\n    }\n    return dp[k];\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "0-1-knapsack",
+    title: "0/1 Knapsack",
+    topic: "DP on Subsequences",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Maximize total value in a knapsack of capacity W.",
+    leetcodeLink: "",
+    useCases: ["Resource allocation", "Selection optimization"],
+    approaches: [
+       {
+          name: "Optimal (1D DP Optimization)",
+          description: "### 🧠 The Core Concept\nWe iterate through items. For each weight capacity from `W` down to `itemWeight`, we decide whether to take the item.",
+          timeComplexity: "O(N * W)",
+          spaceComplexity: "O(W)",
+          implementations: [
+             { language: "Python", code: "def knapsack(wt, val, W, n):\n    dp = [0] * (W + 1)\n    for i in range(n):\n        for w in range(W, wt[i] - 1, -1):\n            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])\n    return dp[W]" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "triangle",
+    title: "Triangle",
+    topic: "DP on Grids",
+    category: "Dynamic Programming",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Find the minimum path sum from top to bottom in a triangle-shaped array.",
+    leetcodeLink: "https://leetcode.com/problems/triangle/",
+    useCases: ["Pathfinding in pyramid structures"],
+    approaches: [
+       {
+          name: "Optimal (Bottom-Up Tabulation)",
+          description: "### 🧠 The Core Concept\nStarting from the second to last row, each cell's min path sum is its value plus the minimum of the two cells directly below it.",
+          timeComplexity: "O(N^2)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "Python", code: "def minimumTotal(triangle):\n    dp = triangle[-1]\n    for i in range(len(triangle)-2, -1, -1):\n        for j in range(len(triangle[i])):\n            dp[j] = triangle[i][j] + min(dp[j], dp[j+1])\n    return dp[0]" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "rod-cutting-problem",
+    title: "Rod Cutting",
+    topic: "DP on Subsequences",
+    category: "Dynamic Programming",
+    frequencyLevel: "Medium",
+    difficulty: "Medium",
+    overview: "Maximize profit by cutting a rod into pieces of various lengths.",
+    leetcodeLink: "",
+    useCases: ["Material utilization optimization"],
+    approaches: [
+       {
+          name: "Optimal (Unbounded Knapsack variant)",
+          description: "### 🧠 The Core Concept\nWe treat lengths as 'weights' and prices as 'values'. Since we can use any length multiple times, it's an Unbounded Knapsack problem.",
+          timeComplexity: "O(Length * N)",
+          spaceComplexity: "O(Length)",
+          implementations: [
+             { language: "JavaScript", code: "function cutRod(price, n) {\n    let dp = new Array(n + 1).fill(0);\n    for (let i = 1; i <= n; i++) {\n        for (let j = 0; j < i; j++) {\n            dp[i] = Math.max(dp[i], price[j] + dp[i - j - 1]);\n        }\n    }\n    return dp[n];\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "matrix-chain-multiplication",
+    title: "Matrix Chain Multiplication",
+    topic: "Partition DP",
+    category: "Dynamic Programming",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Find the most efficient way to multiply a given sequence of matrices.",
+    leetcodeLink: "",
+    useCases: ["Compiler optimization", "Robotics kinematics chains"],
+    approaches: [
+       {
+          name: "Optimal (MCM Tabulation)",
+          description: "### 🧠 The Core Concept\nDivide the problem into sub-problems: *\"What is the min cost to multiply matrices from index i to j?\"* \nTry all possible split points `k` between `i` and `j`.",
+          timeComplexity: "O(N^3)",
+          spaceComplexity: "O(N^2)",
+          implementations: [
+             { language: "Python", code: "def matrixMultiplication(arr, n):\n    dp = [[0]*n for _ in range(n)]\n    for length in range(2, n):\n        for i in range(1, n - length + 1):\n            j = i + length - 1\n            dp[i][j] = float('inf')\n            for k in range(i, j):\n                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j] + arr[i-1]*arr[k]*arr[j])\n    return dp[1][n-1]" }
+          ]
+       }
+    ]
   }
 ];

@@ -171,5 +171,115 @@ export const treesAlgorithms: AlgorithmEntry[] = [
           ]
        }
     ]
+  },
+  {
+    id: "level-order-traversal",
+    title: "Level Order Traversal",
+    topic: "Binary Trees",
+    category: "Breadth-First Search",
+    frequencyLevel: "Very High",
+    difficulty: "Medium",
+    overview: "Return the level order traversal of its nodes' values. (i.e., from left to right, level by level).",
+    leetcodeLink: "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+    useCases: ["Network broadcasting", "GPS routing layers", "Organizational hierarchy visualization"],
+    approaches: [
+       {
+          name: "Optimal (Queue-Based BFS)",
+          description: "### 🧠 The Core Concept\nUse a Queue to keep track of nodes. For every level, record all current nodes in the queue, then add their children for the next level.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "var levelOrder = function(root) {\n    if(!root) return [];\n    let res = [], q = [root];\n    while(q.length) {\n        let size = q.length, level = [];\n        for(let i=0; i<size; i++) {\n            let node = q.shift();\n            level.push(node.val);\n            if(node.left) q.push(node.left);\n            if(node.right) q.push(node.right);\n        }\n        res.push(level);\n    }\n    return res;\n};" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "iterative-inorder",
+    title: "Iterative Inorder",
+    topic: "Binary Trees",
+    category: "DFS",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Perform an Inorder traversal without using recursion (using an explicit stack).",
+    leetcodeLink: "https://leetcode.com/problems/binary-tree-inorder-traversal/",
+    useCases: ["Non-recursive tree processing", "Stack-based parsing"],
+    approaches: [
+       {
+          name: "Optimal (Explicit Stack)",
+          description: "### 🧠 The Core Concept\nTraverse far left as possible, pushing nodes to stack. When you hit NULL, pop from stack, visit, and move to the right child.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(H)",
+          implementations: [
+             { language: "Python", code: "def inorderTraversal(root):\n    res, stack, curr = [], [], root\n    while curr or stack:\n        while curr:\n            stack.append(curr)\n            curr = curr.left\n        curr = stack.pop()\n        res.append(curr.val)\n        curr = curr.right\n    return res" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "top-view-of-binary-tree",
+    title: "Top View",
+    topic: "Binary Trees",
+    category: "Views",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Return the nodes visible from the top of the tree.",
+    leetcodeLink: "",
+    useCases: ["Shadow mapping", "Topological visibility"],
+    approaches: [
+       {
+          name: "Optimal (Vertical Level Tracking)",
+          description: "### 🧠 The Core Concept\nUse a coordinate system where root is 0, left is -1, right is +1. Perform level-order traversal and store the *first* node seen at each vertical coordinate.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(N)",
+          implementations: [
+             { language: "JavaScript", code: "function topView(root) {\n    if(!root) return [];\n    let map = new Map(), q = [[root, 0]];\n    while(q.length) {\n        let [node, hd] = q.shift();\n        if(!map.has(hd)) map.set(hd, node.val);\n        if(node.left) q.push([node.left, hd-1]);\n        if(node.right) q.push([node.right, hd+1]);\n    }\n    return Array.from(new Map([...map].sort((a,b) => a[0]-b[0])).values());\n}" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "right-left-view-of-binary-tree",
+    title: "Right View",
+    topic: "Binary Trees",
+    category: "Views",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview: "Return the sequence of nodes visible when looking from the right side.",
+    leetcodeLink: "https://leetcode.com/problems/binary-tree-right-side-view/",
+    useCases: ["Side-profile rendering"],
+    approaches: [
+       {
+          name: "Optimal (Recursive DFS)",
+          description: "### 🧠 The Core Concept\nUse DFS (Root, Right, Left). The first time we reach a new depth level, the current node is the one visible from the right.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(H)",
+          implementations: [
+             { language: "Python", code: "def rightSideView(root):\n    res = []\n    def dfs(node, depth):\n        if not node: return\n        if depth == len(res): res.append(node.val)\n        dfs(node.right, depth + 1)\n        dfs(node.left, depth + 1)\n    dfs(root, 0)\n    return res" }
+          ]
+       }
+    ]
+  },
+  {
+    id: "morris-preorder-traversal",
+    title: "Morris Traversal",
+    topic: "Binary Trees",
+    category: "Advanced DFS",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "Traverse the tree without recursion and without a stack (O(1) extra space).",
+    leetcodeLink: "",
+    useCases: ["Memory-constrained embedded systems"],
+    approaches: [
+       {
+          name: "Optimal (Threaded Binary Tree)",
+          description: "### 🧠 The Core Concept\nCreate temporary links (threads) from the current node's in-order predecessor back to the current node. This allows 'jumping back' without a stack.",
+          timeComplexity: "O(N)",
+          spaceComplexity: "O(1)",
+          implementations: [
+             { language: "Python", code: "def morris(root):\n    curr, res = root, []\n    while curr:\n        if not curr.left: res.append(curr.val); curr = curr.right\n        else:\n            prev = curr.left\n            while prev.right and prev.right != curr: prev = prev.right\n            if not prev.right: prev.right = curr; res.append(curr.val); curr = curr.left\n            else: prev.right = None; curr = curr.right\n    return res" }
+          ]
+       }
+    ]
   }
 ];

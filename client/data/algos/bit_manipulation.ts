@@ -248,7 +248,7 @@ export const bitManipulationAlgorithms: AlgorithmEntry[] = [
     title: "Single Number",
     topic: "Bit Manipulation - Problems",
     category: "Bit Manipulation",
-    frequencyLevel: "Highest",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview: "Every number appears twice except for one. Find it.",
     leetcodeLink: "https://leetcode.com/problems/single-number/",
