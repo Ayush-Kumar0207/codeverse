@@ -13,12 +13,16 @@ import {
   Activity,
   Zap,
   Sliders,
-  Code
+  Code,
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { useSettings, ThemeType, ScaleType, AudioProfile } from "@/context/SettingsContext";
+import { NetworkTopology } from "@/components/NetworkTopology";
+import { useSettings, ThemeType, ScaleType, AudioProfile, Snapshot } from "@/context/SettingsContext";
 
 export default function SettingsHub() {
   const [activeTab, setActiveTab] = useState("appearance");
@@ -30,9 +34,15 @@ export default function SettingsHub() {
     apm, 
     diagnostics, 
     toggleStressMode, 
-    flushMemory 
+    flushMemory,
+    syncStatus,
+    snapshots,
+    performSync,
+    rollback
   } = useSettings();
   const [showCode, setShowCode] = useState(false);
+  const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
+  const [isDiffExpanded, setIsDiffExpanded] = useState(false);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col items-center">
@@ -344,6 +354,125 @@ export default function SettingsHub() {
                            </div>
                         </div>
                      </div>
+                  </motion.div>
+                )}
+
+                {activeTab === "cloud" && (
+                  <motion.div 
+                    key="cloud"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="flex flex-col gap-8"
+                  >
+                    {/* Topology Header */}
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                               <Cloud className="w-5 h-5" />
+                            </div>
+                            <div>
+                               <h3 className="text-lg font-bold font-outfit uppercase">Network Topology</h3>
+                               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Enterprise Sync Engine // Status: {syncStatus.toUpperCase()}</p>
+                            </div>
+                         </div>
+                         <Button 
+                            onClick={performSync} 
+                            disabled={syncStatus === 'syncing'}
+                            className="bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white uppercase font-bold text-[10px] tracking-widest h-9"
+                         >
+                            {syncStatus === 'syncing' ? "Synchronizing..." : "Initiate Sync"}
+                         </Button>
+                      </div>
+                      <NetworkTopology status={syncStatus} />
+                    </div>
+
+                    {/* Temporal Timeline */}
+                    <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8">
+                      <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                         <Clock className="w-4 h-4 text-primary" />
+                         <h3 className="text-sm font-bold uppercase tracking-widest">Temporal Config History</h3>
+                      </div>
+
+                      <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                         {snapshots.length === 0 ? (
+                           <div className="flex flex-col items-center justify-center gap-3 py-10 opacity-30">
+                              <AlertCircle className="w-8 h-8" />
+                              <span className="text-[10px] uppercase font-bold tracking-widest">No Temporal Nodes Detected</span>
+                           </div>
+                         ) : snapshots.map((snap) => (
+                           <div key={snap.id} className="flex flex-col gap-3">
+                              <button 
+                                onClick={() => {
+                                  setSelectedSnapshot(snap);
+                                  setIsDiffExpanded(selectedSnapshot?.id !== snap.id || !isDiffExpanded);
+                                }}
+                                className={cn(
+                                  "flex items-center justify-between p-4 rounded-xl border transition-all text-left",
+                                  selectedSnapshot?.id === snap.id ? "bg-primary/5 border-primary/40" : "bg-white/5 border-white/5 hover:border-white/10"
+                                )}
+                              >
+                                 <div className="flex items-center gap-4">
+                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                    <div className="flex flex-col">
+                                       <span className="font-mono text-[11px] font-bold text-white/90">{snap.hash}</span>
+                                       <span className="text-[9px] text-muted-foreground uppercase">{new Date(snap.timestamp).toLocaleString()}</span>
+                                    </div>
+                                 </div>
+                                 <div className="flex items-center gap-3">
+                                    <span className="text-[10px] uppercase font-black text-white/20">Snapshot Active</span>
+                                    <Code className="w-3 h-3 text-white/20" />
+                                 </div>
+                              </button>
+
+                              {/* Diff Preview Expansion */}
+                              <AnimatePresence>
+                                {selectedSnapshot?.id === snap.id && isDiffExpanded && (
+                                  <motion.div 
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                  >
+                                     <div className="p-5 rounded-xl bg-black/40 border border-primary/20 flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                           <span className="text-[10px] uppercase font-bold text-primary tracking-widest">Diff Preview // Configuration Hash</span>
+                                           <span className="text-[10px] font-mono text-white/40">{snap.id}</span>
+                                        </div>
+                                        <div className="bg-black/60 p-4 rounded-lg font-mono text-[10px] text-blue-300/80 overflow-x-auto">
+                                           <pre>{JSON.stringify(snap.config, null, 2)}</pre>
+                                        </div>
+                                        <Button 
+                                          onClick={() => rollback(snap.id)}
+                                          className="w-full bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-white uppercase font-black text-[11px] tracking-[0.2em] h-10 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                                        >
+                                          Rollback to this state
+                                        </Button>
+                                     </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                           </div>
+                         ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {activeTab === "security" && (
+                  <motion.div 
+                    key="security"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="flex flex-col gap-6"
+                  >
+                    <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col items-center justify-center gap-4 text-center py-20">
+                       <Shield className="w-16 h-16 text-primary/20 mb-2" />
+                       <h3 className="text-xl font-bold font-outfit uppercase">Security Protocols</h3>
+                       <p className="text-sm text-muted-foreground max-w-sm">Encryption keys and biometric handshake settings are managed at the Kernel level. Section initialization pending.</p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

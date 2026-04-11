@@ -48,6 +48,13 @@ const DEFAULT_SETTINGS: SettingsConfig = {
   },
 };
 
+export interface Snapshot {
+  id: string;
+  timestamp: number;
+  config: SettingsConfig;
+  hash: string;
+}
+
 interface SettingsContextType {
   settings: SettingsConfig;
   setSettings: (settings: SettingsConfig) => void;
@@ -62,6 +69,10 @@ interface SettingsContextType {
     logs: { id: string; msg: string; type: 'sys' | 'sync' | 'neural' | 'critical'; timestamp: number }[];
     stressMode: boolean;
   };
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
+  snapshots: Snapshot[];
+  performSync: () => Promise<void>;
+  rollback: (id: string) => void;
   logEvent: (msg: string, type: 'sys' | 'sync' | 'neural' | 'critical') => void;
   toggleStressMode: () => void;
   flushMemory: () => void;
@@ -80,6 +91,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     logs: [{ id: 'init', msg: 'Neural heart initialized.', type: 'sys', timestamp: Date.now() }],
     stressMode: false
   });
+  const [syncStatus, setSyncStatus] = useState<SettingsContextType['syncStatus']>('idle');
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const keystrokesRef = useRef<number[]>([]);
   const lastApmRef = useRef(0);
 
@@ -126,6 +139,57 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return next;
     });
   }, [logEvent]);
+
+  const saveSnapshot = useCallback(() => {
+    const id = Math.random().toString(36).substring(7);
+    const hash = Math.random().toString(16).substring(2, 8).toUpperCase();
+    const newSnapshot: Snapshot = {
+      id,
+      timestamp: Date.now(),
+      config: JSON.parse(JSON.stringify(settings)),
+      hash: `CFG-${hash}`
+    };
+    
+    setSnapshots(prev => {
+      // Avoid duplicate pulses
+      if (prev.length > 0 && JSON.stringify(prev[0].config) === JSON.stringify(newSnapshot.config)) {
+        return prev;
+      }
+      return [newSnapshot, ...prev].slice(0, 20);
+    });
+    
+    logEvent(`Snapshot created: ${newSnapshot.hash}`, 'sys');
+  }, [settings, logEvent]);
+
+  const performSync = useCallback(async () => {
+    setSyncStatus('syncing');
+    logEvent("Network Handshake: Initializing topology sync...", "sync");
+    
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    setSyncStatus('synced');
+    logEvent("Sync Protocol: Cloud Hub handshake complete.", "sync");
+    
+    setTimeout(() => setSyncStatus('idle'), 2000);
+  }, [logEvent]);
+
+  const rollback = useCallback((id: string) => {
+    const target = snapshots.find(s => s.id === id);
+    if (target) {
+      setSettingsState(target.config);
+      setJsonState(JSON.stringify(target.config, null, 2));
+      localStorage.setItem("codeverse-settings", JSON.stringify(target.config));
+      logEvent(`Rollback: Reverted to ${target.hash}`, 'critical');
+    }
+  }, [snapshots, logEvent]);
+
+  // Debounced Auto-Snapshot
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      saveSnapshot();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [settings, saveSnapshot]);
 
   const setJsonConfig = useCallback((json: string) => {
     setJsonState(json);
@@ -231,7 +295,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <SettingsContext.Provider value={{ 
       settings, setSettings, updateSetting, jsonConfig, setJsonConfig, apm, 
-      diagnostics, logEvent, toggleStressMode, flushMemory 
+      diagnostics, logEvent, toggleStressMode, flushMemory,
+      syncStatus, snapshots, performSync, rollback
     }}>
       {children}
     </SettingsContext.Provider>
