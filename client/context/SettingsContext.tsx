@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from "react";
-import axios from "axios";
+import apiClient from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 
 export type ThemeType = "midnight" | "hacker" | "solarized" | "amoled";
@@ -86,7 +86,7 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token } = useAuth();
+  const { user, token } = useAuth() || { user: null, token: null };
   const [settings, setSettingsState] = useState<SettingsConfig>(DEFAULT_SETTINGS);
   const [jsonConfig, setJsonState] = useState<string>(JSON.stringify(DEFAULT_SETTINGS, null, 2));
   const [apm, setApm] = useState(0);
@@ -102,7 +102,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [lastPushedHash, setLastPushedHash] = useState<string | null>(null);
 
   const currentHash = useMemo(() => btoa(JSON.stringify(settings)), [settings]);
-  const isSynced = useMemo(() => currentHash === lastPushedHash, [currentHash, lastPushedHash]);
+  const isSynced = useMemo(() => {
+    if (!lastPushedHash) return false;
+    return currentHash === lastPushedHash;
+  }, [currentHash, lastPushedHash]);
 
   const keystrokesRef = useRef<number[]>([]);
   const lastApmRef = useRef(0);
@@ -183,10 +186,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (manual) logEvent("Manual Sync initiated: Committing to cloud hub...", "sync");
     
     try {
-      const response = await axios.post("/api/settings/sync", 
-        { config: settings },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await apiClient.post("/api/settings/sync", { config: settings });
 
       if (response.status === 201) {
         setSyncStatus('synced');
@@ -195,9 +195,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         logEvent("Sync Protocol: Cloud Hub push verified (201).", "sync");
         
         // Refresh history after sync
-        const { data } = await axios.get("/api/settings/history", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await apiClient.get("/api/settings/history");
         if (data.history) {
           const cloudSnapshots = data.history.map((s: any) => ({
             id: s.id,
@@ -208,9 +206,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setSnapshots(cloudSnapshots);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       setSyncStatus('error');
-      logEvent("Network Error: Cloud Hub push failed.", "critical");
+      const errorMsg = err.response?.data?.message || err.message || "Cloud Hub push failed.";
+      logEvent(`Network Error: ${errorMsg}`, "critical");
     } finally {
       if (manual) setTimeout(() => setSyncStatus('idle'), 2000);
       else setSyncStatus('idle');
@@ -230,14 +229,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!token) return;
       
       try {
-        const { data: latestData } = await axios.get("/api/settings/latest", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data: latestData } = await apiClient.get("/api/settings/latest");
 
         // Load History too
-        const { data: historyData } = await axios.get("/api/settings/history", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data: historyData } = await apiClient.get("/api/settings/history");
 
         if (historyData.history) {
           const cloudSnapshots = historyData.history.map((s: any) => ({
@@ -271,7 +266,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             logEvent("Retro-Sync: Cloud hub identity verified.", "sync");
           }
         }
-      } catch (err) {
+      } catch (err: any) {
+        const errorMsg = err.response?.data?.message || err.message || "Cloud identity verification failed.";
+        logEvent(`Retro-Sync Error: ${errorMsg}`, "critical");
         console.error("Retro-Sync failed", err);
       }
     };

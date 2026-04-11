@@ -40,10 +40,10 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <SettingsProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <SettingsProvider>
         <AuthenticatedShell>{children}</AuthenticatedShell>
-      </AuthProvider>
-    </SettingsProvider>
+      </SettingsProvider>
+    </AuthProvider>
   );
 }

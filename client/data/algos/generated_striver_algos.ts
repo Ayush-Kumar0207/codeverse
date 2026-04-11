@@ -9091,29 +9091,94 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: `def solve_sliding_window_maximum(*args):
-    # Optimized Sliding Window Maximum Logic
-    pass` 
+                code: `from collections import deque
+def solve_sliding_window_maximum(nums, k):
+    if not nums or k <= 0:
+        return []
+    deq = deque()
+    result = []
+    for i, value in enumerate(nums):
+        while deq and nums[deq[-1]] < value:
+            deq.pop()
+        deq.append(i)
+        if deq[0] == i - k:
+            deq.popleft()
+        if i >= k - 1:
+            result.append(nums[deq[0]])
+    return result`
              },
              {
                 language: "JavaScript",
-                code: `function solve_sliding_window_maximum(...args) {
-    // Optimal Sliding Window Maximum Implementation
-}` 
+                code: `function solve_sliding_window_maximum(nums, k) {
+    if (!nums.length || k <= 0) return [];
+    const result = [];
+    const deque = [];
+    for (let i = 0; i < nums.length; i++) {
+        while (deque.length && nums[deque[deque.length - 1]] < nums[i]) {
+            deque.pop();
+        }
+        deque.push(i);
+        if (deque[0] === i - k) {
+            deque.shift();
+        }
+        if (i >= k - 1) {
+            result.push(nums[deque[0]]);
+        }
+    }
+    return result;
+}`
              },
              {
                 language: "Java",
-                code: `class Solution {
-    public void solve_sliding_window_maximum() {
-        // Logic for Sliding Window Maximum
+                code: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public int[] solve_sliding_window_maximum(int[] nums, int k) {
+        if (nums == null || k <= 0 || nums.length < k) {
+            return new int[0];
+        }
+        Deque<Integer> dq = new ArrayDeque<>();
+        int[] output = new int[nums.length - k + 1];
+        for (int i = 0; i < nums.length; i++) {
+            while (!dq.isEmpty() && nums[dq.peekLast()] < nums[i]) {
+                dq.pollLast();
+            }
+            dq.offerLast(i);
+            if (dq.peekFirst() == i - k) {
+                dq.pollFirst();
+            }
+            if (i >= k - 1) {
+                output[i - k + 1] = nums[dq.peekFirst()];
+            }
+        }
+        return output;
     }
-}` 
+}`
              },
              {
                 language: "C++",
-                code: `void solve_sliding_window_maximum() {
-    // High-performance Sliding Window Maximum routine
-}` 
+                code: `#include <deque>
+#include <vector>
+
+std::vector<int> solve_sliding_window_maximum(std::vector<int>& nums, int k) {
+    std::vector<int> result;
+    if (nums.empty() || k == 0) return result;
+    std::deque<int> dq;
+    for (int i = 0; i < nums.size(); ++i) {
+        while (!dq.empty() && nums[dq.back()] < nums[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        if (dq.front() == i - k) {
+            dq.pop_front();
+        }
+        if (i >= k - 1) {
+            result.push_back(nums[dq.front()]);
+        }
+    }
+    return result;
+}`
              }
           ]
        }
@@ -9138,29 +9203,72 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: `def solve_stock_span_problem(*args):
-    # Optimized Stock Span Problem Logic
-    pass` 
+                code: `def solve_stock_span_problem(prices):
+    spans = []
+    stack = []
+    for i, price in enumerate(prices):
+        while stack and stack[-1][0] <= price:
+            stack.pop()
+        span = i + 1 if not stack else i - stack[-1][1]
+        spans.append(span)
+        stack.append((price, i))
+    return spans`
              },
              {
                 language: "JavaScript",
-                code: `function solve_stock_span_problem(...args) {
-    // Optimal Stock Span Problem Implementation
-}` 
+                code: `function solve_stock_span_problem(prices) {
+    const spans = [];
+    const stack = [];
+    for (let i = 0; i < prices.length; i++) {
+        while (stack.length && stack[stack.length - 1][0] <= prices[i]) {
+            stack.pop();
+        }
+        const span = stack.length === 0 ? i + 1 : i - stack[stack.length - 1][1];
+        spans.push(span);
+        stack.push([prices[i], i]);
+    }
+    return spans;
+}`
              },
              {
                 language: "Java",
-                code: `class Solution {
-    public void solve_stock_span_problem() {
-        // Logic for Stock Span Problem
+                code: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public int[] solve_stock_span_problem(int[] prices) {
+        int n = prices.length;
+        int[] spans = new int[n];
+        Deque<int[]> stack = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            while (!stack.isEmpty() && stack.peek()[0] <= prices[i]) {
+                stack.pop();
+            }
+            spans[i] = stack.isEmpty() ? i + 1 : i - stack.peek()[1];
+            stack.push(new int[]{prices[i], i});
+        }
+        return spans;
     }
-}` 
+}`
              },
              {
                 language: "C++",
-                code: `void solve_stock_span_problem() {
-    // High-performance Stock Span Problem routine
-}` 
+                code: `#include <stack>
+#include <utility>
+#include <vector>
+
+std::vector<int> solve_stock_span_problem(const std::vector<int>& prices) {
+    std::vector<int> spans(prices.size());
+    std::stack<std::pair<int, int>> st;
+    for (int i = 0; i < prices.size(); ++i) {
+        while (!st.empty() && st.top().first <= prices[i]) {
+            st.pop();
+        }
+        spans[i] = st.empty() ? i + 1 : i - st.top().second;
+        st.emplace(prices[i], i);
+    }
+    return spans;
+}`
              }
           ]
        }
@@ -9185,29 +9293,79 @@ export const generatedStriverAlgorithms: AlgorithmEntry[] = [
           implementations: [
              {
                 language: "Python",
-                code: `def solve_the_celebrity_problem(*args):
-    # Optimized The Celebrity Problem Logic
-    pass` 
+                code: `def solve_the_celebrity_problem(knows):
+    n = len(knows)
+    candidate = 0
+    for i in range(1, n):
+        if knows[candidate][i]:
+            candidate = i
+    for i in range(n):
+        if i == candidate:
+            continue
+        if knows[candidate][i] or not knows[i][candidate]:
+            return -1
+    return candidate`
              },
              {
                 language: "JavaScript",
-                code: `function solve_the_celebrity_problem(...args) {
-    // Optimal The Celebrity Problem Implementation
-}` 
+                code: `function solve_the_celebrity_problem(knows) {
+    const n = knows.length;
+    let candidate = 0;
+    for (let i = 1; i < n; i++) {
+        if (knows[candidate][i]) {
+            candidate = i;
+        }
+    }
+    for (let i = 0; i < n; i++) {
+        if (i === candidate) continue;
+        if (knows[candidate][i] || !knows[i][candidate]) {
+            return -1;
+        }
+    }
+    return candidate;
+}`
              },
              {
                 language: "Java",
                 code: `class Solution {
-    public void solve_the_celebrity_problem() {
-        // Logic for The Celebrity Problem
+    public int solve_the_celebrity_problem(int[][] knows) {
+        int n = knows.length;
+        int candidate = 0;
+        for (int i = 1; i < n; i++) {
+            if (knows[candidate][i] == 1) {
+                candidate = i;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (i == candidate) continue;
+            if (knows[candidate][i] == 1 || knows[i][candidate] == 0) {
+                return -1;
+            }
+        }
+        return candidate;
     }
-}` 
+}`
              },
              {
                 language: "C++",
-                code: `void solve_the_celebrity_problem() {
-    // High-performance The Celebrity Problem routine
-}` 
+                code: `#include <vector>
+
+int solve_the_celebrity_problem(const std::vector<std::vector<int>>& knows) {
+    int n = knows.size();
+    int candidate = 0;
+    for (int i = 1; i < n; ++i) {
+        if (knows[candidate][i] == 1) {
+            candidate = i;
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        if (i == candidate) continue;
+        if (knows[candidate][i] == 1 || knows[i][candidate] == 0) {
+            return -1;
+        }
+    }
+    return candidate;
+}`
              }
           ]
        }

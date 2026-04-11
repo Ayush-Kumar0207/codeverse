@@ -6,15 +6,23 @@ const HttpError = require("../utils/httpError");
  * Syncs the current settings config to the cloud as a new snapshot.
  */
 const sync = asyncHandler(async (req, res) => {
-  const userId = req.user._id; // Populated by authMiddleware
+  const userId = req.user._id; 
   const { config } = req.body;
 
   if (!config) {
     throw new HttpError(400, "Configuration data required for sync.");
   }
 
-  const result = await settingsService.insertSnapshot(userId, config);
-  res.status(201).json(result);
+  try {
+    const result = await settingsService.insertSnapshot(userId, config);
+    res.status(201).json({
+      success: true,
+      data: result,
+      message: "Cloud Hub synchronization successful."
+    });
+  } catch (error) {
+    throw new HttpError(error.statusCode || 500, error.message || "Cloud synchronization failed.");
+  }
 });
 
 /**

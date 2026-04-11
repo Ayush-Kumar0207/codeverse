@@ -10,7 +10,10 @@ async function insertSnapshot(userId, config) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase Error [insertSnapshot]:", error.message, error.details);
+    throw error;
+  }
 
   // Background prune
   pruneSnapshots(userId);
@@ -29,7 +32,10 @@ async function pruneSnapshots(userId) {
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
-    if (error) return;
+    if (error) {
+      console.error("Supabase Error [pruneSnapshots]:", error.message);
+      return;
+    }
 
     if (snapshots.length > 20) {
       const idsToDelete = snapshots.slice(20).map(s => s.id);
@@ -55,7 +61,10 @@ async function getLatestSnapshot(userId) {
     .limit(1)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase Error [getLatestSnapshot]:", error.message);
+    throw error;
+  }
   return data;
 }
 
@@ -69,7 +78,10 @@ async function getHistory(userId) {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase Error [getHistory]:", error.message);
+    throw error;
+  }
   return data;
 }
 

@@ -374,14 +374,14 @@ export default function SettingsHub() {
                                <Cloud className="w-5 h-5" />
                             </div>
                             <div>
-                               <h3 className="text-lg font-bold font-outfit uppercase">Network Topology</h3>
-                               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Enterprise Sync Engine // Status: {syncStatus.toUpperCase()}</p>
+                               <h3 className="text-lg font-bold text-white font-outfit uppercase">Network Topology</h3>
+                               <p className="text-[10px] text-white/50 uppercase tracking-widest">Enterprise Sync Engine // Status: {syncStatus.toUpperCase()}</p>
                             </div>
                          </div>
                          <Button 
                             onClick={() => performSync(true)} 
                             disabled={syncStatus === 'syncing'}
-                            className="bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white uppercase font-bold text-[10px] tracking-widest h-9"
+                            className="bg-primary/20 text-primary border-primary/30 hover:bg-primary hover:text-white uppercase font-black text-[10px] tracking-widest h-10 px-6 shadow-2xl transition-all"
                          >
                             {syncStatus === 'syncing' ? "Synchronizing..." : "Initiate Sync"}
                          </Button>
@@ -393,14 +393,14 @@ export default function SettingsHub() {
                     <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8">
                       <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                          <Clock className="w-4 h-4 text-primary" />
-                         <h3 className="text-sm font-bold uppercase tracking-widest">Temporal Config History</h3>
+                         <h3 className="text-sm font-bold text-white uppercase tracking-widest">Temporal Config History</h3>
                       </div>
 
                       <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                          {snapshots.length === 0 ? (
                            <div className="flex flex-col items-center justify-center gap-3 py-10 opacity-30">
-                              <AlertCircle className="w-8 h-8" />
-                              <span className="text-[10px] uppercase font-bold tracking-widest">No Temporal Nodes Detected</span>
+                              <AlertCircle className="w-8 h-8 text-white" />
+                              <span className="text-[10px] uppercase font-bold text-white tracking-widest">No Temporal Nodes Detected</span>
                            </div>
                          ) : snapshots.map((snap) => (
                            <div key={snap.id} className="flex flex-col gap-3">
@@ -411,14 +411,14 @@ export default function SettingsHub() {
                                 }}
                                 className={cn(
                                   "flex items-center justify-between p-4 rounded-xl border transition-all text-left",
-                                  selectedSnapshot?.id === snap.id ? "bg-primary/5 border-primary/40" : "bg-white/5 border-white/5 hover:border-white/10"
+                                  selectedSnapshot?.id === snap.id ? "bg-primary/10 border-primary/40 shadow-lg" : "bg-white/5 border-white/5 hover:border-white/10"
                                 )}
                               >
                                  <div className="flex items-center gap-4">
                                     <div className="w-2 h-2 rounded-full bg-primary" />
                                     <div className="flex flex-col">
                                        <span className="font-mono text-[11px] font-bold text-white/90">{snap.hash}</span>
-                                       <span className="text-[9px] text-muted-foreground uppercase">{new Date(snap.timestamp).toLocaleString()}</span>
+                                       <span className="text-[9px] text-white/40 uppercase font-medium">{new Date(snap.timestamp).toLocaleString()}</span>
                                     </div>
                                  </div>
                                  <div className="flex items-center gap-3">
