@@ -1,11 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@100..900&display=swap');
+@import "github-markdown-css/github-markdown.css";
+@import "tw-animate-css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@100..900&display=swap');
-
-@import "github-markdown-css/github-markdown.css";
-@import "tw-animate-css";
 
 @layer base {
   :root {
