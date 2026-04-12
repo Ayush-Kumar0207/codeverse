@@ -21768,1081 +21768,1206 @@ def largestBST(root):
   },
   {
     id: "graph-and-types",
-    title: "Graph and Types",
+    title: "Graph Anatomy & Types",
     topic: "Graphs - Learning",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Graph and Types. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview:
+      "Understanding the fundamental structure of Graphs: Vertices (Nodes), Edges (Connections), and their various classifications.",
+    leetcodeLink: "https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/",
+    useCases: [
+      "Social networks (Users/Friendships)",
+      "Neural Networks",
+      "Network Routing",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Graph and Types.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_graph_and_types(*args):
-    # Optimized Graph and Types Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_graph_and_types(...args) {
-    // Optimal Graph and Types Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_graph_and_types() {
-        // Logic for Graph and Types
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_graph_and_types() {
-    // High-performance Graph and Types routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Fundamental Taxonomy",
+        description:
+          "### 🧠 Core Intuition\nA Graph $G$ consists of a set of Vertices $V$ and Edges $E$. Unlike trees, graphs can have cycles and multiple disconnected components.\n\n### 📐 Key Classification\n1. **Directed vs. Undirected**: Do edges have a direction (arrow) or are they bidirectional?\n2. **Weighted vs. Unweighted**: Do edges have a cost/value associated with them?\n3. **Cyclic vs. Acyclic**: Can you return to a node by following a path?\n4. **Connected vs. Disconnected**: Is there a path between every pair of nodes?",
+        timeComplexity: "N/A",
+        timeComplexityExplanation: "Conceptual understanding.",
+        spaceComplexity: "N/A",
+        spaceComplexityExplanation: "Conceptual understanding.",
+        implementations: [
+          {
+            language: "Python",
+            code: `# Conceptual Structure
+class Graph:
+    def __init__(self):
+        self.vertices = []
+        self.edges = []`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "graph-representation-in-c-java",
-    title: "Graph Representation in C++ | Java",
+    title: "Graph Representation",
     topic: "Graphs - Learning",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Extreme",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Graph Representation in C++ | Java. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Implementing Graphs using the two primary methods: Adjacency Matrix and Adjacency List.",
+    leetcodeLink: "https://www.geeksforgeeks.org/graph-and-its-representations/",
+    useCases: [
+      "Matrix: Dense graphs, finding edge existence $O(1)$",
+      "List: Sparse graphs (most real-world uses), saving space",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Graph Representation in C++ | Java.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_graph_representation_in_c_____java(*args):
-    # Optimized Graph Representation in C++ | Java Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_graph_representation_in_c_____java(...args) {
-    // Optimal Graph Representation in C++ | Java Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_graph_representation_in_c_____java() {
-        // Logic for Graph Representation in C++ | Java
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_graph_representation_in_c_____java() {
-    // High-performance Graph Representation in C++ | Java routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Adjacency List (Standard)",
+        description:
+          "### 🧠 Core Intuition\nAn array of lists. `adj[i]` contains all neighbors of vertex $i$. This is the gold standard for graph algorithms as it only stores existing edges.\n\n### ⏱️ Complexity\n- **Time**: $O(1)$ to add edge.\n- **Space**: $O(V + E)$ (undirected $V+2E$)",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "To iterate over all edges.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Store each edge once (or twice if undirected).",
+        implementations: [
+          {
+            language: "Python",
+            code: `def buildAdjList(edges, V):
+    adj = [[] for _ in range(V + 1)]
+    for u, v in edges:
+        adj[u].append(v)
+        adj[v].append(u) # For undirected
+    return adj`,
+          },
+          {
+            language: "C++",
+            code: `vector<int> adj[V + 1];
+for(int i = 0; i < E; i++) {
+    int u, v; cin >> u >> v;
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+}`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "connected-components",
-    title: "Connected Components",
+    title: "Connected Components Logic",
     topic: "Graphs - Learning",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Connected Components. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "How to traverse a graph that might have multiple disconnected parts (disjoint sets).",
+    leetcodeLink: "https://www.geeksforgeeks.org/connected-components-in-an-undirected-graph/",
+    useCases: [
+      "Social groups detection",
+      "Network isolation testing",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Connected Components.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_connected_components(*args):
-    # Optimized Connected Components Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_connected_components(...args) {
-    // Optimal Connected Components Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_connected_components() {
-        // Logic for Connected Components
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_connected_components() {
-    // High-performance Connected Components routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Visited Array Barrier",
+        description:
+          "### 🧠 Core Intuition\nA single BFS or DFS only visits nodes in the current component. To visit the entire graph, iterate from $1$ to $V$; if a node is not visited, it signifies the start of a new component. Launch a traversal from that node.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Every node and edge is processed exactly once.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Visited array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def traverseGraph(V, adj):
+    visited = [0] * (V + 1)
+    components = 0
+    for i in range(1, V + 1):
+        if not visited[i]:
+            components += 1
+            bfs(i, adj, visited) # or dfs
+    return components`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "bfs",
+    title: "BFS (Breadth-First Search)",
+    topic: "Graphs - Traversals",
+    category: "Graphs",
+    frequencyLevel: "Extreme",
+    difficulty: "Easy",
+    overview:
+      "Breadth-First Search traverses a graph level by level, exploring all neighbors of a node before moving to their children.",
+    leetcodeLink: "https://leetcode.com/problems/bfs-graph-traversal/",
+    useCases: [
+      "Shortest path in unweighted graphs",
+      "Level-order organization",
+    ],
+    approaches: [
+      {
+        name: "Queue-Based Layering",
+        description:
+          "### 🧠 Core Intuition\nUse a First-In-First-Out (FIFO) Queue. \n1. Push start node into queue and mark as visited.\n2. While queue is not empty: Pop node, add to result, and push all its **unvisited** neighbors into queue.\n\n### ⏱️ Complexity\n- **Time**: $O(V + 2E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + 2E)",
+        timeComplexityExplanation: "Each node enters the queue once. Each edge is considered twice in undirected graphs.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Queue and visited array overhead.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def bfs(V, adj):
+    visited = [0] * (V + 1)
+    visited[1] = 1 # Start from 1
+    queue = deque([1])
+    res = []
+    
+    while queue:
+        node = queue.popleft()
+        res.append(node)
+        for neighbor in adj[node]:
+            if not visited[neighbor]:
+                visited[neighbor] = 1
+                queue.append(neighbor)
+    return res`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "dfs",
-    title: "DFS",
+    title: "DFS (Depth-First Search)",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of DFS. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Extreme",
+    difficulty: "Easy",
+    overview:
+      "Depth-First Search explores as deep as possible along each branch before backtracking.",
+    leetcodeLink: "https://leetcode.com/problems/dfs-graph-traversal/",
+    useCases: [
+      "Cycle detection",
+      "Path finding in complex state spaces",
+      "Connected components",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of DFS.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_dfs(*args):
-    # Optimized DFS Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_dfs(...args) {
-    // Optimal DFS Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_dfs() {
-        // Logic for DFS
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_dfs() {
-    // High-performance DFS routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Recursive Depth Dive",
+        description:
+          "### 🧠 Core Intuition\nUse recursion (Implicit Stack). To visit a node: \n1. Mark current node as visited.\n2. For each unvisited neighbor, recursively call DFS.\n\n### ⏱️ Complexity\n- **Time**: $O(V + 2E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + 2E)",
+        timeComplexityExplanation: "Every node visited once; every edge considered twice.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Recursion stack depth.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def dfs(node, visited, adj, res):
+    visited[node] = 1
+    res.append(node)
+    for neighbor in adj[node]:
+        if not visited[neighbor]:
+            dfs(neighbor, visited, adj, res)
+
+def solve(V, adj):
+    visited = [0] * (V + 1)
+    res = []
+    dfs(1, visited, adj, res)
+    return res`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-provinces",
     title: "Number of Provinces",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Provinces. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Count the number of disconnected sub-graphs (provinces) in a graph represented by an adjacency matrix.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-provinces/",
+    useCases: [
+      "Identifying isolated networks",
+      "Clustering connected users",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Provinces.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_provinces(*args):
-    # Optimized Number of Provinces Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_provinces(...args) {
-    // Optimal Number of Provinces Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_provinces() {
-        // Logic for Number of Provinces
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_provinces() {
-    // High-performance Number of Provinces routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Traversal Counting",
+        description:
+          "### 🧠 Core Intuition\nThis is a classic 'Connected Components' problem. Iterate through all nodes. If a node is unvisited, it belongs to a new province. Launch a DFS/BFS to mark all nodes in that province as visited and increment the count.\n\n### ⏱️ Complexity\n- **Time**: $O(V^2)$ (due to adjacency matrix input processing) or $O(V+E)$ if list.\n- **Space**: $O(V)$",
+        timeComplexity: "O(V^2)",
+        timeComplexityExplanation: "Wait... the input is an adjacency matrix. We visit each cell once.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Visited array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findCircleNum(isConnected):
+    V = len(isConnected)
+    visited = [0] * V
+    provinces = 0
+    
+    def dfs(u):
+        visited[u] = 1
+        for v in range(V):
+            if isConnected[u][v] == 1 and not visited[v]:
+                dfs(v)
+                
+    for i in range(V):
+        if not visited[i]:
+            provinces += 1
+            dfs(i)
+    return provinces`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "rotting-oranges",
     title: "Rotting Oranges",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Extreme",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Rotting Oranges. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum time required for all oranges in a grid to rot. Oranges rot neighbors every minute.",
+    leetcodeLink: "https://leetcode.com/problems/rotting-oranges/",
+    useCases: [
+      "Infection spreading models",
+      "Wildfire propagation simulation",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Rotting Oranges.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_rotting_oranges(*args):
-    # Optimized Rotting Oranges Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_rotting_oranges(...args) {
-    // Optimal Rotting Oranges Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_rotting_oranges() {
-        // Logic for Rotting Oranges
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_rotting_oranges() {
-    // High-performance Rotting Oranges routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Multi-Source BFS",
+        description:
+          "### 🧠 Core Intuition\nThis is fundamentally a 'shortest distance from multiple sources' problem. \n1. Add all initially rotten oranges to a queue at $t=0$.\n2. Use a 'visited' matrix (or modify original) to track progress.\n3. Perform BFS. Each 'level' of the BFS represents 1 unit of time.\n4. If after BFS fresh oranges remain, return -1.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Every cell is processed once.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Queue and visited matrix.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def orangesRotting(grid):
+    R, C = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
+    for r in range(R):
+        for c in range(C):
+            if grid[r][c] == 2: queue.append((r, c, 0))
+            if grid[r][c] == 1: fresh += 1
+            
+    time = 0
+    while queue:
+        r, c, t = queue.popleft()
+        time = max(time, t)
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r+dr, c+dc
+            if 0<=nr<R and 0<=nc<C and grid[nr][nc] == 1:
+                grid[nr][nc] = 2
+                fresh -= 1
+                queue.append((nr, nc, t+1))
+                
+    return time if fresh == 0 else -1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "flood-fill",
     title: "Flood Fill",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Flood Fill. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview:
+      "Perform a flood fill on an image (grid), starting from a pixel $(sr, sc)$ and changing all connected pixels of the same color to a new color.",
+    leetcodeLink: "https://leetcode.com/problems/flood-fill/",
+    useCases: [
+      "Bucket fill tool in image editors",
+      "Region labeling in computer vision",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Flood Fill.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_flood_fill(*args):
-    # Optimized Flood Fill Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_flood_fill(...args) {
-    // Optimal Flood Fill Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_flood_fill() {
-        // Logic for Flood Fill
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_flood_fill() {
-    // High-performance Flood Fill routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DFS (Direct Replacement)",
+        description:
+          "### 🧠 Core Intuition\nFrom the starting point, recursively explore all four directions. If a neighbor has the same original color as the start pixel, change its color and continue exploring. If the new color is the same as the old color, stop immediately to avoid infinite recursion.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$ (recursion stack)",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Every pixel is visited at most once.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Worst case recursion stack for a single-color grid.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def floodFill(image, sr, sc, newColor):
+    oldColor = image[sr][sc]
+    if oldColor == newColor: return image
+    R, C = len(image), len(image[0])
+    
+    def dfs(r, c):
+        if image[r][c] == oldColor:
+            image[r][c] = newColor
+            if r > 0: dfs(r-1, c)
+            if r < R-1: dfs(r+1, c)
+            if c > 0: dfs(r, c-1)
+            if c < C-1: dfs(r, c+1)
+            
+    dfs(sr, sc)
+    return image`,
+          },
+        ],
+      },
+    ],
   },
   {
-    id: "01-matrix-bipartite-graph",
-    title: "01 Matrix (Bipartite Graph)",
+    id: "01-matrix",
+    title: "Distance of Nearest Cell having 1",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of 01 Matrix (Bipartite Graph). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "For each cell in a binary matrix, find the distance to the nearest cell containing a 1.",
+    leetcodeLink: "https://leetcode.com/problems/01-matrix/",
+    useCases: [
+      "Image processing (Distance transform)",
+      "Proximity detection in grids",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of 01 Matrix (Bipartite Graph).",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_01_matrix__bipartite_graph_(*args):
-    # Optimized 01 Matrix (Bipartite Graph) Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_01_matrix__bipartite_graph_(...args) {
-    // Optimal 01 Matrix (Bipartite Graph) Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_01_matrix__bipartite_graph_() {
-        // Logic for 01 Matrix (Bipartite Graph)
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_01_matrix__bipartite_graph_() {
-    // High-performance 01 Matrix (Bipartite Graph) routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Multi-Source BFS",
+        description:
+          "### 🧠 Core Intuition\nThis is a classic BFS problem. Instead of starting from 0s and looking for 1s (multiple searches), start from all 1s simultaneously. Treat all 1s as sources at distance 0 and expand outwards.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Every cell is pushed to the queue exactly once.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Output matrix and queue.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def updateMatrix(mat):
+    R, C = len(mat), len(mat[0])
+    dist = [[-1] * C for _ in range(R)]
+    queue = deque()
+    
+    for r in range(R):
+        for c in range(C):
+            if mat[r][c] == 1:
+                dist[r][c] = 0
+                queue.append((r, c))
+                
+    while queue:
+        r, c = queue.popleft()
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r+dr, c+dc
+            if 0<=nr<R and 0<=nc<C and dist[nr][nc] == -1:
+                dist[nr][nc] = dist[r][c] + 1
+                queue.append((nr, nc))
+    return dist`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "bipartite-graph",
+    title: "Bipartite Graph (BFS/DFS)",
+    topic: "Graphs - Traversals",
+    category: "Graphs",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview:
+      "A graph is Bipartite if its vertices can be divided into two independent sets $U$ and $V$ such that every edge connects a vertex in $U$ to one in $V$.",
+    leetcodeLink: "https://leetcode.com/problems/is-graph-bipartite/",
+    useCases: [
+      "Resource allocation where items can only be linked to different types",
+      "Scheduling with incompatibilities",
+    ],
+    approaches: [
+      {
+        name: "2-Coloring BFS",
+        description:
+          "### 🧠 Core Intuition\nA graph is bipartite if and only if it does not contain an odd-length cycle. During BFS, try to color nodes using two colors (0 and 1). If we encounter a visited neighbor with the **same** color as the current node, the graph is NOT bipartite.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Standard BFS traversal.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Color array and queue.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def isBipartite(adj, V):
+    color = [-1] * V
+    for i in range(V):
+        if color[i] == -1:
+            if not check(i, adj, color): return False
+    return True
+
+def check(start, adj, color):
+    queue = deque([start])
+    color[start] = 0
+    while queue:
+        node = queue.popleft()
+        for neighbor in adj[node]:
+            if color[neighbor] == -1:
+                color[neighbor] = 1 - color[node]
+                queue.append(neighbor)
+            elif color[neighbor] == color[node]:
+                return False
+    return True`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "surrounded-regions",
     title: "Surrounded Regions",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Surrounded Regions. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Given an $M \times N$ matrix containing 'X' and 'O', capture all regions that are 4-directionally surrounded by 'X'.",
+    leetcodeLink: "https://leetcode.com/problems/surrounded-regions/",
+    useCases: [
+      "Image processing (Filling holes)",
+      "Territory capture in games (Go)",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Surrounded Regions.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_surrounded_regions(*args):
-    # Optimized Surrounded Regions Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_surrounded_regions(...args) {
-    // Optimal Surrounded Regions Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_surrounded_regions() {
-        // Logic for Surrounded Regions
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_surrounded_regions() {
-    // High-performance Surrounded Regions routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Boundary Protection DFS",
+        description:
+          "### 🧠 Core Intuition\nAny 'O' that is NOT surrounded must be connected to an 'O' on the boundary. \n1. Start DFS/BFS from all 'O's on the four edges of the matrix.\n2. Mark these 'O's and their connected neighbors as 'Protected' (e.g., change to '#').\n3. After processing all boundary 'O's, traverse the grid: change remaining 'O's to 'X' (captured) and '#' back to 'O' (safe).\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Every cell is visited at most twice.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Recursion stack depth.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def solve(board):
+    R, C = len(board), len(board[0])
+    
+    def dfs(r, c):
+        if r<0 or r>=R or c<0 or c>=C or board[r][c] != 'O':
+            return
+        board[r][c] = '#'
+        dfs(r+1, c); dfs(r-1, c); dfs(r, c+1); dfs(r, c-1)
+
+    # Step 1: Boundary DFS
+    for r in range(R):
+        if board[r][0] == 'O': dfs(r, 0)
+        if board[r][C-1] == 'O': dfs(r, C-1)
+    for c in range(C):
+        if board[0][c] == 'O': dfs(0, c)
+        if board[R-1][c] == 'O': dfs(R-1, c)
+        
+    # Step 2: Swap
+    for r in range(R):
+        for c in range(C):
+            if board[r][c] == 'O': board[r][c] = 'X'
+            elif board[r][c] == '#': board[r][c] = 'O'`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-enclaves",
     title: "Number of Enclaves",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Enclaves. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Count the number of 1s in a grid that cannot reach the boundary of the grid in any number of steps.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-enclaves/",
+    useCases: [
+      "Identifying isolated land masses",
+      "Leak detection in restricted zones",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Enclaves.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_enclaves(*args):
-    # Optimized Number of Enclaves Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_enclaves(...args) {
-    // Optimal Number of Enclaves Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_enclaves() {
-        // Logic for Number of Enclaves
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_enclaves() {
-    // High-performance Number of Enclaves routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Boundary BFS/DFS Mark",
+        description:
+          "### 🧠 Core Intuition\nThis is identical in logic to 'Surrounded Regions'. Start from all 1s on the boundaries and mark all 1s reachable from them. The remaining 1s are 'enclaved'.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Traverse grid to mark and then count.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Visited matrix or recursion stack.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def numEnclaves(grid):
+    R, C = len(grid), len(grid[0])
+    def dfs(r, c):
+        if r<0 or r>=R or c<0 or c>=C or grid[r][c] == 0:
+            return
+        grid[r][c] = 0 # Sink reachable 1s
+        dfs(r+1,c); dfs(r-1,c); dfs(r,c+1); dfs(r,c-1)
+        
+    for r in range(R):
+        for c in range(C):
+            if (r==0 or r==R-1 or c==0 or c==C-1) and grid[r][c]==1:
+                dfs(r, c)
+                
+    return sum(row.count(1) for row in grid)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "word-ladder-i",
     title: "Word Ladder I",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Word Ladder I. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Extreme",
+    difficulty: "Hard",
+    overview:
+      "Find the length of the shortest transformation sequence from a begin word to an end word, changing only one letter at a time.",
+    leetcodeLink: "https://leetcode.com/problems/word-ladder/",
+    useCases: [
+      "Natural language processing (Synonym chains)",
+      "DNA sequence transformation analysis",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Word Ladder I.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_word_ladder_i(*args):
-    # Optimized Word Ladder I Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_word_ladder_i(...args) {
-    // Optimal Word Ladder I Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_word_ladder_i() {
-        // Logic for Word Ladder I
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_word_ladder_i() {
-    // High-performance Word Ladder I routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "BFS Shortest Path",
+        description:
+          "### 🧠 Core Intuition\nThis is a shortest path problem in an unweighted graph where nodes are words and edges exist if words differ by one letter. \n1. Push `(beginWord, 1)` into a queue.\n2. Store `wordList` in a set for $O(1)$ removal.\n3. In BFS, for current word, try changing each character from 'a' to 'z'.\n4. If new word exists in set, add to queue and remove from set (visited).\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot L \cdot 26)$ where $L$ is word length.\n- **Space**: $O(N \cdot L)$",
+        timeComplexity: "O(N * L * 26)",
+        timeComplexityExplanation: "For each word, try 26 changes for each of $L$ positions.",
+        spaceComplexity: "O(N * L)",
+        spaceComplexityExplanation: "Dictionary and queue storage.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def ladderLength(beginWord, endWord, wordList):
+    wordSet = set(wordList)
+    if endWord not in wordSet: return 0
+    queue = deque([(beginWord, 1)])
+    
+    while queue:
+        word, dist = queue.popleft()
+        if word == endWord: return dist
+        for i in range(len(word)):
+            original = word[i]
+            for c in 'abcdefghijklmnopqrstuvwxyz':
+                if c == original: continue
+                nextWord = word[:i] + c + word[i+1:]
+                if nextWord in wordSet:
+                    wordSet.remove(nextWord)
+                    queue.append((nextWord, dist + 1))
+    return 0`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "word-ladder-ii",
     title: "Word Ladder II",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Word Ladder II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find **all** shortest transformation sequences from a begin word to an end word.",
+    leetcodeLink: "https://leetcode.com/problems/word-ladder-ii/",
+    useCases: [
+      "Path discovery in high-dimensional discrete spaces",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Word Ladder II.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_word_ladder_ii(*args):
-    # Optimized Word Ladder II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_word_ladder_ii(...args) {
-    // Optimal Word Ladder II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_word_ladder_ii() {
-        // Logic for Word Ladder II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_word_ladder_ii() {
-    // High-performance Word Ladder II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "BFS Level Tracking + Backtracking",
+        description:
+          "### 🧠 Core Intuition\n1. Use BFS to find the minimum distance from `beginWord` to `endWord` and store the **level** at which each word was first reached.\n2. Once BFS finishes, use DFS starting from `endWord` (backwards) or `beginWord` (forward) to reconstruct only the paths where `dist[curr] == dist[next] - 1`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot L \cdot 26 + \\text{Paths})$\n- **Space**: $O(N \cdot L)$",
+        timeComplexity: "O(N * L * 26)",
+        timeComplexityExplanation: "BFS phase as in Ladder I.",
+        spaceComplexity: "O(N * L)",
+        spaceComplexityExplanation: "Dictionary and graph reconstruction.",
+        implementations: [
+          {
+            language: "Python",
+            code: `class Solution:
+    def findLadders(self, beginWord, endWord, wordList):
+        wordSet = set(wordList)
+        if endWord not in wordSet: return []
+        
+        # BFS to find levels
+        levels = {beginWord: 0}
+        queue = deque([beginWord])
+        while queue:
+            word = queue.popleft()
+            if word == endWord: break
+            for i in range(len(word)):
+                for c in 'abcdefghijklmnopqrstuvwxyz':
+                    nw = word[:i] + c + word[i+1:]
+                    if nw in wordSet and nw not in levels:
+                        levels[nw] = levels[word] + 1
+                        queue.append(nw)
+        
+        # DFS to backtrack paths
+        res = []
+        if endWord not in levels: return []
+        
+        def dfs(word, path):
+            if word == beginWord:
+                res.append(path[::-1])
+                return
+            for i in range(len(word)):
+                for c in 'abcdefghijklmnopqrstuvwxyz':
+                    nw = word[:i] + c + word[i+1:]
+                    if nw in levels and levels[nw] == levels[word] - 1:
+                        dfs(nw, path + [nw])
+                        
+        dfs(endWord, [endWord])
+        return res`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "topological-sort",
-    title: "Topological Sort",
+    title: "Topological Sort (DFS)",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Topological Sort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A linear ordering of vertices in a Directed Acyclic Graph (DAG) such that for every directed edge $uv$, vertex $u$ comes before $v$.",
+    leetcodeLink: "https://www.geeksforgeeks.org/topological-sorting/",
+    useCases: [
+      "Task scheduling with dependencies",
+      "Compiling source code (Build ordering)",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Topological Sort.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_topological_sort(*args):
-    # Optimized Topological Sort Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_topological_sort(...args) {
-    // Optimal Topological Sort Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_topological_sort() {
-        // Logic for Topological Sort
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_topological_sort() {
-    // High-performance Topological Sort routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DFS with Stack",
+        description:
+          "### 🧠 Core Intuition\nA node should be added to the ordering only AFTER all its dependents (neighbors) have been processed. \n1. Launch DFS on unvisited nodes.\n2. After completing the recursive calls for a node's children, push the node into a Stack.\n3. The final result is the Reverse of the stack.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Standard DFS traversal.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Stack and visited array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def topoSort(V, adj):
+    visited = [0] * V
+    stack = []
+    
+    def dfs(u):
+        visited[u] = 1
+        for v in adj[u]:
+            if not visited[v]: dfs(v)
+        stack.append(u)
+        
+    for i in range(V):
+        if not visited[i]: dfs(i)
+        
+    return stack[::-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "kahn-s-algorithm",
-    title: "Kahn's Algorithm",
+    title: "Kahn's Algorithm (BFS Topo)",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Kahn's Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A BFS-based approach for Topological Sorting using the concept of In-degrees.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/topological-sort/1",
+    useCases: [
+      "Dependency resolution in package managers",
+      "Instruction scheduling in CPUs",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Kahn's Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_kahn_s_algorithm(*args):
-    # Optimized Kahn's Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_kahn_s_algorithm(...args) {
-    // Optimal Kahn's Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_kahn_s_algorithm() {
-        // Logic for Kahn's Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_kahn_s_algorithm() {
-    // High-performance Kahn's Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "In-degree Reduction",
+        description:
+          "### 🧠 Core Intuition\nA node with in-degree 0 has no dependencies and can be processed immediately.\n1. Calculate In-degree of all vertices.\n2. Push all vertices with In-degree 0 into a Queue.\n3. While queue is not empty: Pop $u$, add to result. For every neighbor $v$ of $u$, decrement in-degree of $v$. If in-degree becomes 0, push to Queue.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Standard BFS traversal with in-degree updates.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Queue and in-degree array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def topoSort(V, adj):
+    indegree = [0] * V
+    for i in range(V):
+        for neighbor in adj[i]:
+            indegree[neighbor] += 1
+            
+    queue = deque([i for i in range(V) if indegree[i] == 0])
+    res = []
+    while queue:
+        u = queue.popleft()
+        res.append(u)
+        for v in adj[u]:
+            indegree[v] -= 1
+            if indegree[v] == 0:
+                queue.append(v)
+    return res`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "undirected-cycle-detection",
+    title: "Cycle Detection (Undirected)",
+    topic: "Graphs - Traversals",
+    category: "Graphs",
+    frequencyLevel: "High",
+    difficulty: "Medium",
+    overview:
+      "Detect if an undirected graph contains at least one cycle using BFS or DFS.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1",
+    useCases: [
+      "Deadlock detection in resource allocation",
+      "Network redundancy check",
+    ],
+    approaches: [
+      {
+        name: "DFS with Parent Tracking",
+        description:
+          "### 🧠 Core Intuition\nIn an undirected graph, an edge connects two nodes bidirectionally. If we visit a neighbor that has been previously visited AND is NOT the parent of the current node, it must be part of a cycle.\n\n### ⏱️ Complexity\n- **Time**: $O(V + 2E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + 2E)",
+        timeComplexityExplanation: "Standard DFS coverage.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Visited array and recursion stack.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def isCycle(V, adj):
+    visited = [0] * V
+    
+    def dfs(u, p):
+        visited[u] = 1
+        for v in adj[u]:
+            if not visited[v]:
+                if dfs(v, u): return True
+            elif v != p:
+                return True
+        return False
+        
+    for i in range(V):
+        if not visited[i]:
+            if dfs(i, -1): return True
+    return False`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "cycle-detection-in-directed-graph",
-    title: "Cycle Detection in Directed Graph",
+    title: "Cycle Detection (Directed)",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Cycle Detection in Directed Graph. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Detect if a directed graph (digraph) contains at least one cycle.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1",
+    useCases: [
+      "Circular dependency detection in build systems",
+      "Analyzing pointer graphs for memory leaks",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Cycle Detection in Directed Graph.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_cycle_detection_in_directed_graph(*args):
-    # Optimized Cycle Detection in Directed Graph Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_cycle_detection_in_directed_graph(...args) {
-    // Optimal Cycle Detection in Directed Graph Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_cycle_detection_in_directed_graph() {
-        // Logic for Cycle Detection in Directed Graph
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_cycle_detection_in_directed_graph() {
-    // High-performance Cycle Detection in Directed Graph routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DFS Path Tracking",
+        description:
+          "### 🧠 Core Intuition\nIn a directed graph, parent tracking is not enough. We need to know if we've encountered a node that is currently in the **active recursion stack**. \n1. Use a `visited` array and a `pathVisited` array.\n2. When entering a node, set both to 1.\n3. When leaving (backtracking), clear `pathVisited` to 0.\n4. If we hit a node where `pathVisited` is already 1, a cycle exists.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Standard DFS coverage.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Visited and pathVisited arrays.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def isCyclic(V, adj):
+    visited = [0] * V
+    pathVisited = [0] * V
+    
+    def dfs(u):
+        visited[u] = 1
+        pathVisited[u] = 1
+        for v in adj[u]:
+            if not visited[v]:
+                if dfs(v): return True
+            elif pathVisited[v]:
+                return True
+        pathVisited[u] = 0
+        return False
+        
+    for i in range(V):
+        if not visited[i]:
+            if dfs(i): return True
+    return False`,
+          },
+          {
+            name: "Kahn's (BFS) Approach",
+            description: "If Topological Sort result length < V, cycle exists.",
+            code: `def isCyclicKahn(V, adj):
+    # Standard Kahn's logic
+    # if count != V: return True`
+          }
+        ],
+      },
+    ],
   },
   {
     id: "course-schedule-i",
     title: "Course Schedule I",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "Extreme",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Course Schedule I. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Determine if it is possible to finish all courses given pre-requisite dependencies.",
+    leetcodeLink: "https://leetcode.com/problems/course-schedule/",
+    useCases: [
+      "Curriculum planning",
+      "Resource dependency resolution",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Course Schedule I.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_course_schedule_i(*args):
-    # Optimized Course Schedule I Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_course_schedule_i(...args) {
-    // Optimal Course Schedule I Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_course_schedule_i() {
-        // Logic for Course Schedule I
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_course_schedule_i() {
-    // High-performance Course Schedule I routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Cycle Detection (Kahn's BFS)",
+        description:
+          "### 🧠 Core Intuition\nCourse dependencies form a directed graph. Finishing all courses is possible IF AND ONLY IF the graph is a Directed Acyclic Graph (DAG). We can use Kahn's Algorithm: if we can't produce a full topological sort, a cycle exists, and it's impossible.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V + E)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Visit all nodes and edges.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Adjacency list and in-degree array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def canFinish(numCourses, prerequisites):
+    adj = [[] for _ in range(numCourses)]
+    indegree = [0] * numCourses
+    for dest, src in prerequisites:
+        adj[src].append(dest)
+        indegree[dest] += 1
+        
+    queue = deque([i for i in range(numCourses) if indegree[i] == 0])
+    count = 0
+    while queue:
+        u = queue.popleft()
+        count += 1
+        for v in adj[u]:
+            indegree[v] -= 1
+            if indegree[v] == 0: queue.append(v)
+            
+    return count == numCourses`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "course-schedule-ii",
     title: "Course Schedule II",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Course Schedule II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Return the ordering of courses you should take to finish all courses. If impossible, return an empty array.",
+    leetcodeLink: "https://leetcode.com/problems/course-schedule-ii/",
+    useCases: [
+      "Automated degree planning",
+      "Sequential task generation",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Course Schedule II.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_course_schedule_ii(*args):
-    # Optimized Course Schedule II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_course_schedule_ii(...args) {
-    // Optimal Course Schedule II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_course_schedule_ii() {
-        // Logic for Course Schedule II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_course_schedule_ii() {
-    // High-performance Course Schedule II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Topological Sort (Kahn's)",
+        description:
+          "### 🧠 Core Intuition\nThis is the extension of Course Schedule I. Instead of just returning a boolean, we return the actual queue order of nodes as they reach 0 in-degree. In-degree 0 means all prerequisites for that course are met.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V + E)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Visit all nodes and edges.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Adjacency list and in-degree array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def findOrder(numCourses, prerequisites):
+    adj = [[] for _ in range(numCourses)]
+    indegree = [0] * numCourses
+    for dest, src in prerequisites:
+        adj[src].append(dest)
+        indegree[dest] += 1
+        
+    queue = deque([i for i in range(numCourses) if indegree[i] == 0])
+    topo = []
+    while queue:
+        u = queue.popleft()
+        topo.append(u)
+        for v in adj[u]:
+            indegree[v] -= 1
+            if indegree[v] == 0: queue.append(v)
+            
+    return topo if len(topo) == numCourses else []`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "find-eventual-safe-states",
     title: "Find Eventual Safe States",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Find Eventual Safe States. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A node is 'Safe' if every possible path starting from it eventually leads to a terminal node (node with no outgoing edges).",
+    leetcodeLink: "https://leetcode.com/problems/find-eventual-safe-states/",
+    useCases: [
+      "Identifying terminating processes in a system",
+      "Analyzing flowcharts for infinite loops",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Find Eventual Safe States.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_find_eventual_safe_states(*args):
-    # Optimized Find Eventual Safe States Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_find_eventual_safe_states(...args) {
-    // Optimal Find Eventual Safe States Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_find_eventual_safe_states() {
-        // Logic for Find Eventual Safe States
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_find_eventual_safe_states() {
-    // High-performance Find Eventual Safe States routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Cycle Detection (Reverse Logic)",
+        description:
+          "### 🧠 Core Intuition\nA node is NOT safe if it is part of a cycle or points to a node that is part of a cycle. \n**Strategy 1 (DFS)**: Use directed cycle detection. Nodes not marked as cyclic are safe.\n**Strategy 2 (Topo Sort)**: Reverse all edges. Terminal nodes become sources (in-degree 0). Any node reachable in a Topo Sort on the reversed graph is safe.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V + E)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Standard graph traversal.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Graph storage and state tracking.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def eventualSafeNodes(graph):
+    V = len(graph)
+    rev_adj = [[] for _ in range(V)]
+    indegree = [0] * V
+    for u in range(V):
+        for v in graph[u]:
+            rev_adj[v].append(u)
+            indegree[u] += 1
+            
+    queue = deque([i for i in range(V) if indegree[i] == 0])
+    safe = []
+    while queue:
+        u = queue.popleft()
+        safe.append(u)
+        for v in rev_adj[u]:
+            indegree[v] -= 1
+            if indegree[v] == 0: queue.append(v)
+            
+    return sorted(safe)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "alien-dictionary",
     title: "Alien Dictionary",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Alien Dictionary. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Given a sorted dictionary from an alien language, derive the order of characters in that language.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/alien-dictionary/1",
+    useCases: [
+      "Inferring hierarchical structures from sequence comparisons",
+      "Deciphering unknown scripts",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Alien Dictionary.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_alien_dictionary(*args):
-    # Optimized Alien Dictionary Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_alien_dictionary(...args) {
-    // Optimal Alien Dictionary Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_alien_dictionary() {
-        // Logic for Alien Dictionary
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_alien_dictionary() {
-    // High-performance Alien Dictionary routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Graph Construction + Topo Sort",
+        description:
+          "### 🧠 Core Intuition\n1. Compare adjacent words to find the FIRST differing character. \n2. For words $W_1$ and $W_2$, if $W_1[i] \\neq W_2[i]$, add an edge $W_1[i] \\to W_2[i]$.\n3. The resulting graph is a DAG (if the dictionary is valid). Perform Topological Sort to get the character order.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot L + K)$ where $L$ is word length, $K$ is alphabet size.\n- **Space**: $O(K)$",
+        timeComplexity: "O(N * L + K)",
+        timeComplexityExplanation: "Compare words to build graph, then Topo Sort.",
+        spaceComplexity: "O(K)",
+        spaceComplexityExplanation: "Adjacency list for characters.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def getAlienOrder(dict, K):
+    adj = {chr(i + 97): [] for i in range(K)}
+    for i in range(len(dict) - 1):
+        w1, w2 = dict[i], dict[i+1]
+        for j in range(min(len(w1), len(w2))):
+            if w1[j] != w2[j]:
+                adj[w1[j]].append(w2[j])
+                break
+                
+    # Perform Topological Sort (Kahn's or DFS)
+    return topoSort(adj, K)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shortest-path-in-directed-acyclic-graph",
-    title: "Shortest Path in Directed Acyclic Graph",
+    title: "Shortest Path in DAG",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Shortest Path in Directed Acyclic Graph. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the shortest distance from a source to all other vertices in a Directed Acyclic Graph with weighted edges.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/shortest-path-in-directed-acyclic-graph/1",
+    useCases: [
+      "Project scheduling with task durations",
+      "Network routing with fixed directions",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Shortest Path in Directed Acyclic Graph.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_shortest_path_in_directed_acyclic_graph(*args):
-    # Optimized Shortest Path in Directed Acyclic Graph Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_shortest_path_in_directed_acyclic_graph(...args) {
-    // Optimal Shortest Path in Directed Acyclic Graph Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_shortest_path_in_directed_acyclic_graph() {
-        // Logic for Shortest Path in Directed Acyclic Graph
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_shortest_path_in_directed_acyclic_graph() {
-    // High-performance Shortest Path in Directed Acyclic Graph routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Topological Sort + Edge Relaxation",
+        description:
+          "### 🧠 Core Intuition\nIn a DAG, if we process nodes in topological order, by the time we reach a node $v$, we must have already computed the absolute shortest path to $v$ (since all nodes that point to $v$ appear earlier in the topo sort).\n1. Find the Topological Sort of the DAG.\n2. Initialize `dist[source] = 0` and all others to $\\infty$.\n3. For each node in the topo sort, iterate over its neighbors and relax the edges: `dist[v] = min(dist[v], dist[u] + weight)`.\n\n### ⏱️ Complexity\n- **Time**: $O(V + E)$\n- **Space**: $O(V + E)$",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Topo Sort + single pass edge relaxation.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Adjacency list and dist array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def shortestPath(self, V, E, edges):
+    adj = [[] for _ in range(V)]
+    for u, v, w in edges:
+        adj[u].append((v, w))
+        
+    stack = []
+    visited = [0] * V
+    def findTopo(u):
+        visited[u] = 1
+        for v, w in adj[u]:
+            if not visited[v]: findTopo(v)
+        stack.append(u)
+        
+    for i in range(V):
+        if not visited[i]: findTopo(i)
+        
+    dist = [float('inf')] * V
+    dist[0] = 0 # Assume source is 0
+    
+    while stack:
+        u = stack.pop()
+        if dist[u] != float('inf'):
+            for v, w in adj[u]:
+                if dist[u] + w < dist[v]:
+                    dist[v] = dist[u] + w
+    return dist`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shortest-path-in-undirected-graph-with-unit-weights",
-    title: "Shortest Path in Undirected Graph with Unit Weights",
+    title: "Shortest Path (Unit Weights)",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Shortest Path in Undirected Graph with Unit Weights. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the shortest distance from a source to all other nodes in an undirected graph where every edge has a weight of 1.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/shortest-path-in-undirected-graph-having-unit-distance/1",
+    useCases: [
+      "Degrees of separation in social networks",
+      "Finding the minimum number of jumps in a game",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Shortest Path in Undirected Graph with Unit Weights.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_shortest_path_in_undirected_graph_with_unit_weights(*args):
-    # Optimized Shortest Path in Undirected Graph with Unit Weights Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_shortest_path_in_undirected_graph_with_unit_weights(...args) {
-    // Optimal Shortest Path in Undirected Graph with Unit Weights Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_shortest_path_in_undirected_graph_with_unit_weights() {
-        // Logic for Shortest Path in Undirected Graph with Unit Weights
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_shortest_path_in_undirected_graph_with_unit_weights() {
-    // High-performance Shortest Path in Undirected Graph with Unit Weights routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Standard BFS",
+        description:
+          "### 🧠 Core Intuition\nBFS explores nodes level-by-level (layer-by-layer). In an unweighted graph, the first time you reach a node via BFS, you have found its absolute shortest path from the source.\n\n### ⏱️ Complexity\n- **Time**: $O(V + 2E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V + 2E)",
+        timeComplexityExplanation: "Standard BFS traversal.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Distance array and queue.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def shortestPath(adj, V, source):
+    dist = [float('inf')] * V
+    dist[source] = 0
+    queue = deque([source])
+    while queue:
+        u = queue.popleft()
+        for v in adj[u]:
+            if dist[u] + 1 < dist[v]:
+                dist[v] = dist[u] + 1
+                queue.append(v)
+    return dist`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "dijkstra-s-algorithm",
     title: "Dijkstra's Algorithm",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Dijkstra's Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "Extreme",
+    difficulty: "Hard",
+    overview:
+      "Find the shortest path from a starting node to all other nodes in a weighted graph (non-negative weights).",
+    leetcodeLink: "https://leetcode.com/problems/network-delay-time/",
+    useCases: [
+      "GPS navigation (Google Maps)",
+      "OSPF routing protocol",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Dijkstra's Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_dijkstra_s_algorithm(*args):
-    # Optimized Dijkstra's Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_dijkstra_s_algorithm(...args) {
-    // Optimal Dijkstra's Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_dijkstra_s_algorithm() {
-        // Logic for Dijkstra's Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_dijkstra_s_algorithm() {
-    // High-performance Dijkstra's Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Priority Queue (Min-Heap)",
+        description:
+          "### 🧠 Core Intuition\nA greedy algorithm that always picks the nearest unvisited node. \n1. Maintain a `dist` array initialized to $\\infty$.\n2. Use a Min-Heap to store `(distance, node)` pairs.\n3. For the current edge $(u, v)$ with weight $w$, if `dist[u] + w < dist[v]`, update `dist[v]` and push to heap.\n\n### ⏱️ Complexity\n- **Time**: $O(E \\log V)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(E log V)",
+        timeComplexityExplanation: "Each edge is relaxed once, and heap operations take log V.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Distance array and heap elements.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def dijkstra(V, adj, S):
+    dist = [float('inf')] * V
+    dist[S] = 0
+    pq = [(0, S)]
+    
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]: continue
+        for v, w in adj[u]:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.heappush(pq, (dist[v], v))
+    return dist`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shortest-path-in-weighted-undirected-graph",
@@ -22894,715 +23019,475 @@ def largestBST(root):
     ]
   },
   {
-    id: "shortest-distance-in-a-binary-maze",
-    title: "Shortest Distance in a Binary Maze",
-    topic: "Graphs - Shortest Path",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Shortest Distance in a Binary Maze. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Shortest Distance in a Binary Maze.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_shortest_distance_in_a_binary_maze(*args):
-    # Optimized Shortest Distance in a Binary Maze Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_shortest_distance_in_a_binary_maze(...args) {
-    // Optimal Shortest Distance in a Binary Maze Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_shortest_distance_in_a_binary_maze() {
-        // Logic for Shortest Distance in a Binary Maze
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_shortest_distance_in_a_binary_maze() {
-    // High-performance Shortest Distance in a Binary Maze routine
-}`
-            }
-          ]
-        }
-    ]
-  },
-  {
     id: "path-with-minimum-effort",
     title: "Path With Minimum Effort",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Path With Minimum Effort. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find a path from source to destination such that the maximum absolute difference in heights between adjacent cells is minimized.",
+    leetcodeLink: "https://leetcode.com/problems/path-with-minimum-effort/",
+    useCases: [
+      "Finding the 'steepest' vs 'easiest' hiking trail",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Path With Minimum Effort.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_path_with_minimum_effort(*args):
-    # Optimized Path With Minimum Effort Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_path_with_minimum_effort(...args) {
-    // Optimal Path With Minimum Effort Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_path_with_minimum_effort() {
-        // Logic for Path With Minimum Effort
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_path_with_minimum_effort() {
-    // High-performance Path With Minimum Effort routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Modified Dijkstra",
+        description:
+          "### 🧠 Core Intuition\nInstead of minimizing the SUM of weights, we minimize the MAXIMUM weight on the path. \n1. Use a Min-Heap of `(effort, r, c)`.\n2. When moving from $(r, c)$ to $(nr, nc)$, the effort to reach the neighbor is `max(effort_at_rc, abs(grid[r][c] - grid[nr][nc]))`.\n3. Update neighbor's distance and push to heap only if this new effort is less than previously recorded.\n\n### ⏱️ Complexity\n- **Time**: $O(N \\cdot M \\log(N \\cdot M))$\n- **Space**: $O(N \\cdot M)$",
+        timeComplexity: "O(N * M log(N * M))",
+        timeComplexityExplanation: "Dijkstra on a grid of $N \\times M$ nodes.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Effort matrix and heap storage.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def minimumEffortPath(heights):
+    R, C = len(heights), len(heights[0])
+    efforts = [[float('inf')] * C for _ in range(R)]
+    efforts[0][0] = 0
+    pq = [(0, 0, 0)]
+    
+    while pq:
+        eff, r, c = heapq.heappop(pq)
+        if r == R - 1 and c == C - 1: return eff
+        if eff > efforts[r][c]: continue
+        
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r+dr, c+dc
+            if 0<=nr<R and 0<=nc<C:
+                new_eff = max(eff, abs(heights[r][c] - heights[nr][nc]))
+                if new_eff < efforts[nr][nc]:
+                    efforts[nr][nc] = new_eff
+                    heapq.heappush(pq, (new_eff, nr, nc))
+    return 0`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "cheapest-flights-within-k-stops",
     title: "Cheapest Flights Within K Stops",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Cheapest Flights Within K Stops. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the cheapest price from source to destination with at most $K$ stops.",
+    leetcodeLink: "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+    useCases: [
+      "Flight booking systems with layover constraints",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Cheapest Flights Within K Stops.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_cheapest_flights_within_k_stops(*args):
-    # Optimized Cheapest Flights Within K Stops Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_cheapest_flights_within_k_stops(...args) {
-    // Optimal Cheapest Flights Within K Stops Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_cheapest_flights_within_k_stops() {
-        // Logic for Cheapest Flights Within K Stops
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_cheapest_flights_within_k_stops() {
-    // High-performance Cheapest Flights Within K Stops routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Modified BFS / Dijkstra by Stops",
+        description:
+          "### 🧠 Core Intuition\nStandard Dijkstra minimizes total price but doesn't respect stop limits. A node reached late with lower price might be invalid due to stop counts.\n**Strategy**: Use BFS where each level corresponds to one 'stop'. At each step, only explore neighbors if the current stops $\\leq K$. \n\n### ⏱️ Complexity\n- **Time**: $O(E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(E)",
+        timeComplexityExplanation: "We process each edge at most once for each stop level.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Price array and queue.",
+        implementations: [
+          {
+            language: "Python",
+            code: `from collections import deque
+def findCheapestPrice(n, flights, src, dst, k):
+    adj = [[] for _ in range(n)]
+    for u, v, w in flights:
+        adj[u].append((v, w))
+        
+    prices = [float('inf')] * n
+    prices[src] = 0
+    queue = deque([(0, src, 0)]) # stops, node, price
+    
+    while queue:
+        stops, u, p = queue.popleft()
+        if stops > k: continue
+        
+        for v, w in adj[u]:
+            if p + w < prices[v]:
+                prices[v] = p + w
+                queue.append((stops + 1, v, prices[v]))
+                
+    return prices[dst] if prices[dst] != float('inf') else -1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "network-delay-time",
     title: "Network Delay Time",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Network Delay Time. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "You are given a network of $n$ nodes. Find the minimum time it takes for all nodes to receive a signal sent from a source node $k$.",
+    leetcodeLink: "https://leetcode.com/problems/network-delay-time/",
+    useCases: [
+      "Measuring latency in distributed systems",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Network Delay Time.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_network_delay_time(*args):
-    # Optimized Network Delay Time Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_network_delay_time(...args) {
-    // Optimal Network Delay Time Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_network_delay_time() {
-        // Logic for Network Delay Time
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_network_delay_time() {
-    // High-performance Network Delay Time routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Standard Dijkstra",
+        description:
+          "### 🧠 Core Intuition\nThe signal reaches all nodes when it reaches the **farthest** node via the shortest path. This is a direct application of Dijkstra's.\n1. Run Dijkstra starting from node $k$.\n2. The answer is `max(dist)`. If any node is unreachable ($\infty$), return -1.\n\n### ⏱️ Complexity\n- **Time**: $O(E \\log V)$\n- **Space**: $O(V + E)$",
+        timeComplexity: "O(E log V)",
+        timeComplexityExplanation: "Standard Dijkstra on weighted directed edges.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Adjacency list and dist array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def networkDelayTime(times, n, k):
+    adj = [[] for _ in range(n + 1)]
+    for u, v, w in times:
+        adj[u].append((v, w))
+        
+    dist = [float('inf')] * (n + 1)
+    dist[k] = 0
+    pq = [(0, k)]
+    
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]: continue
+        for v, w in adj[u]:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.heappush(pq, (dist[v], v))
+                
+    ans = max(dist[1:])
+    return ans if ans != float('inf') else -1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-ways-to-arrive-at-destination",
     title: "Number of Ways to Arrive at Destination",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Ways to Arrive at Destination. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the number of ways you can arrive at your destination in the shortest amount of time.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-ways-to-arrive-at-destination/",
+    useCases: [
+      "Optimizing traffic routes with multiple alternatives",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Ways to Arrive at Destination.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_ways_to_arrive_at_destination(*args):
-    # Optimized Number of Ways to Arrive at Destination Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_ways_to_arrive_at_destination(...args) {
-    // Optimal Number of Ways to Arrive at Destination Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_ways_to_arrive_at_destination() {
-        // Logic for Number of Ways to Arrive at Destination
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_ways_to_arrive_at_destination() {
-    // High-performance Number of Ways to Arrive at Destination routine
-}`
-            }
-          ]
-        }
-    ]
-  },
-  {
-    id: "minimum-multiplications-to-reach-end",
-    title: "Minimum Multiplications to reach End",
-    topic: "Graphs - Shortest Path",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum Multiplications to reach End. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum Multiplications to reach End.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_multiplications_to_reach_end(*args):
-    # Optimized Minimum Multiplications to reach End Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_multiplications_to_reach_end(...args) {
-    // Optimal Minimum Multiplications to reach End Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_multiplications_to_reach_end() {
-        // Logic for Minimum Multiplications to reach End
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_multiplications_to_reach_end() {
-    // High-performance Minimum Multiplications to reach End routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Dijkstra with Combinatorics",
+        description:
+          "### 🧠 Core Intuition\nWe need to track not just the shortest distance, but also the count of paths that achieve that distance.\n1. Initialize `dist` to $\\infty$, `ways` to 0. `dist[start]=0`, `ways[start]=1`.\n2. In Dijkstra, for edge $(u, v)$ with weight $w$:\n   - If `dist[u] + w < dist[v]`: \n     - Found a **shorter** path. Update `dist[v] = dist[u] + w` and reset `ways[v] = ways[u]`.\n   - If `dist[u] + w == dist[v]`:\n     - Found **another** path of equal shortest length. `ways[v] = (ways[v] + ways[u]) % MOD`.\n\n### ⏱️ Complexity\n- **Time**: $O(E \\log V)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(E log V)",
+        timeComplexityExplanation: "Dijkstra with additional bookkeeping.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Distance and ways arrays.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def countPaths(n, roads):
+    adj = [[] for _ in range(n)]
+    for u, v, w in roads:
+        adj[u].append((v, w))
+        adj[v].append((u, w))
+        
+    MOD = 10**9 + 7
+    dist = [float('inf')] * n
+    ways = [0] * n
+    dist[0] = 0
+    ways[0] = 1
+    pq = [(0, 0)]
+    
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]: continue
+        for v, w in adj[u]:
+            if d + w < dist[v]:
+                dist[v] = d + w
+                ways[v] = ways[u]
+                heapq.heappush(pq, (dist[v], v))
+            elif d + w == dist[v]:
+                ways[v] = (ways[v] + ways[u]) % MOD
+    return ways[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "bellman-ford-algorithm",
-    title: "Bellman Ford Algorithm",
+    title: "Bellman-Ford Algorithm",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Bellman Ford Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the shortest path from a source to all nodes in a graph that may contain negative weights and detect negative cycles.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/bellman-ford/1",
+    useCases: [
+      "Graphs with negative edge weights",
+      "Negative cycle detection in financial arbitrage",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Bellman Ford Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_bellman_ford_algorithm(*args):
-    # Optimized Bellman Ford Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_bellman_ford_algorithm(...args) {
-    // Optimal Bellman Ford Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_bellman_ford_algorithm() {
-        // Logic for Bellman Ford Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_bellman_ford_algorithm() {
-    // High-performance Bellman Ford Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Edge Relaxation (V-1 times)",
+        description:
+          "### 🧠 Core Intuition\nIn a graph with $V$ nodes, the shortest path can have at most $V-1$ edges. By relaxing all $E$ edges $V-1$ times, we guarantee the shortest path is found. A $V$-th relaxation that reduces a distance indicates a negative cycle.\n\n### ⏱️ Complexity\n- **Time**: $O(V \\cdot E)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(V * E)",
+        timeComplexityExplanation: "Relax $E$ edges, $V-1$ times.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Distance array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def bellman_ford(V, edges, S):
+    dist = [10**8] * V
+    dist[S] = 0
+    
+    # Relax V-1 times
+    for _ in range(V - 1):
+        for u, v, w in edges:
+            if dist[u] != 10**8 and dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                
+    # Detect Negative Cycle
+    for u, v, w in edges:
+        if dist[u] != 10**8 and dist[u] + w < dist[v]:
+            return [-1] # Negative Cycle detected
+            
+    return dist`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "floyd-warshall-algorithm",
-    title: "Floyd Warshall Algorithm",
+    title: "Floyd-Warshall Algorithm",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Floyd Warshall Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the shortest distances between every pair of vertices in a weighted graph.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/distance-from-the-source-bellman-ford/1",
+    useCases: [
+      "All-pairs shortest path",
+      "Transitive closure of a graph",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Floyd Warshall Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_floyd_warshall_algorithm(*args):
-    # Optimized Floyd Warshall Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_floyd_warshall_algorithm(...args) {
-    // Optimal Floyd Warshall Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_floyd_warshall_algorithm() {
-        // Logic for Floyd Warshall Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_floyd_warshall_algorithm() {
-    // High-performance Floyd Warshall Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Dynamic Programming (Matrix)",
+        description:
+          "### 🧠 Core Intuition\nIteratively improve the estimate of the shortest path between two vertices $i$ and $j$, using a third vertex $k$ as an intermediate step: `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`.\n\n### ⏱️ Complexity\n- **Time**: $O(V^3)$\n- **Space**: $O(V^2)$",
+        timeComplexity: "O(V^3)",
+        timeComplexityExplanation: "Triple nested loop over vertices.",
+        spaceComplexity: "O(V^2)",
+        spaceComplexityExplanation: "Distance matrix.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def shortest_distance(matrix):
+    n = len(matrix)
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if matrix[i][k] != -1 and matrix[k][j] != -1:
+                    if matrix[i][j] == -1 or matrix[i][k] + matrix[k][j] < matrix[i][j]:
+                        matrix[i][j] = matrix[i][k] + matrix[k][j]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "prim-s-algorithm",
-    title: "Prim's Algorithm",
+    title: "Prim's Algorithm (MST)",
     topic: "Graphs - MST",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Prim's Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the Minimum Spanning Tree (MST) of a connected, undirected graph with weighted edges.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1",
+    useCases: [
+      "Designing efficient networks (cables, roads)",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Prim's Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_prim_s_algorithm(*args):
-    # Optimized Prim's Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_prim_s_algorithm(...args) {
-    // Optimal Prim's Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_prim_s_algorithm() {
-        // Logic for Prim's Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_prim_s_algorithm() {
-    // High-performance Prim's Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
-  },
-  {
-    id: "disjoint-set-union-by-rank-size",
-    title: "Disjoint Set (Union by Rank & Size)",
-    topic: "Graphs - MST",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Disjoint Set (Union by Rank & Size). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Disjoint Set (Union by Rank & Size).",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_disjoint_set__union_by_rank___size_(*args):
-    # Optimized Disjoint Set (Union by Rank & Size) Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_disjoint_set__union_by_rank___size_(...args) {
-    // Optimal Disjoint Set (Union by Rank & Size) Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_disjoint_set__union_by_rank___size_() {
-        // Logic for Disjoint Set (Union by Rank & Size)
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_disjoint_set__union_by_rank___size_() {
-    // High-performance Disjoint Set (Union by Rank & Size) routine
-}`
-            }
-          ]
-        }
-    ]
-  },
-  {
-    id: "kruskal-s-algorithm",
-    title: "Kruskal's Algorithm",
-    topic: "Graphs - MST",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Kruskal's Algorithm. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Kruskal's Algorithm.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_kruskal_s_algorithm(*args):
-    # Optimized Kruskal's Algorithm Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_kruskal_s_algorithm(...args) {
-    // Optimal Kruskal's Algorithm Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_kruskal_s_algorithm() {
-        // Logic for Kruskal's Algorithm
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_kruskal_s_algorithm() {
-    // High-performance Kruskal's Algorithm routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Greedy with Priority Queue",
+        description:
+          "### 🧠 Core Intuition\nStart with an arbitrary node and grow the MST by greedily adding the cheapest edge that connects a node in the MST to a node outside it.\n1. Maintain a `visited` array and a Min-Heap of `(weight, node)`. \n2. Pop the smallest weight edge. If node is already visited, skip. \n3. Else, add weight to sum and explore its neighbors, pushing unvisited ones to heap.\n\n### ⏱️ Complexity\n- **Time**: $O(E \\log E)$\n- **Space**: $O(E)$",
+        timeComplexity: "O(E log E)",
+        timeComplexityExplanation: "Each edge is processed once via a Priority Queue.",
+        spaceComplexity: "O(V + E)",
+        spaceComplexityExplanation: "Adjacency list and heap storage.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def spanningTree(V, adj):
+    pq = [(0, 0)] # weight, node
+    visited = [0] * V
+    mst_sum = 0
+    
+    while pq:
+        w, u = heapq.heappop(pq)
+        if visited[u]: continue
+        visited[u] = 1
+        mst_sum += w
+        for v, weight in adj[u]:
+            if not visited[v]:
+                heapq.heappush(pq, (weight, v))
+                
+    return mst_sum`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-operations-to-make-network-connected",
-    title: "Number of Operations to Make Network Connected",
-    topic: "Graphs - MST",
+    title: "Network Connectivity (DSU)",
+    topic: "Graphs - DSU",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Operations to Make Network Connected. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum number of operations to make all computers in a network connected. One operation is moving an existing cable between two computers.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-operations-to-make-network-connected/",
+    useCases: [
+      "Network infrastructure optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Operations to Make Network Connected.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_operations_to_make_network_connected(*args):
-    # Optimized Number of Operations to Make Network Connected Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_operations_to_make_network_connected(...args) {
-    // Optimal Number of Operations to Make Network Connected Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_operations_to_make_network_connected() {
-        // Logic for Number of Operations to Make Network Connected
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_operations_to_make_network_connected() {
-    // High-performance Number of Operations to Make Network Connected routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DSU - Component Counting",
+        description:
+          "### 🧠 Core Intuition\n1. To connect $N$ nodes, we need at least $N-1$ edges. If total edges $< N-1$, connection is impossible.\n2. Use DSU to find the number of connected components ($C$).\n3. The number of 'extra' edges is calculated during the union process (when two nodes already share the same root). \n4. We need $C-1$ more edges to connect $C$ components.\n\n### ⏱️ Complexity\n- **Time**: $O(E + V)$\n- **Space**: $O(V)$",
+        timeComplexity: "O(E + V)",
+        timeComplexityExplanation: "Applying DSU on all edges.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "DSU parent array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def makeConnected(n, connections):
+    if len(connections) < n - 1: return -1
+    ds = DisjointSet(n)
+    components = n
+    for u, v in connections:
+        if ds.find(u) != ds.find(v):
+            ds.union_by_size(u, v)
+            components -= 1
+    return components - 1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "most-stones-removed-with-same-row-or-column",
-    title: "Most Stones Removed with Same Row or Column",
-    topic: "Graphs - MST",
+    title: "Most Stones Removed (DSU)",
+    topic: "Graphs - DSU",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Most Stones Removed with Same Row or Column. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A stone can be removed if it shares the same row or column as another stone that has not been removed. Find the maximum number of stones that can be removed.",
+    leetcodeLink: "https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/",
+    useCases: [
+      "Connectivity in grid-based layouts",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Most Stones Removed with Same Row or Column.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_most_stones_removed_with_same_row_or_column(*args):
-    # Optimized Most Stones Removed with Same Row or Column Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_most_stones_removed_with_same_row_or_column(...args) {
-    // Optimal Most Stones Removed with Same Row or Column Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_most_stones_removed_with_same_row_or_column() {
-        // Logic for Most Stones Removed with Same Row or Column
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_most_stones_removed_with_same_row_or_column() {
-    // High-performance Most Stones Removed with Same Row or Column routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DSU - Coordinate Mapping",
+        description:
+          "### 🧠 Core Intuition\nThink of rows and columns as nodes in a graph. A stone at $(r, c)$ represents an edge between row node $r$ and column node $c$. \n1. Total stones that can be removed = Total Stones - Number of Connected Components.\n2. Use a large offset to distinguish row nodes from column nodes (e.g., column index $j$ becomes $j + 10001$).\n\n### ⏱️ Complexity\n- **Time**: $O(N)$ where $N$ is number of stones.\n- **Space**: $O(V)$ where $V$ is coordinate range.",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Union operations for each stone.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "DSU for coordinates.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def removeStones(stones):
+    ds = {} # Use dict for dynamic DSU
+    def find(i):
+        if ds.setdefault(i, i) == i: return i
+        ds[i] = find(ds[i])
+        return ds[i]
+    def union(i, j):
+        root_i, root_j = find(i), find(j)
+        if root_i != root_j: ds[root_i] = root_j
+        
+    for r, c in stones:
+        union(r, c + 10001)
+        
+    return len(stones) - len({find(x) for x in ds})`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "accounts-merge",
     title: "Accounts Merge",
-    topic: "Graphs - MST",
+    topic: "Graphs - DSU",
     category: "Graphs",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Accounts Merge. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Merge accounts that belong to the same person. Two accounts belong to the same person if they share at least one email.",
+    leetcodeLink: "https://leetcode.com/problems/accounts-merge/",
+    useCases: [
+      "Deduplication in CRM systems",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Accounts Merge.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_accounts_merge(*args):
-    # Optimized Accounts Merge Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_accounts_merge(...args) {
-    // Optimal Accounts Merge Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_accounts_merge() {
-        // Logic for Accounts Merge
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_accounts_merge() {
-    // High-performance Accounts Merge routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DSU - Email Mapping",
+        description:
+          "### 🧠 Core Intuition\nAccounts are indices, and emails are the links. \n1. Map every email to an account index. If an email appears in multiple accounts, union those account indices in DSU.\n2. After processing all accounts, group emails by their account's root representative.\n3. Sort emails and add the owner's name.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K \log(NK))$ where $K$ is emails per account.\n- **Space**: $O(NK)$",
+        timeComplexity: "O(NK log(NK))",
+        timeComplexityExplanation: "Processing emails + sorting.",
+        spaceComplexity: "O(NK)",
+        spaceComplexityExplanation: "Email to account mapping and DSU.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def accountsMerge(accounts):
+    ds = DisjointSet(len(accounts))
+    email_to_acc = {}
+    
+    for i, acc in enumerate(accounts):
+        for email in acc[1:]:
+            if email in email_to_acc:
+                ds.union_by_size(i, email_to_acc[email])
+            else:
+                email_to_acc[email] = i
+                
+    merged = collections.defaultdict(list)
+    for email, acc_idx in email_to_acc.items():
+        root = ds.find(acc_idx)
+        merged[root].append(email)
+        
+    return [[accounts[i][0]] + sorted(emails) for i, emails in merged.items()]`,
+          },
+        ],
+      },
+    ],
   },
   {
-    id: "number-of-islands-ii",
+    id: "number-of-islands-ii-online-queries",
     title: "Number of Islands II",
-    topic: "Graphs - MST",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Islands II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Islands II.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_islands_ii(*args):
-    # Optimized Number of Islands II Logic
-    pass`
             },
             {
               language: "JavaScript",
@@ -23680,134 +23565,50 @@ def largestBST(root):
   {
     id: "swim-in-rising-water",
     title: "Swim in Rising Water",
-    topic: "Graphs - MST",
+    topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Swim in Rising Water. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the minimum time to reach the bottom-right corner of a grid if you can only swim when the water level is at least the height of the current cell.",
+    leetcodeLink: "https://leetcode.com/problems/swim-in-rising-water/",
+    useCases: [
+      "Path planning in dynamic threshold environments",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Swim in Rising Water.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_swim_in_rising_water(*args):
-    # Optimized Swim in Rising Water Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_swim_in_rising_water(...args) {
-    // Optimal Swim in Rising Water Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_swim_in_rising_water() {
-        // Logic for Swim in Rising Water
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_swim_in_rising_water() {
-    // High-performance Swim in Rising Water routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Modified Dijkstra",
+        description:
+          "### 🧠 Core Intuition\nThis is identical in logic to 'Path with Minimum Effort'. We want to minimize the MAXIMUM elevation encountered on the path. \n\n### ⏱️ Complexity\n- **Time**: $O(N^2 \log N^2)$\n- **Space**: $O(N^2)$",
+        timeComplexity: "O(N^2 log N^2)",
+        timeComplexityExplanation: "Dijkstra on $N^2$ states.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "Distance matrix and heap.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import heapq
+def swimInWater(grid):
+    n = len(grid)
+    pq = [(grid[0][0], 0, 0)]
+    visited = [[0] * n for _ in range(n)]
+    visited[0][0] = 1
+    
+    while pq:
+        t, r, c = heapq.heappop(pq)
+        if r == n - 1 and c == n - 1: return t
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r+dr, c+dc
+            if 0<=nr<n and 0<=nc<n and not visited[nr][nc]:
+                visited[nr][nc] = 1
+                heapq.heappush(pq, (max(t, grid[nr][nc]), nr, nc))
+    return -1`,
+          },
+        ],
+      },
+    ],
   },
   {
-    id: "bridges-in-graph-tarjan-s-algorithm",
-    title: "Bridges in Graph (Tarjan's Algorithm)",
-    topic: "Graphs - Other",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Bridges in Graph (Tarjan's Algorithm). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Bridges in Graph (Tarjan's Algorithm).",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_bridges_in_graph__tarjan_s_algorithm_(*args):
-    # Optimized Bridges in Graph (Tarjan's Algorithm) Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_bridges_in_graph__tarjan_s_algorithm_(...args) {
-    // Optimal Bridges in Graph (Tarjan's Algorithm) Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_bridges_in_graph__tarjan_s_algorithm_() {
-        // Logic for Bridges in Graph (Tarjan's Algorithm)
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_bridges_in_graph__tarjan_s_algorithm_() {
-    // High-performance Bridges in Graph (Tarjan's Algorithm) routine
-}`
-            }
-          ]
-        }
-    ]
-  },
-  {
-    id: "articulation-point",
-    title: "Articulation Point",
-    topic: "Graphs - Other",
-    category: "Graphs",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Articulation Point. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Articulation Point.",
-          timeComplexity: "O(V + E)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(V + E)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_articulation_point(*args):
-    # Optimized Articulation Point Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_articulation_point(...args) {
-    // Optimal Articulation Point Implementation
-}`
-            },
-            {
-              language: "Java",
               code: `class Solution {
     public void solve_articulation_point() {
         // Logic for Articulation Point
@@ -23878,2743 +23679,2460 @@ def largestBST(root):
     title: "Frog Jump",
     topic: "Dynamic Programming - 1D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Frog Jump. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview:
+      "A frog is on the 0-th stair and wants to reach the (N-1)-th stair. At any point, the frog can jump to the next stair or skip one stair. Find the minimum cost to reach the top.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/frog-jump/1",
+    useCases: [
+      "Pathfinding with jump costs",
+      "Resource optimization in sequential steps",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Frog Jump.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_frog_jump(*args):
-    # Optimized Frog Jump Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_frog_jump(...args) {
-    // Optimal Frog Jump Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_frog_jump() {
-        // Logic for Frog Jump
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_frog_jump() {
-    // High-performance Frog Jump routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nThis is a variation of Fibonacci. Let `dp[i]` be the min cost to reach stair `i`.\n`dp[i] = min(dp[i-1] + abs(h[i] - h[i-1]), dp[i-2] + abs(h[i] - h[i-2]))`.\nWe only need the last two states (`prev`, `prev2`) to calculate the current cost.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single pass through the height array.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only tracking last two costs.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minimumEnergy(height, n):
+    prev, prev2 = 0, 0
+    for i in range(1, n):
+        jump1 = prev + abs(height[i] - height[i-1])
+        jump2 = float('inf')
+        if i > 1:
+            jump2 = prev2 + abs(height[i] - height[i-2])
+        
+        curr = min(jump1, jump2)
+        prev2, prev = prev, curr
+    return prev`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "frog-jump-with-k-distances",
-    title: "Frog Jump with k distances",
+    title: "Frog Jump with K Steps",
     topic: "Dynamic Programming - 1D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Frog Jump with k distances. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A variation of Frog Jump where the frog can jump up to $K$ stairs at a time ($1, 2, \dots, K$). Find the minimum cost to reach the (N-1)-th stair.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/minimal-cost/1",
+    useCases: [
+      "Generalized pathfinding with variable step sizes",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Frog Jump with k distances.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_frog_jump_with_k_distances(*args):
-    # Optimized Frog Jump with k distances Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_frog_jump_with_k_distances(...args) {
-    // Optimal Frog Jump with k distances Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_frog_jump_with_k_distances() {
-        // Logic for Frog Jump with k distances
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_frog_jump_with_k_distances() {
-    // High-performance Frog Jump with k distances routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Iterative DP",
+        description:
+          "### 🧠 Core Intuition\nFor each stair $i$, we can reach it from any of the previous $K$ stairs ($i-1, i-2, \dots, i-k$). \n`dp[i] = min(dp[i-j] + abs(h[i] - h[i-j]))` for $j \in [1, K]$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N * K)",
+        timeComplexityExplanation: "Nested loop over $N$ stairs and $K$ jumps.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "DP array of size $N$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minimizeCost(height, n, k):
+    dp = [0] * n
+    for i in range(1, n):
+        min_steps = float('inf')
+        for j in range(1, k + 1):
+            if i - j >= 0:
+                jump = dp[i-j] + abs(height[i] - height[i-j])
+                min_steps = min(min_steps, jump)
+        dp[i] = min_steps
+    return dp[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "maximum-sum-of-non-adjacent-elements",
-    title: "Maximum sum of non-adjacent elements",
+    title: "Max Sum of Non-adjacent Elements",
     topic: "Dynamic Programming - 1D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Maximum sum of non-adjacent elements. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the maximum sum of a subsequence such that no two elements in the subsequence are adjacent in the original array.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/max-sum-without-adjacents2430/1",
+    useCases: [
+      "Scheduling with conflict constraints",
+      "Maximizing profit with mandatory gaps",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Maximum sum of non-adjacent elements.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_maximum_sum_of_non_adjacent_elements(*args):
-    # Optimized Maximum sum of non-adjacent elements Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_maximum_sum_of_non_adjacent_elements(...args) {
-    // Optimal Maximum sum of non-adjacent elements Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_maximum_sum_of_non_adjacent_elements() {
-        // Logic for Maximum sum of non-adjacent elements
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_maximum_sum_of_non_adjacent_elements() {
-    // High-performance Maximum sum of non-adjacent elements routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nFor each element $i$, we have two choices:\n1. **Pick it**: Current sum becomes `arr[i] + dp[i-2]` (cannot pick `i-1`).\n2. **Don't pick it**: Current sum remains `dp[i-1]`.\n`dp[i] = max(arr[i] + dp[i-2], dp[i-1])`.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single pass through the array.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only tracking the last two max sums.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findMaxSum(arr, n):
+    prev, prev2 = arr[0], 0
+    for i in range(1, n):
+        pick = arr[i]
+        if i > 1: pick += prev2
+        non_pick = prev
+        
+        curr = max(pick, non_pick)
+        prev2, prev = prev, curr
+    return prev`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "house-robber",
     title: "House Robber",
     topic: "Dynamic Programming - 1D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of House Robber. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "You are a professional robber. You cannot rob two adjacent houses. Find the maximum money you can rob from a circular row of houses (first and last are adjacent).",
+    leetcodeLink: "https://leetcode.com/problems/house-robber-ii/",
+    useCases: [
+      "Subsequence optimization given circular constraints",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of House Robber.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_house_robber(*args):
-    # Optimized House Robber Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_house_robber(...args) {
-    // Optimal House Robber Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_house_robber() {
-        // Logic for House Robber
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_house_robber() {
-    // High-performance House Robber routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Sub-arrays",
+        description:
+          "### 🧠 Core Intuition\nThis is identical to 'Max Sum of Non-adjacent Elements' but with a circular twist. \n**Crucial Observation**: You can either rob houses from $0$ to $N-2$ (ignoring the last) or houses from $1$ to $N-1$ (ignoring the first).\n1. Compute `solve(houses[0...N-2])`.\n2. Compute `solve(houses[1...N-1])`.\n3. Final result is `max(result1, result2)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Two passes through partial arrays.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only space for tracking variables.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def rob(nums):
+    def solve(arr):
+        prev, prev2 = 0, 0
+        for x in arr:
+            curr = max(x + prev2, prev)
+            prev2, prev = prev, curr
+        return prev
+    
+    n = len(nums)
+    if n == 1: return nums[0]
+    return max(solve(nums[:-1]), solve(nums[1:]))`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "ninja-s-training",
     title: "Ninja's Training",
-    topic: "Dynamic Programming - 2D/3D DP",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Ninja's Training. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A ninja has $N$ days of training. On each day, he can perform one of three tasks (0, 1, 2). He cannot perform the same task on two consecutive days. Maximize the total merit points.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/ninjas-training/1",
+    useCases: [
+      "Activity selection with temporal constraints",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Ninja's Training.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_ninja_s_training(*args):
-    # Optimized Ninja's Training Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_ninja_s_training(...args) {
-    // Optimal Ninja's Training Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_ninja_s_training() {
-        // Logic for Ninja's Training
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_ninja_s_training() {
-    // High-performance Ninja's Training routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "2D DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nOn day $i$, the merit points depend on the task chosen and the maximum points accumulated until day $i-1$ without choosing the same task.\n`dp[task] = points[i][task] + max(prev_dp[other_tasks])`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot 4 \cdot 3) \approx O(N)$\n- **Space**: $O(4) \approx O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single pass through $N$ days with constant work per day.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only storing points for 4 possible states (task 0, 1, 2, or none).",
+        implementations: [
+          {
+            language: "Python",
+            code: `def ninjaTraining(n, points):
+    prev = [0] * 4
+    prev[0] = max(points[0][1], points[0][2])
+    prev[1] = max(points[0][0], points[0][2])
+    prev[2] = max(points[0][0], points[0][1])
+    prev[3] = max(points[0][0], points[0][1], points[0][2])
+    
+    for day in range(1, n):
+        temp = [0] * 4
+        for last in range(4):
+            for task in range(3):
+                if task != last:
+                    temp[last] = max(temp[last], points[day][task] + prev[task])
+        prev = temp
+    return prev[3]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "grid-unique-paths",
-    title: "Grid Unique Paths",
-    topic: "Dynamic Programming - 2D/3D DP",
+    title: "Unique Paths",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Grid Unique Paths. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A robot is at the top-left corner of a $M \times N$ grid. It can only move down or right. Find the total number of unique paths to reach the bottom-right corner.",
+    leetcodeLink: "https://leetcode.com/problems/unique-paths/",
+    useCases: [
+      "Counting combinations in constrained movements",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Grid Unique Paths.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_grid_unique_paths(*args):
-    # Optimized Grid Unique Paths Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_grid_unique_paths(...args) {
-    // Optimal Grid Unique Paths Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_grid_unique_paths() {
-        // Logic for Grid Unique Paths
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_grid_unique_paths() {
-    // High-performance Grid Unique Paths routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nThe number of ways to reach $(i, j)$ is the sum of ways to reach $(i-1, j)$ and $(i, j-1)$.\n`dp[i][j] = dp[i-1][j] + dp[i][j-1]`.\nWe can optimize space to $O(N)$ by only storing the previous row.\n\n### ⏱️ Complexity\n- **Time**: $O(M \cdot N)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(M * N)",
+        timeComplexityExplanation: "Iterate through every cell in the grid.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Storing only the current/previous row.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def uniquePaths(m, n):
+    prev = [1] * n
+    for i in range(1, m):
+        curr = [1] * n
+        for j in range(1, n):
+            curr[j] = curr[j-1] + prev[j]
+        prev = curr
+    return prev[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "unique-paths-ii",
-    title: "Unique Paths II",
-    topic: "Dynamic Programming - 2D/3D DP",
+    title: "Unique Paths II (Obstacles)",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Unique Paths II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find unique paths from top-left to bottom-right in a grid where some cells contain obstacles (1) and cannot be passed.",
+    leetcodeLink: "https://leetcode.com/problems/unique-paths-ii/",
+    useCases: [
+      "Path counting with restricted access zones",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Unique Paths II.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_unique_paths_ii(*args):
-    # Optimized Unique Paths II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_unique_paths_ii(...args) {
-    // Optimal Unique Paths II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_unique_paths_ii() {
-        // Logic for Unique Paths II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_unique_paths_ii() {
-    // High-performance Unique Paths II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nSame as Unique Paths I, but if `grid[i][j] == 1`, set `dp[i][j] = 0`.\n\n### ⏱️ Complexity\n- **Time**: $O(M \cdot N)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(M * N)",
+        timeComplexityExplanation: "Single grid traversal.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "One row of space.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def uniquePathsWithObstacles(grid):
+    m, n = len(grid), len(grid[0])
+    prev = [0] * n
+    for i in range(m):
+        curr = [0] * n
+        for j in range(n):
+            if grid[i][j] == 1:
+                curr[j] = 0
+            elif i == 0 and j == 0:
+                curr[j] = 1
+            else:
+                up = prev[j]
+                left = curr[j-1] if j > 0 else 0
+                curr[j] = up + left
+        prev = curr
+    return prev[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-path-sum-in-grid",
-    title: "Minimum path sum in Grid",
-    topic: "Dynamic Programming - 2D/3D DP",
+    title: "Minimum Path Sum",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum path sum in Grid. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find a path from top-left to bottom-right in a grid which minimizes the sum of all numbers along its path.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-path-sum/",
+    useCases: [
+      "Shortest path in weighted grids (non-negative)",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum path sum in Grid.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_path_sum_in_grid(*args):
-    # Optimized Minimum path sum in Grid Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_path_sum_in_grid(...args) {
-    // Optimal Minimum path sum in Grid Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_path_sum_in_grid() {
-        // Logic for Minimum path sum in Grid
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_path_sum_in_grid() {
-    // High-performance Minimum path sum in Grid routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nTo reach $(i, j)$, you must come from either $(i-1, j)$ or $(i, j-1)$. \n`dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])`.\n\n### ⏱️ Complexity\n- **Time**: $O(M \cdot N)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(M * N)",
+        timeComplexityExplanation: "Single pass over the grid.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Storing only one row of min sums.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minPathSum(grid):
+    m, n = len(grid), len(grid[0])
+    prev = [float('inf')] * n
+    for i in range(m):
+        curr = [0] * n
+        for j in range(n):
+            if i == 0 and j == 0:
+                curr[j] = grid[i][j]
+            else:
+                up = prev[j]
+                left = curr[j-1] if j > 0 else float('inf')
+                curr[j] = grid[i][j] + min(up, left)
+        prev = curr
+    return prev[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "triangle",
-    title: "Triangle",
-    topic: "Dynamic Programming - 2D/3D DP",
+    title: "Triangle (Min Path Sum)",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Triangle. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum path sum from top to bottom in a triangle-shaped array. At each step, you can move to adjacent indices in the next row.",
+    leetcodeLink: "https://leetcode.com/problems/triangle/",
+    useCases: [
+      "Optimal pathfinding in hierarchical structures",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Triangle.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_triangle(*args):
-    # Optimized Triangle Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_triangle(...args) {
-    // Optimal Triangle Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_triangle() {
-        // Logic for Triangle
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_triangle() {
-    // High-performance Triangle routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Bottom-Up DP",
+        description:
+          "### 🧠 Core Intuition\nInstead of going top-down (which is messy with edges), go bottom-up. The min path to reach index $j$ in row $i$ is `triangle[i][j] + min(dp[i+1][j], dp[i+1][j+1])`.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$ where $N$ is number of rows.\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Processing each element of the triangle exactly once.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Optimal space for the bottom-most row.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minimumTotal(triangle):
+    n = len(triangle)
+    prev = triangle[-1][:] # Copy of bottom row
+    for i in range(n - 2, -1, -1):
+        curr = [0] * (i + 1)
+        for j in range(i + 1):
+            curr[j] = triangle[i][j] + min(prev[j], prev[j+1])
+        prev = curr
+    return prev[0]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-falling-path-sum",
     title: "Minimum Falling Path Sum",
-    topic: "Dynamic Programming - 2D/3D DP",
+    topic: "Dynamic Programming - 2D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum Falling Path Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum sum of a falling path through a square grid. A falling path starts at any element in the first row and ends in the last row, moving only to adjacent columns in the next row.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-falling-path-sum/",
+    useCases: [
+      "Image seam carving energy minimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum Falling Path Sum.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_falling_path_sum(*args):
-    # Optimized Minimum Falling Path Sum Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_falling_path_sum(...args) {
-    // Optimal Minimum Falling Path Sum Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_falling_path_sum() {
-        // Logic for Minimum Falling Path Sum
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_falling_path_sum() {
-    // High-performance Minimum Falling Path Sum routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nFor each cell $(i, j)$, you can come from $(i-1, j-1), (i-1, j),$ or $(i-1, j+1)$. \n`dp[i][j] = matrix[i][j] + min(up, up_left, up_right)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Single pass through the $N \times M$ grid.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "Storing only the previous row's results.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minFallingPathSum(matrix):
+    n = len(matrix)
+    prev = matrix[0][:]
+    for i in range(1, n):
+        curr = [0] * n
+        for j in range(n):
+            mid = prev[j]
+            left = prev[j-1] if j > 0 else float('inf')
+            right = prev[j+1] if j < n - 1 else float('inf')
+            curr[j] = matrix[i][j] + min(mid, left, right)
+        prev = curr
+    return min(prev)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "cherry-pickup-ii-3d-dp",
     title: "Cherry Pickup II (3D DP)",
-    topic: "Dynamic Programming - 2D/3D DP",
+    topic: "Dynamic Programming - 3D DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Cherry Pickup II (3D DP). optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Two robots start at $(0, 0)$ and $(0, C-1)$. Both move to the same row in the next step (diag-left, down, diag-right). Find the maximum cherries collected by both.",
+    leetcodeLink: "https://leetcode.com/problems/cherry-pickup-ii/",
+    useCases: [
+      "Multi-agent path coordination with shared rewards",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Cherry Pickup II (3D DP).",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_cherry_pickup_ii__3d_dp_(*args):
-    # Optimized Cherry Pickup II (3D DP) Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_cherry_pickup_ii__3d_dp_(...args) {
-    // Optimal Cherry Pickup II (3D DP) Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_cherry_pickup_ii__3d_dp_() {
-        // Logic for Cherry Pickup II (3D DP)
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_cherry_pickup_ii__3d_dp_() {
-    // High-performance Cherry Pickup II (3D DP) routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "3D DP (Tabulation)",
+        description:
+          "### 🧠 Core Intuition\nSince both robots move to the next row simultaneously, we only need to track the current row (`i`) and the columns of both robots (`j1, j2`).\n`dp[i][j1][j2] = (grid[i][j1] + grid[i][j2]) + max(dp[i+1][nj1][nj2])` where `j1 != j2`. If `j1 == j2`, only add once.\n\n### ⏱️ Complexity\n- **Time**: $O(R \cdot C^2 \times 9)$\n- **Space**: $O(R \cdot C^2)$ (can be optimized to $O(C^2)$)",
+        timeComplexity: "O(R * C^2)",
+        timeComplexityExplanation: "Triple nested loop over row and two column positions.",
+        spaceComplexity: "O(C^2)",
+        spaceComplexityExplanation: "Optimized space using only the next row's results.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def cherryPickup(grid):
+    R, C = len(grid), len(grid[0])
+    dp = [[-1] * C for _ in range(C)]
+    
+    # Base Case: Last Row
+    for j1 in range(C):
+        for j2 in range(C):
+            if j1 == j2: dp[j1][j2] = grid[R-1][j1]
+            else: dp[j1][j2] = grid[R-1][j1] + grid[R-1][j2]
+            
+    # Iterative DP
+    for i in range(R - 2, -1, -1):
+        curr = [[-1] * C for _ in range(C)]
+        for j1 in range(C):
+            for j2 in range(C):
+                mx = -1e9
+                for dj1 in [-1, 0, 1]:
+                    for dj2 in [-1, 0, 1]:
+                        nj1, nj2 = j1 + dj1, j2 + dj2
+                        if 0 <= nj1 < C and 0 <= nj2 < C:
+                            mx = max(mx, dp[nj1][nj2])
+                
+                res = grid[i][j1] + (grid[i][j2] if j1 != j2 else 0)
+                curr[j1][j2] = res + mx
+        dp = curr
+        
+    return dp[0][C-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "subset-sum-equal-to-k",
     title: "Subset Sum Equal to K",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Subset Sum Equal to K. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Given an array of non-negative integers and a target $K$, find if there exists a subsequence whose sum is exactly $K$.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1",
+    useCases: [
+      "Resource allocation with fixed capacity",
+      "Decision problems in combinatorics",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Subset Sum Equal to K.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_subset_sum_equal_to_k(*args):
-    # Optimized Subset Sum Equal to K Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_subset_sum_equal_to_k(...args) {
-    // Optimal Subset Sum Equal to K Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_subset_sum_equal_to_k() {
-        // Logic for Subset Sum Equal to K
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_subset_sum_equal_to_k() {
-    // High-performance Subset Sum Equal to K routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nFor each element, we either 'take' it or 'leave' it.\n`dp[target] = dp[target] or dp[target - arr[i]]`.\nBy iterating backwards through the target array, we can solve this in $O(K)$ space.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K)$\n- **Space**: $O(K)$",
+        timeComplexity: "O(N * K)",
+        timeComplexityExplanation: "Process each element for every possible target sum up to $K$.",
+        spaceComplexity: "O(K)",
+        spaceComplexityExplanation: "Storing only the current target state boolean array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def isSubsetSum(arr, k):
+    n = len(arr)
+    dp = [False] * (k + 1)
+    dp[0] = True
+    
+    # Pre-check first element
+    if arr[0] <= k: dp[arr[0]] = True
+    
+    for i in range(1, n):
+        curr = [False] * (k + 1)
+        curr[0] = True
+        for target in range(1, k + 1):
+            not_take = dp[target]
+            take = dp[target - arr[i]] if target >= arr[i] else False
+            curr[target] = take or not_take
+        dp = curr
+    return dp[k]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "partition-equal-subset-sum",
     title: "Partition Equal Subset Sum",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Partition Equal Subset Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Check if an array can be partitioned into two subsets such that the sum of elements in both subsets is equal.",
+    leetcodeLink: "https://leetcode.com/problems/partition-equal-subset-sum/",
+    useCases: [
+      "Fair resource division",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Partition Equal Subset Sum.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_partition_equal_subset_sum(*args):
-    # Optimized Partition Equal Subset Sum Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_partition_equal_subset_sum(...args) {
-    // Optimal Partition Equal Subset Sum Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_partition_equal_subset_sum() {
-        // Logic for Partition Equal Subset Sum
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_partition_equal_subset_sum() {
-    // High-performance Partition Equal Subset Sum routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Subset Sum Variant",
+        description:
+          "### 🧠 Core Intuition\nIf the total sum is odd, it's impossible. If even, the problem reduces to finding if a subset exists with `sum = totalSum // 2`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot \text{Sum})$\n- **Space**: $O(\text{Sum})$",
+        timeComplexity: "O(N * Sum)",
+        timeComplexityExplanation: "Iterate through array and half of total sum.",
+        spaceComplexity: "O(Sum)",
+        spaceComplexityExplanation: "Boolean DP array of size Sum/2.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def canPartition(nums):
+    total = sum(nums)
+    if total % 2 != 0: return False
+    target = total // 2
+    
+    dp = [False] * (target + 1)
+    dp[0] = True
+    for x in nums:
+        for t in range(target, x - 1, -1):
+            dp[t] = dp[t] or dp[t-x]
+    return dp[target]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "partition-a-set-into-two-subsets-with-minimum-absolute-sum-difference",
-    title: "Partition a set into two subsets with minimum absolute sum difference",
+    title: "Min Subset Sum Difference",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Partition a set into two subsets with minimum absolute sum difference. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Partition an array into two subsets such that the absolute difference of their sums is minimized.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/minimum-sum-partition3317/1",
+    useCases: [
+      "Load balancing in parallel computing",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Partition a set into two subsets with minimum absolute sum difference.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_partition_a_set_into_two_subsets_with_minimum_absolute_sum_difference(*args):
-    # Optimized Partition a set into two subsets with minimum absolute sum difference Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_partition_a_set_into_two_subsets_with_minimum_absolute_sum_difference(...args) {
-    // Optimal Partition a set into two subsets with minimum absolute sum difference Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_partition_a_set_into_two_subsets_with_minimum_absolute_sum_difference() {
-        // Logic for Partition a set into two subsets with minimum absolute sum difference
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_partition_a_set_into_two_subsets_with_minimum_absolute_sum_difference() {
-    // High-performance Partition a set into two subsets with minimum absolute sum difference routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP Tabulation Analysis",
+        description:
+          "### 🧠 Core Intuition\n1. Find all possible subset sums using the Subset Sum DP ($dp[n-1][0 \dots \text{totalSum}]$).\n2. The last row of the DP table gives us which sums are achievable.\n3. Iterate through achievable sums $s$: `min_diff = min(min_diff, abs(totalSum - 2*s))`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot \text{totalSum})$\n- **Space**: $O(\text{totalSum})$",
+        timeComplexity: "O(N * totalSum)",
+        timeComplexityExplanation: "Standard subset sum complexity.",
+        spaceComplexity: "O(totalSum)",
+        spaceComplexityExplanation: "Storing boolean state for each possible sum.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minDifference(arr, n):
+    total = sum(arr)
+    dp = [False] * (total + 1)
+    dp[0] = True
+    for x in arr:
+        for t in range(total, x - 1, -1):
+            dp[t] = dp[t] or dp[t-x]
+            
+    min_diff = total
+    for s in range(total // 2 + 1):
+        if dp[s]:
+            min_diff = min(min_diff, abs(total - 2*s))
+    return min_diff`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "count-subsets-with-sum-k",
     title: "Count Subsets with Sum K",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count Subsets with Sum K. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Count the total number of subsequences from an array that sum up to exactly $K$. Be careful with zeroes in the array.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/perfect-sum-problem5633/1",
+    useCases: [
+      "Probability calculations in discrete math",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count Subsets with Sum K.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_count_subsets_with_sum_k(*args):
-    # Optimized Count Subsets with Sum K Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_count_subsets_with_sum_k(...args) {
-    // Optimal Count Subsets with Sum K Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_count_subsets_with_sum_k() {
-        // Logic for Count Subsets with Sum K
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_count_subsets_with_sum_k() {
-    // High-performance Count Subsets with Sum K routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nThis is the counting version of Subset Sum. \n`dp[target] = dp[target] + dp[target - arr[i]]`.\n**Note**: If the array has zeroes, the number of ways is doubled for each zero (taken or not taken).\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K)$\n- **Space**: $O(K)$",
+        timeComplexity: "O(N * K)",
+        timeComplexityExplanation: "Nested loops for items and sum range.",
+        spaceComplexity: "O(K)",
+        spaceComplexityExplanation: "Storing subset counts for every possible sum.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findWays(arr, k):
+    n = len(arr)
+    dp = [0] * (k + 1)
+    dp[0] = 1 # 1 way to make sum 0 (empty subset)
+    
+    for x in arr:
+        for t in range(k, x - 1, -1):
+            dp[t] = (dp[t] + dp[t-x]) % (10**9 + 7)
+    return dp[k]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "count-partitions-with-given-difference",
-    title: "Count Partitions with Given Difference",
+    title: "Count Partitions with Difference D",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Count Partitions with Given Difference. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Partition an array into two subsets ($S_1, S_2$) such that $S_1 - S_2 = D$. Count the number of such partitions.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/partitions-with-given-difference/1",
+    useCases: [
+      "Target optimization in balanced partitions",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Count Partitions with Given Difference.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_count_partitions_with_given_difference(*args):
-    # Optimized Count Partitions with Given Difference Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_count_partitions_with_given_difference(...args) {
-    // Optimal Count Partitions with Given Difference Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_count_partitions_with_given_difference() {
-        // Logic for Count Partitions with Given Difference
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_count_partitions_with_given_difference() {
-    // High-performance Count Partitions with Given Difference routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Reduction to Subset Sum",
+        description:
+          "### 🧠 Core Intuition\n$S_1 - S_2 = D$ and $S_1 + S_2 = \text{totalSum}$.\nAdding equations: $2S_1 = \text{totalSum} + D \implies S_1 = (\text{totalSum} + D) // 2$.\nProblem reduces to counting subsets with sum $S_1$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot \text{totalSum})$\n- **Space**: $O(\text{totalSum})$",
+        timeComplexity: "O(N * totalSum)",
+        timeComplexityExplanation: "Solving subset sum for the derived target.",
+        spaceComplexity: "O(totalSum)",
+        spaceComplexityExplanation: "DP array to count subsets.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def countPartitions(n, d, arr):
+    total = sum(arr)
+    if (total + d) % 2 != 0 or total < d: return 0
+    target = (total + d) // 2
+    
+    dp = [0] * (target + 1)
+    dp[0] = 1
+    for x in arr:
+        for t in range(target, x - 1, -1):
+            dp[t] = (dp[t] + dp[t-x]) % (10**9 + 7)
+    return dp[target]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "0-1-knapsack",
     title: "0/1 Knapsack",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of 0/1 Knapsack. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A thief has a knapsack that can carry a max weight $W$. Given weights and values of $N$ items, maximize the total value such that the weight sum $\le W$. Each item can be picked at most once.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1",
+    useCases: [
+      "Budget constrained resource allocation",
+      "Cargo loading optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of 0/1 Knapsack.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_0_1_knapsack(*args):
-    # Optimized 0/1 Knapsack Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_0_1_knapsack(...args) {
-    // Optimal 0/1 Knapsack Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_0_1_knapsack() {
-        // Logic for 0/1 Knapsack
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_0_1_knapsack() {
-    // High-performance 0/1 Knapsack routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nFor each item, maximize value by deciding to take it or not.\n`dp[w] = max(val[i] + dp[w - weight[i]], dp[w])`.\nBy iterating backwards through weight $W$, we only need a single row of space.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot W)$\n- **Space**: $O(W)$",
+        timeComplexity: "O(N * W)",
+        timeComplexityExplanation: "Nested loops for items and capacity.",
+        spaceComplexity: "O(W)",
+        spaceComplexityExplanation: "Single array of size $W$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def knapSack(W, wt, val, n):
+    dp = [0] * (W + 1)
+    for i in range(n):
+        for w in range(W, wt[i] - 1, -1):
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])
+    return dp[W]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-coins",
-    title: "Minimum Coins",
+    title: "Minimum Coins (Coin Change)",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum Coins. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum number of coins needed to make a total sum $T$, given an infinite supply of each coin type. If impossible, return -1.",
+    leetcodeLink: "https://leetcode.com/problems/coin-change/",
+    useCases: [
+      "Currency exchange systems",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum Coins.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_coins(*args):
-    # Optimized Minimum Coins Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_coins(...args) {
-    // Optimal Minimum Coins Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_coins() {
-        // Logic for Minimum Coins
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_coins() {
-    // High-performance Minimum Coins routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nSince we have infinite supply, for each coin, we can pick it multiple times. \n`dp[target] = min(dp[target], 1 + dp[target - coin])`.\nIteration through targets should be forward to allow reuse of the same coin.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot T)$\n- **Space**: $O(T)$",
+        timeComplexity: "O(N * T)",
+        timeComplexityExplanation: "Nested loops for coins and sum $T$.",
+        spaceComplexity: "O(T)",
+        spaceComplexityExplanation: "1D DP array of target sums.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def coinChange(coins, amount):
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+    for coin in coins:
+        for t in range(coin, amount + 1):
+            dp[t] = min(dp[t], 1 + dp[t - coin])
+    return dp[amount] if dp[amount] != float('inf') else -1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "target-sum",
     title: "Target Sum",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Target Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Assign '+' or '-' sign to every integer in an array to make their sum equal to `target`. Find the total number of ways.",
+    leetcodeLink: "https://leetcode.com/problems/target-sum/",
+    useCases: [
+      "Subset partitioning with sign toggles",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Target Sum.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_target_sum(*args):
-    # Optimized Target Sum Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_target_sum(...args) {
-    // Optimal Target Sum Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_target_sum() {
-        // Logic for Target Sum
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_target_sum() {
-    // High-performance Target Sum routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Reduction to Count Partitions",
+        description:
+          "### 🧠 Core Intuition\nLet elements with '+' be $S_1$ and elements with '-' be $S_2$.\n$S_1 - S_2 = \text{target}$. This is identical to 'Count Partitions with Difference D'.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot \text{totalSum})$\n- **Space**: $O(\text{totalSum})$",
+        timeComplexity: "O(N * totalSum)",
+        timeComplexityExplanation: "Standard subset counting complexity.",
+        spaceComplexity: "O(totalSum)",
+        spaceComplexityExplanation: "DP array to count ways.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findTargetSumWays(nums, target):
+    total = sum(nums)
+    if (total + target) % 2 != 0 or total < abs(target): return 0
+    t = (total + target) // 2
+    
+    dp = [0] * (t + 1)
+    dp[0] = 1
+    for x in nums:
+        for j in range(t, x - 1, -1):
+            dp[j] += dp[j - x]
+    return dp[t]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "coin-change-2",
-    title: "Coin Change 2",
+    title: "Coin Change 2 (Ways)",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Coin Change 2. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Count the total number of ways to make progress sum $T$ using infinite supply of coins.",
+    leetcodeLink: "https://leetcode.com/problems/coin-change-ii/",
+    useCases: [
+      "Counting combinations with repetition",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Coin Change 2.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_coin_change_2(*args):
-    # Optimized Coin Change 2 Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_coin_change_2(...args) {
-    // Optimal Coin Change 2 Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_coin_change_2() {
-        // Logic for Coin Change 2
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_coin_change_2() {
-    // High-performance Coin Change 2 routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nSame as Minimum Coins, but instead of `min`, we sum the possibilities.\n`dp[target] = dp[target] + dp[target - coin]`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot T)$\n- **Space**: $O(T)$",
+        timeComplexity: "O(N * T)",
+        timeComplexityExplanation: "Nested loops for coins and total sum.",
+        spaceComplexity: "O(T)",
+        spaceComplexityExplanation: "1D DP array of target counts.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def change(amount, coins):
+    dp = [0] * (amount + 1)
+    dp[0] = 1
+    for coin in coins:
+        for t in range(coin, amount + 1):
+            dp[t] += dp[t - coin]
+    return dp[amount]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "unbounded-knapsack",
     title: "Unbounded Knapsack",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Unbounded Knapsack. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Similar to 0/1 Knapsack, but each item is available in infinite supply. Maximize total value for capacity $W$.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/unbounded-knapsack4819/1",
+    useCases: [
+      "Stock replenishment for items with unlimited supply",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Unbounded Knapsack.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_unbounded_knapsack(*args):
-    # Optimized Unbounded Knapsack Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_unbounded_knapsack(...args) {
-    // Optimal Unbounded Knapsack Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_unbounded_knapsack() {
-        // Logic for Unbounded Knapsack
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_unbounded_knapsack() {
-    // High-performance Unbounded Knapsack routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Iterative DP",
+        description:
+          "### 🧠 Core Intuition\nBy iterating forwards through the weight capacity, we automatically account for the possibility of picking the same item multiple times.\n`dp[w] = max(dp[w], val[i] + dp[w - wt[i]])`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot W)$\n- **Space**: $O(W)$",
+        timeComplexity: "O(N * W)",
+        timeComplexityExplanation: "Standard item/capacity nested loop.",
+        spaceComplexity: "O(W)",
+        spaceComplexityExplanation: "1D array for capacities.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def knapSack(N, W, val, wt):
+    dp = [0] * (W + 1)
+    for i in range(N):
+        for w in range(wt[i], W + 1):
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])
+    return dp[W]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "rod-cutting-problem",
     title: "Rod Cutting Problem",
     topic: "Dynamic Programming - Subsequences",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Rod Cutting Problem. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Cut a rod of length $N$ into smaller pieces such that the total price obtained is maximized. Each length has an associated price.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/rod-cutting0840/1",
+    useCases: [
+      "Revenue maximization for segmented sales",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Rod Cutting Problem.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_rod_cutting_problem(*args):
-    # Optimized Rod Cutting Problem Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_rod_cutting_problem(...args) {
-    // Optimal Rod Cutting Problem Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_rod_cutting_problem() {
-        // Logic for Rod Cutting Problem
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_rod_cutting_problem() {
-    // High-performance Rod Cutting Problem routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Reduction to Unbounded Knapsack",
+        description:
+          "### 🧠 Core Intuition\nThis is identical to Unbounded Knapsack where:\n1. Weight of item $i$ = length $(i+1)$.\n2. Value of item $i$ = price of length $(i+1)$.\n3. Capacity $W$ = length of the rod $N$.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Two loops of size $N$.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "1D DP array of size $N+1$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def cutRod(price, n):
+    dp = [0] * (n + 1)
+    for i in range(n):
+        wt = i + 1
+        val = price[i]
+        for w in range(wt, n + 1):
+            dp[w] = max(dp[w], val + dp[w - wt])
+    return dp[n]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-common-subsequence",
     title: "Longest Common Subsequence",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Common Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the length of the longest subsequence present in both strings $S_1$ and $S_2$.",
+    leetcodeLink: "https://leetcode.com/problems/longest-common-subsequence/",
+    useCases: [
+      "File comparison (diff)",
+      "Bioinformatics sequence alignment",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Common Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_common_subsequence(*args):
-    # Optimized Longest Common Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_common_subsequence(...args) {
-    // Optimal Longest Common Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_common_subsequence() {
-        // Logic for Longest Common Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_common_subsequence() {
-    // High-performance Longest Common Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "2D DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nIf $S_1[i] == S_2[j]$, then `LCS[i][j] = 1 + LCS[i-1][j-1]`.\nOtherwise, `LCS[i][j] = max(LCS[i-1][j], LCS[i][j-1])`.\nCan be optimized to $O(N)$ space using two rows.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Nested loops for lengths of both strings.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "Storing only two rows of length $M$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def longestCommonSubsequence(text1, text2):
+    m, n = len(text1), len(text2)
+    prev = [0] * (n + 1)
+    for i in range(1, m + 1):
+        curr = [0] * (n + 1)
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                curr[j] = 1 + prev[j-1]
+            else:
+                curr[j] = max(prev[j], curr[j-1])
+        prev = curr
+    return prev[n]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "print-longest-common-subsequence",
     title: "Print Longest Common Subsequence",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Print Longest Common Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Instead of just the length, extract and return the actual LCS string using the DP table.",
+    leetcodeLink: "https://www.geeksforgeeks.org/printing-longest-common-subsequence/",
+    useCases: [
+      "Visualizing differences between strings",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print Longest Common Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_print_longest_common_subsequence(*args):
-    # Optimized Print Longest Common Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_print_longest_common_subsequence(...args) {
-    // Optimal Print Longest Common Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_print_longest_common_subsequence() {
-        // Logic for Print Longest Common Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_print_longest_common_subsequence() {
-    // High-performance Print Longest Common Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP Table Backtracking",
+        description:
+          "### 🧠 Core Intuition\n1. Generate the full $O(N \cdot M)$ DP table.\n2. Start from cell $(N, M)$.\n3. If $S_1[i-1] == S_2[j-1]$, add the char to result and move to $(i-1, j-1)$.\n4. Else, move towards the larger value: either $(i-1, j)$ or $(i, j-1)$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(N \cdot M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Time for table generation and backtracking.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Requires full DP matrix for backtracking.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def printLCS(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1]
+            else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+            
+    res = []
+    i, j = m, n
+    while i > 0 and j > 0:
+        if s1[i-1] == s2[j-1]:
+            res.append(s1[i-1])
+            i -= 1; j -= 1
+        elif dp[i-1][j] > dp[i][j-1]: i -= 1
+        else: j -= 1
+    return "".join(reversed(res))`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-common-substring",
     title: "Longest Common Substring",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Common Substring. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the length of the longest string which is a substring (must be contiguous) of both $S_1$ and $S_2$.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/longest-common-substring1452/1",
+    useCases: [
+      "Plagiarism detection",
+      "Finding common sequences in genetic data",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Common Substring.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_common_substring(*args):
-    # Optimized Longest Common Substring Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_common_substring(...args) {
-    // Optimal Longest Common Substring Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_common_substring() {
-        // Logic for Longest Common Substring
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_common_substring() {
-    // High-performance Longest Common Substring routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nIf $S_1[i] == S_2[j]$, then `dp[j] = 1 + prev[j-1]`.\nOtherwise, `dp[j] = 0` (since it must be contiguous). \nTrack `max_val` globally during the loops.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Nested loops over both string lengths.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "Using one current and one previous row.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def longestCommonSubstring(s1, s2):
+    m, n = len(s1), len(s2)
+    prev = [0] * (n + 1)
+    max_len = 0
+    for i in range(1, m + 1):
+        curr = [0] * (n + 1)
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]:
+                curr[j] = 1 + prev[j-1]
+                max_len = max(max_len, curr[j])
+            else:
+                curr[j] = 0
+        prev = curr
+    return max_len`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-palindromic-subsequence",
     title: "Longest Palindromic Subsequence",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Palindromic Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the length of the longest subsequence in a string that reads the same forwards and backwards.",
+    leetcodeLink: "https://leetcode.com/problems/longest-palindromic-subsequence/",
+    useCases: [
+      "Genomic sequence research",
+      "Parsing palindrome patterns",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Palindromic Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_palindromic_subsequence(*args):
-    # Optimized Longest Palindromic Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_palindromic_subsequence(...args) {
-    // Optimal Longest Palindromic Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_palindromic_subsequence() {
-        // Logic for Longest Palindromic Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_palindromic_subsequence() {
-    // High-performance Longest Palindromic Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "LCS Reduction",
+        description:
+          "### 🧠 Core Intuition\n**LPS of String $S$** is equivalent to **LCS of $S$ and Reverse($S$)**.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Solving LCS for two strings of length $N$.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Optimized LCS space.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def longestPalindromeSubseq(s):
+    def lcs(s1, s2):
+        n = len(s1)
+        prev = [0] * (n + 1)
+        for i in range(1, n + 1):
+            curr = [0] * (n + 1)
+            for j in range(1, n + 1):
+                if s1[i-1] == s2[j-1]: curr[j] = 1 + prev[j-1]
+                else: curr[j] = max(prev[j], curr[j-1])
+            prev = curr
+        return prev[n]
+    
+    return lcs(s, s[::-1])`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-insertions-to-make-string-palindrome",
-    title: "Minimum insertions to make string palindrome",
+    title: "Min Insertions for Palindrome",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum insertions to make string palindrome. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum number of character insertions needed to convert a string into a palindrome.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/",
+    useCases: [
+      "String symmetry optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum insertions to make string palindrome.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_insertions_to_make_string_palindrome(*args):
-    # Optimized Minimum insertions to make string palindrome Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_insertions_to_make_string_palindrome(...args) {
-    // Optimal Minimum insertions to make string palindrome Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_insertions_to_make_string_palindrome() {
-        // Logic for Minimum insertions to make string palindrome
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_insertions_to_make_string_palindrome() {
-    // High-performance Minimum insertions to make string palindrome routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "LPS Reduction",
+        description:
+          "### 🧠 Core Intuition\nKeep the characters of the **Longest Palindromic Subsequence (LPS)** as they are. Insert duplicates for the remaining characters to form a palindrome.\n**Result**: `len(S) - LPS(S)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Solving for the LPS of length $N$.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "1D DP array of size $N+1$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minInsertions(s):
+    n = len(s)
+    s2 = s[::-1]
+    prev = [0] * (n + 1)
+    for i in range(1, n + 1):
+        curr = [0] * (n + 1)
+        for j in range(1, n + 1):
+            if s[i-1] == s2[j-1]: curr[j] = 1 + prev[j-1]
+            else: curr[j] = max(prev[j], curr[j-1])
+        prev = curr
+    return n - prev[n]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-insertions-deletions-to-convert-string-a-to-string-b",
-    title: "Minimum insertions/deletions to convert String A to String B",
+    title: "Min Operations to Convert A to B",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum insertions/deletions to convert String A to String B. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the minimum total insertions and deletions needed to transform string $A$ into string $B$.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/minimum-number-of-deletions-and-insertions0209/1",
+    useCases: [
+      "Text editing reconciliation",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum insertions/deletions to convert String A to String B.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_insertions_deletions_to_convert_string_a_to_string_b(*args):
-    # Optimized Minimum insertions/deletions to convert String A to String B Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_insertions_deletions_to_convert_string_a_to_string_b(...args) {
-    // Optimal Minimum insertions/deletions to convert String A to String B Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_insertions_deletions_to_convert_string_a_to_string_b() {
-        // Logic for Minimum insertions/deletions to convert String A to String B
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_insertions_deletions_to_convert_string_a_to_string_b() {
-    // High-performance Minimum insertions/deletions to convert String A to String B routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "LCS Reduction",
+        description:
+          "### 🧠 Core Intuition\nTo minimize operations, find the **Longest Common Subsequence (LCS)** that both strings share. \n1. Deletions = `len(A) - LCS(A, B)`.\n2. Insertions = `len(B) - LCS(A, B)`.\n**Result** = `(len(A) + len(B)) - 2 * LCS(A, B)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Computing LCS for strings of length $N$ and $M$.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "Optimized LCS state storage.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minDistance(s1, s2):
+    m, n = len(s1), len(s2)
+    prev = [0] * (n + 1)
+    for i in range(1, m + 1):
+        curr = [0] * (n + 1)
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]: curr[j] = 1 + prev[j-1]
+            else: curr[j] = max(prev[j], curr[j-1])
+        prev = curr
+    lcs = prev[n]
+    return (m + n) - (2 * lcs)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "shortest-common-supersequence",
     title: "Shortest Common Supersequence",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Shortest Common Supersequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the shortest string that contains both $S_1$ and $S_2$ as subsequences.",
+    leetcodeLink: "https://leetcode.com/problems/shortest-common-supersequence/",
+    useCases: [
+      "Merging data streams with commonality",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Shortest Common Supersequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_shortest_common_supersequence(*args):
-    # Optimized Shortest Common Supersequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_shortest_common_supersequence(...args) {
-    // Optimal Shortest Common Supersequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_shortest_common_supersequence() {
-        // Logic for Shortest Common Supersequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_shortest_common_supersequence() {
-    // High-performance Shortest Common Supersequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "LCS Backtracking",
+        description:
+          "### 🧠 Core Intuition\nThe length of SCS is `(len(A) + len(B)) - LCS(A, B)`. To build it:\n1. Use the LCS DP table.\n2. Start from $(N, M)$.\n3. If $S_1[i-1] == S_2[j-1]$, add the char once and move diagonal.\n4. Else, add the char corresponding to the larger DP value move.",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Standard LCS complexity for table and backtrack.",
+        spaceComplexity: "O(N * M)",
+        spaceComplexityExplanation: "Requires full DP matrix for reconstruction.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def shortestCommonSupersequence(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1]
+            else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+            
+    res = []
+    i, j = m, n
+    while i > 0 and j > 0:
+        if s1[i-1] == s2[j-1]:
+            res.append(s1[i-1]); i -= 1; j -= 1
+        elif dp[i-1][j] > dp[i][j-1]:
+            res.append(s1[i-1]); i -= 1
+        else:
+            res.append(s2[j-1]); j -= 1
+    while i > 0: res.append(s1[i-1]); i -= 1
+    while j > 0: res.append(s2[j-1]); j -= 1
+    return "".join(reversed(res))`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "distinct-subsequences",
     title: "Distinct Subsequences",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Distinct Subsequences. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Count how many distinct subsequences of string $S$ are equal to string $T$.",
+    leetcodeLink: "https://leetcode.com/problems/distinct-subsequences/",
+    useCases: [
+      "Sub-pattern counting in long sequences",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Distinct Subsequences.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_distinct_subsequences(*args):
-    # Optimized Distinct Subsequences Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_distinct_subsequences(...args) {
-    // Optimal Distinct Subsequences Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_distinct_subsequences() {
-        // Logic for Distinct Subsequences
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_distinct_subsequences() {
-    // High-performance Distinct Subsequences routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\n1. If $S[i-1] == T[j-1]$, we can either use it: `dp[i-1][j-1]` or ignore it: `dp[i-1][j]`.\n2. Otherwise, we must ignore it: `dp[i-1][j]`.\nCan be space optimized to $O(M)$ by iterating backwards.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Nested loops over strings $S$ and $T$.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "1D DP array of target string length.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def numDistinct(s, t):
+    n, m = len(s), len(t)
+    dp = [0] * (m + 1)
+    dp[0] = 1 # 1 empty subsequence for empty target
+    
+    for i in range(1, n + 1):
+        for j in range(m, 0, -1):
+            if s[i-1] == t[j-1]:
+                dp[j] = dp[j] + dp[j-1]
+    return dp[m]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "edit-distance",
-    title: "Edit Distance",
+    title: "Edit Distance (Levenshtein)",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Edit Distance. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the minimum number of operations (insert, delete, replace) required to convert string $S_1$ to $S_2$.",
+    leetcodeLink: "https://leetcode.com/problems/edit-distance/",
+    useCases: [
+      "Spell check and autocorrect",
+      "Natural Language Processing similarity",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Edit Distance.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_edit_distance(*args):
-    # Optimized Edit Distance Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_edit_distance(...args) {
-    // Optimal Edit Distance Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_edit_distance() {
-        // Logic for Edit Distance
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_edit_distance() {
-    // High-performance Edit Distance routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "2D DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\n1. If $S_1[i-1] == S_2[j-1]$, no operation needed: `dp[i][j] = dp[i-1][j-1]`.\n2. Otherwise, `dp[i][j] = 1 + min(insert, delete, replace)`.\n- **Insert**: `dp[i][j-1]`\n- **Delete**: `dp[i-1][j]`\n- **Replace**: `dp[i-1][j-1]`\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Nested loops for lengths $N$ and $M$.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "Optimized to two rows of size $M$.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minDistance(s1, s2):
+    m, n = len(s1), len(s2)
+    prev = list(range(n + 1))
+    for i in range(1, m + 1):
+        curr = [0] * (n + 1)
+        curr[0] = i # Base Case: converting A[0...i] to empty B
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]:
+                curr[j] = prev[j-1]
+            else:
+                curr[j] = 1 + min(curr[j-1], prev[j], prev[j-1])
+        prev = curr
+    return prev[n]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "wildcard-matching",
     title: "Wildcard Matching",
     topic: "Dynamic Programming - Strings",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Wildcard Matching. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Check if string $S$ matches pattern $P$ containing wildcards '?' (matches any single char) and '*' (matches zero or more of any sequence).",
+    leetcodeLink: "https://leetcode.com/problems/wildcard-matching/",
+    useCases: [
+      "File system globbing",
+      "Regex-lite patterns",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Wildcard Matching.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_wildcard_matching(*args):
-    # Optimized Wildcard Matching Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_wildcard_matching(...args) {
-    // Optimal Wildcard Matching Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_wildcard_matching() {
-        // Logic for Wildcard Matching
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_wildcard_matching() {
-    // High-performance Wildcard Matching routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\n1. If $P[j] == S[i]$ or $P[j] == '?': dp[i][j] = dp[i-1][j-1]$.\n2. If $P[j] == '*': dp[i][j] = dp[i-1][j]$ (use *) OR $dp[i][j-1]$ (ignore *).\n3. Otherwise: $False$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot M)$\n- **Space**: $O(M)$",
+        timeComplexity: "O(N * M)",
+        timeComplexityExplanation: "Solving for all $(N+1)(M+1)$ states.",
+        spaceComplexity: "O(M)",
+        spaceComplexityExplanation: "One row of pattern state.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def isMatch(s, p):
+    n, m = len(s), len(p)
+    prev = [False] * (m + 1)
+    prev[0] = True # Base Case
+    for j in range(1, m + 1):
+        if p[j-1] == '*': prev[j] = prev[j-1]
+        else: break
+        
+    for i in range(1, n + 1):
+        curr = [False] * (m + 1)
+        for j in range(1, m + 1):
+            if s[i-1] == p[j-1] or p[j-1] == '?':
+                curr[j] = prev[j-1]
+            elif p[j-1] == '*':
+                curr[j] = prev[j] or curr[j-1]
+        prev = curr
+    return prev[m]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock",
     title: "Best Time to Buy and Sell Stock",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Easy",
+    overview:
+      "Given stock prices for $N$ days, find the maximum profit you can achieve by buying on one day and selling on a future day.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+    useCases: [
+      "Simple profit maximization",
+      "Finding global minimum and subsequent maximum",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock(*args):
-    # Optimized Best Time to Buy and Sell Stock Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock(...args) {
-    // Optimal Best Time to Buy and Sell Stock Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock() {
-        // Logic for Best Time to Buy and Sell Stock
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock() {
-    // High-performance Best Time to Buy and Sell Stock routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "One Pass Greedy",
+        description:
+          "### 🧠 Core Intuition\nTrack the minimum price seen so far. For each new price, calculate the potential profit if sold today and update the maximum profit.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single traversal through the price array.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only tracking two variables: minPrice and maxProfit.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(prices):
+    min_price = float('inf')
+    max_profit = 0
+    for p in prices:
+        min_price = min(min_price, p)
+        max_profit = max(max_profit, p - min_price)
+    return max_profit`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock-ii",
     title: "Best Time to Buy and Sell Stock II",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Maximize total profit by buying and selling stocks as many times as you want. You must sell before you can buy again.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
+    useCases: [
+      "Capturing every upward price movement",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock II.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock_ii(*args):
-    # Optimized Best Time to Buy and Sell Stock II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock_ii(...args) {
-    // Optimal Best Time to Buy and Sell Stock II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock_ii() {
-        // Logic for Best Time to Buy and Sell Stock II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock_ii() {
-    // High-performance Best Time to Buy and Sell Stock II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Peak-Valley / Greedy",
+        description:
+          "### 🧠 Core Intuition\nWhenever the price today is higher than yesterday, capture that profit. Total profit is the sum of all positive price differences.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single linear scan of prices.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "No extra memory required.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(prices):
+    profit = 0
+    for i in range(1, len(prices)):
+        if prices[i] > prices[i-1]:
+            profit += prices[i] - prices[i-1]
+    return profit`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock-iii",
     title: "Best Time to Buy and Sell Stock III",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock III. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Maximize total profit with at most **two transactions**. You must sell before you buy again.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/",
+    useCases: [
+      "Constrained transaction frequency optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock III.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock_iii(*args):
-    # Optimized Best Time to Buy and Sell Stock III Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock_iii(...args) {
-    // Optimal Best Time to Buy and Sell Stock III Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock_iii() {
-        // Logic for Best Time to Buy and Sell Stock III
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock_iii() {
-    // High-performance Best Time to Buy and Sell Stock III routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with State Machine",
+        description:
+          "### 🧠 Core Intuition\nTrack four states: \n1. First Buy (min cost)\n2. First Sell (max profit)\n3. Second Buy (min net cost after first profit)\n4. Second Sell (max final profit)\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single pass updates the four state variables.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Constant space for the state tracking.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(prices):
+    b1, s1 = float('inf'), 0
+    b2, s2 = float('inf'), 0
+    for p in prices:
+        b1 = min(b1, p)
+        s1 = max(s1, p - b1)
+        b2 = min(b2, p - s1)
+        s2 = max(s2, p - b2)
+    return s2`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock-iv",
     title: "Best Time to Buy and Sell Stock IV",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock IV. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Maximize total profit with at most **K transactions**.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/",
+    useCases: [
+      "Multi-transaction optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock IV.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock_iv(*args):
-    # Optimized Best Time to Buy and Sell Stock IV Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock_iv(...args) {
-    // Optimal Best Time to Buy and Sell Stock IV Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock_iv() {
-        // Logic for Best Time to Buy and Sell Stock IV
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock_iv() {
-    // High-performance Best Time to Buy and Sell Stock IV routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Space Optimization",
+        description:
+          "### 🧠 Core Intuition\nExtend the 2-transaction state machine to `k` transactions using two arrays: `buy[k]` and `sell[k]`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K)$\n- **Space**: $O(K)$",
+        timeComplexity: "O(N * K)",
+        timeComplexityExplanation: "For each price, update K states.",
+        spaceComplexity: "O(K)",
+        spaceComplexityExplanation: "Two arrays of size K+1 to store buy/sell states.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(k, prices):
+    if not prices: return 0
+    # Optimization if K is huge
+    if k >= len(prices) // 2:
+        return sum(max(0, prices[i] - prices[i-1]) for i in range(1, len(prices)))
+        
+    buy = [float('inf')] * (k + 1)
+    sell = [0] * (k + 1)
+    for p in prices:
+        for i in range(1, k + 1):
+            buy[i] = min(buy[i], p - sell[i-1])
+            sell[i] = max(sell[i], p - buy[i])
+    return sell[k]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock-with-cooldown",
-    title: "Best Time to Buy and Sell Stock with Cooldown",
+    title: "Stock with Cooldown",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock with Cooldown. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Maximize profit with infinite transactions, but after selling, you cannot buy for one day (cooldown).",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+    useCases: [
+      "Market behavior simulation with latency",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock with Cooldown.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock_with_cooldown(*args):
-    # Optimized Best Time to Buy and Sell Stock with Cooldown Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock_with_cooldown(...args) {
-    // Optimal Best Time to Buy and Sell Stock with Cooldown Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock_with_cooldown() {
-        // Logic for Best Time to Buy and Sell Stock with Cooldown
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock_with_cooldown() {
-    // High-performance Best Time to Buy and Sell Stock with Cooldown routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "State Machine DP",
+        description:
+          "### 🧠 Core Intuition\nThree states:\n1. **Held**: Buying or holding stock.\n2. **Sold**: Just sold today (initiates cooldown).\n3. **Reset**: Not holding, can buy next or stay reset.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Updating 3 states for each day's price.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Constant state variables.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(prices):
+    if not prices: return 0
+    # States: held (holding), sold (cooldown), reset (no stock)
+    held = -prices[0]
+    sold = reset = 0
+    for i in range(1, len(prices)):
+        prev_sold = sold
+        sold = held + prices[i]
+        held = max(held, reset - prices[i])
+        reset = max(reset, prev_sold)
+    return max(sold, reset)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "best-time-to-buy-and-sell-stock-with-transaction-fee",
-    title: "Best Time to Buy and Sell Stock with Transaction Fee",
+    title: "Stock with Transaction Fee",
     topic: "Dynamic Programming - Stocks",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Best Time to Buy and Sell Stock with Transaction Fee. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Maximize profit with infinite transactions, but each sell incurs a fixed transaction fee.",
+    leetcodeLink: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/",
+    useCases: [
+      "Real-world trading costs modeling",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Best Time to Buy and Sell Stock with Transaction Fee.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_best_time_to_buy_and_sell_stock_with_transaction_fee(*args):
-    # Optimized Best Time to Buy and Sell Stock with Transaction Fee Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_best_time_to_buy_and_sell_stock_with_transaction_fee(...args) {
-    // Optimal Best Time to Buy and Sell Stock with Transaction Fee Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_best_time_to_buy_and_sell_stock_with_transaction_fee() {
-        // Logic for Best Time to Buy and Sell Stock with Transaction Fee
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_best_time_to_buy_and_sell_stock_with_transaction_fee() {
-    // High-performance Best Time to Buy and Sell Stock with Transaction Fee routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with 2 States",
+        description:
+          "### 🧠 Core Intuition\nMaintain two states: \n1. **Held**: Maximum profit if we are currently holding a stock.\n2. **Cash**: Maximum profit if we are currently liquid.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Single linear pass updating two states.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "Only two state variables updated.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxProfit(prices, fee):
+    held = -prices[0]
+    cash = 0
+    for i in range(1, len(prices)):
+        cash = max(cash, held + prices[i] - fee)
+        held = max(held, cash - prices[i])
+    return cash`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-increasing-subsequence",
-    title: "Longest Increasing Subsequence",
+    title: "Longest Increasing Subsequence (LIS)",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Increasing Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Given an array of integers, find the length of the longest strictly increasing subsequence.",
+    leetcodeLink: "https://leetcode.com/problems/longest-increasing-subsequence/",
+    useCases: [
+      "Job scheduling",
+      "Sequence alignment in various fields",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Increasing Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_increasing_subsequence(*args):
-    # Optimized Longest Increasing Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_increasing_subsequence(...args) {
-    // Optimal Longest Increasing Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_increasing_subsequence() {
-        // Logic for Longest Increasing Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_increasing_subsequence() {
-    // High-performance Longest Increasing Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Binary Search (Optimized)",
+        description:
+          "### 🧠 Core Intuition\nMaintain a list `tails` where `tails[i]` is the smallest tail of all increasing subsequences of length `i+1`.\nFor each element $x$:\n- If $x$ is larger than all tails, append it.\n- Otherwise, find the smallest tail $\ge x$ and update it to $x$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \log N)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N log N)",
+        timeComplexityExplanation: "N elements processed with log N search each.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Storing tails array.",
+        implementations: [
+          {
+            language: "Python",
+            code: `import bisect
+
+def lengthOfLIS(nums):
+    tails = []
+    for x in nums:
+        idx = bisect.bisect_left(tails, x)
+        if idx == len(tails):
+            tails.append(x)
+        else:
+            tails[idx] = x
+    return len(tails)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "print-longest-increasing-subsequence",
-    title: "Print Longest Increasing Subsequence",
+    title: "Print LIS",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Print Longest Increasing Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Extract and return the actual Longest Increasing Subsequence string/array, not just its length.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/printing-longest-increasing-subsequence/1",
+    useCases: [
+      "Visualizing sequence trends",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Print Longest Increasing Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_print_longest_increasing_subsequence(*args):
-    # Optimized Print Longest Increasing Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_print_longest_increasing_subsequence(...args) {
-    // Optimal Print Longest Increasing Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_print_longest_increasing_subsequence() {
-        // Logic for Print Longest Increasing Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_print_longest_increasing_subsequence() {
-    // High-performance Print Longest Increasing Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Parent Tracking",
+        description:
+          "### 🧠 Core Intuition\nUse the $O(N^2)$ DP approach. Maintain an array `parent` where `parent[i]` stores the index of the element that preceded `nums[i]` in the LIS ending at `i`. Backtrack from the index with maximum LIS value.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Nested loops to build the LIS table.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Storing DP values and parent pointers.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def printLIS(nums):
+    n = len(nums)
+    dp = [1] * n
+    parent = [-1] * n
+    max_idx = 0
+    
+    for i in range(1, n):
+        for j in range(i):
+            if nums[i] > nums[j] and dp[i] < dp[j] + 1:
+                dp[i] = dp[j] + 1
+                parent[i] = j
+        if dp[i] > dp[max_idx]:
+            max_idx = i
+            
+    res = []
+    while max_idx != -1:
+        res.append(nums[max_idx])
+        max_idx = parent[max_idx]
+    return res[::-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "largest-divisible-subset",
     title: "Largest Divisible Subset",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Largest Divisible Subset. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the largest subset such that every pair of elements $(a, b)$ satisfies $a \pmod b = 0$ or $b \pmod a = 0$.",
+    leetcodeLink: "https://leetcode.com/problems/largest-divisible-subset/",
+    useCases: [
+      "Dependency resolution in modular arithmetic",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Largest Divisible Subset.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_largest_divisible_subset(*args):
-    # Optimized Largest Divisible Subset Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_largest_divisible_subset(...args) {
-    // Optimal Largest Divisible Subset Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_largest_divisible_subset() {
-        // Logic for Largest Divisible Subset
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_largest_divisible_subset() {
-    // High-performance Largest Divisible Subset routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Sort + LIS Variant",
+        description:
+          "### 🧠 Core Intuition\n1. Sort the numbers. \n2. Now, we only need to check if $nums[i] \pmod{nums[j]} == 0$ where $j < i$.\n3. This is precisely the LIS pattern.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Sorting takes $O(N \log N)$, DP takes $O(N^2)$.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "DP array and path tracking.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def largestDivisibleSubset(nums):
+    if not nums: return []
+    nums.sort()
+    n = len(nums)
+    dp = [1] * n
+    parent = [-1] * n
+    max_idx = 0
+    
+    for i in range(1, n):
+        for j in range(i):
+            if nums[i] % nums[j] == 0 and dp[i] < dp[j] + 1:
+                dp[i] = dp[j] + 1
+                parent[i] = j
+        if dp[i] > dp[max_idx]:
+            max_idx = i
+            
+    res = []
+    while max_idx != -1:
+        res.append(nums[max_idx])
+        max_idx = parent[max_idx]
+    return res[::-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-string-chain",
     title: "Longest String Chain",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest String Chain. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the longest sequence of words where each word follows the previous one by adding exactly one character.",
+    leetcodeLink: "https://leetcode.com/problems/longest-string-chain/",
+    useCases: [
+      "Word ladder variants",
+      "Evolutionary sequence modeling",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest String Chain.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_string_chain(*args):
-    # Optimized Longest String Chain Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_string_chain(...args) {
-    // Optimal Longest String Chain Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_string_chain() {
-        // Logic for Longest String Chain
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_string_chain() {
-    // High-performance Longest String Chain routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Sort + Hash Map DP",
+        description:
+          "### 🧠 Core Intuition\n1. Sort words by length.\n2. For each word, try deleting one character to see if the predecessor exists in the hash map.\n3. `dp[word] = 1 + max(dp[predecessor])`.\n\n### ⏱️ Complexity\n- **Time**: $O(N \log N + N \cdot L^2)$ where $L$ is max word length.\n- **Space**: $O(N \cdot L)$",
+        timeComplexity: "O(N * L^2)",
+        timeComplexityExplanation: "Process N words, delete L positions for each, string creation takes L.",
+        spaceComplexity: "O(N * L)",
+        spaceComplexityExplanation: "Dictionary storing profit for each word.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def longestStrChain(words):
+    words.sort(key=len)
+    dp = {}
+    max_chain = 0
+    for w in words:
+        dp[w] = 1
+        for i in range(len(w)):
+            pre = w[:i] + w[i+1:]
+            if pre in dp:
+                dp[w] = max(dp[w], dp[pre] + 1)
+        max_chain = max(max_chain, dp[w])
+    return max_chain`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-bitonic-subsequence",
     title: "Longest Bitonic Subsequence",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Bitonic Subsequence. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "A bitonic subsequence is a sequence that first increases then decreases. Find the longest such subsequence length.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/longest-bitonic-subsequence0824/1",
+    useCases: [
+      "Trend analysis (spike detection)",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Bitonic Subsequence.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_bitonic_subsequence(*args):
-    # Optimized Longest Bitonic Subsequence Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_bitonic_subsequence(...args) {
-    // Optimal Longest Bitonic Subsequence Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_bitonic_subsequence() {
-        // Logic for Longest Bitonic Subsequence
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_bitonic_subsequence() {
-    // High-performance Longest Bitonic Subsequence routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Bidirectional DP",
+        description:
+          "### 🧠 Core Intuition\n1. `dp1[i]`: Length of LIS ending at index `i` (left to right).\n2. `dp2[i]`: Length of LIS starting at index `i` (right to left).\n3. Result is `max(dp1[i] + dp2[i] - 1)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Two $O(N^2)$ LIS sweeps.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Two DP arrays of size N.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def LongestBitonicSequence(nums):
+    n = len(nums)
+    # LIS from left
+    dp1 = [1] * n
+    for i in range(n):
+        for prev in range(i):
+            if nums[i] > nums[prev]:
+                dp1[i] = max(dp1[i], 1 + dp1[prev])
+                
+    # LIS from right
+    dp2 = [1] * n
+    for i in range(n-1, -1, -1):
+        for prev in range(n-1, i, -1):
+            if nums[i] > nums[prev]:
+                dp2[i] = max(dp2[i], 1 + dp2[prev])
+                
+    max_len = 0
+    for i in range(n):
+        max_len = max(max_len, dp1[i] + dp2[i] - 1)
+    return max_len`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-longest-increasing-subsequences",
-    title: "Number of Longest Increasing Subsequences",
+    title: "Number of LIS",
     topic: "Dynamic Programming - LIS",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Longest Increasing Subsequences. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the total count of distinct subsequences that achieve the maximum length of LIS.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-longest-increasing-subsequence/",
+    useCases: [
+      "Path counting in directed graphs",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Longest Increasing Subsequences.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_longest_increasing_subsequences(*args):
-    # Optimized Number of Longest Increasing Subsequences Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_longest_increasing_subsequences(...args) {
-    // Optimal Number of Longest Increasing Subsequences Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_longest_increasing_subsequences() {
-        // Logic for Number of Longest Increasing Subsequences
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_longest_increasing_subsequences() {
-    // High-performance Number of Longest Increasing Subsequences routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "DP with Count Array",
+        description:
+          "### 🧠 Core Intuition\nMaintain two arrays:\n1. `dp[i]` for length of LIS ending at `i`.\n2. `count[i]` for the number of such LIS.\nIf `dp[i] == dp[j] + 1`, we add `count[j]` to `count[i]`. If `dp[i] < dp[j] + 1`, we reset `count[i] = count[j]`.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Nested loops over array indices.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Two arrays of size N.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findNumberOfLIS(nums):
+    n = len(nums)
+    dp = [1] * n
+    count = [1] * n
+    max_len = 1
+    
+    for i in range(1, n):
+        for j in range(i):
+            if nums[i] > nums[j]:
+                if dp[i] < dp[j] + 1:
+                    dp[i] = dp[j] + 1
+                    count[i] = count[j]
+                elif dp[i] == dp[j] + 1:
+                    count[i] += count[j]
+        max_len = max(max_len, dp[i])
+        
+    return sum(c for l, c in zip(dp, count) if l == max_len)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "matrix-chain-multiplication",
-    title: "Matrix Chain Multiplication",
+    title: "Matrix Chain Multiplication (MCM)",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Matrix Chain Multiplication. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the minimum number of scalar multiplications needed to multiply a chain of matrices.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/matrix-chain-multiplication0303/1",
+    useCases: [
+      "Query optimization in databases",
+      "Graphics computation chains",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Matrix Chain Multiplication.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_matrix_chain_multiplication(*args):
-    # Optimized Matrix Chain Multiplication Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_matrix_chain_multiplication(...args) {
-    // Optimal Matrix Chain Multiplication Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_matrix_chain_multiplication() {
-        // Logic for Matrix Chain Multiplication
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_matrix_chain_multiplication() {
-    // High-performance Matrix Chain Multiplication routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Optimal Partitioning DP",
+        description:
+          "### 🧠 Core Intuition\nSplit the chain $(i, j)$ into two parts $(i, k)$ and $(k+1, j)$. \n`dp[i][j] = min(dp[i][k] + dp[k+1][j] + arr[i-1]*arr[k]*arr[j])` for all $i \le k < j$.\n\n### ⏱️ Complexity\n- **Time**: $O(N^3)$\n- **Space**: $O(N^2)$",
+        timeComplexity: "O(N^3)",
+        timeComplexityExplanation: "Nested loops for length, start index, and partition point.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "2D table to store costs for all subarrays.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def matrixMultiplication(N, arr):
+    dp = [[0]*N for _ in range(N)]
+    for length in range(2, N):
+        for i in range(1, N - length + 1):
+            j = i + length - 1
+            dp[i][j] = float('inf')
+            for k in range(i, j):
+                cost = dp[i][k] + dp[k+1][j] + arr[i-1]*arr[k]*arr[j]
+                dp[i][j] = min(dp[i][j], cost)
+    return dp[1][N-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "minimum-cost-to-cut-the-stick",
-    title: "Minimum cost to cut the stick",
+    title: "Min Cost to Cut Stick",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Minimum cost to cut the stick. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "A stick of length $L$ has $M$ cutting positions. Each cut costs the length of the segment being cut. Find the minimum total cost.",
+    leetcodeLink: "https://leetcode.com/problems/minimum-cost-to-cut-a-stick/",
+    useCases: [
+      "Optimal material segmentation",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Minimum cost to cut the stick.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_minimum_cost_to_cut_the_stick(*args):
-    # Optimized Minimum cost to cut the stick Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_minimum_cost_to_cut_the_stick(...args) {
-    // Optimal Minimum cost to cut the stick Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_minimum_cost_to_cut_the_stick() {
-        // Logic for Minimum cost to cut the stick
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_minimum_cost_to_cut_the_stick() {
-    // High-performance Minimum cost to cut the stick routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "MCM-style Partitioning",
+        description:
+          "### 🧠 Core Intuition\nSimilar to MCM, sort the cuts and add $0$ and $L$ as boundary positions. Define `dp[i][j]` as the min cost to make all cuts between `cuts[i]` and `cuts[j]`.\n`dp[i][j] = (cuts[j+1] - cuts[i-1]) + min(dp[i][k-1] + dp[k+1][j])`.\n\n### ⏱️ Complexity\n- **Time**: $O(M^3)$ where $M$ is the number of cuts.\n- **Space**: $O(M^2)$",
+        timeComplexity: "O(M^3)",
+        timeComplexityExplanation: "Nested loops over cutting positions.",
+        spaceComplexity: "O(M^2)",
+        spaceComplexityExplanation: "Storage for all sub-interval costs.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minCost(n, cuts):
+    cuts.sort()
+    cuts = [0] + cuts + [n]
+    m = len(cuts)
+    dp = [[0]*m for _ in range(m)]
+    
+    for length in range(1, m - 1):
+        for i in range(1, m - length):
+            j = i + length - 1
+            res = float('inf')
+            for k in range(i, j + 1):
+                res = min(res, (cuts[j+1] - cuts[i-1]) + dp[i][k-1] + dp[k+1][j])
+            dp[i][j] = res
+    return dp[1][m-2]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "burst-balloons",
     title: "Burst Balloons",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Burst Balloons. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Burst balloons one by one. If you burst balloon $i$, you get coins equal to $nums[i-1] \cdot nums[i] \cdot nums[i+1]$. Maximize total coins.",
+    leetcodeLink: "https://leetcode.com/problems/burst-balloons/",
+    useCases: [
+      "Optimal sequence evaluation with dependencies",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Burst Balloons.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_burst_balloons(*args):
-    # Optimized Burst Balloons Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_burst_balloons(...args) {
-    // Optimal Burst Balloons Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_burst_balloons() {
-        // Logic for Burst Balloons
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_burst_balloons() {
-    // High-performance Burst Balloons routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Reverse DP (Final Burst)",
+        description:
+          "### 🧠 Core Intuition\nInstead of thinking about which balloon to burst *first*, think about which balloon in the range $[i, j]$ is burst **last**. If balloon $k$ is burst last in $[i, j]$, then the coins gained from $k$ is $nums[i-1] \cdot nums[k] \cdot nums[j+1]$.\n\n### ⏱️ Complexity\n- **Time**: $O(N^3)$\n- **Space**: $O(N^2)$",
+        timeComplexity: "O(N^3)",
+        timeComplexityExplanation: "3-level nested loop for range and partition point.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "2D DP table for range solutions.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxCoins(nums):
+    nums = [1] + nums + [1]
+    n = len(nums)
+    dp = [[0]*n for _ in range(n)]
+    
+    for length in range(1, n - 1):
+        for i in range(1, n - length):
+            j = i + length - 1
+            for k in range(i, j + 1):
+                dp[i][j] = max(dp[i][j], 
+                              nums[i-1] * nums[k] * nums[j+1] + 
+                              dp[i][k-1] + dp[k+1][j])
+    return dp[1][n-2]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "evaluate-boolean-expression-to-true",
-    title: "Evaluate Boolean Expression to True",
+    title: "Boolean Evaluation to True",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Evaluate Boolean Expression to True. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Given a boolean expression string with operands (T, F) and operators (&, |, ^), find the number of ways to parenthesize it so it evaluates to True.",
+    leetcodeLink: "https://www.geeksforgeeks.org/problems/boolean-parenthesization5610/1",
+    useCases: [
+      "Logic gate simulation",
+      "Compiler expression parsing",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Evaluate Boolean Expression to True.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_evaluate_boolean_expression_to_true(*args):
-    # Optimized Evaluate Boolean Expression to True Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_evaluate_boolean_expression_to_true(...args) {
-    // Optimal Evaluate Boolean Expression to True Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_evaluate_boolean_expression_to_true() {
-        // Logic for Evaluate Boolean Expression to True
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_evaluate_boolean_expression_to_true() {
-    // High-performance Evaluate Boolean Expression to True routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "3D DP Partitioning",
+        description:
+          "### 🧠 Core Intuition\n`dp[i][j][isTrue]` stores the counts. For each operator at index $k$, combine results from substrings $[i, k-1]$ and $[k+1, j]$ using truth table logic for that operator.\n\n### ⏱️ Complexity\n- **Time**: $O(N^3)$\n- **Space**: $O(N^2)$",
+        timeComplexity: "O(N^3)",
+        timeComplexityExplanation: "Nested loops for length and partitions.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "DP table for True and False counts.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def countWays(S):
+    n = len(S)
+    MOD = 1003
+    # dp[i][j] = [countTrue, countFalse]
+    dp = [[[0, 0] for _ in range(n)] for _ in range(n)]
+    
+    for i in range(0, n, 2):
+        if S[i] == 'T': dp[i][i] = [1, 0]
+        else: dp[i][i] = [0, 1]
+        
+    for length in range(3, n + 1, 2):
+        for i in range(0, n - length + 1, 2):
+            j = i + length - 1
+            for k in range(i + 1, j, 2):
+                lT, lF = dp[i][k-1]
+                rT, rF = dp[k+1][j]
+                op = S[k]
+                if op == '&':
+                    dp[i][j][0] += (lT * rT)
+                    dp[i][j][1] += (lT * rF + lF * rT + lF * rF)
+                elif op == '|':
+                    dp[i][j][0] += (lT * rT + lT * rF + lF * rT)
+                    dp[i][j][1] += (lF * rF)
+                elif op == '^':
+                    dp[i][j][0] += (lT * rF + lF * rT)
+                    dp[i][j][1] += (lT * rT + lF * rF)
+            dp[i][j][0] %= MOD; dp[i][j][1] %= MOD
+    return dp[0][n-1][0]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "palindrome-partitioning-ii",
     title: "Palindrome Partitioning II",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Palindrome Partitioning II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Given a string $S$, partition it such that every substring is a palindrome. Return the minimum cuts needed.",
+    leetcodeLink: "https://leetcode.com/problems/palindrome-partitioning-ii/",
+    useCases: [
+      "Optimal sequence decomposition",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Palindrome Partitioning II.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_palindrome_partitioning_ii(*args):
-    # Optimized Palindrome Partitioning II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_palindrome_partitioning_ii(...args) {
-    // Optimal Palindrome Partitioning II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_palindrome_partitioning_ii() {
-        // Logic for Palindrome Partitioning II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_palindrome_partitioning_ii() {
-    // High-performance Palindrome Partitioning II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Linear DP with Palindrome Pre-check",
+        description:
+          "### 🧠 Core Intuition\n1. `dp[i]` stores the min cuts for substring $S[0 \dots i]$.\n2. For every $j \le i$, if $S[j \dots i]$ is a palindrome, then `dp[i] = min(dp[i], dp[j-1] + 1)`.\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N^2)$ for pre-checking palindromes.",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "Nested loops for index $i$ and $j$.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "Storing boolean palindrome status for all segments.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def minCut(s):
+    n = len(s)
+    dp = [0] * n
+    pal = [[False] * n for _ in range(n)]
+    
+    for i in range(n):
+        min_cuts = i
+        for j in range(i + 1):
+            if s[i] == s[j] and (i - j < 2 or pal[j+1][i-1]):
+                pal[j][i] = True
+                min_cuts = 0 if j == 0 else min(min_cuts, dp[j-1] + 1)
+        dp[i] = min_cuts
+    return dp[n-1]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "partition-array-for-maximum-sum",
-    title: "Partition Array for Maximum Sum",
+    title: "Partition Array for Max Sum",
     topic: "Dynamic Programming - MCM DP",
     category: "Dynamic Programming",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Partition Array for Maximum Sum. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Partition an array into subarrays of length at most $K$. Each element in a subarray becomes the maximum element of that subarray. Maximize the total sum.",
+    leetcodeLink: "https://leetcode.com/problems/partition-array-for-maximum-sum/",
+    useCases: [
+      "Resource allocation with grouping constraints",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Partition Array for Maximum Sum.",
-          timeComplexity: "O(N * M)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(N * M)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_partition_array_for_maximum_sum(*args):
-    # Optimized Partition Array for Maximum Sum Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_partition_array_for_maximum_sum(...args) {
-    // Optimal Partition Array for Maximum Sum Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_partition_array_for_maximum_sum() {
-        // Logic for Partition Array for Maximum Sum
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_partition_array_for_maximum_sum() {
-    // High-performance Partition Array for Maximum Sum routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Linear DP (Look-back)",
+        description:
+          "### 🧠 Core Intuition\n`dp[i]` is max sum for $S[0 \dots i-1]$. To compute `dp[i]`, look back at the previous $K$ possible partition points $j$.\n`dp[i] = max(dp[j] + max_val * (i - j))` where $i-k \le j < i$.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot K)$\n- **Space**: $O(N)$",
+        timeComplexity: "O(N * K)",
+        timeComplexityExplanation: "Iterate through $N$ elements, looking back up to $K$.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Storing DP results for all indices.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maxSumAfterPartitioning(arr, k):
+    n = len(arr)
+    dp = [0] * (n + 1)
+    for i in range(1, n + 1):
+        curr_max = 0
+        for j in range(1, min(i, k) + 1):
+            curr_max = max(curr_max, arr[i-j])
+            dp[i] = max(dp[i], dp[i-j] + curr_max * j)
+    return dp[n]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "implement-trie-ii",
     title: "Implement Trie II",
     topic: "Tries",
     category: "Tries",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Implement Trie II. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "An advanced Trie supporting string counting: `countWordsEqualTo`, `countWordsStartingWith`, and `erase` operations.",
+    leetcodeLink: "https://www.naukri.com/code-studio/problems/implement-trie_1387095",
+    useCases: [
+      "Dynamic data frequency tracking",
+      "Auto-complete with frequency priors",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Implement Trie II.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_implement_trie_ii(*args):
-    # Optimized Implement Trie II Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_implement_trie_ii(...args) {
-    // Optimal Implement Trie II Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_implement_trie_ii() {
-        // Logic for Implement Trie II
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_implement_trie_ii() {
-    // High-performance Implement Trie II routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Prefix Tree with Counts",
+        description:
+          "### 🧠 Core Intuition\nEach node stores:\n1. `cntPrefix`: How many words pass through this node.\n2. `cntEnd`: How many words end at this node.\n\n### ⏱️ Complexity\n- **Insert/Search/Erase**: $O(L)$ where $L$ is word length.\n- **Space**: $O(N \cdot L)$ worst case.",
+        timeComplexity: "O(L)",
+        timeComplexityExplanation: "Linear time relative to word length for all operations.",
+        spaceComplexity: "O(N * L)",
+        spaceComplexityExplanation: "Nodes created per character in the vocabulary.",
+        implementations: [
+          {
+            language: "Python",
+            code: `class Node:
+    def __init__(self):
+        self.children = {}
+        self.cntEnd = 0
+        self.cntPrefix = 0
+
+class Trie:
+    def __init__(self):
+        self.root = Node()
+
+    def insert(self, word):
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = Node()
+            curr = curr.children[c]
+            curr.cntPrefix += 1
+        curr.cntEnd += 1
+
+    def countWordsEqualTo(self, word):
+        curr = self.root
+        for c in word:
+            if c not in curr.children: return 0
+            curr = curr.children[c]
+        return curr.cntEnd
+
+    def countWordsStartingWith(self, prefix):
+        curr = self.root
+        for c in prefix:
+            if c not in curr.children: return 0
+            curr = curr.children[c]
+        return curr.cntPrefix
+
+    def erase(self, word):
+        curr = self.root
+        for c in word:
+            curr = curr.children[c]
+            curr.cntPrefix -= 1
+        curr.cntEnd -= 1`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "longest-word-with-all-prefixes",
-    title: "Longest Word with All Prefixes",
+    title: "Complete String",
     topic: "Tries",
     category: "Tries",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Longest Word with All Prefixes. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the longest word in an array such that **every prefix** of that word is also present in the array.",
+    leetcodeLink: "https://www.naukri.com/code-studio/problems/complete-string_2673906",
+    useCases: [
+      "Dependency-chain validation",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Longest Word with All Prefixes.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_longest_word_with_all_prefixes(*args):
-    # Optimized Longest Word with All Prefixes Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_longest_word_with_all_prefixes(...args) {
-    // Optimal Longest Word with All Prefixes Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_longest_word_with_all_prefixes() {
-        // Logic for Longest Word with All Prefixes
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_longest_word_with_all_prefixes() {
-    // High-performance Longest Word with All Prefixes routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Trie-based Pre-prefix Check",
+        description:
+          "### 🧠 Core Intuition\n1. Insert all words into a Trie.\n2. For each word, traverse the Trie and ensure every node marked as `isEndOfWord` is true.\n3. Keep track of the longest such word.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot L)$\n- **Space**: $O(N \cdot L)$",
+        timeComplexity: "O(N * L)",
+        timeComplexityExplanation: "Iteration through all words and their characters.",
+        spaceComplexity: "O(N * L)",
+        spaceComplexityExplanation: "Space for the Trie structure.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def completeString(n, words):
+    trie = {}
+    # Build Trie
+    for w in words:
+        curr = trie
+        for c in w:
+            if c not in curr: curr[c] = {}
+            curr = curr[c]
+        curr['#'] = True # End marker
+        
+    longest = ""
+    for w in words:
+        # Check all prefixes
+        curr = trie
+        possible = True
+        for c in w:
+            curr = curr[c]
+            if '#' not in curr:
+                possible = False
+                break
+        
+        if possible:
+            if len(w) > len(longest):
+                longest = w
+            elif len(w) == len(longest) and w < longest:
+                longest = w
+    return longest if longest else "None"`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "number-of-distinct-substrings-in-a-string",
-    title: "Number of Distinct Substrings in a String",
+    title: "Distinct Substrings",
     topic: "Tries",
     category: "Tries",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Number of Distinct Substrings in a String. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Count the number of unique substrings in a given string using a Trie.",
+    leetcodeLink: "https://www.naukri.com/code-studio/problems/count-distinct-substrings_985292",
+    useCases: [
+      "DNA sequence novelty detection",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Number of Distinct Substrings in a String.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_number_of_distinct_substrings_in_a_string(*args):
-    # Optimized Number of Distinct Substrings in a String Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_number_of_distinct_substrings_in_a_string(...args) {
-    // Optimal Number of Distinct Substrings in a String Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_number_of_distinct_substrings_in_a_string() {
-        // Logic for Number of Distinct Substrings in a String
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_number_of_distinct_substrings_in_a_string() {
-    // High-performance Number of Distinct Substrings in a String routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Suffix Insertion in Trie",
+        description:
+          "### 🧠 Core Intuition\nEvery substring of $S$ is a prefix of some suffix of $S$. \nInsert all suffixes of $S$ into a Trie. The total number of unique non-empty substrings equals the total number of nodes in the Trie (excluding the root).\n\n### ⏱️ Complexity\n- **Time**: $O(N^2)$\n- **Space**: $O(N^2)$",
+        timeComplexity: "O(N^2)",
+        timeComplexityExplanation: "N suffixes, each of max length N.",
+        spaceComplexity: "O(N^2)",
+        spaceComplexityExplanation: "Worst case space for the Trie nodes.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def countDistinctSubstrings(s):
+    n = len(s)
+    root = {}
+    count = 0
+    for i in range(n):
+        curr = root
+        for j in range(i, n):
+            if s[j] not in curr:
+                curr[s[j]] = {}
+                count += 1
+            curr = curr[s[j]]
+    return count + 1 # Include empty substring`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "bit-prerequisites-for-tries",
-    title: "Bit PreRequisites for Tries",
+    title: "Bitwise Pre-Requisites",
     topic: "Tries",
     category: "Tries",
     frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Bit PreRequisites for Tries. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    difficulty: "Easy",
+    overview:
+      "Core bitwise skills needed for advanced Trie problems (like XOR Tries). includes bit extraction and bitwise properties.",
+    leetcodeLink: "https://www.geeksforgeeks.org/bitwise-hacks-for-competitive-programming/",
+    useCases: [
+      "Preparation for Bit-Manipulation Tries",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Bit PreRequisites for Tries.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_bit_prerequisites_for_tries(*args):
-    # Optimized Bit PreRequisites for Tries Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_bit_prerequisites_for_tries(...args) {
-    // Optimal Bit PreRequisites for Tries Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_bit_prerequisites_for_tries() {
-        // Logic for Bit PreRequisites for Tries
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_bit_prerequisites_for_tries() {
-    // High-performance Bit PreRequisites for Tries routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Fundamental Ops",
+        description:
+          "### 🧠 Core Intuition\n1. **Check $i$-th bit**: `(n >> i) & 1`.\n2. **Set $i$-th bit**: `n | (1 << i)`.\n3. **Clear $i$-th bit**: `n & ~(1 << i)`.\n\n### ⏱️ Complexity\n- **Time**: $O(1)$\n- **Space**: $O(1)$",
+        timeComplexity: "O(1)",
+        timeComplexityExplanation: "Constant time bitwise operations.",
+        spaceComplexity: "O(1)",
+        spaceComplexityExplanation: "No additional space.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def getBit(n, i):
+    return (n >> i) & 1
+
+def setBit(n, i):
+    return n | (1 << i)
+
+def clearBit(n, i):
+    return n & ~(1 << i)`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "maximum-xor-of-two-numbers-in-an-array",
-    title: "Maximum XOR of Two Numbers in an Array",
+    title: "Max XOR of Two Numbers",
     topic: "Tries",
     category: "Tries",
-    frequencyLevel: "Medium",
+    frequencyLevel: "High",
     difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Maximum XOR of Two Numbers in an Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    overview:
+      "Find the maximum value of $nums[i] \oplus nums[j]$ for any $i, j$ in the array.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/",
+    useCases: [
+      "Cryptographic key analysis",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Maximum XOR of Two Numbers in an Array.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_maximum_xor_of_two_numbers_in_an_array(*args):
-    # Optimized Maximum XOR of Two Numbers in an Array Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_maximum_xor_of_two_numbers_in_an_array(...args) {
-    // Optimal Maximum XOR of Two Numbers in an Array Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_maximum_xor_of_two_numbers_in_an_array() {
-        // Logic for Maximum XOR of Two Numbers in an Array
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_maximum_xor_of_two_numbers_in_an_array() {
-    // High-performance Maximum XOR of Two Numbers in an Array routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Bitwise XOR Trie",
+        description:
+          "### 🧠 Core Intuition\n1. Insert each number into a Binary Trie (31-bit depth).\n2. For each number $X$, traverse the Trie. At each bit, try to go the **opposite direction** ($1 \to 0$ or $0 \to 1$) to maximize the XOR result.\n\n### ⏱️ Complexity\n- **Time**: $O(N \cdot 31)$\n- **Space**: $O(N \cdot 31)$",
+        timeComplexity: "O(N)",
+        timeComplexityExplanation: "Each of the N numbers is processed in constant (31 bits) time.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Trie nodes proportional to input size.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def findMaximumXOR(nums):
+    root = {}
+    for n in nums:
+        curr = root
+        for i in range(30, -1, -1):
+            bit = (n >> i) & 1
+            if bit not in curr: curr[bit] = {}
+            curr = curr[bit]
+            
+    max_xor = 0
+    for n in nums:
+        curr = root
+        current_xor = 0
+        for i in range(30, -1, -1):
+            bit = (n >> i) & 1
+            desired = 1 - bit
+            if desired in curr:
+                current_xor |= (1 << i)
+                curr = curr[desired]
+            else:
+                curr = curr[bit]
+        max_xor = max(max_xor, current_xor)
+    return max_xor`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "maximum-xor-with-an-element-from-array",
-    title: "Maximum XOR With an Element From Array",
+    title: "Max XOR With Limit",
     topic: "Tries",
     category: "Tries",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Maximum XOR With an Element From Array. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview:
+      "Find the max XOR of $X$ with any element in $arr \le M$. Multiple queries $(X, M)$ are given.",
+    leetcodeLink: "https://leetcode.com/problems/maximum-xor-with-an-element-from-array/",
+    useCases: [
+      "Range-constrained bitwise optimization",
+    ],
     approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Maximum XOR With an Element From Array.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_maximum_xor_with_an_element_from_array(*args):
-    # Optimized Maximum XOR With an Element From Array Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_maximum_xor_with_an_element_from_array(...args) {
-    // Optimal Maximum XOR With an Element From Array Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_maximum_xor_with_an_element_from_array() {
-        // Logic for Maximum XOR With an Element From Array
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_maximum_xor_with_an_element_from_array() {
-    // High-performance Maximum XOR With an Element From Array routine
-}`
-            }
-          ]
-        }
-    ]
+      {
+        name: "Offline Sorting + Trie",
+        description:
+          "### 🧠 Core Intuition\n1. Sort the input array `nums`.\n2. Sort queries based on their `M` value.\n3. Iterate through queries. For each query, insert elements from `nums` that are $\le M$ into a Binary Trie.\n4. Perform standard Max XOR search.\n\n### ⏱️ Complexity\n- **Time**: $O(N \log N + Q \log Q + (N + Q) \cdot 31)$\n- **Space**: $O(N \cdot 31)$",
+        timeComplexity: "O((N+Q) * 31)",
+        timeComplexityExplanation: "Sorting followed by linear pass over entries and queries with Trie ops.",
+        spaceComplexity: "O(N)",
+        spaceComplexityExplanation: "Space for the Binary Trie.",
+        implementations: [
+          {
+            language: "Python",
+            code: `def maximizeXor(nums, queries):
+    nums.sort()
+    # Query: [m, x, original_idx]
+    q = sorted([[m, x, i] for i, (x, m) in enumerate(queries)])
+    
+    ans = [-1] * len(queries)
+    trie = {}
+    p = 0
+    for m, x, i in q:
+        while p < len(nums) and nums[p] <= m:
+            # Insert nums[p] in trie
+            curr = trie
+            for bit_i in range(30, -1, -1):
+                bit = (nums[p] >> bit_i) & 1
+                if bit not in curr: curr[bit] = {}
+                curr = curr[bit]
+            p += 1
+            
+        if not trie: continue
+        # Find Max XOR
+        curr, res = trie, 0
+        for bit_i in range(30, -1, -1):
+            bit = (x >> bit_i) & 1
+            if (1 - bit) in curr:
+                res |= (1 << bit_i)
+                curr = curr[1 - bit]
+            else:
+                curr = curr[bit]
+        ans[i] = res
+    return ans`,
+          },
+        ],
+      },
+    ],
   }
 ];
