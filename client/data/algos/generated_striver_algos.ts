@@ -3,6 +3,7 @@ import { AlgorithmEntry } from "./types";
 export const generatedStriverAlgorithms: AlgorithmEntry[] = [
   {
     id: "user-input-output",
+    title: "User Input / Output",
     topic: "Basic Basics - Things to Know",
     category: "Basic Basics",
     frequencyLevel: "Medium",
@@ -11534,7 +11535,7 @@ public:
       {
         name: "Optimal (Pointer Swapping)",
         description:
-          "### 🧠 Core Intuition\nIn a DLL, every node knows its predecessor (`prev`) and successor (`next`). To reverse the entire list, we simply visit each node and tell it that its previous next is now its prev, and its previous prev is now its next.\n\n### ✅ Invariant\nAt each step, the `next` and `prev` pointers of the current node are accurately swapped before moving to the 'next' node (which is now stored in the `prev` pointer).\n\n### 🔍 Step-by-step\n1. Initialize `curr = head`, `last = null`.\n2. While `curr` is not `null`:\n   - **Swap**: Record `last = curr.prev`. Set `curr.prev = curr.next`, `curr.next = last`.\n   - **Move**: Set `curr = curr.prev` (important: because we just swapped, the *true* next node is now held in `curr.prev`).\n3. After the loop, the new head is the `prev` pointer of the last node visited. Return `last.prev`.\n\n### ⏱️ Complexity\n- **Time**: $O(N)$ — single pass.\n- **Space**: $O(1)$ constant state updates.",
+          "Traverse the doubly linked list once and swap prev/next pointers for every node. After swapping at a node, move using the updated prev pointer (which points to the original next node). The last processed node becomes the new head.\n\nInvariant: nodes already processed have their pointers correctly reversed.\n\nComplexity: O(N) time and O(1) extra space.",
         timeComplexity: "O(N)",
         timeComplexityExplanation: "Every node in the list is visited and updated exactly once.",
         spaceComplexity: "O(1)",
@@ -13168,7 +13169,7 @@ public:
     title: "Clone List with Random Pointer",
     topic: "LinkedList - Hard",
     category: "LinkedList",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Deep copy a linked list where each node contains an extra pointer that could point to any random node or null. This requires maintaining node relationships during the cloning process.",
@@ -13376,7 +13377,7 @@ public:
     title: "Print All Subsequences",
     topic: "Recursion - Subsequences",
     category: "Recursion",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Generate every possible subsequence of a given string or array using recursion. This fundamentally explores the $2^N$ cardinality of a power set.",
@@ -13688,7 +13689,7 @@ public:
     title: "Combination Sum",
     topic: "Recursion - Subsequences",
     category: "Recursion",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Find all unique combinations from a set of candidates that sum to a target. Candidates can be reused an unlimited number of times.",
@@ -14124,7 +14125,73 @@ public:
           {
             language: "Python",
             code: `def letterCombinations(digits):
-},
+    if not digits:
+        return []
+    
+    mapping = {
+        "2": "abc", "3": "def", "4": "ghi", "5": "jkl",
+        "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz"
+    }
+    
+    result = []
+    
+    def backtrack(index, path):
+        if index == len(digits):
+            result.append("".join(path))
+            return
+        
+        letters = mapping[digits[index]]
+        for letter in letters:
+            path.append(letter)
+            backtrack(index + 1, path)
+            path.pop()
+    
+    backtrack(0, [])
+    return result`,
+          },
+          {
+            language: "JavaScript",
+            code: `function letterCombinations(digits) {
+  if (!digits) return [];
+  const map = {
+    '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+    '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+  };
+  const res = [];
+  function solve(idx, path) {
+    if (idx === digits.length) { res.push(path); return; }
+    for (const char of map[digits[idx]]) {
+      solve(idx + 1, path + char);
+    }
+  }
+  solve(0, "");
+  return res;
+}`,
+          },
+          {
+            language: "C++",
+            code: `class Solution {
+public:
+    vector<string> letterCombinations(string digits) {
+        if (digits.empty()) return {};
+        vector<string> res;
+        string map[] = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        string path = "";
+        solve(0, digits, path, res, map);
+        return res;
+    }
+    void solve(int idx, string& digits, string& path, vector<string>& res, string map[]) {
+        if (idx == digits.size()) { res.push_back(path); return; }
+        for (char c : map[digits[idx] - '0']) {
+            path.push_back(c);
+            solve(idx + 1, digits, path, res, map);
+            path.pop_back();
+        }
+    }
+};`,
+          },
+        ],
+      },
     ],
   },
   {
@@ -14242,97 +14309,36 @@ public:
     category: "Recursion",
     frequencyLevel: "Medium",
     difficulty: "Hard",
-    overview:
-      "Check if a graph can be colored with at most $M$ colors such that no two adjacent vertices have the same color.",
+    overview: "Check if a graph can be colored with at most M colors such that no two adjacent vertices have the same color.",
     leetcodeLink: "https://www.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1",
     useCases: [
       "Register allocation in compiler design",
       "Map coloring and geographic segmentation",
-      "Frequency assignment in wireless networks",
+      "Frequency assignment in wireless networks"
     ],
     approaches: [
       {
-        name: "Optimal (Backtracking with Degree Pruning)",
-        description:
-          "### 🧠 Core Intuition\nWe pick a node and try to assign colors $1$ to $M$ sequentially. For each color, we check if any neighbors already have that color. If a safe color is found, we move to the next node.\n\n### ✅ Invariant\nAt node $i$, nodes $0...i-1$ have been validly colored such that no adjacency constraint is violated.\n\n### 🔍 Step-by-step\n1. `solve(nodeIdx, colors[])`:\n2. If `nodeIdx == N`, return true (Success).\n3. For `c = 1` to `M`:\n   - Check `isSafe(nodeIdx, c, colors)`.\n   - If safe: `colors[nodeIdx] = c`, if `solve(nodeIdx + 1)` is true return true.\n   - `colors[nodeIdx] = 0` (Backtrack).\n4. Return false.\n\n### ⏱️ Complexity\n- **Time**: $O(M^N)$ — every node has $M$ possibilities.\n- **Space**: $O(N)$ for the colors array.",
+        name: "Backtracking",
+        description: "Try every color for every node and backtrack if a conflict is found.",
         timeComplexity: "O(M^N)",
-        timeComplexityExplanation: "Worst case explores all combinations of colors for all nodes.",
+        timeComplexityExplanation: "Each of the N nodes can be colored in M ways.",
         spaceComplexity: "O(N)",
-        spaceComplexityExplanation: "Array to store colors and recursive stack depth.",
+        spaceComplexityExplanation: "Recursion depth and color array.",
         implementations: [
           {
             language: "Python",
-            code: `def graphColoring(adj, m, n):
-    color = [0] * n
-    def isSafe(node, col):
-        for i in range(n):
-            if adj[node][i] and color[i] == col: return False
-        return True
-    def solve(node):
-        if node == n: return True
-        for c in range(1, m + 1):
-            if isSafe(node, c):
-                color[node] = c
-                if solve(node + 1): return True
-                color[node] = 0
-        return False
-    return solve(0)`,
-          },
-          {
-            language: "JavaScript",
-            code: `function graphColoring(adj, m, n) {
-  let color = new Array(n).fill(0);
-  function isSafe(node, col) {
-    for (let i = 0; i < n; i++) if (adj[node][i] && color[i] === col) return false;
-    return true;
-  }
-  function solve(node) {
-    if (node === n) return true;
-    for (let c = 1; c <= m; c++) {
-      if (isSafe(node, c)) {
-        color[node] = c; if (solve(node + 1)) return true;
-        color[node] = 0;
+            code: "def solve(nodeIdx, color, m, n, adj):\n    if nodeIdx == n: return True\n    for c in range(1, m + 1):\n        if isSafe(nodeIdx, color, c, n, adj):\n            color[nodeIdx] = c\n            if solve(nodeIdx + 1, color, m, n, adj): return True\n            color[nodeIdx] = 0\n    return False\n\ndef isSafe(node, color, c, n, adj):\n    for i in range(n):\n        if adj[node][i] == 1 and color[i] == c: return False\n    return True"
+          }
+        ]
       }
-    }
-    return false;
-  }
-  return solve(0);
-}`,
-          },
-          {
-            language: "C",
-            code: `// ... C Implementation with adjacency matrix ...`,
-          },
-          {
-            language: "C++",
-            code: `class Solution {
-public:
-    bool isSafe(int node, int c, int n, bool g[101][101], int color[]) {
-        for(int k=0; k<n; k++) if(k != node && g[k][node] && color[k] == c) return false;
-        return true;
-    }
-    bool solve(int node, int color[], int m, int n, bool g[101][101]) {
-        if(node == n) return true;
-        for(int i=1; i<=m; i++) {
-            if(isSafe(node, i, n, g, color)) {
-                color[node] = i; if(solve(node+1, color, m, n, g)) return true;
-                color[node] = 0;
-            }
-        }
-        return false;
-    }
-};`,
-          },
-        ],
-      },
-    ],
+    ]
   },
   {
     id: "sudoku-solver",
     title: "Sudoku Solver",
     topic: "Recursion - Hard",
     category: "Recursion",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Fill a partially completed $9 \\times 9$ Sudoku board such that every row, column, and $3 \\times 3$ subgrid contains all digits from 1 to 9 exactly once.",
@@ -14346,7 +14352,7 @@ public:
       {
         name: "Optimal (Cell-by-Cell Backtracking)",
         description:
-          "### 🧠 Core Intuition\nWe iterate through every empty cell. For each, we try placing digits 1-9. A digit is 'safe' if it doesn't exist in the same row, column, or $3\\times3$ subgrid. If we reach a dead end, we backtrack and change the previous choice.\n\n### ✅ Invariant\nAt any cell $(r, c)$, the board prefix has been filled according to all Sudoku constraints.\n\n### 🔍 Step-by-step\n1. Find the next empty cell $(r, c)$. If none exist, board solved.\n2. For digit $d = '1'...'9':$\n   - Check `isSafe(r, c, d)`.\n   - If safe, `board[r][c] = d`. Recurse to next cell.\n   - If recursion returns true, return true.\n   - `board[r][c] = '.'` (Backtrack).\n3. Return false.\n\n### ⏱️ Complexity\n- **Time**: $O(9^{N \\times N})$ worst case, but heavily pruned by Sudoku rules.\n- **Space**: $O(N^2)$ for board storage and recursive stack.",
+          "Use backtracking on empty cells. For each empty cell, try digits 1 through 9 and keep a digit only if it is valid in that row, column, and 3x3 box. If no digit works, backtrack to the previous cell and try another option.\n\nInvariant: every filled cell always satisfies Sudoku constraints.\n\nComplexity: exponential in the number of empty cells in the worst case, but pruning is strong in practice.",
         timeComplexity: "O(9^(M))",
         timeComplexityExplanation: "9 possible digits for each of the M empty cells.",
         spaceComplexity: "O(1)",
@@ -14533,7 +14539,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "An essential primer on bitwise operations: `&` (AND), `|` (OR), `^` (XOR), `~` (NOT), and shifts `<<`, `>>`.",
     leetcodeLink: "",
@@ -14600,7 +14606,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "Check if a number is odd or even using bitwise operators. This is faster than the modulo operator.",
     leetcodeLink: "",
@@ -14712,7 +14718,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "Forces the bit at position $i$ (0-indexed) of an integer $N$ to be $1$, regardless of its previous state.",
     leetcodeLink: "",
@@ -14767,7 +14773,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "Forces the bit at position $i$ (0-indexed) of an integer $N$ to be $0$, regardless of its previous state.",
     leetcodeLink: "",
@@ -14822,7 +14828,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "Flips the bit at position $i$ (0-indexed) of an integer $N$: if it's $0$ it becomes $1$, and if it's $1$ it becomes $0$.",
     leetcodeLink: "",
@@ -14877,7 +14883,7 @@ public:
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
     frequencyLevel: "High",
-    difficulty: "Basic",
+    difficulty: "Easy",
     overview:
       "Turn off the rightmost set bit ($1$) in an integer $N$, leaving all other bits unchanged.",
     leetcodeLink: "",
@@ -14931,7 +14937,7 @@ public:
     title: "Power of 2 Check",
     topic: "Bit Manipulation - Basics",
     category: "Bit Manipulation",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Determine if an integer $N$ is a power of 2 (e.g., 1, 2, 4, 8, ...).",
@@ -15120,7 +15126,7 @@ public:
     title: "Find Single Number (I)",
     topic: "Bit Manipulation - Interview",
     category: "Bit Manipulation",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Given a non-empty array of integers where every element appears twice except for one, find that single one.",
@@ -15934,7 +15940,7 @@ public:
     title: "Balanced Parentheses",
     topic: "Stack and Queues - Basics",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Verify if a string containing brackets `(`, `)`, `{`, `}`, `[` and `]` is balanced. Brackets must close in the same order they were opened.",
@@ -16009,7 +16015,7 @@ public:
     title: "Min Stack Design",
     topic: "Stack and Queues - Basics",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Support standard stack operations plus a constant-time method to retrieve the minimum element.",
@@ -16625,7 +16631,7 @@ public:
     title: "Trapping Rainwater",
     topic: "Stack and Queues - Monotonic",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given $N$ non-negative integers representing an elevation map, compute how much water it can trap after raining.",
@@ -17102,7 +17108,7 @@ public:
     title: "Maximal Rectangle",
     topic: "Stack and Queues - Monotonic",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Find the largest rectangle containing only 1's in a given 2D binary matrix.",
@@ -17196,7 +17202,7 @@ public:
     title: "Sliding Window Maximum",
     topic: "Stack and Queues - Advanced",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given an array and a window size $K$, find the maximum element in every sliding window of size $K$.",
@@ -17354,11 +17360,7 @@ public:
         if i != l and (M[l][i] or not M[i][l]): return -1
     return l`,
           },
-        ],
-      },
-    ],
-  },            },
-            {
+          {
               language: "Java",
               code: `class Solution {
     public int solve_the_celebrity_problem(int[][] knows) {
@@ -17409,7 +17411,7 @@ int solve_the_celebrity_problem(const std::vector<std::vector<int>>& knows) {
     title: "LRU Cache Design",
     topic: "Stack and Queues - Advanced",
     category: "Stack and Queues",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Design a data structure that follows the Least Recently Used (LRU) cache policy. Operations ($get, put$) must run in $O(1)$ average time.",
@@ -17475,6 +17477,7 @@ public:
         ],
       },
     ],
+  },
   {
     id: "lfu-cache",
     title: "LFU Cache Design",
@@ -17520,12 +17523,7 @@ class LFUCache:
   // ... Implementation of O(1) LFU logic ...
 }`,
           },
-        ],
-      },
-    ],
-  },}`
-            },
-            {
+          {
               language: "Java",
               code: `import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -17658,7 +17656,7 @@ public:
     title: "Longest Substring Without Repeating Characters",
     topic: "Sliding Window - Medium",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Given a string, find the length of the longest substring that contains no repeating characters.",
@@ -17956,7 +17954,7 @@ public:
     title: "Minimum Window Subsequence",
     topic: "Sliding Window - Hard",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given strings $S$ and $T$, find the minimum window in $S$ such that $T$ is a **subsequence** of the window.",
@@ -18182,7 +18180,7 @@ public:
     title: "Longest Substring with At Most K Distinct Characters",
     topic: "Sliding Window - Hard",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given a string, find the length of the longest substring that contains at most $K$ distinct characters.",
@@ -18242,7 +18240,7 @@ public:
     title: "Subarrays with K Different Integers",
     topic: "Sliding Window - Hard",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given an array, return the number of subarrays with exactly $K$ different integers.",
@@ -18305,7 +18303,7 @@ public:
     title: "Minimum Window Substring",
     topic: "Sliding Window - Hard",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given two strings $S$ and $T$, return the minimum window substring of $S$ such that every character in $T$ (including duplicates) is included in the window.",
@@ -18374,7 +18372,7 @@ def minWindow(s, t):
     title: "Minimum Window Subsequence",
     topic: "Sliding Window - Hard",
     category: "Sliding Window",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Given strings $S$ and $T$, find the minimum window in $S$ such that $T$ is a **subsequence** of the window. Return the smallest starting index in case of a tie.",
@@ -18386,6 +18384,7 @@ def minWindow(s, t):
     approaches: [
       {
         name: "Two-Pointer (Forward-Reverse Optimization)",
+        description:
           "### 🧠 Core Intuition\n1. **Forward Search**: Iterate through $S$ to find a match for $T$. Once matched, at index `r` of $S$, we know a window exists.\n2. **Reverse Search**: From `r`, search backwards for $T$ to find the largest possible starting index `l`. This ensures the window $[l, r]$ is minimal for that specific `r`.\n3. Repeat from `l + 1` to find better windows.\n\n### ⏱️ Complexity\n- **Time**: $O(S \times T)$\n- **Space**: $O(1)$",
         timeComplexity: "O(S * T)",
         timeComplexityExplanation: "Single forward pass with optimized backtracking.",
@@ -18557,7 +18556,7 @@ def minWindow(s, t):
     title: "Kth Largest Element in an Array",
     topic: "Heaps - Medium",
     category: "Heaps",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Find the $K$-th largest element in an unsorted array. It's the $K$-th largest in sorted order, not the $K$-th distinct element.",
@@ -18608,7 +18607,7 @@ function findKthLargest(nums, k) {
     title: "Kth Smallest Element in an Array",
     topic: "Heaps - Medium",
     category: "Heaps",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Find the $K$-th smallest element in an unsorted array.",
@@ -19034,7 +19033,7 @@ class Twitter:
     title: "Merge K Sorted Lists",
     topic: "Heaps - Hard",
     category: "Heaps",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Merge $K$ sorted linked lists into one sorted linked list.",
@@ -19484,7 +19483,7 @@ def mergeKLists(lists):
     title: "Insert Interval",
     topic: "Greedy Algorithms",
     category: "Greedy Algorithms",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Insert a new interval into a set of non-overlapping sorted intervals and merge overlapping ones if necessary.",
@@ -19534,7 +19533,7 @@ def mergeKLists(lists):
     title: "Merge Intervals",
     topic: "Greedy Algorithms",
     category: "Greedy Algorithms",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Merge all overlapping intervals in an array and return an array of the non-overlapping intervals.",
@@ -19573,51 +19572,6 @@ def mergeKLists(lists):
       },
     ],
   },
-  {
-    id: "non-overlapping-intervals",
-    title: "Non-overlapping Intervals",
-    topic: "Greedy Algorithms",
-    category: "Greedy Algorithms",
-    frequencyLevel: "Medium",
-    difficulty: "Medium",
-    overview: "Elite algorithmic implementation of Non-overlapping Intervals. optimized for high-performance execution and clarity in the CodeVerse simulation environment.",
-    leetcodeLink: "",
-    useCases: ["Technical Interviews", "Algorithm Mastery"],
-    approaches: [
-        {
-          name: "Standard Optimized",
-          description: "### 🧠 Concept\nStandard production-grade implementation of Non-overlapping Intervals.",
-          timeComplexity: "O(1)",
-          timeComplexityExplanation: "",
-          spaceComplexity: "O(1)",
-          spaceComplexityExplanation: "",
-          implementations: [
-            {
-              language: "Python",
-              code: `def solve_non_overlapping_intervals(*args):
-    # Optimized Non-overlapping Intervals Logic
-    pass`
-            },
-            {
-              language: "JavaScript",
-              code: `function solve_non_overlapping_intervals(...args) {
-    // Optimal Non-overlapping Intervals Implementation
-}`
-            },
-            {
-              language: "Java",
-              code: `class Solution {
-    public void solve_non_overlapping_intervals() {
-        // Logic for Non-overlapping Intervals
-    }
-}`
-            },
-            {
-              language: "C++",
-              code: `void solve_non_overlapping_intervals() {
-    // High-performance Non-overlapping Intervals routine
-}`
-            }
   {
     id: "non-overlapping-intervals",
     title: "Non-overlapping Intervals",
@@ -19846,7 +19800,7 @@ class Node:
     title: "Level Order Traversal",
     topic: "Binary Trees - Traversals",
     category: "Binary Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Traverse the tree level by level, starting from the root and moving down (Breadth-First Search).",
@@ -20219,7 +20173,7 @@ def levelOrder(root):
     title: "Max Path Sum",
     topic: "Binary Trees - Medium",
     category: "Binary Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Find the maximum path sum in a binary tree. A path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections.",
@@ -20406,7 +20360,7 @@ def zigzagLevelOrder(root):
     title: "Vertical Order Traversal",
     topic: "Binary Trees - Medium",
     category: "Binary Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Assign coordinates to nodes: horizontal $(x)$ and vertical $(y)$. Group nodes by their horizontal coordinate, sorting by vertical coordinate and value for ties.",
@@ -20665,7 +20619,7 @@ def bottomView(root):
     title: "Lowest Common Ancestor",
     topic: "Binary Trees - Hard",
     category: "Binary Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Find the lowest common ancestor (LCA) of two given nodes in a binary tree. LCA is the deepest node that has both nodes as descendants.",
@@ -21040,7 +20994,7 @@ def distanceK(root, target, k):
     title: "Serialize & Deserialize",
     topic: "Binary Trees - Hard",
     category: "Binary Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Serialize a binary tree into a string and deserialize that string back into the original tree structure.",
@@ -21192,7 +21146,7 @@ class Codec:
     title: "Search in BST",
     topic: "Binary Search Trees",
     category: "Binary Search Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Given the root of a Binary Search Tree (BST) and a value, find the node in the BST that the node's value equals the given value.",
@@ -21350,7 +21304,7 @@ def findMax(root):
     title: "Insert into BST",
     topic: "Binary Search Trees",
     category: "Binary Search Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Insert a new node with value $V$ into an existing Binary Search Tree while maintaining the BST property.",
@@ -21538,7 +21492,7 @@ def findLastRight(node):
     title: "Is Valid BST?",
     topic: "Binary Search Trees",
     category: "Binary Search Trees",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Determine if a binary tree is a valid Binary Search Tree.",
@@ -21808,7 +21762,7 @@ class Graph:
     title: "Graph Representation",
     topic: "Graphs - Learning",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Implementing Graphs using the two primary methods: Adjacency Matrix and Adjacency List.",
@@ -21893,7 +21847,7 @@ for(int i = 0; i < E; i++) {
     title: "BFS (Breadth-First Search)",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Breadth-First Search traverses a graph level by level, exploring all neighbors of a node before moving to their children.",
@@ -21939,7 +21893,7 @@ def bfs(V, adj):
     title: "DFS (Depth-First Search)",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Easy",
     overview:
       "Depth-First Search explores as deep as possible along each branch before backtracking.",
@@ -22030,7 +21984,7 @@ def solve(V, adj):
     title: "Rotting Oranges",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Find the minimum time required for all oranges in a grid to rot. Oranges rot neighbors every minute.",
@@ -22329,7 +22283,7 @@ def check(start, adj, color):
     title: "Word Ladder I",
     topic: "Graphs - Traversals",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Find the length of the shortest transformation sequence from a begin word to an end word, changing only one letter at a time.",
@@ -22623,9 +22577,16 @@ def topoSort(V, adj):
             if dfs(i): return True
     return False`,
           },
+        ],
+      },
+      {
+        name: "Kahn's (BFS) Approach",
+        description: "If Topological Sort result length < V, cycle exists.",
+        timeComplexity: "O(V + E)",
+        spaceComplexity: "O(V)",
+        implementations: [
           {
-            name: "Kahn's (BFS) Approach",
-            description: "If Topological Sort result length < V, cycle exists.",
+            language: "Python",
             code: `def isCyclicKahn(V, adj):
     # Standard Kahn's logic
     # if count != V: return True`
@@ -22639,7 +22600,7 @@ def topoSort(V, adj):
     title: "Course Schedule I",
     topic: "Graphs - Topo Sort",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Medium",
     overview:
       "Determine if it is possible to finish all courses given pre-requisite dependencies.",
@@ -22929,7 +22890,7 @@ def shortestPath(adj, V, source):
     title: "Dijkstra's Algorithm",
     topic: "Graphs - Shortest Path",
     category: "Graphs",
-    frequencyLevel: "Extreme",
+    frequencyLevel: "Very High",
     difficulty: "Hard",
     overview:
       "Find the shortest path from a starting node to all other nodes in a weighted graph (non-negative weights).",
@@ -23488,9 +23449,24 @@ def spanningTree(V, adj):
   {
     id: "number-of-islands-ii-online-queries",
     title: "Number of Islands II",
-            },
-            {
-              language: "JavaScript",
+    topic: "Graphs - DSU",
+    category: "Graphs",
+    frequencyLevel: "High",
+    difficulty: "Hard",
+    overview: "Number of Islands II (Online Queries) involves processing island additions in a grid dynamically and counting components using DSU.",
+    leetcodeLink: "https://leetcode.com/problems/number-of-islands-ii/",
+    useCases: ["Dynamic connectivity", "Real-time region merging"],
+    approaches: [
+      {
+        name: "Disjoint Set Union (DSU)",
+        description: "Uses DSU to efficiently maintain and query the number of connected components as islands are added.",
+        timeComplexity: "O(K * alpha(N))",
+        timeComplexityExplanation: "K queries with near-constant DSU operations.",
+        spaceComplexity: "O(M * N)",
+        spaceComplexityExplanation: "Parent and rank arrays for the grid.",
+        implementations: [
+          {
+            language: "JavaScript",
               code: `function solve_number_of_islands_ii(...args) {
     // Optimal Number of Islands II Implementation
 }`
@@ -23609,7 +23585,27 @@ def swimInWater(grid):
     ],
   },
   {
-              code: `class Solution {
+    id: "articulation-point",
+    title: "Articulation Points",
+    topic: "Graphs - Advanced",
+    category: "Graphs",
+    frequencyLevel: "Medium",
+    difficulty: "Hard",
+    overview: "An articulation point in an undirected graph is a vertex whose removal increases the number of connected components.",
+    leetcodeLink: "https://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/",
+    useCases: ["Network reliability", "Critical router identification"],
+    approaches: [
+      {
+        name: "Tarjan's Algorithm (DFS)",
+        description: "Finds articulation points by identifying nodes that are part of a DFS tree but have no back-edges to their ancestors (excluding the root which needs special handling).",
+        timeComplexity: "O(V + E)",
+        timeComplexityExplanation: "Single DFS pass with low-link values.",
+        spaceComplexity: "O(V)",
+        spaceComplexityExplanation: "Discovery time and low arrays.",
+        implementations: [
+          {
+            language: "Java",
+            code: `class Solution {
     public void solve_articulation_point() {
         // Logic for Articulation Point
     }
