@@ -154,7 +154,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none select-none transition-all duration-200",
+        "group/command-item relative flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none select-none transition-all duration-200",
         "data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:translate-x-1",
         "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
         "hover:bg-primary/5",

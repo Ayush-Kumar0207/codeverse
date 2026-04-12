@@ -156,6 +156,17 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Force pointer cursor on all interactive elements */
+  button, 
+  a, 
+  [role="button"],
+  .cursor-pointer,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer !important;
+  }
 }
 
 /* ============================================
