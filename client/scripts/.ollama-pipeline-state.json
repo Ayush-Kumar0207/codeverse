@@ -1,0 +1,359 @@
+{
+  "completed": {
+    "user-input-output": {
+      "at": "2026-04-11T16:18:11.650Z",
+      "model": "llama3.2:latest"
+    },
+    "data-types": {
+      "at": "2026-04-11T16:21:49.951Z",
+      "model": "llama3.2:latest"
+    },
+    "if-else-statements": {
+      "at": "2026-04-11T16:39:09.143Z",
+      "model": "llama3.2:latest"
+    },
+    "switch-statement": {
+      "at": "2026-04-11T16:46:41.469Z",
+      "model": "llama3.2:latest"
+    },
+    "for-loops-while-loops": {
+      "at": "2026-04-11T16:55:24.226Z",
+      "model": "llama3.2:latest"
+    },
+    "pattern-printing-patterns-1-to-22": {
+      "at": "2026-04-11T16:57:41.945Z",
+      "model": "llama3.2:latest"
+    },
+    "count-digits": {
+      "at": "2026-04-11T16:59:25.940Z",
+      "model": "llama3.2:latest"
+    },
+    "reverse-a-number": {
+      "at": "2026-04-11T17:01:21.186Z",
+      "model": "llama3.2:latest"
+    },
+    "gcd-or-hcf": {
+      "at": "2026-04-11T17:32:18.544Z",
+      "model": "llama3.2:latest"
+    },
+    "armstrong-numbers": {
+      "at": "2026-04-11T17:46:56.062Z",
+      "model": "llama3.2:latest"
+    },
+    "print-all-divisors": {
+      "at": "2026-04-11T17:49:53.969Z",
+      "model": "llama3.2:latest"
+    },
+    "check-for-prime": {
+      "at": "2026-04-11T17:56:01.462Z",
+      "model": "llama3.2:latest"
+    },
+    "understand-recursion-by-printing-something-n-times": {
+      "at": "2026-04-11T17:57:52.067Z",
+      "model": "llama3.2:latest"
+    },
+    "print-1-to-n-using-recursion": {
+      "at": "2026-04-11T18:01:36.174Z",
+      "model": "llama3.2:latest"
+    },
+    "print-n-to-1-using-recursion": {
+      "at": "2026-04-11T18:05:13.440Z",
+      "model": "llama3.2:latest"
+    },
+    "sum-of-first-n-numbers": {
+      "at": "2026-04-11T18:06:42.394Z",
+      "model": "llama3.2:latest"
+    },
+    "factorial-of-n-numbers": {
+      "at": "2026-04-11T18:10:36.884Z",
+      "model": "llama3.2:latest"
+    },
+    "reverse-an-array": {
+      "at": "2026-04-11T18:25:09.970Z",
+      "model": "llama3.2:latest"
+    },
+    "check-if-a-string-is-palindrome-or-not": {
+      "at": "2026-04-11T18:36:49.457Z",
+      "model": "llama3.2:latest"
+    },
+    "fibonacci-number": {
+      "at": "2026-04-11T19:01:09.337Z",
+      "model": "llama3.2:latest"
+    },
+    "counting-frequencies-of-array-elements": {
+      "at": "2026-04-11T19:04:02.754Z",
+      "model": "llama3.2:latest"
+    },
+    "find-the-highest-lowest-frequency-element": {
+      "at": "2026-04-11T19:07:00.755Z",
+      "model": "llama3.2:latest"
+    },
+    "selection-sort": {
+      "at": "2026-04-11T19:28:32.708Z",
+      "model": "llama3.2:latest"
+    },
+    "bubble-sort": {
+      "at": "2026-04-11T20:00:31.002Z",
+      "model": "llama3.2:latest"
+    },
+    "insertion-sort": {
+      "at": "2026-04-11T21:28:29.398Z",
+      "model": "llama3.2:latest"
+    },
+    "merge-sort": {
+      "at": "2026-04-11T22:40:17.508Z",
+      "model": "llama3.2:latest"
+    },
+    "quick-sort": {
+      "at": "2026-04-11T22:43:47.642Z",
+      "model": "llama3.2:latest"
+    },
+    "largest-element-in-an-array": {
+      "at": "2026-04-11T22:46:02.395Z",
+      "model": "llama3.2:latest"
+    },
+    "second-largest-element-in-an-array-without-sorting": {
+      "at": "2026-04-11T22:49:01.066Z",
+      "model": "llama3.2:latest"
+    },
+    "check-if-the-array-is-sorted": {
+      "at": "2026-04-11T22:53:17.221Z",
+      "model": "llama3.2:latest"
+    },
+    "remove-duplicates-from-sorted-array": {
+      "at": "2026-04-11T22:58:37.342Z",
+      "model": "llama3.2:latest"
+    },
+    "left-rotate-an-array-by-one-place": {
+      "at": "2026-04-11T23:05:12.507Z",
+      "model": "llama3.2:latest"
+    },
+    "left-rotate-an-array-by-d-places": {
+      "at": "2026-04-11T23:09:35.976Z",
+      "model": "llama3.2:latest"
+    },
+    "move-zeroes-to-end": {
+      "at": "2026-04-11T23:17:31.070Z",
+      "model": "llama3.2:latest"
+    },
+    "linear-search": {
+      "at": "2026-04-11T23:19:31.595Z",
+      "model": "llama3.2:latest"
+    },
+    "find-the-union": {
+      "at": "2026-04-11T23:30:28.352Z",
+      "model": "llama3.2:latest"
+    },
+    "find-missing-number-in-an-array": {
+      "at": "2026-04-12T00:07:35.452Z",
+      "model": "llama3.2:latest"
+    },
+    "maximum-consecutive-ones": {
+      "at": "2026-04-12T00:11:15.042Z",
+      "model": "llama3.2:latest"
+    },
+    "find-the-number-that-appears-once": {
+      "at": "2026-04-12T00:16:38.800Z",
+      "model": "llama3.2:latest"
+    },
+    "longest-subarray-with-given-sum-k-positives": {
+      "at": "2026-04-12T00:19:21.191Z",
+      "model": "llama3.2:latest"
+    },
+    "longest-subarray-with-given-sum-k-positives-negatives": {
+      "at": "2026-04-12T00:22:03.648Z",
+      "model": "llama3.2:latest"
+    },
+    "sort-an-array-of-0-s-1-s-and-2-s": {
+      "at": "2026-04-12T00:37:20.617Z",
+      "model": "llama3.2:latest"
+    },
+    "majority-element-n-2-times": {
+      "at": "2026-04-12T00:40:59.460Z",
+      "model": "llama3.2:latest"
+    },
+    "print-subarray-with-maximum-sum": {
+      "at": "2026-04-12T00:43:40.538Z",
+      "model": "llama3.2:latest"
+    },
+    "best-time-to-buy-and-sell-stock": {
+      "at": "2026-04-12T00:46:54.214Z",
+      "model": "llama3.2:latest"
+    },
+    "rearrange-array-elements-by-sign": {
+      "at": "2026-04-12T00:50:28.935Z",
+      "model": "llama3.2:latest"
+    },
+    "next-permutation": {
+      "at": "2026-04-12T01:08:20.096Z",
+      "model": "llama3.2:latest"
+    },
+    "longest-consecutive-sequence": {
+      "at": "2026-04-12T05:55:55.407Z",
+      "model": "llama3.2:latest"
+    },
+    "set-matrix-zeroes": {
+      "at": "2026-04-12T05:59:09.574Z",
+      "model": "llama3.2:latest"
+    },
+    "rotate-matrix-by-90-degrees": {
+      "at": "2026-04-12T06:03:34.859Z",
+      "model": "llama3.2:latest"
+    },
+    "majority-element-n-3-times": {
+      "at": "2026-04-12T06:13:22.121Z",
+      "model": "llama3.2:latest"
+    },
+    "count-subarrays-with-given-sum": {
+      "at": "2026-04-12T06:18:02.727Z",
+      "model": "llama3.2:latest"
+    },
+    "4-sum": {
+      "at": "2026-04-12T06:23:37.901Z",
+      "model": "llama3.2:latest"
+    },
+    "largest-subarray-with-0-sum": {
+      "at": "2026-04-12T06:25:56.729Z",
+      "model": "llama3.2:latest"
+    },
+    "leaders-in-an-array": {
+      "at": "2026-04-12T06:31:16.575Z",
+      "model": "llama3.2:latest"
+    },
+    "count-number-of-subarrays-with-given-xor-k": {
+      "at": "2026-04-12T06:37:12.036Z",
+      "model": "llama3.2:latest"
+    },
+    "pascal-s-triangle": {
+      "at": "2026-04-12T07:01:01.760Z",
+      "model": "llama3.2:latest"
+    },
+    "find-the-repeating-and-missing-number": {
+      "at": "2026-04-12T07:08:10.637Z",
+      "model": "llama3.2:latest"
+    },
+    "reverse-pairs": {
+      "at": "2026-04-12T07:13:24.645Z",
+      "model": "llama3.2:latest"
+    },
+    "count-inversions": {
+      "at": "2026-04-12T07:25:59.411Z",
+      "model": "llama3.2:latest"
+    },
+    "implement-lower-bound": {
+      "at": "2026-04-12T07:31:41.950Z",
+      "model": "llama3.2:latest"
+    },
+    "implement-upper-bound": {
+      "at": "2026-04-12T07:34:50.221Z",
+      "model": "llama3.2:latest"
+    },
+    "search-insert-position": {
+      "at": "2026-04-12T07:52:36.629Z",
+      "model": "llama3.2:latest"
+    },
+    "maximum-product-subarray": {
+      "at": "2026-04-12T08:11:53.795Z",
+      "model": "llama3.2:latest"
+    },
+    "count-occurrences-of-a-number-in-a-sorted-array": {
+      "at": "2026-04-12T08:27:25.296Z",
+      "model": "llama3.2:latest"
+    },
+    "find-peak-element": {
+      "at": "2026-04-12T09:06:50.054Z",
+      "model": "qwen2.5-coder:1.5b"
+    },
+    "minimum-days-to-make-m-bouquets": {
+      "at": "2026-04-12T09:13:22.083Z",
+      "model": "qwen2.5-coder:1.5b"
+    }
+  },
+  "failed": {
+    "print-the-matrix-in-spiral-manner": {
+      "at": "2026-04-12T08:30:25.384Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "3-sum": {
+      "at": "2026-04-12T08:30:25.384Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "largest-subarray-with-0-sum": {
+      "at": "2026-04-12T06:26:37.924Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "merge-overlapping-subintervals": {
+      "at": "2026-04-12T08:30:25.384Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "merge-two-sorted-arrays-without-extra-space": {
+      "at": "2026-04-12T08:40:03.052Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "floor-ceil-in-sorted-array": {
+      "at": "2026-04-12T08:40:03.052Z",
+      "error": "Generation failed after retries: implementations must contain 4 language entries"
+    },
+    "first-or-last-occurrence-of-a-number": {
+      "at": "2026-04-12T08:40:03.052Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "search-in-rotated-sorted-array-i": {
+      "at": "2026-04-12T08:45:17.525Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "search-in-rotated-sorted-array-ii": {
+      "at": "2026-04-12T08:45:17.525Z",
+      "error": "Generation failed after retries: implementations must contain 4 language entries"
+    },
+    "find-minimum-in-rotated-sorted-array": {
+      "at": "2026-04-12T09:06:50.056Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "find-out-how-many-times-array-has-been-rotated": {
+      "at": "2026-04-12T09:06:50.057Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "single-element-in-a-sorted-array": {
+      "at": "2026-04-12T09:06:50.058Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "find-square-root-of-a-number-in-log-n": {
+      "at": "2026-04-12T09:06:50.058Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "find-the-nth-root-of-a-number": {
+      "at": "2026-04-12T09:06:50.058Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "kth-missing-positive-number": {
+      "at": "2026-04-12T09:13:22.085Z",
+      "error": "This operation was aborted"
+    },
+    "koko-eating-bananas": {
+      "at": "2026-04-12T09:13:22.085Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "find-the-smallest-divisor-given-a-threshold": {
+      "at": "2026-04-12T09:13:22.086Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "capacity-to-ship-packages-within-d-days": {
+      "at": "2026-04-12T09:17:05.970Z",
+      "error": "This operation was aborted"
+    },
+    "painter-s-partition-problem": {
+      "at": "2026-04-12T09:17:05.970Z",
+      "error": "This operation was aborted"
+    },
+    "median-of-two-sorted-arrays": {
+      "at": "2026-04-12T09:17:05.971Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    },
+    "k-th-element-of-two-sorted-arrays": {
+      "at": "2026-04-12T09:17:05.971Z",
+      "error": "Generation timed out. Use a smaller model or increase --request-timeout-ms."
+    }
+  },
+  "updatedAt": "2026-04-12T09:17:05.999Z"
+}

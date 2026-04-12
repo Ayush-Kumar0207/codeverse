@@ -824,6 +824,128 @@ export const arraysAlgorithms: AlgorithmEntry[] = [
         freq_map[xr] = freq_map.get(xr, 0) + 1
         
     return count`
+             },
+             {
+                language: "JavaScript",
+                code: `function solve(arr, k) {
+  let xr = 0;
+  let count = 0;
+  const freq = new Map();
+  freq.set(0, 1);
+
+  for (const val of arr) {
+    xr ^= val;
+    const target = xr ^ k;
+    count += freq.get(target) || 0;
+    freq.set(xr, (freq.get(xr) || 0) + 1);
+  }
+
+  return count;
+}`
+             },
+             {
+                language: "C",
+                code: `#include <stdlib.h>
+#include <limits.h>
+
+typedef struct Node {
+    int key;
+    int value;
+    struct Node* next;
+} Node;
+
+static unsigned int hash_key(int key, int bucket_count) {
+    unsigned int x = (unsigned int)key;
+    return (x * 2654435761u) % (unsigned int)bucket_count;
+}
+
+static Node* find_node(Node** buckets, int bucket_count, int key) {
+    unsigned int idx = hash_key(key, bucket_count);
+    Node* cur = buckets[idx];
+    while (cur) {
+        if (cur->key == key) return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+static void increment(Node** buckets, int bucket_count, int key) {
+    unsigned int idx = hash_key(key, bucket_count);
+    Node* cur = buckets[idx];
+    while (cur) {
+        if (cur->key == key) {
+            cur->value++;
+            return;
+        }
+        cur = cur->next;
+    }
+
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->key = key;
+    node->value = 1;
+    node->next = buckets[idx];
+    buckets[idx] = node;
+}
+
+static void free_map(Node** buckets, int bucket_count) {
+    for (int i = 0; i < bucket_count; i++) {
+        Node* cur = buckets[i];
+        while (cur) {
+            Node* next = cur->next;
+            free(cur);
+            cur = next;
+        }
+    }
+}
+
+int solve(int* arr, int n, int k) {
+    if (n <= 0) return 0;
+
+    int bucket_count = 1;
+    while (bucket_count < n * 2) bucket_count <<= 1;
+    if (bucket_count < 8) bucket_count = 8;
+
+    Node** buckets = (Node**)calloc((size_t)bucket_count, sizeof(Node*));
+    int xr = 0;
+    int count = 0;
+
+    increment(buckets, bucket_count, 0); // prefix XOR 0 appears once
+
+    for (int i = 0; i < n; i++) {
+        xr ^= arr[i];
+        int target = xr ^ k;
+        Node* hit = find_node(buckets, bucket_count, target);
+        if (hit) count += hit->value;
+        increment(buckets, bucket_count, xr);
+    }
+
+    free_map(buckets, bucket_count);
+    free(buckets);
+    return count;
+}`
+             },
+             {
+                language: "C++",
+                code: `#include <vector>
+#include <unordered_map>
+using namespace std;
+
+int solve(const vector<int>& arr, int k) {
+    int xr = 0;
+    int count = 0;
+    unordered_map<int, int> freq;
+    freq[0] = 1;
+
+    for (int val : arr) {
+        xr ^= val;
+        int target = xr ^ k;
+        auto it = freq.find(target);
+        if (it != freq.end()) count += it->second;
+        freq[xr]++;
+    }
+
+    return count;
+}`
              }
           ]
        }
