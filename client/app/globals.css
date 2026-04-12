@@ -48,7 +48,10 @@
 
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 215 20% 65%;
-    --sidebar-border: 222 47% 8%;
+    --primary-glow: 263 100% 70%;
+    --secondary-glow: 280 100% 70%;
+    --terminal-font: 'JetBrains Mono', 'Fira Code', monospace;
+    --scanner-speed: 2s;
 
     --editor-background: 222 47% 4%;
     --editor-foreground: 210 40% 98%;
@@ -107,6 +110,46 @@
 
   html {
     @apply antialiased scroll-smooth;
+  }
+
+  /* --- God-Level Omni-Shell Aesthetics --- */
+  .glass-panel {
+    @apply bg-background/60 backdrop-blur-2xl border border-white/5 shadow-2xl;
+  }
+
+  .scanner-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanner-glow::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      hsl(var(--primary) / 0.1),
+      transparent
+    );
+    animation: scan var(--scanner-speed) linear infinite;
+  }
+
+  @keyframes scan {
+    0% { top: -50%; }
+    100% { top: 150%; }
+  }
+
+  .terminal-prompt {
+    font-family: var(--terminal-font);
+    letter-spacing: -0.02em;
+  }
+
+  .active-selection-glow {
+    @apply bg-primary/10 border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.1)];
   }
 
   body {

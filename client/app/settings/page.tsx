@@ -66,7 +66,7 @@ export default function SettingsHub() {
                <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">System Overrides</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-black font-outfit uppercase tracking-tighter">
-              Kernel <span className="text-primary italic">Config</span>
+              <span className="text-foreground">Kernel</span> <span className="text-primary italic">Config</span>
             </h1>
             <p className="text-muted-foreground text-sm font-mono uppercase tracking-[0.1em] mt-2 opacity-60">
               Node: codeverse-core-v2 // Status: Secure // Flow State: {apm} APM
