@@ -1,4 +1,16 @@
-const SUPPORTED_LANGUAGES = Object.freeze(["javascript", "python", "cpp", "c", "java"]);
+const SUPPORTED_LANGUAGES = Object.freeze([
+  "javascript",
+  "typescript",
+  "python",
+  "cpp",
+  "c",
+  "java",
+  "html",
+  "css",
+  "markdown",
+  "json",
+  "plaintext",
+]);
 
 const LANGUAGE_FILE_MAP = Object.freeze({
   javascript: "script.js",
@@ -6,6 +18,12 @@ const LANGUAGE_FILE_MAP = Object.freeze({
   cpp: "main.cpp",
   c: "main.c",
   java: "Main.java",
+  typescript: "main.ts",
+  html: "index.html",
+  css: "style.css",
+  markdown: "README.md",
+  json: "data.json",
+  plaintext: "notes.txt",
 });
 
 const DEFAULT_LANGUAGE_FILES = Object.freeze({
@@ -17,6 +35,9 @@ const DEFAULT_LANGUAGE_FILES = Object.freeze({
   "main.cpp": "#include<iostream>\nint main(){ std::cout << \"Hello C++\"; return 0; }",
   "main.c": "#include<stdio.h>\nint main(){ printf(\"Hello C\"); return 0; }",
   "Main.java": "public class Main { public static void main(String[] args) { System.out.println(\"Hello Java\"); } }",
+  "main.ts": "const message: string = 'Hello TypeScript';\nconsole.log(message);",
+  "data.json": "{\n  \"ready\": true\n}",
+  "notes.txt": "CodeVerse notes\n",
 });
 
 module.exports = {

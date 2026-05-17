@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   Rocket, 
   ShieldCheck, 
@@ -23,9 +23,9 @@ interface Props {
 }
 
 const STEPS = [
-  { id: "sync", label: "Neural Workspace Sync", icon: Rocket },
-  { id: "build", label: "Aegis Asset Optimization", icon: ShieldCheck },
-  { id: "deploy", label: "Edge Propagation", icon: Globe },
+  { id: "sync", label: "Collect Workspace Files", icon: Rocket },
+  { id: "build", label: "Prepare Static Assets", icon: ShieldCheck },
+  { id: "deploy", label: "Publish Local Route", icon: Globe },
 ];
 
 export default function DeploymentModal({
@@ -36,7 +36,12 @@ export default function DeploymentModal({
   projectName,
 }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isFinishing, setIsFinishing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(0);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && !deploymentUrl && !error) {
@@ -46,12 +51,6 @@ export default function DeploymentModal({
       return () => clearInterval(interval);
     }
   }, [isOpen, deploymentUrl, error]);
-
-  useEffect(() => {
-    if (deploymentUrl) {
-      setIsFinishing(true);
-    }
-  }, [deploymentUrl]);
 
   if (!isOpen) return null;
 
@@ -87,7 +86,7 @@ export default function DeploymentModal({
                 <Server className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-sm font-bold tracking-tight uppercase">Aegis Deployment Engine</h2>
+                <h2 className="text-sm font-bold tracking-tight uppercase">Deployment Engine</h2>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{projectName}</p>
               </div>
             </div>
@@ -119,7 +118,7 @@ export default function DeploymentModal({
             </div>
           ) : error ? (
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-bold">
-               ❌ CRITICAL ERROR: {error}
+               Deployment failed: {error}
             </div>
           ) : (
              <motion.div 
@@ -130,19 +129,29 @@ export default function DeploymentModal({
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
                   <CheckCircle2 className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-xl font-bold tracking-tight">System Propagated</h3>
-                <p className="text-xs text-muted-foreground">Successfully deployed to global edge infrastructure.</p>
+                <h3 className="text-xl font-bold tracking-tight">Deployment Ready</h3>
+                <p className="text-xs text-muted-foreground">Your project is now served by the local CodeVerse deployment server.</p>
                 
-                <div className="p-3 bg-black/40 rounded-lg border border-white/5 flex items-center justify-between gap-4 group cursor-pointer hover:bg-black/60 transition-colors" onClick={() => window.open(deploymentUrl, '_blank')}>
+                <a
+                  className="p-3 bg-black/40 rounded-lg border border-white/5 flex items-center justify-between gap-4 group cursor-pointer hover:bg-black/60 transition-colors"
+                  href={deploymentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                    <span className="text-[10px] font-mono text-primary truncate flex-1 text-left">{deploymentUrl}</span>
                    <ExternalLink className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
-                </div>
+                </a>
 
                 <div className="pt-4 flex gap-3">
                    <Button variant="outline" className="flex-1 text-[10px] h-9 border-white/10" onClick={onClose}>Dismiss</Button>
-                   <Button className="flex-1 text-[10px] h-9 bg-primary" onClick={() => window.open(deploymentUrl, '_blank')}>
+                   <a
+                     className="group/button inline-flex h-9 flex-1 items-center justify-center rounded-lg bg-primary px-2.5 text-[10px] font-medium text-primary-foreground transition-all hover:bg-primary/80"
+                     href={deploymentUrl}
+                     target="_blank"
+                     rel="noreferrer"
+                   >
                       Visit Deployment
-                   </Button>
+                   </a>
                 </div>
              </motion.div>
           )}
@@ -152,11 +161,11 @@ export default function DeploymentModal({
         {!deploymentUrl && !error && (
           <div className="p-4 bg-black/60 font-mono text-[10px] text-muted-foreground h-32 overflow-hidden relative">
              <div className="space-y-1">
-               <div className="text-green-500/70">[{new Date().toLocaleTimeString()}] COMPRESSION_ACTIVE: Compacting workspace assets...</div>
-               <div>[{new Date().toLocaleTimeString()}] NEURAL_SYNC: Optimizing project weight...</div>
-               <div>[{new Date().toLocaleTimeString()}] PROFILING: Analyzing entry points...</div>
-               {currentStep >= 1 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] AEGIS_BRIDGE: Connecting to edge node group alpha...</div>}
-               {currentStep >= 2 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] PROPAGATION: Distributing static blocks...</div>}
+               <div className="text-green-500/70">[{new Date().toLocaleTimeString()}] FILES_READY: Collecting workspace files...</div>
+               <div>[{new Date().toLocaleTimeString()}] STATIC_BUILD: Preparing browser assets...</div>
+               <div>[{new Date().toLocaleTimeString()}] ROUTE_CHECK: Reserving deployment URL...</div>
+               {currentStep >= 1 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] INDEX_READY: Confirming application entry point...</div>}
+               {currentStep >= 2 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] PUBLISH_READY: Serving project from backend...</div>}
              </div>
              <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
           </div>

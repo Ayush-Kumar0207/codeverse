@@ -1,5 +1,4 @@
 const { deployProject } = require("../services/deployment.service");
-const Project = require("../config/db").Project; // Or appropriate project model
 
 async function handleDeploy(req, res) {
   const { projectId, files } = req.body;
@@ -9,17 +8,19 @@ async function handleDeploy(req, res) {
   }
 
   try {
-    console.log(`🚀 Initiating Aegis Deployment for ${projectId}...`);
-    const result = await deployProject(projectId, files);
+    console.log(`Initiating deployment for ${projectId}...`);
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const result = await deployProject(projectId, files, { baseUrl });
     
     res.status(200).json({
-      message: "✅ Deployment successful!",
+      message: "Deployment successful.",
       url: result.url,
-      timestamp: result.timestamp
+      files: result.files,
+      timestamp: result.timestamp,
     });
   } catch (err) {
     console.error("Deployment failed:", err);
-    res.status(500).json({ error: "Deployment orchestration failed." });
+    res.status(500).json({ error: err.message || "Deployment orchestration failed." });
   }
 }
 

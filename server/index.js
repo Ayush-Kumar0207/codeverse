@@ -30,6 +30,7 @@ server.listen(PORT, () => {
 // Aegis Deployment Engine - Secondary Listener
 const express = require("express");
 const path = require("path");
+const { DEPLOY_DIR } = require("./src/services/deployment.service");
 const deployApp = express();
 const DEPLOY_PORT = process.env.DEPLOY_PORT || 5001;
 
@@ -38,9 +39,12 @@ deployApp.use(require("cors")());
 
 // Dynamic static serving for all projects
 deployApp.use('/:projectId', (req, res, next) => {
-  const projectId = req.params.projectId;
-  const projectPath = path.join(__dirname, 'deployments', projectId);
-  express.static(projectPath)(req, res, next);
+  const projectId = String(req.params.projectId || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const projectPath = path.join(DEPLOY_DIR, projectId);
+  express.static(projectPath, { extensions: ["html"], index: "index.html" })(req, res, next);
 });
 
 deployApp.listen(DEPLOY_PORT, () => {

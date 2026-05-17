@@ -10,7 +10,7 @@ export function useAutoScroll(dependency: unknown[] = []) {
     if (isAutoScroll) {
       messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, dependency);
+  }, [dependency, isAutoScroll]);
 
   // Detect manual scrolling to disable auto-scroll
   const handleScroll = useCallback(() => {

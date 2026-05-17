@@ -11,10 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  InputGroup,
-  InputGroupAddon,
-} from "@/components/ui/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
 function Command({
@@ -25,7 +21,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "flex size-full flex-col overflow-hidden rounded-xl border border-white/5 bg-background/80 backdrop-blur-xl text-foreground font-inter shadow-2xl",
+        "flex size-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0b111c] text-slate-100 shadow-2xl",
         className
       )}
       {...props}
@@ -55,7 +51,7 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         className={cn(
-          "top-[20%] translate-y-0 overflow-hidden rounded-2xl border-white/10 bg-black/40 backdrop-blur-2xl p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),0_0_40px_-12px_rgba(99,102,241,0.2)]",
+          "top-[14%] w-full translate-y-0 overflow-hidden rounded-xl border border-white/10 bg-[#0b111c] p-0 shadow-2xl shadow-black/50 sm:max-w-[640px]",
           className
         )}
         showCloseButton={showCloseButton}
@@ -73,12 +69,12 @@ function CommandInput({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
-    <div data-slot="command-input-wrapper" className="flex items-center border-b border-white/5 px-4 bg-white/5">
-      <SearchIcon className="mr-3 size-4 shrink-0 text-primary animate-pulse" />
+    <div data-slot="command-input-wrapper" className="mt-4 flex items-center border-t border-white/10 bg-[#0f1725] px-4">
+      <SearchIcon className="mr-3 size-4 shrink-0 text-slate-500" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "flex h-14 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 text-foreground font-medium",
+          "flex h-12 w-full rounded-md bg-transparent py-3 text-sm font-medium text-slate-100 outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -95,7 +91,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+        "no-scrollbar max-h-72 scroll-py-2 overflow-x-hidden overflow-y-auto outline-none",
         className
       )}
       {...props}
@@ -110,7 +106,7 @@ function CommandEmpty({
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className={cn("py-6 text-center text-sm", className)}
+      className={cn("py-6 text-center text-sm text-slate-400", className)}
       {...props}
     />
   )
@@ -124,7 +120,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground",
+        "overflow-hidden p-1 text-slate-100 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-[11px] **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-[0.14em] **:[[cmdk-group-heading]]:text-slate-500",
         className
       )}
       {...props}
@@ -139,7 +135,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("-mx-1 h-px bg-border", className)}
+      className={cn("mx-2 my-2 h-px bg-white/10", className)}
       {...props}
     />
   )
@@ -154,18 +150,17 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none select-none transition-all duration-200",
-        "data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:translate-x-1",
+        "group/command-item relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm outline-none select-none transition-colors",
+        "data-[selected=true]:bg-white/[0.06] data-[selected=true]:text-white",
         "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-        "hover:bg-primary/5",
-        "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform group-data-[selected=true]/command-item:[&_svg]:scale-110",
+        "hover:bg-white/[0.04]",
+        "[&_svg]:size-4 [&_svg]:shrink-0",
         className
       )}
       {...props}
     >
-      {/* Selection Glow */}
-      <div className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary opacity-0 transition-opacity group-data-[selected=true]/command-item:opacity-100" />
-      
+      <div className="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-indigo-400 opacity-0 transition-opacity group-data-[selected=true]/command-item:opacity-100" />
+
       {children}
       <CheckIcon className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
@@ -180,9 +175,8 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "ml-auto text-[10px] uppercase font-bold tracking-widest text-muted-foreground/30",
-        "px-1.5 py-0.5 rounded border border-white/5 bg-white/5 shadow-inner",
-        "group-data-[selected=true]/command-item:text-primary group-data-[selected=true]/command-item:border-primary/20",
+        "ml-auto hidden rounded border border-white/10 bg-white/[0.03] px-1.5 py-0.5 text-[11px] font-medium text-slate-500 sm:inline-flex",
+        "group-data-[selected=true]/command-item:border-white/20 group-data-[selected=true]/command-item:text-slate-300",
         className
       )}
       {...props}

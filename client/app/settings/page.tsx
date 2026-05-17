@@ -1,634 +1,870 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Palette, 
-  Settings2, 
-  Terminal, 
-  Cpu, 
-  Database, 
-  Cloud, 
-  Monitor, 
-  Shield, 
+import { AnimatePresence, motion } from "framer-motion";
+import {
   Activity,
-  Zap,
-  Sliders,
-  Code,
+  AlertCircle,
+  Check,
   Clock,
-  CheckCircle2,
-  AlertCircle
+  Cloud,
+  Code,
+  Cpu,
+  Database,
+  Gauge,
+  Keyboard,
+  Monitor,
+  Palette,
+  RotateCcw,
+  Settings2,
+  Shield,
+  Sliders,
+  Terminal,
+  Volume2,
+  Zap,
+  type LucideIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { NetworkTopology } from "@/components/NetworkTopology";
-import { useSettings, ThemeType, ScaleType, AudioProfile, Snapshot } from "@/context/SettingsContext";
+import { cn } from "@/lib/utils";
+import { AudioProfile, Snapshot, ThemeType, useSettings } from "@/context/SettingsContext";
+
+const settingsTabs = [
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "editor", label: "Editor", icon: Settings2 },
+  { id: "diagnostics", label: "Diagnostics", icon: Activity },
+  { id: "cloud", label: "Cloud Sync", icon: Cloud },
+  { id: "security", label: "Security", icon: Shield },
+] as const;
+
+type SettingsTab = (typeof settingsTabs)[number]["id"];
+
+const tabMeta: Record<SettingsTab, { title: string; kicker: string }> = {
+  appearance: {
+    title: "Appearance",
+    kicker: "Theme, motion, and interface density",
+  },
+  editor: {
+    title: "Editor",
+    kicker: "Completion, formatting, and feedback preferences",
+  },
+  diagnostics: {
+    title: "Diagnostics",
+    kicker: "Local runtime health and telemetry",
+  },
+  cloud: {
+    title: "Cloud Sync",
+    kicker: "Snapshot history and configuration sync",
+  },
+  security: {
+    title: "Security",
+    kicker: "Session, storage, and access posture",
+  },
+};
+
+const themeDetails: Record<ThemeType, { label: string; tone: string; swatch: string; note: string }> = {
+  midnight: {
+    label: "Midnight",
+    tone: "Balanced",
+    swatch: "bg-indigo-500",
+    note: "Default dark IDE palette",
+  },
+  hacker: {
+    label: "Hacker",
+    tone: "High signal",
+    swatch: "bg-emerald-400",
+    note: "Terminal-forward contrast",
+  },
+  solarized: {
+    label: "Solarized",
+    tone: "Cool",
+    swatch: "bg-cyan-400",
+    note: "Soft cyan-blue workspace",
+  },
+  amoled: {
+    label: "AMOLED",
+    tone: "Pure dark",
+    swatch: "bg-white",
+    note: "Minimal glow, maximum black",
+  },
+};
+
+const audioProfiles: { id: AudioProfile; label: string; icon: LucideIcon }[] = [
+  { id: "none", label: "Silent", icon: Volume2 },
+  { id: "mechanical", label: "Mechanical", icon: Keyboard },
+  { id: "synth", label: "Synth", icon: Zap },
+];
 
 export default function SettingsHub() {
-  const [activeTab, setActiveTab] = useState("appearance");
-  const { 
-    settings, 
-    updateSetting, 
-    jsonConfig, 
-    setJsonConfig, 
-    apm, 
-    diagnostics, 
-    toggleStressMode, 
+  const [activeTab, setActiveTab] = useState<SettingsTab>("appearance");
+  const [showCode, setShowCode] = useState(false);
+  const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
+  const [isDiffExpanded, setIsDiffExpanded] = useState(false);
+
+  const {
+    settings,
+    updateSetting,
+    jsonConfig,
+    setJsonConfig,
+    apm,
+    diagnostics,
+    toggleStressMode,
     flushMemory,
     syncStatus,
     snapshots,
     performSync,
     rollback,
-    isSynced
+    isSynced,
   } = useSettings();
-  const [showCode, setShowCode] = useState(false);
-  const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
-  const [isDiffExpanded, setIsDiffExpanded] = useState(false);
+
+  const activeMeta = tabMeta[activeTab];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col items-center">
-      {/* Ambient Background Visuals */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] glow-orb opacity-30 select-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] glow-orb-secondary opacity-20 select-none" />
-      <div className="fixed inset-0 noise-bg pointer-events-none opacity-20" />
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute inset-0 noise-bg opacity-30" />
+        <div className="settings-grid-bg absolute inset-0 opacity-50" />
+        <div className="settings-top-glow absolute inset-x-0 top-0 h-64" />
+      </div>
 
-      <main className="w-full max-w-7xl px-8 py-12 relative z-10 flex flex-col gap-12">
-        
-        {/* Header / Brand */}
-        <div className="flex justify-between items-end">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-2"
-          >
-            <div className="flex items-center gap-3">
-               <div className="h-0.5 w-12 bg-primary" />
-               <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">System Overrides</span>
+      <main className="relative z-10 mx-auto flex w-full max-w-[1520px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <StatusPill label="CODEVERSE-CORE-V2" />
+              <StatusPill label="SECURE" tone="success" />
+              <StatusPill label={`${apm} APM`} tone="primary" />
             </div>
-            <h1 className="text-5xl md:text-7xl font-black font-outfit uppercase tracking-tighter">
-              <span className="text-foreground">Kernel</span> <span className="text-primary italic">Config</span>
-            </h1>
-            <p className="text-muted-foreground text-sm font-mono uppercase tracking-[0.1em] mt-2 opacity-60">
-              Node: codeverse-core-v2 // Status: Secure // Flow State: {apm} APM
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Workspace Settings</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Tune the shell, editor, motion layer, diagnostics, and sync behavior from one control surface.
             </p>
-          </motion.div>
+          </div>
 
-          <button 
-            onClick={() => setShowCode(!showCode)}
-            className={cn(
-               "flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-xs uppercase tracking-widest border border-white/5",
-               showCode ? "bg-primary text-white" : "text-muted-foreground hover:bg-white/5"
-            )}
-          >
-            <Code className="w-4 h-4" />
-            {showCode ? "Exit Code View" : "UI-as-Code"}
-          </button>
-        </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <SyncBadge status={syncStatus} isSynced={isSynced} />
+            <button
+              type="button"
+              aria-pressed={showCode}
+              onClick={() => setShowCode((value) => !value)}
+              className={cn(
+                "inline-flex h-10 items-center gap-2 rounded-md border px-4 text-xs font-semibold uppercase tracking-[0.18em] transition-colors",
+                showCode
+                  ? "border-primary/60 bg-primary text-primary-foreground"
+                  : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
+              )}
+            >
+              <Code className="h-4 w-4" />
+              {showCode ? "Close JSON" : "UI as Code"}
+            </button>
+          </div>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-           
-           {/* Sidebar Navigation */}
-           <div className="lg:col-span-3 flex flex-col gap-4 sticky top-12">
-              {[
-                { id: "appearance", label: "Appearance", icon: Palette },
-                { id: "editor", label: "Editor Tuning", icon: Settings2 },
-                { id: "diagnostics", label: "Diagnostics", icon: Activity },
-                { id: "cloud", label: "Cloud Sync", icon: Cloud },
-                { id: "security", label: "Security", icon: Shield },
-              ].map((item) => (
+        <div
+          className={cn(
+            "grid gap-5 xl:items-start",
+            showCode ? "xl:grid-cols-[17rem_minmax(0,1fr)_26rem]" : "xl:grid-cols-[17rem_minmax(0,1fr)]"
+          )}
+        >
+          <aside className="xl:sticky xl:top-5">
+            <div className="grid gap-2 rounded-md border border-border bg-card/90 p-2 shadow-xl shadow-black/20 sm:grid-cols-2 xl:grid-cols-1">
+              {settingsTabs.map(({ id, label, icon: Icon }) => (
                 <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveTab(id)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm uppercase tracking-widest",
-                    activeTab === item.id 
-                      ? "bg-primary text-white shadow-xl shadow-primary/20 scale-105" 
-                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                    "flex h-11 items-center gap-3 rounded-md px-3 text-left text-sm font-semibold transition-colors",
+                    activeTab === id
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-black/20"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{label}</span>
                 </button>
               ))}
-           </div>
+            </div>
 
-           {/* Configuration Modules */}
-           <div className={cn("transition-all duration-500", showCode ? "lg:col-span-5" : "lg:col-span-9")}>
+            <div className="mt-4 grid gap-2 rounded-md border border-border bg-card/70 p-4 text-sm">
+              <RailStat label="Theme" value={themeDetails[settings.appearance.theme].label} />
+              <RailStat label="Scale" value={`${Math.round(settings.appearance.scale * 100)}%`} />
+              <RailStat label="Audio" value={settings.audio.profile === "none" ? "Silent" : settings.audio.profile} />
+            </div>
+          </aside>
+
+          <section className="min-w-0 rounded-md border border-border bg-card/80 shadow-2xl shadow-black/20">
+            <div className="flex flex-col gap-1 border-b border-border px-4 py-4 sm:px-5">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{activeMeta.kicker}</div>
+              <h2 className="text-xl font-semibold text-foreground">{activeMeta.title}</h2>
+            </div>
+
+            <div className="p-4 sm:p-5">
               <AnimatePresence mode="wait">
                 {activeTab === "appearance" && (
-                  <motion.div 
-                    key="appearance"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                  >
-                     <ConfigCard title="Theme Engine" icon={Monitor}>
-                        <div className="flex flex-col gap-4">
-                           {(["midnight", "hacker", "solarized", "amoled"] as ThemeType[]).map((t) => (
-                             <ThemeOption 
-                                key={t} 
-                                label={t} 
-                                active={settings.appearance.theme === t} 
-                                onClick={() => updateSetting("appearance", { theme: t })}
-                             />
-                           ))}
+                  <TabMotion key="appearance">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.82fr)]">
+                      <SettingsPanel title="Theme Engine" icon={Monitor}>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {(["midnight", "hacker", "solarized", "amoled"] as ThemeType[]).map((theme) => (
+                            <ThemeOption
+                              key={theme}
+                              theme={theme}
+                              active={settings.appearance.theme === theme}
+                              onClick={() => updateSetting("appearance", { theme })}
+                            />
+                          ))}
                         </div>
-                     </ConfigCard>
+                      </SettingsPanel>
 
-                     <ConfigCard title="Kinetic Effects" icon={Zap}>
-                        <div className="space-y-4">
-                          <SettingToggle 
-                            label="Ambient Glow Orbs" 
-                            active={settings.kinetics.glowOrbs} 
+                      <SettingsPanel title="Kinetic Effects" icon={Zap}>
+                        <div className="grid gap-3">
+                          <SettingToggle
+                            label="Ambient glow"
+                            active={settings.kinetics.glowOrbs}
                             onToggle={() => updateSetting("kinetics", { glowOrbs: !settings.kinetics.glowOrbs })}
                           />
-                          <SettingToggle 
-                            label="Interface Animations" 
-                            active={settings.kinetics.animations} 
+                          <SettingToggle
+                            label="Interface animation"
+                            active={settings.kinetics.animations}
                             onToggle={() => updateSetting("kinetics", { animations: !settings.kinetics.animations })}
                           />
-                          <SettingToggle 
-                            label="Neon Overdrive (APM Driven)" 
-                            active={settings.kinetics.neonOverdrive} 
+                          <SettingToggle
+                            label="APM neon overdrive"
+                            active={settings.kinetics.neonOverdrive}
                             onToggle={() => updateSetting("kinetics", { neonOverdrive: !settings.kinetics.neonOverdrive })}
                           />
-                          <SettingToggle 
-                             label="Force Reduced Motion" 
-                             active={settings.kinetics.reducedMotionOverride} 
-                             onToggle={() => updateSetting("kinetics", { reducedMotionOverride: !settings.kinetics.reducedMotionOverride })}
+                          <SettingToggle
+                            label="Reduced motion"
+                            active={settings.kinetics.reducedMotionOverride}
+                            onToggle={() =>
+                              updateSetting("kinetics", {
+                                reducedMotionOverride: !settings.kinetics.reducedMotionOverride,
+                              })
+                            }
                           />
                         </div>
-                     </ConfigCard>
+                      </SettingsPanel>
 
-                     <ConfigCard 
-                        title={`Interface Scale: ${Math.round(settings.appearance.scale * 100)}%`} 
-                        icon={Sliders} 
-                        className="md:col-span-2"
-                     >
-                          <div className="px-2 py-4">
-                             <input 
-                               type="range" 
-                               min="0.75" 
-                               max="1.25" 
-                               step="0.01"
-                               value={settings.appearance.scale}
-                               onChange={(e) => {
-                                 updateSetting("appearance", { scale: parseFloat(e.target.value) });
-                               }}
-                               className="w-full accent-primary bg-white/5 rounded-lg appearance-none h-1.5 cursor-pointer" 
-                             />
-                             <div className="flex justify-between mt-2 text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-50">
-                                <span>Minimum (75%)</span>
-                                <span>Standard (100%)</span>
-                                <span>Maximum (125%)</span>
-                             </div>
+                      <SettingsPanel
+                        title={`Interface Scale: ${Math.round(settings.appearance.scale * 100)}%`}
+                        icon={Sliders}
+                        className="lg:col-span-2"
+                      >
+                        <div className="px-1 py-3">
+                          <input
+                            aria-label="Interface scale"
+                            type="range"
+                            min="0.75"
+                            max="1.25"
+                            step="0.01"
+                            value={settings.appearance.scale}
+                            onChange={(event) =>
+                              updateSetting("appearance", { scale: Number.parseFloat(event.target.value) })
+                            }
+                            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
+                          />
+                          <div className="mt-3 grid grid-cols-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            <span>75%</span>
+                            <span className="text-center">100%</span>
+                            <span className="text-right">125%</span>
                           </div>
-                     </ConfigCard>
-                  </motion.div>
+                        </div>
+                      </SettingsPanel>
+                    </div>
+                  </TabMotion>
                 )}
 
                 {activeTab === "editor" && (
-                  <motion.div 
-                    key="editor"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                  >
-                     <ConfigCard title="Intellisense" icon={Cpu}>
-                        <div className="space-y-4">
-                          <SettingToggle 
-                            label="AI Autocomplete" 
-                            active={settings.editor.autocomplete} 
+                  <TabMotion key="editor">
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <SettingsPanel title="Intellisense" icon={Cpu}>
+                        <div className="grid gap-3">
+                          <SettingToggle
+                            label="AI autocomplete"
+                            active={settings.editor.autocomplete}
                             onToggle={() => updateSetting("editor", { autocomplete: !settings.editor.autocomplete })}
                           />
-                          <SettingToggle label="Context-Aware Logic" active />
+                          <SettingToggle label="Context aware logic" active />
                         </div>
-                     </ConfigCard>
+                      </SettingsPanel>
 
-                     <ConfigCard title="Formatting" icon={Terminal}>
-                        <div className="grid grid-cols-1 gap-4">
-                           <div className="flex flex-col gap-1">
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground">Tab Multiplier</span>
-                              <div className="flex gap-2">
-                                 {[2, 4, 8].map(n => (
-                                   <button 
-                                     key={n} 
-                                     onClick={() => updateSetting("editor", { tabSize: n as any })}
-                                     className={cn(
-                                       "px-4 py-2 rounded-lg border border-white/5 font-mono text-xs hover:bg-white/5 transition-all", 
-                                       settings.editor.tabSize === n ? "text-primary border-primary/50 bg-primary/5 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "text-muted-foreground"
-                                     )}
-                                   >
-                                     {n}
-                                   </button>
-                                 ))}
-                              </div>
-                           </div>
-                           <SettingToggle 
-                             label="Format on Save" 
-                             active={settings.editor.formatOnSave} 
-                             onToggle={() => updateSetting("editor", { formatOnSave: !settings.editor.formatOnSave })}
-                           />
+                      <SettingsPanel title="Formatting" icon={Terminal}>
+                        <div className="grid gap-5">
+                          <div>
+                            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              Tab size
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              {([2, 4, 8] as const).map((tabSize) => (
+                                <button
+                                  key={tabSize}
+                                  type="button"
+                                  onClick={() => updateSetting("editor", { tabSize })}
+                                  className={cn(
+                                    "h-10 rounded-md border text-sm font-semibold transition-colors",
+                                    settings.editor.tabSize === tabSize
+                                      ? "border-primary/70 bg-primary/15 text-primary"
+                                      : "border-border bg-muted/25 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                                  )}
+                                >
+                                  {tabSize}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <SettingToggle
+                            label="Format on save"
+                            active={settings.editor.formatOnSave}
+                            onToggle={() => updateSetting("editor", { formatOnSave: !settings.editor.formatOnSave })}
+                          />
                         </div>
-                     </ConfigCard>
+                      </SettingsPanel>
 
-                     <ConfigCard title="Acoustic Haptics" icon={Activity} className="md:col-span-2">
-                        <div className="flex gap-4">
-                           {(["none", "mechanical", "synth"] as AudioProfile[]).map((p) => (
-                             <button
-                               key={p}
-                               onClick={() => updateSetting("audio", { profile: p })}
-                               className={cn(
-                                 "flex-1 px-4 py-3 rounded-xl border border-white/5 font-bold text-xs uppercase tracking-widest transition-all",
-                                 settings.audio.profile === p ? "bg-primary text-white shadow-lg" : "text-muted-foreground hover:bg-white/5"
-                               )}
-                             >
-                               {p}
-                             </button>
-                           ))}
+                      <SettingsPanel title="Acoustic Haptics" icon={Volume2} className="lg:col-span-2">
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          {audioProfiles.map(({ id, label, icon: Icon }) => (
+                            <button
+                              key={id}
+                              type="button"
+                              onClick={() => updateSetting("audio", { profile: id })}
+                              className={cn(
+                                "flex h-14 items-center justify-between rounded-md border px-4 text-left transition-colors",
+                                settings.audio.profile === id
+                                  ? "border-primary/70 bg-primary/15 text-foreground"
+                                  : "border-border bg-muted/25 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                              )}
+                            >
+                              <span className="text-sm font-semibold">{label}</span>
+                              <Icon className="h-4 w-4" />
+                            </button>
+                          ))}
                         </div>
-                     </ConfigCard>
-                  </motion.div>
+                      </SettingsPanel>
+                    </div>
+                  </TabMotion>
                 )}
 
                 {activeTab === "diagnostics" && (
-                  <motion.div 
-                     key="diagnostics"
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     exit={{ opacity: 0, x: -20 }}
-                     className="flex flex-col gap-6"
-                  >
-                     <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8 relative overflow-hidden">
-                        {/* Neural Pulse Background */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[120px] -mr-32 -mt-32 animate-pulse" />
-                        
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-                           <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                                 <Database className="w-6 h-6" />
-                              </div>
-                              <div>
-                                 <h3 className="text-xl font-bold font-outfit uppercase">System Health</h3>
-                                 <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">Neural Heartbeat // Active</p>
-                              </div>
-                           </div>
-                           
-                           <div className="flex gap-2">
-                               <Button 
-                                 variant="outline" 
-                                 size="sm" 
-                                 onClick={toggleStressMode}
-                                 className={cn("h-8 text-[10px] font-bold uppercase tracking-widest border-white/20 text-slate-400 hover:text-white transition-all", diagnostics.stressMode && "bg-destructive/20 border-destructive/50 text-destructive")}
-                               >
-                                Trigger Heap Stress
-                              </Button>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm" 
-                                 onClick={flushMemory}
-                                 className="h-8 text-[10px] font-bold uppercase tracking-widest border-white/20 text-slate-400 hover:text-primary hover:border-primary/50 transition-all"
-                               >
-                                Flush Memory
-                              </Button>
-                           </div>
+                  <TabMotion key="diagnostics">
+                    <div className="grid gap-4">
+                      <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-primary">
+                            <Database className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground">System Health</div>
+                            <div className="text-xs text-muted-foreground">
+                              {diagnostics.stressMode ? "Stress mode active" : "Live telemetry active"}
+                            </div>
+                          </div>
+                        </div>
 
-                           <div className="flex flex-col items-end">
-                              <span className={cn(
-                                "text-3xl font-black font-outfit uppercase tracking-tighter transition-colors duration-500",
-                                diagnostics.stressMode ? "text-destructive" : "text-green-400"
-                              )}>
-                                {diagnostics.stressMode ? "Critical" : "Healthy"}
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={toggleStressMode}
+                            className={cn(
+                              "h-9 rounded-md border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:text-foreground",
+                              diagnostics.stressMode && "border-destructive/50 bg-destructive/15 text-destructive"
+                            )}
+                          >
+                            Trigger Stress
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={flushMemory}
+                            className="h-9 rounded-md border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                          >
+                            Flush Memory
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <StatCard label="Node Latency" value={`${diagnostics.latency}ms`} data={diagnostics.latency} color="#60A5FA" max={100} />
+                        <StatCard
+                          label="Memory Usage"
+                          value={`${(diagnostics.memory / 1024).toFixed(2)}GB`}
+                          data={diagnostics.memory}
+                          color="#34D399"
+                          max={2048}
+                        />
+                        <StatCard
+                          label="Thread Load"
+                          value={`${Math.round(diagnostics.load)}%`}
+                          data={diagnostics.load}
+                          color="#F59E0B"
+                          max={100}
+                        />
+                      </div>
+
+                      <SettingsPanel title="Telemetry Log" icon={Gauge}>
+                        <div className="max-h-64 overflow-y-auto rounded-md border border-border bg-background/70 p-3 font-mono text-xs">
+                          {diagnostics.logs.map((log) => (
+                            <div key={log.id} className="grid grid-cols-[4.5rem_4.5rem_1fr] gap-3 border-b border-white/5 py-2 last:border-b-0">
+                              <span className="text-muted-foreground/70">
+                                {new Date(log.timestamp).toLocaleTimeString([], {
+                                  hour12: false,
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                })}
                               </span>
-                              <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">Cluster Status</span>
-                           </div>
+                              <span
+                                className={cn(
+                                  "font-semibold uppercase",
+                                  log.type === "sys" && "text-blue-300",
+                                  log.type === "sync" && "text-cyan-300",
+                                  log.type === "neural" && "text-primary",
+                                  log.type === "critical" && "text-destructive"
+                                )}
+                              >
+                                {log.type}
+                              </span>
+                              <span className="min-w-0 text-foreground/85">{log.msg}</span>
+                            </div>
+                          ))}
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-                           <StatCard 
-                             label="Node Latency" 
-                             val={`${diagnostics.latency}ms`} 
-                             data={diagnostics.latency} 
-                             color="#60A5FA" 
-                             max={100}
-                           />
-                           <StatCard 
-                             label="Memory Usage" 
-                             val={`${(diagnostics.memory / 1024).toFixed(2)}GB`} 
-                             data={diagnostics.memory} 
-                             color="#C084FC" 
-                             max={2048}
-                           />
-                           <StatCard 
-                             label="Thread Load" 
-                             val={`${Math.round(diagnostics.load)}%`} 
-                             data={diagnostics.load} 
-                             color="#4ADE80" 
-                             max={100}
-                           />
-                        </div>
-
-                        <div className="flex flex-col gap-3 relative z-10">
-                           <div className="flex items-center gap-2 opacity-50">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Real Telemetry Log</span>
-                           </div>
-                           <div className="bg-black/60 p-5 rounded-2xl border border-white/5 font-mono text-[11px] h-40 overflow-y-auto flex flex-col gap-1 custom-scrollbar">
-                              {diagnostics.logs.map((log) => (
-                                <div key={log.id} className="flex gap-4 group">
-                                   <span className="text-white/20 shrink-0">[{new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
-                                   <span className={cn(
-                                     "font-bold shrink-0 w-16",
-                                     log.type === 'sys' && "text-blue-400",
-                                     log.type === 'sync' && "text-purple-400",
-                                     log.type === 'neural' && "text-primary",
-                                     log.type === 'critical' && "text-destructive"
-                                   )}>
-                                     {log.type.toUpperCase()}
-                                   </span>
-                                   <span className="text-white/70 group-hover:text-white transition-colors">{log.msg}</span>
-                                </div>
-                              ))}
-                              <div className="pt-2 text-primary/40 animate-pulse">_ system awaiting neural pulse...</div>
-                           </div>
-                        </div>
-                     </div>
-                  </motion.div>
+                      </SettingsPanel>
+                    </div>
+                  </TabMotion>
                 )}
 
                 {activeTab === "cloud" && (
-                  <motion.div 
-                    key="cloud"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="flex flex-col gap-8"
-                  >
-                    {/* Topology Header */}
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                               <Cloud className="w-5 h-5" />
+                  <TabMotion key="cloud">
+                    <div className="grid gap-4">
+                      <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/20 p-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-cyan-400/30 bg-cyan-500/10 text-cyan-300">
+                            <Cloud className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground">Network Topology</div>
+                            <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                              {syncStatus === "syncing" ? "Synchronizing" : isSynced ? "Synced" : "Local changes"}
                             </div>
-                            <div>
-                               <h3 className="text-lg font-bold text-white font-outfit uppercase">Network Topology</h3>
-                               <p className="text-[10px] text-white/50 uppercase tracking-widest">Enterprise Sync Engine // Status: {syncStatus.toUpperCase()}</p>
-                            </div>
-                         </div>
-                         <Button 
-                            onClick={() => performSync(true)} 
-                            disabled={syncStatus === 'syncing'}
-                            className="bg-primary/20 text-primary border-primary/30 hover:bg-primary hover:text-white uppercase font-black text-[10px] tracking-widest h-10 px-6 shadow-2xl transition-all"
-                         >
-                            {syncStatus === 'syncing' ? "Synchronizing..." : "Initiate Sync"}
-                         </Button>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => performSync(true)}
+                          disabled={syncStatus === "syncing"}
+                          className="h-10 rounded-md bg-primary px-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {syncStatus === "syncing" ? "Syncing" : "Sync Now"}
+                        </Button>
                       </div>
+
                       <NetworkTopology status={syncStatus} isSynced={isSynced} />
-                    </div>
 
-                    {/* Temporal Timeline */}
-                    <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col gap-8">
-                      <div className="flex items-center gap-3 border-b border-white/5 pb-4">
-                         <Clock className="w-4 h-4 text-primary" />
-                         <h3 className="text-sm font-bold text-white uppercase tracking-widest">Temporal Config History</h3>
-                      </div>
-
-                      <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                         {snapshots.length === 0 ? (
-                           <div className="flex flex-col items-center justify-center gap-3 py-10 opacity-30">
-                              <AlertCircle className="w-8 h-8 text-white" />
-                              <span className="text-[10px] uppercase font-bold text-white tracking-widest">No Temporal Nodes Detected</span>
-                           </div>
-                         ) : snapshots.map((snap) => (
-                           <div key={snap.id} className="flex flex-col gap-3">
-                              <button 
-                                onClick={() => {
-                                  setSelectedSnapshot(snap);
-                                  setIsDiffExpanded(selectedSnapshot?.id !== snap.id || !isDiffExpanded);
+                      <SettingsPanel title="Config History" icon={Clock}>
+                        <div className="grid max-h-[28rem] gap-3 overflow-y-auto pr-1">
+                          {snapshots.length === 0 ? (
+                            <EmptyState icon={AlertCircle} title="No snapshots yet" />
+                          ) : (
+                            snapshots.map((snapshot) => (
+                              <SnapshotRow
+                                key={snapshot.id}
+                                snapshot={snapshot}
+                                selected={selectedSnapshot?.id === snapshot.id}
+                                expanded={selectedSnapshot?.id === snapshot.id && isDiffExpanded}
+                                onSelect={() => {
+                                  setSelectedSnapshot(snapshot);
+                                  setIsDiffExpanded(selectedSnapshot?.id !== snapshot.id || !isDiffExpanded);
                                 }}
-                                className={cn(
-                                  "flex items-center justify-between p-4 rounded-xl border transition-all text-left",
-                                  selectedSnapshot?.id === snap.id ? "bg-primary/10 border-primary/40 shadow-lg" : "bg-white/5 border-white/5 hover:border-white/10"
-                                )}
-                              >
-                                 <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                    <div className="flex flex-col">
-                                       <span className="font-mono text-[11px] font-bold text-white/90">{snap.hash}</span>
-                                       <span className="text-[9px] text-white/40 uppercase font-medium">{new Date(snap.timestamp).toLocaleString()}</span>
-                                    </div>
-                                 </div>
-                                 <div className="flex items-center gap-3">
-                                    <span className="text-[10px] uppercase font-black text-white/20">Snapshot Active</span>
-                                    <Code className="w-3 h-3 text-white/20" />
-                                 </div>
-                              </button>
-
-                              {/* Diff Preview Expansion */}
-                              <AnimatePresence>
-                                {selectedSnapshot?.id === snap.id && isDiffExpanded && (
-                                  <motion.div 
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden"
-                                  >
-                                     <div className="p-5 rounded-xl bg-black/40 border border-primary/20 flex flex-col gap-4">
-                                        <div className="flex items-center justify-between">
-                                           <span className="text-[10px] uppercase font-bold text-primary tracking-widest">Diff Preview // Configuration Hash</span>
-                                           <span className="text-[10px] font-mono text-white/40">{snap.id}</span>
-                                        </div>
-                                        <div className="bg-black/60 p-4 rounded-lg font-mono text-[10px] text-blue-300/80 overflow-x-auto">
-                                           <pre>{JSON.stringify(snap.config, null, 2)}</pre>
-                                        </div>
-                                        <Button 
-                                          onClick={() => rollback(snap.config, snap.hash)}
-                                          className="w-full bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-white uppercase font-black text-[11px] tracking-[0.2em] h-10 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
-                                        >
-                                          Rollback to this state
-                                        </Button>
-                                     </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                           </div>
-                         ))}
-                      </div>
+                                onRollback={() => rollback(snapshot.config, snapshot.hash)}
+                              />
+                            ))
+                          )}
+                        </div>
+                      </SettingsPanel>
                     </div>
-                  </motion.div>
+                  </TabMotion>
                 )}
 
                 {activeTab === "security" && (
-                  <motion.div 
-                    key="security"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="flex flex-col gap-6"
-                  >
-                    <div className="glass-effect rounded-3xl border-white/5 p-8 flex flex-col items-center justify-center gap-4 text-center py-20">
-                       <Shield className="w-16 h-16 text-primary/20 mb-2" />
-                       <h3 className="text-xl font-bold font-outfit uppercase">Security Protocols</h3>
-                       <p className="text-sm text-muted-foreground max-w-sm">Encryption keys and biometric handshake settings are managed at the Kernel level. Section initialization pending.</p>
+                  <TabMotion key="security">
+                    <div className="grid gap-4 lg:grid-cols-3">
+                      <SecurityStatus title="Authenticated Shell" value="Guarded" tone="success" />
+                      <SecurityStatus title="Local Config" value="Persisted" tone="primary" />
+                      <SecurityStatus title="Cloud Sync" value={isSynced ? "Aligned" : "Local"} tone={isSynced ? "success" : "warning"} />
+                      <SettingsPanel title="Security Posture" icon={Shield} className="lg:col-span-3">
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <PostureItem label="Route guard" value="Active" />
+                          <PostureItem label="Token storage" value="Browser local" />
+                          <PostureItem label="Rollback safety" value={`${snapshots.length} snapshots`} />
+                        </div>
+                      </SettingsPanel>
                     </div>
-                  </motion.div>
+                  </TabMotion>
                 )}
               </AnimatePresence>
-           </div>
+            </div>
+          </section>
 
-           {/* UI-as-Code Pane */}
-           <AnimatePresence>
-             {showCode && (
-                <motion.div 
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="lg:col-span-4 h-full sticky top-12 overflow-hidden"
-                >
-                   <div className="glass-effect rounded-2xl border-primary/20 p-6 flex flex-col gap-4 h-[600px] shadow-2xl shadow-primary/10">
-                      <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                         <div className="flex items-center gap-3">
-                            <Code className="w-4 h-4 text-primary" />
-                            <h3 className="text-sm font-black uppercase tracking-widest">Config JSON</h3>
-                         </div>
-                         <div className="flex gap-1">
-                            <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                            <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-                            <div className="w-2 h-2 rounded-full bg-green-500/50" />
-                         </div>
-                      </div>
-                      <textarea 
-                        spellCheck={false}
-                        value={jsonConfig}
-                        onChange={(e) => setJsonConfig(e.target.value)}
-                        className="flex-1 bg-black/40 rounded-xl p-4 font-mono text-[11px] text-blue-300 outline-none border border-white/5 resize-none leading-relaxed"
-                      />
-                      <p className="text-[10px] text-muted-foreground uppercase text-center opacity-50">Manual edits are applied in real-time.</p>
-                   </div>
-                </motion.div>
-             )}
-           </AnimatePresence>
-
+          <AnimatePresence>
+            {showCode && (
+              <motion.aside
+                key="json-pane"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="min-w-0 xl:sticky xl:top-5"
+              >
+                <JsonPane value={jsonConfig} onChange={setJsonConfig} />
+              </motion.aside>
+            )}
+          </AnimatePresence>
         </div>
-
       </main>
     </div>
   );
 }
 
-function ConfigCard({ title, icon: Icon, children, className }: { title: string, icon: any, children: React.ReactNode, className?: string }) {
+function TabMotion({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass-effect rounded-2xl border-white/5 p-6 flex flex-col gap-4 shadow-lg bg-[hsl(var(--card-bg))]">
-       <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-2">
-          <Icon className="w-4 h-4 text-primary" />
-          <h3 className="text-xs text-slate-400 font-bold uppercase tracking-widest">{title}</h3>
-       </div>
-       {children}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.18 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function StatusPill({ label, tone = "default" }: { label: string; tone?: "default" | "success" | "primary" }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 items-center rounded-md border px-3 text-[10px] font-semibold uppercase tracking-[0.18em]",
+        tone === "default" && "border-border bg-muted/30 text-muted-foreground",
+        tone === "success" && "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+        tone === "primary" && "border-primary/30 bg-primary/10 text-primary"
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced" | "error"; isSynced: boolean }) {
+  const label = status === "syncing" ? "Syncing" : status === "error" ? "Sync Error" : isSynced ? "Synced" : "Local";
+  return (
+    <div className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-muted/30 px-3 text-sm text-foreground">
+      <span
+        className={cn(
+          "h-2 w-2 rounded-full",
+          status === "error" && "bg-destructive",
+          status === "syncing" && "bg-amber-300",
+          status !== "error" && status !== "syncing" && isSynced && "bg-emerald-300",
+          status !== "error" && status !== "syncing" && !isSynced && "bg-primary"
+        )}
+      />
+      {label}
     </div>
   );
 }
 
-function ThemeOption({ label, active, onClick }: { label: ThemeType, active: boolean, onClick: () => void }) {
-  const colors: Record<ThemeType, string> = {
-    midnight: "bg-[#6366F1]",
-    hacker: "bg-[#2ECC71]",
-    solarized: "bg-[#2AA198]",
-    amoled: "bg-white"
-  };
+function RailStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-white/5 py-2 last:border-b-0">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="truncate text-xs font-semibold capitalize text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function SettingsPanel({
+  title,
+  icon: Icon,
+  children,
+  className,
+}: {
+  title: string;
+  icon: LucideIcon;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn("rounded-md border border-border bg-card/85 p-4 shadow-lg shadow-black/10", className)}>
+      <div className="mb-4 flex items-center gap-3 border-b border-border pb-3">
+        <Icon className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ThemeOption({
+  theme,
+  active,
+  onClick,
+}: {
+  theme: ThemeType;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const meta = themeDetails[theme];
 
   return (
-    <button 
+    <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "flex items-center justify-between p-3 rounded-xl border transition-all",
-        active ? "bg-black/40 border-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "bg-white/5 border-white/5 hover:border-white/10"
+        "flex min-h-24 flex-col justify-between rounded-md border p-4 text-left transition-colors",
+        active
+          ? "border-primary/70 bg-primary/15 text-foreground shadow-[0_0_0_1px_hsl(var(--primary)/0.16)]"
+          : "border-border bg-muted/25 text-foreground hover:border-primary/35 hover:bg-muted/40"
       )}
     >
-       <span className={cn("text-xs font-bold uppercase tracking-widest", active ? "text-primary" : "text-muted-foreground")}>{label}</span>
-       <div className={cn("w-3 h-3 rounded-full", colors[label], active && "shadow-[0_0_8px_currentColor]")} />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold">{meta.label}</span>
+        <span className={cn("h-3 w-3 rounded-full", meta.swatch)} />
+      </div>
+      <div>
+        <div className="text-xs font-medium text-muted-foreground">{meta.note}</div>
+        <div className="mt-2 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span>{meta.tone}</span>
+          {active && <Check className="h-3.5 w-3.5 text-primary" />}
+        </div>
+      </div>
     </button>
   );
 }
 
-function SettingToggle({ label, active, onToggle }: { label: string, active?: boolean, onToggle?: () => void }) {
+function SettingToggle({ label, active = false, onToggle }: { label: string; active?: boolean; onToggle?: () => void }) {
   return (
-    <div className="flex items-center justify-between group cursor-pointer" onClick={onToggle}>
-       <span className={cn("text-xs font-bold transition-colors uppercase tracking-tight", active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>{label}</span>
-       <div className={cn(
-         "w-8 h-4 rounded-full relative transition-all duration-300",
-         active ? "bg-primary shadow-[0_0_12px_rgba(99,102,241,0.6)]" : "bg-white/10"
-       )}>
-          <motion.div 
-            animate={{ left: active ? 18 : 2 }}
-            className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm"
+    <button
+      type="button"
+      role="switch"
+      aria-checked={active}
+      disabled={!onToggle}
+      onClick={onToggle}
+      className={cn(
+        "flex min-h-12 items-center justify-between gap-4 rounded-md border border-border bg-muted/25 px-4 text-left transition-colors hover:border-primary/35 hover:bg-muted/40 disabled:opacity-70",
+        active && "border-primary/35 bg-primary/10"
+      )}
+    >
+      <span className={cn("text-sm font-semibold", active ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+      <span className="flex shrink-0 items-center gap-2">
+        <span className={cn("w-7 text-right text-[10px] font-semibold uppercase tracking-[0.14em]", active ? "text-primary" : "text-muted-foreground")}>
+          {active ? "On" : "Off"}
+        </span>
+        <span
+          className={cn(
+            "relative h-6 w-11 rounded-full border p-0.5 transition-colors",
+            active ? "border-primary/45 bg-primary shadow-[0_0_14px_hsl(var(--primary)/0.28)]" : "border-border bg-secondary"
+          )}
+        >
+          <motion.span
+            animate={{ x: active ? 20 : 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+            className="block h-5 w-5 rounded-full bg-white shadow-sm ring-1 ring-black/10"
           />
-       </div>
-    </div>
+        </span>
+      </span>
+    </button>
   );
 }
 
-function StatCard({ label, val, data, color, max }: { label: string, val: string, data: number, color: string, max: number }) {
+function StatCard({
+  label,
+  value,
+  data,
+  color,
+  max,
+}: {
+  label: string;
+  value: string;
+  data: number;
+  color: string;
+  max: number;
+}) {
   return (
-    <div className="bg-black/20 p-5 rounded-2xl border border-white/5 flex flex-col gap-3 group hover:border-white/10 transition-all">
-       <div className="flex justify-between items-end">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
-          <span className="text-sm font-black font-mono text-white/90">{val}</span>
-       </div>
-       <div className="h-12 w-full">
-          <Sparkline data={data} color={color} max={max} />
-       </div>
+    <div className="rounded-md border border-border bg-card/85 p-4">
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
+        <span className="font-mono text-sm font-semibold text-foreground">{value}</span>
+      </div>
+      <div className="h-14">
+        <Sparkline data={data} color={color} max={max} />
+      </div>
     </div>
   );
 }
 
-function Sparkline({ data, color, max }: { data: number, color: string, max: number }) {
+function Sparkline({ data, color, max }: { data: number; color: string; max: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dataRef = useRef<number[]>([]);
 
   useEffect(() => {
-    // Keep last 30 points
     dataRef.current = [...dataRef.current, data].slice(-30);
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const width = canvas.width;
     const height = canvas.height;
-    
     ctx.clearRect(0, 0, width, height);
-    
-    // Draw Line
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     const step = width / 29;
-    dataRef.current.forEach((val, i) => {
-      const x = i * step;
-      const y = height - (Math.min(val, max) / max * (height - 4)) - 2;
-      if (i === 0) ctx.moveTo(x, y);
+    dataRef.current.forEach((value, index) => {
+      const x = index * step;
+      const y = height - (Math.min(value, max) / max) * (height - 4) - 2;
+      if (index === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
-    // Draw Gradient Area
     ctx.lineTo(width, height);
     ctx.lineTo(0, height);
     ctx.closePath();
-    const grad = ctx.createLinearGradient(0, 0, 0, height);
-    grad.addColorStop(0, `${color}44`);
-    grad.addColorStop(1, `${color}00`);
-    ctx.fillStyle = grad;
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, `${color}44`);
+    gradient.addColorStop(1, `${color}00`);
+    ctx.fillStyle = gradient;
     ctx.fill();
-
   }, [data, color, max]);
 
-  return <canvas ref={canvasRef} width={200} height={50} className="w-full h-full" />;
+  return <canvas ref={canvasRef} width={240} height={64} className="h-full w-full" />;
+}
+
+function EmptyState({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
+  return (
+    <div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border text-muted-foreground">
+      <Icon className="h-6 w-6" />
+      <span className="text-sm font-semibold">{title}</span>
+    </div>
+  );
+}
+
+function SnapshotRow({
+  snapshot,
+  selected,
+  expanded,
+  onSelect,
+  onRollback,
+}: {
+  snapshot: Snapshot;
+  selected: boolean;
+  expanded: boolean;
+  onSelect: () => void;
+  onRollback: () => void;
+}) {
+  return (
+    <div className="rounded-md border border-border bg-muted/25">
+      <button
+        type="button"
+        onClick={onSelect}
+        className={cn(
+          "flex w-full items-center justify-between gap-4 rounded-md px-4 py-3 text-left transition-colors",
+          selected && "bg-primary/10"
+        )}
+      >
+        <div className="min-w-0">
+          <div className="truncate font-mono text-xs font-semibold text-foreground">{snapshot.hash}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{new Date(snapshot.timestamp).toLocaleString()}</div>
+        </div>
+        <Code className={cn("h-4 w-4 shrink-0", selected ? "text-primary" : "text-muted-foreground")} />
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-border p-4">
+              <pre className="max-h-56 overflow-auto rounded-md border border-border bg-background/70 p-3 font-mono text-xs leading-5 text-primary">
+                {JSON.stringify(snapshot.config, null, 2)}
+              </pre>
+              <button
+                type="button"
+                onClick={onRollback}
+                className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 text-xs font-semibold uppercase tracking-[0.16em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Rollback
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function SecurityStatus({
+  title,
+  value,
+  tone,
+}: {
+  title: string;
+  value: string;
+  tone: "success" | "primary" | "warning";
+}) {
+  return (
+    <div className="rounded-md border border-border bg-card/85 p-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</div>
+      <div
+        className={cn(
+          "mt-3 text-2xl font-semibold",
+          tone === "success" && "text-emerald-300",
+          tone === "primary" && "text-primary",
+          tone === "warning" && "text-amber-300"
+        )}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function PostureItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border bg-muted/25 p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function JsonPane({ value, onChange }: { value: string; onChange: (json: string) => void }) {
+  return (
+    <div className="rounded-md border border-primary/25 bg-card/95 shadow-2xl shadow-black/30">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Code className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">Config JSON</h3>
+        </div>
+        <div className="flex gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-rose-400/70" />
+          <span className="h-2 w-2 rounded-full bg-amber-300/70" />
+          <span className="h-2 w-2 rounded-full bg-emerald-300/70" />
+        </div>
+      </div>
+      <textarea
+        spellCheck={false}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-[34rem] w-full resize-none rounded-b-md bg-background/80 p-4 font-mono text-xs leading-5 text-primary outline-none"
+      />
+    </div>
+  );
 }

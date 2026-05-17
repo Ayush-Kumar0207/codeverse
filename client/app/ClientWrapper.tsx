@@ -11,8 +11,15 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const isEditorRoute = pathname?.startsWith("/editor/");
+  const canPaintBeforeAuth =
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname === "/demo" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/encyclopedia";
   
-  if (loading) return null;
+  if (loading && !canPaintBeforeAuth) return null;
 
   if (!user) {
     return (

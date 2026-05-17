@@ -4,17 +4,16 @@ import { useEffect, useRef } from "react";
 import * as monacoType from "monaco-editor";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 
-interface RemoteCursor {
-  username: string;
-  line: number;
-  column: number;
-  color: string;
+interface SocketLike {
+  on: (event: string, handler: (data: unknown) => void) => void;
+  off: (event: string, handler: (data: unknown) => void) => void;
+  emit: (event: string, payload: unknown) => void;
 }
 
 export const usePresenceCursors = (
   editor: monacoType.editor.IStandaloneCodeEditor | null,
   monaco: typeof monacoType | null,
-  socket: any,
+  socket: SocketLike | null,
   roomId: string,
   currentUser?: string
 ) => {
@@ -95,7 +94,10 @@ export const usePresenceCursors = (
       );
     };
 
-    const socketHandler = (data: any) => handleCursorMove(data);
+    const socketHandler = (data: unknown) => {
+      const cursor = data as { username: string; position: { lineNumber: number; column: number } };
+      if (cursor.username && cursor.position) handleCursorMove(cursor);
+    };
     socket.on(SOCKET_EVENTS.CURSOR_MOVE, socketHandler);
 
     // Track own cursor
@@ -106,12 +108,13 @@ export const usePresenceCursors = (
         position: e.position,
       });
     });
+    const decorations = decorationsRef.current;
 
     return () => {
       socket.off(SOCKET_EVENTS.CURSOR_MOVE, socketHandler);
       disposable.dispose();
       // Cleanup styles
-      Object.keys(decorationsRef.current).forEach(user => {
+      Object.keys(decorations).forEach(user => {
         const el = document.getElementById(`cursor-${user.replace(/\s+/g, '-')}`);
         if (el) el.remove();
       });

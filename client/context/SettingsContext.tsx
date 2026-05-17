@@ -57,6 +57,18 @@ export interface Snapshot {
   hash: string;
 }
 
+interface CloudSettingsSnapshot {
+  id: string;
+  created_at: string;
+  config: SettingsConfig;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: {
+    usedJSHeapSize: number;
+  };
+}
+
 interface SettingsContextType {
   settings: SettingsConfig;
   setSettings: (settings: SettingsConfig) => void;
@@ -85,8 +97,32 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+const makeId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const shortHash = (value: string) =>
+  value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase().padEnd(6, "0");
+
+const getErrorMessage = (err: unknown, fallback: string) => {
+  if (typeof err === "object" && err !== null) {
+    const maybeResponse = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
+    return maybeResponse.response?.data?.error || maybeResponse.response?.data?.message || maybeResponse.message || fallback;
+  }
+
+  return fallback;
+};
+
+const isUnauthorizedError = (err: unknown) => {
+  if (typeof err !== "object" || err === null) return false;
+
+  const maybeResponse = err as { response?: { status?: number; data?: { statusCode?: number } } };
+  return maybeResponse.response?.status === 401 || maybeResponse.response?.data?.statusCode === 401;
+};
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token } = useAuth() || { user: null, token: null };
+  const { token, logout } = useAuth();
   const [settings, setSettingsState] = useState<SettingsConfig>(DEFAULT_SETTINGS);
   const [jsonConfig, setJsonState] = useState<string>(JSON.stringify(DEFAULT_SETTINGS, null, 2));
   const [apm, setApm] = useState(0);
@@ -102,6 +138,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [lastPushedHash, setLastPushedHash] = useState<string | null>(null);
 
   const currentHash = useMemo(() => btoa(JSON.stringify(settings)), [settings]);
+  const settingsRef = useRef(settings);
+  const currentHashRef = useRef(currentHash);
   const isSynced = useMemo(() => {
     if (!lastPushedHash) return false;
     return currentHash === lastPushedHash;
@@ -109,6 +147,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const keystrokesRef = useRef<number[]>([]);
   const lastApmRef = useRef(0);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+    currentHashRef.current = currentHash;
+  }, [settings, currentHash]);
 
   // Load from localStorage
   useEffect(() => {
@@ -138,7 +181,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const logEvent = useCallback((msg: string, type: 'sys' | 'sync' | 'neural' | 'critical') => {
     setDiagnostics(prev => ({
       ...prev,
-      logs: [{ id: Math.random().toString(36), msg, type, timestamp: Date.now() }, ...prev.logs].slice(0, 15)
+      logs: [{ id: makeId(), msg, type, timestamp: Date.now() }, ...prev.logs].slice(0, 15)
     }));
   }, []);
 
@@ -159,13 +202,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [logEvent]);
 
   const saveSnapshot = useCallback(() => {
-    const id = Math.random().toString(36).substring(7);
-    const hash = Math.random().toString(16).substring(2, 8).toUpperCase();
     const newSnapshot: Snapshot = {
-      id,
+      id: makeId(),
       timestamp: Date.now(),
       config: JSON.parse(JSON.stringify(settings)),
-      hash: `CFG-${hash}`
+      hash: `CFG-${shortHash(currentHash)}`
     };
     
     setSnapshots(prev => {
@@ -177,7 +218,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
     
     logEvent(`Snapshot created: ${newSnapshot.hash}`, 'sys');
-  }, [settings, logEvent]);
+  }, [settings, currentHash, logEvent]);
 
   const performSync = useCallback(async (manual = false) => {
     if (!token) return;
@@ -197,7 +238,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Refresh history after sync
         const { data } = await apiClient.get("/api/settings/history");
         if (data.history) {
-          const cloudSnapshots = data.history.map((s: any) => ({
+          const cloudSnapshots = data.history.map((s: CloudSettingsSnapshot) => ({
             id: s.id,
             timestamp: new Date(s.created_at).getTime(),
             config: s.config,
@@ -206,15 +247,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setSnapshots(cloudSnapshots);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (isUnauthorizedError(err)) {
+        setSyncStatus('idle');
+        setLastPushedHash(null);
+        localStorage.removeItem("codeverse-last-pushed-hash");
+        logEvent("Session expired: Cloud sync paused. Please sign in again.", "critical");
+        logout();
+        return;
+      }
+
       setSyncStatus('error');
-      const errorMsg = err.response?.data?.message || err.message || "Cloud Hub push failed.";
+      const errorMsg = getErrorMessage(err, "Cloud Hub push failed.");
       logEvent(`Network Error: ${errorMsg}`, "critical");
     } finally {
       if (manual) setTimeout(() => setSyncStatus('idle'), 2000);
       else setSyncStatus('idle');
     }
-  }, [token, settings, currentHash, logEvent]);
+  }, [token, settings, currentHash, logEvent, logout]);
 
   const rollback = useCallback((targetConfig: SettingsConfig, hash: string) => {
     setSettingsState(targetConfig);
@@ -235,7 +285,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const { data: historyData } = await apiClient.get("/api/settings/history");
 
         if (historyData.history) {
-          const cloudSnapshots = historyData.history.map((s: any) => ({
+          const cloudSnapshots = historyData.history.map((s: CloudSettingsSnapshot) => ({
             id: s.id,
             timestamp: new Date(s.created_at).getTime(),
             config: s.config,
@@ -247,7 +297,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (latestData.snapshot) {
           const cloudConfig = latestData.snapshot.config;
           const cloudHash = btoa(JSON.stringify(cloudConfig));
-          const localIsFresh = JSON.stringify(settings) === JSON.stringify(DEFAULT_SETTINGS);
+          const localIsFresh = JSON.stringify(settingsRef.current) === JSON.stringify(DEFAULT_SETTINGS);
 
           if (localIsFresh) {
             // Case A: Auto-apply
@@ -256,7 +306,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setLastPushedHash(cloudHash);
             localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
             logEvent("Retro-Sync: Cloud config applied (Case A).", "sys");
-          } else if (cloudHash !== currentHash) {
+          } else if (cloudHash !== currentHashRef.current) {
             // Case B: Conflict
             logEvent("Retro-Sync: Conflict detected. Local state modified (Case B).", "critical");
           } else {
@@ -266,15 +316,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             logEvent("Retro-Sync: Cloud hub identity verified.", "sync");
           }
         }
-      } catch (err: any) {
-        const errorMsg = err.response?.data?.message || err.message || "Cloud identity verification failed.";
+      } catch (err: unknown) {
+        if (isUnauthorizedError(err)) {
+          setLastPushedHash(null);
+          localStorage.removeItem("codeverse-last-pushed-hash");
+          logEvent("Retro-Sync paused: Session expired. Please sign in again.", "critical");
+          logout();
+          return;
+        }
+
+        const errorMsg = getErrorMessage(err, "Cloud identity verification failed.");
         logEvent(`Retro-Sync Error: ${errorMsg}`, "critical");
-        console.error("Retro-Sync failed", err);
       }
     };
 
     initSync();
-  }, [token]); // Trigger on login
+  }, [token, logEvent, logout]); // Trigger on login
 
   // Debounced Auto-Snapshot & Auto-Push (Optimistic)
   useEffect(() => {
@@ -294,19 +351,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setSettingsState(parsed);
       localStorage.setItem("codeverse-settings", json);
       logEvent("Neural JSON re-serialization success.", "sys");
-    } catch (e) {
+    } catch {
       logEvent("Diagnostic Error: Invalid JSON structure detected.", "critical");
     }
   }, [logEvent]);
 
   const toggleStressMode = useCallback(() => {
     setDiagnostics(prev => ({ ...prev, stressMode: !prev.stressMode }));
-    logEvent("System Alert: Artificial Heap Stress Triggered.", "critical");
+    logEvent("Diagnostics: Stress overlay toggled for UI responsiveness testing.", "critical");
   }, [logEvent]);
 
   const flushMemory = useCallback(() => {
     setDiagnostics(prev => ({ ...prev, stressMode: false }));
-    logEvent("Garbage Collection: V8 Heap Purge complete.", "sys");
+    logEvent("Diagnostics: Stress overlay cleared. Live browser/server readings restored.", "sys");
   }, [logEvent]);
 
   // APM Engine Logic
@@ -337,7 +394,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       window.removeEventListener("keydown", handleKeydown);
       clearInterval(interval);
     };
-  }, []);
+  }, [logEvent]);
 
   // Global Side Effects (CSS Variables)
   useEffect(() => {
@@ -369,24 +426,37 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Heartbeat Engine
   useEffect(() => {
     const heartbeat = setInterval(async () => {
-      // Simulated metrics with real-time jitter
-      const memoryBase = (window.performance as any)?.memory?.usedJSHeapSize 
-        ? Math.round((window.performance as any).memory.usedJSHeapSize / 1024 / 1024)
-        : 120;
-      
-      const jitter = Math.random() * 5;
-      const stressAdd = diagnostics.stressMode ? 800 + Math.random() * 200 : 0;
-      
-      setDiagnostics(prev => ({
-        ...prev,
-        latency: Math.round(12 + Math.random() * 8), // Real implementation would be a fetch to /api/health
-        memory: memoryBase + stressAdd + jitter,
-        load: Math.min(100, (apm / 4) + (diagnostics.stressMode ? 40 : 5) + (Math.random() * 5))
-      }));
+      const started = performance.now();
+      const browserPerformance = window.performance as PerformanceWithMemory;
+      const browserMemory = browserPerformance.memory?.usedJSHeapSize
+        ? Math.round(browserPerformance.memory.usedJSHeapSize / 1024 / 1024)
+        : 0;
+
+      try {
+        const { data } = await apiClient.get("/api/health");
+        const latency = Math.max(1, Math.round(performance.now() - started));
+        const serverMemory = data?.memory?.heapUsedMb || 0;
+        const memory = browserMemory ? browserMemory + serverMemory : serverMemory;
+        const loadFromServer = Number(data?.load || 0);
+
+        setDiagnostics(prev => ({
+          ...prev,
+          latency,
+          memory: Math.round(memory + (prev.stressMode ? 800 : 0)),
+          load: Math.min(100, Math.round((apm / 4) + loadFromServer * 10 + (prev.stressMode ? 40 : 0)))
+        }));
+      } catch {
+        setDiagnostics(prev => ({
+          ...prev,
+          latency: 0,
+          memory: Math.round((browserMemory || prev.memory || 0) + (prev.stressMode ? 800 : 0)),
+          load: Math.min(100, Math.round((apm / 4) + (prev.stressMode ? 40 : 0)))
+        }));
+      }
     }, 2000);
 
     return () => clearInterval(heartbeat);
-  }, [apm, diagnostics.stressMode]);
+  }, [apm]);
 
   return (
     <SettingsContext.Provider value={{ 

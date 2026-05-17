@@ -1,8 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
-import type { SupportedLanguage } from "@shared/types/language";
 
 export type ExecutionOutputType = "terminal" | "visual";
+
+interface SocketLike {
+  on: (event: string, handler: (data: unknown) => void) => void;
+  off: (event: string, handler: (data: unknown) => void) => void;
+}
 
 export interface ExecutionState {
   output: string;
@@ -14,11 +18,7 @@ export interface ExecutionState {
 }
 
 export function useCodeExecution(
-  socket: any,
-  language: SupportedLanguage,
-  code: string,
-  roomId: string,
-  user: { username: string } | null
+  socket: SocketLike | null
 ): ExecutionState {
   const [output, setOutput] = useState("");
   const [outputType, setOutputType] = useState<ExecutionOutputType>("terminal");
@@ -28,14 +28,16 @@ export function useCodeExecution(
   useEffect(() => {
     if (!socket) return;
 
-    const handleExecutionResult = (data: { user: string; output: string; type?: ExecutionOutputType }) => {
-      setOutput(data.output);
-      setOutputType(data.type || "terminal");
+    const handleExecutionResult = (data: unknown) => {
+      const result = data as { output?: string; type?: ExecutionOutputType };
+      setOutput(result.output || "");
+      setOutputType(result.type || "terminal");
       setLoading(false);
     };
 
-    const handleExecutionError = (data: { user: string; error: string }) => {
-      setOutput(`❌ Execution failed: ${data.error}`);
+    const handleExecutionError = (data: unknown) => {
+      const result = data as { error?: string };
+      setOutput(`❌ Execution failed: ${result.error || "Unknown socket error"}`);
       setOutputType("terminal");
       setLoading(false);
     };

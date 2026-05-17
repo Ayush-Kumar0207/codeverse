@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ThumbsDown, Send, CheckCircle2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle2, Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,91 +9,102 @@ import { Textarea } from "@/components/ui/textarea";
 interface FeedbackLoopProps {
   isVisible: boolean;
   onClose: () => void;
+  codeSnippet?: string;
+  traceOutput?: unknown[];
 }
 
-export default function FeedbackLoop({ isVisible, onClose }: FeedbackLoopProps) {
+export default function FeedbackLoop({
+  isVisible,
+  onClose,
+  codeSnippet = "",
+  traceOutput = [],
+}: FeedbackLoopProps) {
   const [feedbackType, setFeedbackType] = useState<"up" | "down" | null>(null);
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
 
-  const handleSubmit = async () => {
+  const reset = () => {
+    setStatus("idle");
+    setFeedbackType(null);
+    setComment("");
+  };
+
+  const handleSubmit = async (type = feedbackType) => {
     setStatus("submitting");
     const payload = {
-      codeSnippet: "// Mock trace snippet",
-      traceOutput: ["50", "30", "20", "40", "70", "60", "80"],
-      userFeedback: feedbackType === "up" ? "Positive" : comment,
+      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      codeSnippet: codeSnippet.slice(0, 4000),
+      traceOutput: traceOutput.slice(0, 50),
+      userFeedback: type === "up" ? "Positive" : comment,
     };
-    console.log("Routing to Neural Architect for Self-Correction:", payload);
+
+    const existing = JSON.parse(localStorage.getItem("codeverse-algotrace-feedback") || "[]");
+    localStorage.setItem("codeverse-algotrace-feedback", JSON.stringify([payload, ...existing].slice(0, 50)));
 
     setStatus("success");
     setTimeout(() => {
       onClose();
-      setTimeout(() => {
-        setStatus("idle");
-        setFeedbackType(null);
-        setComment("");
-      }, 500);
-    }, 2000);
+      setTimeout(reset, 300);
+    }, 1400);
   };
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: 20, opacity: 0, scale: 0.95 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ height: 0, opacity: 0, scale: 0.95 }}
-          className="w-full max-w-sm z-50 overflow-hidden"
+          initial={{ y: 8, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 8, opacity: 0 }}
+          className="w-full max-w-md"
         >
-          {/* Refactored: Unobtrusive Toast-like floating pill */}
-          <div className="p-3 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl glass-effect relative">
-            <button 
+          <div className="relative rounded-md border border-slate-800 bg-slate-950 px-4 py-3 shadow-xl">
+            <button
+              type="button"
               onClick={onClose}
-              className="absolute top-1.5 right-1.5 p-1 text-slate-500 hover:text-white transition-colors"
+              aria-label="Close feedback"
+              className="absolute right-2 top-2 rounded p-1 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-200"
             >
-              <X className="w-3 h-3" />
+              <X className="h-3.5 w-3.5" />
             </button>
 
             {status === "success" ? (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-3 py-1 text-center"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <div className="text-left">
-                  <h3 className="text-white text-[11px] font-bold">Feedback Sent</h3>
-                  <p className="text-slate-400 text-[9px]">Successfully routed to Neural Architect</p>
+              <div className="flex items-center gap-3 pr-6">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <div>
+                  <div className="text-sm font-semibold text-slate-100">Feedback saved</div>
+                  <div className="text-xs text-slate-500">Thanks for helping tune the trace view.</div>
                 </div>
-              </motion.div>
+              </div>
             ) : (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3 pr-4">
-                  <div className="overflow-hidden">
-                    <h3 className="text-white text-[11px] font-bold truncate">Trace Complete</h3>
-                    <p className="text-slate-400 text-[8px] uppercase tracking-wider truncate">Visualization accurate?</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Button
-                      variant={feedbackType === "up" ? "default" : "ghost"}
-                      size="icon"
-                      className={`h-7 w-7 ${feedbackType === "up" ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400"}`}
-                      onClick={() => {
-                        setFeedbackType("up");
-                        handleSubmit();
-                      }}
-                    >
-                      <ThumbsUp className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant={feedbackType === "down" ? "default" : "ghost"}
-                      size="icon"
-                      className={`h-7 w-7 ${feedbackType === "down" ? "bg-rose-500/20 text-rose-400" : "text-slate-400"}`}
-                      onClick={() => setFeedbackType("down")}
-                    >
-                      <ThumbsDown className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+              <div className="space-y-3 pr-6">
+                <div>
+                  <div className="text-sm font-semibold text-slate-100">Was this trace useful?</div>
+                  <div className="text-xs text-slate-500">Your note is stored locally for this workspace.</div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                    onClick={() => {
+                      setFeedbackType("up");
+                      handleSubmit("up");
+                    }}
+                  >
+                    <ThumbsUp className="mr-2 h-3.5 w-3.5" />
+                    Helpful
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
+                    onClick={() => setFeedbackType("down")}
+                  >
+                    <ThumbsDown className="mr-2 h-3.5 w-3.5" />
+                    Needs work
+                  </Button>
                 </div>
 
                 <AnimatePresence>
@@ -102,23 +113,22 @@ export default function FeedbackLoop({ isVisible, onClose }: FeedbackLoopProps) 
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
+                      className="space-y-2 overflow-hidden"
                     >
-                      <div className="pt-1 space-y-2">
-                        <Textarea
-                          placeholder="What was wrong?"
-                          className="bg-black/40 border-white/5 focus:border-indigo-500/50 resize-none h-16 text-[11px] text-slate-300"
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                        />
-                        <Button 
-                          className="w-full h-8 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold"
-                          onClick={handleSubmit}
-                          disabled={status === "submitting"}
-                        >
-                          <Send className="w-3 h-3 mr-2" />
-                          {status === "submitting" ? "Submitting..." : "Submit Correction"}
-                        </Button>
-                      </div>
+                      <Textarea
+                        placeholder="What should be clearer?"
+                        className="h-20 resize-none border-slate-800 bg-slate-950 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500"
+                        value={comment}
+                        onChange={(event) => setComment(event.target.value)}
+                      />
+                      <Button
+                        className="h-8 w-full bg-indigo-500 text-xs font-semibold text-white hover:bg-indigo-400"
+                        onClick={() => handleSubmit("down")}
+                        disabled={status === "submitting"}
+                      >
+                        <Send className="mr-2 h-3.5 w-3.5" />
+                        {status === "submitting" ? "Saving" : "Save feedback"}
+                      </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>

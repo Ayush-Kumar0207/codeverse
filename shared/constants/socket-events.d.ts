@@ -3,6 +3,7 @@ export declare const SOCKET_EVENTS: {
   readonly CODE_CHANGE: "codeChange";
   readonly SYNC_CODE: "syncCode";
   readonly CHAT_MESSAGE: "chatMessage";
+  readonly FILES_CHANGE: "filesChange";
   readonly EXECUTION_START: "execution:start";
   readonly EXECUTION_RESULT: "execution:result";
   readonly EXECUTION_ERROR: "execution:error";
@@ -10,4 +11,9 @@ export declare const SOCKET_EVENTS: {
   readonly USER_JOINED: "userJoined";
   readonly USER_LEFT: "userLeft";
   readonly PRESENCE_UPDATE: "presenceUpdate";
+  readonly EDIT_PERMISSION_UPDATE: "editPermission:update";
+  readonly EDIT_PERMISSION_STATE: "editPermission:state";
+  readonly EDIT_PERMISSION_DENIED: "editPermission:denied";
+  readonly REALTIME_PING: "realtime:ping";
+  readonly REALTIME_PONG: "realtime:pong";
 };

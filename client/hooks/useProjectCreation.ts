@@ -14,38 +14,28 @@ interface User {
 export function useProjectCreation() {
   const router = useRouter();
   const [storedUser] = useLocalStorage<User | null>("user", null);
-  const [storedToken] = useLocalStorage<string | null>("token", null);
   const { user: authUser } = useAuth();
 
   const handleCreate = useCallback(
     async (title: string, language: SupportedLanguage) => {
-      try {
-        // Determine owner (prefer auth context, fallback to localStorage)
-        const owner = authUser?.username || storedUser?.username;
+      const owner = authUser?.username || storedUser?.username;
 
-        if (!owner) {
-          console.error("No authenticated user found for project creation");
-          return;
-        }
+      if (!owner) {
+        throw new Error("No authenticated user found for project creation");
+      }
 
-        if (!title.trim()) {
-          console.error("Project title cannot be empty");
-          return;
-        }
+      if (!title.trim()) {
+        throw new Error("Project title cannot be empty");
+      }
 
-        // Create project via service
-        const response = await createProject({
-          title,
-          language,
-          owner,
-        });
+      const response = await createProject({
+        title,
+        language,
+        owner,
+      });
 
-        if (response.project?._id) {
-          router.push(`/editor/${response.project._id}`);
-        }
-      } catch (err) {
-        console.error("Error creating project:", err);
-        throw err;
+      if (response.project?._id) {
+        router.push(`/editor/${response.project._id}`);
       }
     },
     [authUser, storedUser, router]

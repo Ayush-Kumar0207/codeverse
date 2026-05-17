@@ -1,0 +1,3 @@
+const status = document.querySelector("#status");
+status.textContent = "Live";
+console.log("CodeVerse deployment is live.");

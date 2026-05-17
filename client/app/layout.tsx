@@ -31,7 +31,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full`}
       suppressHydrationWarning
     >
-      <body className="bg-[var(--background)] text-[var(--foreground)] min-h-screen w-full">
+      <body className="min-h-screen w-full bg-background text-foreground">
         <ClientWrapper>
           {children}
         </ClientWrapper>

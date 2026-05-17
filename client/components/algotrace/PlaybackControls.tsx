@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { SkipBack, Pause, Play, SkipForward, RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Pause, Play, RotateCcw, SkipBack, SkipForward, type LucideIcon } from "lucide-react";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -10,6 +8,8 @@ interface PlaybackControlsProps {
   onNext: () => void;
   onPrev: () => void;
   onReset: () => void;
+  activeStep: number;
+  totalSteps: number;
 }
 
 export default function PlaybackControls({
@@ -18,47 +18,58 @@ export default function PlaybackControls({
   onNext,
   onPrev,
   onReset,
+  activeStep,
+  totalSteps,
 }: PlaybackControlsProps) {
-  return (
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="z-10"
-    >
-      {/* Phase 4: Floating Control Deck (glassmorphic pill) */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl shadow-indigo-500/10">
-        <ControlButton onClick={onReset} icon={RotateCcw} />
-        <ControlButton onClick={onPrev} icon={SkipBack} />
-        
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="flex items-center justify-center w-10 h-10 bg-indigo-500 hover:bg-indigo-400 text-white rounded-full transition-colors shadow-lg shadow-indigo-500/20"
-        >
-          {isPlaying ? (
-            <Pause className="w-5 h-5 fill-current" />
-          ) : (
-            <Play className="w-5 h-5 fill-current ml-0.5" />
-          )}
-        </motion.button>
+  const atStart = activeStep <= 0;
+  const atEnd = activeStep >= totalSteps - 1;
+  const canPlay = totalSteps > 1;
 
-        <ControlButton onClick={onNext} icon={SkipForward} />
-        {/* Added a spacer or logic for the end? No, just the controls */}
+  return (
+    <div className="flex items-center gap-3 rounded-md border border-slate-800 bg-slate-950/90 px-3 py-2 shadow-sm">
+      <ControlButton label="Reset trace" onClick={onReset} icon={RotateCcw} disabled={atStart} />
+      <ControlButton label="Previous step" onClick={onPrev} icon={SkipBack} disabled={atStart} />
+
+      <button
+        type="button"
+        onClick={() => setIsPlaying(!isPlaying)}
+        disabled={!canPlay || atEnd}
+        aria-label={isPlaying ? "Pause trace" : "Play trace"}
+        title={isPlaying ? "Pause trace" : "Play trace"}
+        className="flex h-9 w-9 items-center justify-center rounded-md bg-indigo-500 text-white transition-colors hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+      >
+        {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+      </button>
+
+      <ControlButton label="Next step" onClick={onNext} icon={SkipForward} disabled={atEnd} />
+      <div className="ml-1 min-w-14 text-right font-mono text-[11px] text-slate-400">
+        {activeStep + 1}/{Math.max(totalSteps, 1)}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-function ControlButton({ onClick, icon: Icon }: { onClick: () => void; icon: any }) {
+function ControlButton({
+  onClick,
+  icon: Icon,
+  label,
+  disabled = false,
+}: {
+  onClick: () => void;
+  icon: LucideIcon;
+  label: string;
+  disabled?: boolean;
+}) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+    <button
+      type="button"
       onClick={onClick}
-      className="p-2 text-slate-400 hover:text-white transition-colors"
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:text-slate-700 disabled:hover:bg-transparent"
     >
-      <Icon className="w-5 h-5" />
-    </motion.button>
+      <Icon className="h-4 w-4" />
+    </button>
   );
 }

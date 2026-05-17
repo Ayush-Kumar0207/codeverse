@@ -1,5 +1,15 @@
 import apiClient from "./api";
 import type { SharedProject } from "@shared/types/project";
+import axios from "axios";
+
+function getProjectErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { error?: string; message?: string } | undefined;
+    return data?.error || data?.message || error.message || fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+}
 
 export async function fetchProjectById(id: string): Promise<{ project: SharedProject }> {
   const { data } = await apiClient.get(`/api/projects/${id}`);
@@ -17,7 +27,15 @@ export async function createProject(payload: {
   owner: string | null;
   isDemo?: boolean;
 }): Promise<{ project: SharedProject }> {
-  const { data } = await apiClient.post("/api/projects/create", payload);
-  return data;
+  try {
+    const { data } = await apiClient.post("/api/projects/create", payload, { timeout: 12000 });
+    return data;
+  } catch (error) {
+    throw new Error(getProjectErrorMessage(error, "Failed to create project"));
+  }
 }
 
+export async function deleteProject(id: string): Promise<{ message?: string }> {
+  const { data } = await apiClient.delete(`/api/projects/${id}`);
+  return data;
+}

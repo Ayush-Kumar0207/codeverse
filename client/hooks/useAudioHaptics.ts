@@ -3,6 +3,10 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useSettings } from "@/context/SettingsContext";
 
+interface WindowWithWebkitAudioContext extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 export function useAudioHaptics() {
   const { settings, apm } = useSettings();
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -14,7 +18,8 @@ export function useAudioHaptics() {
     const initAudio = () => {
       if (audioCtxRef.current) return;
       
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as WindowWithWebkitAudioContext).webkitAudioContext;
+      if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
       
       const filter = ctx.createBiquadFilter();

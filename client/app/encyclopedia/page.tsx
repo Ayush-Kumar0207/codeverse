@@ -1,395 +1,705 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AT_ALGORITHMS, AlgorithmEntry, AlgorithmApproach } from "@/data/algos";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, BookOpen, Code2, Link as LinkIcon, Cpu, HardDrive, Maximize2, Minimize2, ChevronDown, ChevronRight, Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { AT_ALGORITHMS, AlgorithmEntry } from "@/data/algos";
+import { buildAlgorithmLearningProfile } from "@/lib/algo-learning";
+import {
+  BookOpen,
+  BrainCircuit,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  Copy,
+  Cpu,
+  Database,
+  ExternalLink,
+  Layers3,
+  ListChecks,
+  Maximize2,
+  Menu,
+  Minimize2,
+  Play,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
+
+const difficultyStyles: Record<AlgorithmEntry["difficulty"], string> = {
+  Easy: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
+  Medium: "border-amber-400/25 bg-amber-400/10 text-amber-300",
+  Hard: "border-red-400/25 bg-red-400/10 text-red-300",
+};
+
+const frequencyStyles: Record<AlgorithmEntry["frequencyLevel"], string> = {
+  "Very High": "border-cyan-400/25 bg-cyan-400/10 text-cyan-200",
+  High: "border-sky-400/25 bg-sky-400/10 text-sky-200",
+  Medium: "border-violet-400/25 bg-violet-400/10 text-violet-200",
+  Variable: "border-slate-400/20 bg-slate-400/10 text-slate-300",
+  Niche: "border-slate-400/20 bg-slate-400/10 text-slate-300",
+};
+
+const getComplexityStyle = (complexity: string) => {
+  const value = complexity.toLowerCase();
+  if (value.includes("2^") || value.includes("n^") || value.includes("factorial")) {
+    return "border-red-400/25 bg-red-400/10 text-red-300";
+  }
+  if (value.includes("n log n")) return "border-amber-400/25 bg-amber-400/10 text-amber-300";
+  if (value.includes("log n") || value === "o(1)") {
+    return "border-emerald-400/25 bg-emerald-400/10 text-emerald-300";
+  }
+  if (value.includes("n")) return "border-sky-400/25 bg-sky-400/10 text-sky-300";
+  return "border-slate-400/20 bg-slate-400/10 text-slate-300";
+};
+
+const getFileExtension = (language: string) => {
+  if (language === "Python") return "py";
+  if (language === "Java") return "java";
+  if (language === "C++") return "cpp";
+  if (language === "TypeScript") return "ts";
+  return "js";
+};
 
 export default function EncyclopediaPage() {
   const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(AT_ALGORITHMS[0]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeApproachIdx, setActiveApproachIdx] = useState(0);
   const [selectedLang, setSelectedLang] = useState("JavaScript");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    if (AT_ALGORITHMS[0]?.topic) initial[AT_ALGORITHMS[0].topic] = true;
+    return initial;
+  });
 
-  // Load preferred language from localStorage on mount
   useEffect(() => {
     const savedLang = localStorage.getItem("algo-trace-preferred-lang");
-    if (savedLang) {
-      setSelectedLang(savedLang);
-    }
+    if (savedLang) setSelectedLang(savedLang);
   }, []);
 
-  // Save preferred language whenever it changes
+  const filteredAlgos = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return AT_ALGORITHMS;
+
+    return AT_ALGORITHMS.filter((algo) =>
+      `${algo.title} ${algo.topic} ${algo.category} ${algo.difficulty} ${algo.frequencyLevel}`
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [searchTerm]);
+
+  const groupedAlgos = useMemo(
+    () =>
+      filteredAlgos.reduce((acc, algo) => {
+        const topic = algo.topic || "Uncategorized";
+        if (!acc[topic]) acc[topic] = [];
+        acc[topic].push(algo);
+        return acc;
+      }, {} as Record<string, AlgorithmEntry[]>),
+    [filteredAlgos]
+  );
+
+  const topicCount = useMemo(() => new Set(AT_ALGORITHMS.map((algo) => algo.topic || "Uncategorized")).size, []);
+  const activeApproach = activeAlgo.approaches[activeApproachIdx] || activeAlgo.approaches[0];
+  const activeImplementation =
+    activeApproach.implementations.find((impl) => impl.language === selectedLang) ||
+    activeApproach.implementations[0];
+  const learning = useMemo(() => buildAlgorithmLearningProfile(activeAlgo, activeApproach), [activeAlgo, activeApproach]);
+  const isSearchActive = searchTerm.trim().length > 0;
+  const codeFileName = `${activeAlgo.id}-${slugify(activeApproach.name)}.${getFileExtension(
+    activeImplementation?.language || selectedLang
+  )}`;
+
+  useEffect(() => {
+    const languages = activeApproach.implementations.map((implementation) => implementation.language);
+    if (languages.length > 0 && !languages.includes(selectedLang)) {
+      setSelectedLang(languages[0]);
+    }
+  }, [activeApproach, selectedLang]);
+
   const handleLangChange = (lang: string) => {
     setSelectedLang(lang);
     localStorage.setItem("algo-trace-preferred-lang", lang);
   };
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const filteredAlgos = AT_ALGORITHMS.filter(a => 
-    a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (a.topic && a.topic.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const groupedAlgos = filteredAlgos.reduce((acc, algo) => {
-    const topic = algo.topic || "Uncategorized";
-    if (!acc[topic]) acc[topic] = [];
-    acc[topic].push(algo);
-    return acc;
-  }, {} as Record<string, AlgorithmEntry[]>);
-
-  const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    if (AT_ALGORITHMS.length > 0 && AT_ALGORITHMS[0].topic) {
-        initial[AT_ALGORITHMS[0].topic] = true;
-    }
-    return initial;
-  });
-
-  const toggleTopic = (topic: string) => {
-    setExpandedTopics(prev => ({ ...prev, [topic]: !prev[topic] }));
-  };
-
-  // When switching algorithms, reset approach to 0
   const handleSelectAlgo = (algo: AlgorithmEntry) => {
     setActiveAlgo(algo);
     setActiveApproachIdx(0);
+    setExpandedTopics((prev) => ({ ...prev, [algo.topic || "Uncategorized"]: true }));
+    setIsLibraryOpen(false);
+    setCopied(false);
   };
 
-  const getComplexityColor = (complexity: string) => {
-    const comp = complexity.toLowerCase();
-    if (comp.includes("2^") || comp.includes("n^") || comp.includes("factorial")) return "bg-rose-500/20 text-rose-400 border-rose-500/30";
-    if (comp.includes("n log n")) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-    if (comp.includes("log n") || comp === "o(1)") return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-    if (comp.includes("n")) return "bg-amber-500/20 text-amber-400 border-amber-500/30";
-    return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  const toggleTopic = (topic: string) => {
+    setExpandedTopics((prev) => ({ ...prev, [topic]: !prev[topic] }));
   };
 
-  const activeApproach = activeAlgo.approaches[activeApproachIdx] || activeAlgo.approaches[0];
+  const copySnippet = async () => {
+    await navigator.clipboard.writeText(activeImplementation?.code || "");
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
 
-  const isSearchActive = searchTerm.trim().length > 0;
+  const libraryPanel = (
+    <LibraryPanel
+      activeAlgo={activeAlgo}
+      expandedTopics={expandedTopics}
+      filteredCount={filteredAlgos.length}
+      groupedAlgos={groupedAlgos}
+      isSearchActive={isSearchActive}
+      onClose={() => setIsLibraryOpen(false)}
+      onSearch={setSearchTerm}
+      onSelectAlgo={handleSelectAlgo}
+      onToggleTopic={toggleTopic}
+      searchTerm={searchTerm}
+      topicCount={topicCount}
+    />
+  );
 
   return (
-    <div className="h-screen flex w-full bg-slate-950 text-foreground font-sans overflow-hidden">
-      
-      {/* Left List Pane (Hidden in Fullscreen) */}
+    <div className="flex h-full min-h-screen w-full overflow-hidden bg-[#050910] text-slate-100">
       {!isFullscreen && (
-        <div className="w-[320px] flex-none border-r border-white/5 flex flex-col bg-slate-900/50 relative z-20">
-          <div className="p-5 border-b border-white/5 bg-slate-900/80 backdrop-blur-md">
-            <h2 className="text-xs font-black tracking-widest uppercase text-slate-300 flex items-center gap-2 mb-4">
-              <BookOpen className="w-4 h-4 text-indigo-400" />
-              Algorithm Codex
-            </h2>
-            <div className="relative">
-               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-               <input 
-                 type="text" 
-                 placeholder="Search algorithms..." 
-                 value={searchTerm}
-                 onChange={(e) => setSearchTerm(e.target.value)}
-                 className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 shadow-inner max-w-full truncate flex-1 focus:ring-1 transition-all"
-               />
-               {searchTerm && (
-                 <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
-                   <Minimize2 className="w-3 h-3" />
-                 </button>
-               )}
+        <>
+          <aside className="hidden w-[360px] shrink-0 border-r border-white/10 bg-[#080e18] lg:flex">
+            {libraryPanel}
+          </aside>
+
+          {isLibraryOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setIsLibraryOpen(false)}>
+              <aside
+                className="h-full w-[min(92vw,380px)] border-r border-white/10 bg-[#080e18] shadow-2xl shadow-black"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {libraryPanel}
+              </aside>
             </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto pb-32">
-            <div className="p-3 space-y-1.5">
-              
-              {Object.keys(groupedAlgos).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 px-4 text-center opacity-50">
-                   <h3 className="text-sm font-bold text-white mb-2">No algorithms found</h3>
-                   <p className="text-xs text-slate-400">Try tweaking your search term to find what you're looking for.</p>
-                </div>
-              ) : (
-                Object.entries(groupedAlgos).map(([topic, algos]) => {
-                  const isExpanded = isSearchActive || expandedTopics[topic];
-                  
-                  return (
-                    <div key={topic} className="mb-2">
-                      <button 
-                        onClick={() => toggleTopic(topic)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors"
-                      >
-                        <span className="truncate">{topic}</span>
-                        {isExpanded ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
-                      </button>
-                      
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden mt-1 space-y-1 pl-2 border-l border-white/5 ml-2"
-                          >
-                            {algos.map((algo) => {
-                              const isActive = activeAlgo.id === algo.id;
-                              const difficultyColor = 
-                                algo.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                                algo.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                                "bg-rose-500/20 text-rose-400 border-rose-500/30";
-                                
-                              return (
-                                <button
-                                  key={algo.id}
-                                  onClick={() => handleSelectAlgo(algo)}
-                                  className={"w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex flex-col gap-1.5 " + (isActive ? "bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]" : "hover:bg-white/5 border border-transparent")}
-                                >
-                                  <div className="flex justify-between items-start w-full gap-2">
-                                    <span className={"text-xs font-bold leading-tight " + (isActive ? "text-indigo-300" : "text-slate-300")}>{algo.title}</span>
-                                    <span className={"text-[9px] font-mono px-1.5 py-0.5 rounded border " + getComplexityColor(algo.approaches[0].timeComplexity)}>
-                                      {algo.approaches[0].timeComplexity}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className={"text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 " + difficultyColor}>
-                                      {algo.difficulty}
-                                    </span>
-                                    <span className="text-[9px] text-slate-500 font-medium tracking-wide">Fre: {algo.frequencyLevel}</span>
-                                  </div>
-                                </button>
-                              );
-                            })}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
-      {/* Right Detail Pane */}
-      <motion.div 
-        layout
-        className={isFullscreen 
-          ? "fixed inset-0 z-50 bg-slate-950 flex flex-col overflow-hidden" 
-          : "flex-1 flex flex-col overflow-hidden relative"
-        }
-      >
-         <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-400 via-slate-900 to-black mix-blend-screen" />
-         
-         <div className="absolute top-6 right-8 flex gap-3 z-50">
-            {activeAlgo.visualizerCode && (
-              <a 
-                href={"/editor/demo-sandbox?mode=demo&algo=" + activeAlgo.id}
-                title="Inject Code into IDE"
-                className="p-2 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 rounded-md transition-colors"
-                target="_blank" rel="noreferrer"
+      <main className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", isFullscreen && "fixed inset-0 z-50 bg-[#050910]")}>
+        <div className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-white/10 bg-[#080e18]/95 px-4 backdrop-blur-xl lg:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            {!isFullscreen && (
+              <button
+                onClick={() => setIsLibraryOpen(true)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06] lg:hidden"
+                aria-label="Open algorithm library"
+                title="Open algorithm library"
               >
-                <Code2 className="w-5 h-5" />
+                <Menu className="h-4 w-4" />
+              </button>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Encyclopedia</p>
+              <p className="truncate text-sm font-semibold text-slate-200">{activeAlgo.topic}</p>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {activeAlgo.visualizerCode && (
+              <a
+                href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950/35 transition hover:bg-indigo-400 sm:px-4"
+              >
+                <Play className="h-4 w-4" />
+                <span className="hidden sm:inline">Simulate</span>
               </a>
             )}
-            <button 
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              title="Toggle Focus Mode"
-              className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-md transition-colors"
+            <button
+              onClick={() => setIsFullscreen((value) => !value)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06]"
+              aria-label={isFullscreen ? "Exit focus view" : "Open focus view"}
+              title={isFullscreen ? "Exit focus view" : "Open focus view"}
             >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
-         </div>
-         
-         <div className="flex-1 relative z-10 px-8 md:px-16 py-12 overflow-y-auto">
-            <div className={"mx-auto space-y-12 transition-all duration-300 pb-32 " + (isFullscreen ? "max-w-6xl" : "max-w-4xl")}>
-               
-               {/* 1. Header Section */}
-               <div className="space-y-4 pr-32">
-                  <div className="flex flex-wrap items-center gap-2">
-                     <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-[10px] rounded uppercase tracking-widest font-bold">
-                       {activeAlgo.category}
-                     </span>
-                     <span className="px-2 py-1 bg-slate-800 text-slate-400 text-[10px] rounded uppercase tracking-widest font-bold font-mono">
-                       {activeAlgo.frequencyLevel} Frequency
-                     </span>
-                  </div>
-                  <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">{activeAlgo.title}</h1>
-                  <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-                     {activeAlgo.overview}
-                  </p>
-                  
-                  {activeAlgo.useCases && activeAlgo.useCases.length > 0 && (
-                     <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/5">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 py-1.5 mr-2">Use Cases:</span>
-                        {activeAlgo.useCases.map((uc, i) => (
-                           <span key={i} className="text-[10px] px-2.5 py-1 bg-white/5 border border-white/10 rounded text-slate-300">
-                             {uc}
-                           </span>
-                        ))}
-                     </div>
-                  )}
-               </div>
+          </div>
+        </div>
 
-               {/* 2. Visualizer Native Injection Banner */}
-               {activeAlgo.visualizerCode && (
-                  <div className="bg-gradient-to-r from-indigo-900/60 to-slate-900/40 border border-indigo-500/30 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0_0_40px_rgba(99,102,241,0.05)]">
-                     <div>
-                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                          <Sparkles className="w-5 h-5 text-indigo-400" />
-                          Interactive Coaching Available
-                        </h3>
-                        <p className="text-xs text-indigo-200/70 mt-1 max-w-lg leading-relaxed">
-                          This algorithm comes with a pre-configured Auto-Visualizer script. Inject it into the CodeVerse simulation environment to trace the pointers and logic natively.
-                        </p>
-                     </div>
-                     <a 
-                       href={"/editor/demo-sandbox?mode=demo&algo=" + activeAlgo.id}
-                       className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] flex items-center gap-2 shrink-0 w-full md:w-auto justify-center"
-                     >
-                       <Code2 className="w-4 h-4" />
-                       Activate Simulation
-                     </a>
-                  </div>
-               )}
+        <div className="flex-1 overflow-y-auto">
+          <div className={cn("mx-auto flex w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8", isFullscreen ? "max-w-6xl" : "max-w-[1480px]")}>
+            <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="rounded-lg border border-white/10 bg-[#0a101b] p-5 shadow-2xl shadow-black/20 sm:p-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Pill className="border-indigo-400/25 bg-indigo-400/10 text-indigo-200">{activeAlgo.category || activeAlgo.topic}</Pill>
+                  <Pill className={difficultyStyles[activeAlgo.difficulty]}>{activeAlgo.difficulty}</Pill>
+                  <Pill className={frequencyStyles[activeAlgo.frequencyLevel]}>{activeAlgo.frequencyLevel} frequency</Pill>
+                  <Pill className="border-slate-400/20 bg-slate-400/10 text-slate-300">{learning.family}</Pill>
+                </div>
 
-               {/* 3. Multi-Tier Architecture Section */}
-               <div className="space-y-6">
-                  
-                  {/* Approach Tabs */}
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-4 overflow-x-auto no-scrollbar mask-image-gradient-r">
-                    {activeAlgo.approaches.map((appr, idx) => (
-                       <button
-                         key={idx}
-                         onClick={() => setActiveApproachIdx(idx)}
-                         className={"px-5 py-2.5 rounded-lg text-xs font-bold transition-all shrink-0 uppercase tracking-widest flex items-center gap-2 " + (
-                           activeApproachIdx === idx 
-                           ? "bg-white text-black shadow-lg" 
-                           : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
-                         )}
-                       >
-                         Method {idx + 1}: {appr.name}
-                       </button>
+                <div className="mt-5 max-w-4xl">
+                  <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">{activeAlgo.title}</h1>
+                  <p className="mt-4 text-base leading-7 text-slate-300">{activeAlgo.overview}</p>
+                </div>
+
+                {activeAlgo.useCases?.length > 0 && (
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {activeAlgo.useCases.slice(0, 6).map((useCase) => (
+                      <span key={useCase} className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-slate-300">
+                        {useCase}
+                      </span>
                     ))}
                   </div>
+                )}
+              </div>
 
-                  {/* Active Approach Display */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                       key={activeApproachIdx}
-                       initial={{ opacity: 0, y: 10 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       exit={{ opacity: 0, y: -10 }}
-                       transition={{ duration: 0.2 }}
-                       className="space-y-8"
+              <aside className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <Metric label="Time" value={activeApproach.timeComplexity} icon={Cpu} />
+                <Metric label="Space" value={activeApproach.spaceComplexity} icon={Database} />
+                <Metric label="Approaches" value={`${activeAlgo.approaches.length}`} icon={Layers3} />
+                <Metric label="Notes" value={learning.coverage} icon={Sparkles} />
+              </aside>
+            </section>
+
+            {activeAlgo.visualizerCode && (
+              <section className="flex flex-col gap-4 rounded-lg border border-indigo-400/20 bg-indigo-400/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-lg border border-indigo-300/20 bg-indigo-300/10 p-2 text-indigo-200">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-semibold text-white">Interactive visualizer available</h2>
+                    <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">Open this problem in the editor with a ready-made trace script.</p>
+                  </div>
+                </div>
+                <a
+                  href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                >
+                  <Play className="h-4 w-4" />
+                  Open Visualizer
+                </a>
+              </section>
+            )}
+
+            <section className="rounded-lg border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
+              <div className="flex flex-col gap-4 border-b border-white/10 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Selected approach</p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">{activeApproach.name}</h2>
+                </div>
+                <div className="flex gap-2 overflow-x-auto">
+                  {activeAlgo.approaches.map((approach, index) => (
+                    <button
+                      key={`${approach.name}-${index}`}
+                      onClick={() => {
+                        setActiveApproachIdx(index);
+                        setCopied(false);
+                      }}
+                      className={cn(
+                        "inline-flex h-10 max-w-[280px] shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
+                        activeApproachIdx === index
+                          ? "bg-white text-slate-950 shadow-lg shadow-black/20"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
+                      )}
                     >
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="md:col-span-2 space-y-3">
-                             <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-                               <Sparkles className="w-5 h-5 text-emerald-400" />
-                               Step-by-Step Methodology
-                             </h3>
-                             <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-headings:text-indigo-300 prose-strong:text-indigo-400 bg-white/5 p-6 rounded-2xl border border-white/5 shadow-inner">
-                               <ReactMarkdown>{activeApproach.description}</ReactMarkdown>
-                             </div>
-                          </div>
-                          
-                          <div className="space-y-4 flex flex-col justify-center">
-                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-start flex-col gap-3">
-                               <div className="flex items-center gap-4">
-                                 <div className={"p-3 rounded-lg flex-none " + (activeApproach.timeComplexity.includes("2^") || activeApproach.timeComplexity.includes("N^") ? "bg-rose-500/10 text-rose-400" : activeApproach.timeComplexity.includes("log") ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400")}>
-                                    <Cpu className="w-5 h-5" />
-                                 </div>
-                                 <div>
-                                    <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Time Complexity</div>
-                                    <div className="font-mono font-bold text-white text-base">{activeApproach.timeComplexity}</div>
-                                 </div>
-                               </div>
-                               {activeApproach.timeComplexityExplanation && (
-                                  <div className="text-xs text-slate-400 mt-1 leading-relaxed border-t border-white/5 pt-2 w-full">
-                                    {activeApproach.timeComplexityExplanation}
-                                  </div>
-                               )}
-                             </div>
-                             
-                             <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl flex items-start flex-col gap-3">
-                               <div className="flex items-center gap-4">
-                                 <div className={"p-3 rounded-lg flex-none " + (activeApproach.spaceComplexity.includes("N") ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400")}>
-                                    <HardDrive className="w-5 h-5" />
-                                 </div>
-                                 <div>
-                                    <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Space Complexity</div>
-                                    <div className="font-mono font-bold text-white text-base">{activeApproach.spaceComplexity}</div>
-                                 </div>
-                               </div>
-                               {activeApproach.spaceComplexityExplanation && (
-                                  <div className="text-xs text-slate-400 mt-1 leading-relaxed border-t border-white/5 pt-2 w-full">
-                                    {activeApproach.spaceComplexityExplanation}
-                                  </div>
-                               )}
-                             </div>
-                          </div>
-                       </div>
+                      <span className="truncate">{index + 1}. {approach.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                       <div className="space-y-3 pt-4 border-t border-white/5 mt-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-2">
-                              System Implementation
-                            </h3>
-                            
-                            {/* Polyglot Language Switcher */}
-                            <div className="flex bg-black/40 p-1 rounded-lg border border-white/5">
-                              {activeApproach.implementations.map((impl) => (
-                                <button
-                                  key={impl.language}
-                                  onClick={() => handleLangChange(impl.language)}
-                                  className={"px-3 py-1.5 text-[10px] font-bold rounded flex-1 sm:flex-none uppercase tracking-wider transition-all " + (
-                                    selectedLang === impl.language
-                                    ? "bg-indigo-500 text-white shadow-md"
-                                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                                  )}
-                                >
-                                  {impl.language}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl">
-                             <div className="absolute top-0 left-0 right-0 h-8 bg-black/60 flex items-center justify-between px-4 gap-2 border-b border-white/5 z-10">
-                               <div className="flex items-center gap-2">
-                                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/50" />
-                                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
-                                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
-                                 <div className="ml-2 text-[9px] font-mono text-slate-400">{activeAlgo.id}-{activeApproach.name.toLowerCase().replace(/ /g, '-')}.{
-                                    selectedLang === "Python" ? "py" : 
-                                    selectedLang === "Java" ? "java" : 
-                                    selectedLang === "C++" ? "cpp" : "js"
-                                 }</div>
-                               </div>
-                               <button 
-                                 className="text-[9px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
-                                 onClick={() => navigator.clipboard.writeText(
-                                   activeApproach.implementations.find(impl => impl.language === selectedLang)?.code || activeApproach.implementations[0].code
-                                 )}
-                               >
-                                 Copy snippet
-                               </button>
-                             </div>
-                             <pre className="bg-[#0D0D0D] p-6 pt-12 overflow-x-auto text-sm font-mono text-slate-300 leading-loose min-h-[150px]">
-                               <code>
-                                 {activeApproach.implementations.find(impl => impl.language === selectedLang)?.code || activeApproach.implementations[0].code}
-                               </code>
-                             </pre>
-                          </div>
-                       </div>
-                       
-                    </motion.div>
-                  </AnimatePresence>
-               </div>
-            </div>
-         </div>
-      </motion.div>
+              <div className="grid grid-cols-1 gap-5 p-4 lg:p-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="space-y-5">
+                  <InsightCard title="Mental model" label={learning.family} icon={BrainCircuit}>
+                    <p>{learning.mentalModel}</p>
+                  </InsightCard>
 
+                  <StepCard title="Execution plan" icon={ListChecks} steps={learning.executionSteps} />
+
+                  <div className="grid grid-cols-1 gap-5 2xl:grid-cols-2">
+                    <InsightCard title="Invariant" icon={ShieldCheck}>
+                      <p>{learning.invariant}</p>
+                    </InsightCard>
+                    <InsightCard title="Why it works" icon={Target}>
+                      <p>{learning.whyItWorks}</p>
+                    </InsightCard>
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-indigo-300" />
+                      <h3 className="text-base font-semibold text-white">Detailed walkthrough</h3>
+                    </div>
+                    <div className="prose prose-invert max-w-none prose-headings:mb-2 prose-headings:mt-5 prose-headings:text-white prose-p:my-2 prose-p:leading-7 prose-p:text-slate-300 prose-strong:text-white prose-code:rounded prose-code:bg-black/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-indigo-200 prose-code:before:content-none prose-code:after:content-none prose-li:my-1 prose-li:text-slate-300 prose-ul:my-3 prose-ol:my-3">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeApproach.description}</ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+                  <ListCard title="Edge cases to test" icon={ShieldCheck} items={learning.edgeCases} tone="emerald" />
+                  <ListCard title="Interview notes" icon={Sparkles} items={learning.interviewNotes} tone="indigo" />
+                  <ComplexityCard
+                    title="Time complexity"
+                    value={activeApproach.timeComplexity}
+                    description={learning.timeExplanation}
+                    icon={Cpu}
+                    tone="amber"
+                  />
+                  <ComplexityCard
+                    title="Space complexity"
+                    value={activeApproach.spaceComplexity}
+                    description={learning.spaceExplanation}
+                    icon={Database}
+                    tone="cyan"
+                  />
+                </aside>
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
+              <div className="flex flex-col gap-4 border-b border-white/10 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-indigo-300">
+                    <Code2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Implementation</h2>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">Reference code for the selected approach.</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {activeApproach.implementations.map((implementation) => (
+                    <button
+                      key={implementation.language}
+                      onClick={() => handleLangChange(implementation.language)}
+                      className={cn(
+                        "h-9 rounded-lg px-3 text-sm font-semibold transition",
+                        activeImplementation?.language === implementation.language
+                          ? "bg-indigo-500 text-white"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
+                      )}
+                    >
+                      {implementation.language}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="overflow-hidden">
+                <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#070b12] px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                    <span className="ml-2 truncate font-mono text-xs text-slate-500">{codeFileName}</span>
+                  </div>
+                  <button
+                    onClick={copySnippet}
+                    className="inline-flex h-8 items-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? "Copied" : "Copy"}
+                  </button>
+                </div>
+                <pre className="max-h-[560px] overflow-auto bg-[#05080d] p-5 text-sm leading-7 text-slate-300">
+                  <code>{activeImplementation?.code || "// No implementation available"}</code>
+                </pre>
+              </div>
+            </section>
+
+            {activeAlgo.leetcodeLink && (
+              <a
+                href={activeAlgo.leetcodeLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-fit items-center gap-2 rounded-lg border border-indigo-400/20 bg-indigo-400/10 px-3 py-2 text-sm font-semibold text-indigo-200 transition hover:border-indigo-300/35 hover:bg-indigo-400/15"
+              >
+                Open original problem
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
+}
+
+function LibraryPanel({
+  activeAlgo,
+  expandedTopics,
+  filteredCount,
+  groupedAlgos,
+  isSearchActive,
+  onClose,
+  onSearch,
+  onSelectAlgo,
+  onToggleTopic,
+  searchTerm,
+  topicCount,
+}: {
+  activeAlgo: AlgorithmEntry;
+  expandedTopics: Record<string, boolean>;
+  filteredCount: number;
+  groupedAlgos: Record<string, AlgorithmEntry[]>;
+  isSearchActive: boolean;
+  onClose: () => void;
+  onSearch: (term: string) => void;
+  onSelectAlgo: (algo: AlgorithmEntry) => void;
+  onToggleTopic: (topic: string) => void;
+  searchTerm: string;
+  topicCount: number;
+}) {
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="border-b border-white/10 p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <BookOpen className="h-4 w-4 text-indigo-300" />
+              Algorithm Library
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              {AT_ALGORITHMS.length} entries across {topicCount} topics
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 lg:hidden"
+            aria-label="Close algorithm library"
+            title="Close algorithm library"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search algorithms"
+            value={searchTerm}
+            onChange={(event) => onSearch(event.target.value)}
+            className="h-11 w-full rounded-lg border border-white/10 bg-[#050910] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+          <span>{filteredCount} visible</span>
+          <span>{isSearchActive ? "Search mode" : "Grouped by topic"}</span>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-3">
+        {Object.keys(groupedAlgos).length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <Search className="h-8 w-8 text-slate-600" />
+            <h3 className="mt-4 text-sm font-semibold text-white">No matches found</h3>
+            <p className="mt-1 text-xs leading-5 text-slate-500">Try another title, topic, or difficulty.</p>
+          </div>
+        ) : (
+          Object.entries(groupedAlgos).map(([topic, algos]) => {
+            const isExpanded = isSearchActive || expandedTopics[topic];
+
+            return (
+              <section key={topic} className="mb-2">
+                <button
+                  onClick={() => onToggleTopic(topic)}
+                  className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
+                >
+                  <span className="truncate">{topic}</span>
+                  <span className="flex items-center gap-2 text-xs text-slate-500">
+                    {algos.length}
+                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </span>
+                </button>
+
+                {isExpanded && (
+                  <div className="mt-1 space-y-1">
+                    {algos.map((algo) => {
+                      const isActive = activeAlgo.id === algo.id;
+                      const firstApproach = algo.approaches[0];
+
+                      return (
+                        <button
+                          key={algo.id}
+                          onClick={() => onSelectAlgo(algo)}
+                          className={cn(
+                            "w-full rounded-lg border p-3 text-left transition",
+                            isActive
+                              ? "border-indigo-400/35 bg-indigo-400/10 shadow-lg shadow-indigo-950/20"
+                              : "border-transparent hover:border-white/10 hover:bg-white/[0.04]"
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <span className={cn("min-w-0 text-sm font-semibold leading-5", isActive ? "text-indigo-100" : "text-slate-200")}>
+                              {algo.title}
+                            </span>
+                            <span className={cn("shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[11px]", getComplexityStyle(firstApproach.timeComplexity))}>
+                              {firstApproach.timeComplexity}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-semibold", difficultyStyles[algo.difficulty])}>
+                              {algo.difficulty}
+                            </span>
+                            <span className="truncate text-xs text-slate-500">{algo.frequencyLevel} frequency</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, icon: Icon }: { label: string; value: string; icon: LucideIcon }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-[#0a101b] p-4 shadow-xl shadow-black/15">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+          <p className="mt-2 truncate font-mono text-sm font-semibold text-white">{value}</p>
+        </div>
+        <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-300">
+          <Icon className="h-4 w-4" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Pill({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cn("rounded-md border px-2.5 py-1 text-xs font-semibold", className)}>{children}</span>;
+}
+
+function InsightCard({
+  title,
+  label,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  label?: string;
+  icon: LucideIcon;
+  children: ReactNode;
+}) {
+  return (
+    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-300">
+            <Icon className="h-4 w-4" />
+          </div>
+          <h3 className="text-base font-semibold text-white">{title}</h3>
+        </div>
+        {label && <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-xs font-medium text-slate-400">{label}</span>}
+      </div>
+      <div className="text-sm leading-7 text-slate-300">{children}</div>
+    </article>
+  );
+}
+
+function StepCard({ title, icon: Icon, steps }: { title: string; icon: LucideIcon; steps: string[] }) {
+  return (
+    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-2 text-cyan-300">
+          <Icon className="h-4 w-4" />
+        </div>
+        <h3 className="text-base font-semibold text-white">{title}</h3>
+      </div>
+      <ol className="space-y-3">
+        {steps.map((step, index) => (
+          <li key={step} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 text-sm leading-6 text-slate-300">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
+              {index + 1}
+            </span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+    </article>
+  );
+}
+
+function ListCard({
+  title,
+  icon: Icon,
+  items,
+  tone,
+}: {
+  title: string;
+  icon: LucideIcon;
+  items: string[];
+  tone: "emerald" | "indigo";
+}) {
+  const toneClass =
+    tone === "emerald"
+      ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+      : "border-indigo-400/20 bg-indigo-400/10 text-indigo-300";
+
+  return (
+    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <div className={cn("rounded-lg border p-2", toneClass)}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <h3 className="text-base font-semibold text-white">{title}</h3>
+      </div>
+      <ul className="space-y-2.5">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 text-sm leading-6 text-slate-300">
+            <Check className="mt-1 h-4 w-4 shrink-0 text-slate-500" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+function ComplexityCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  tone,
+}: {
+  title: string;
+  value: string;
+  description: string;
+  icon: LucideIcon;
+  tone: "amber" | "cyan";
+}) {
+  const toneClass =
+    tone === "amber"
+      ? "border-amber-400/20 bg-amber-400/10 text-amber-300"
+      : "border-cyan-400/20 bg-cyan-400/10 text-cyan-300";
+
+  return (
+    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
+      <div className="mb-4 flex items-start gap-3">
+        <div className={cn("rounded-lg border p-2", toneClass)}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
+          <p className="mt-2 font-mono text-base font-semibold text-white">{value}</p>
+        </div>
+      </div>
+      <p className="text-sm leading-7 text-slate-300">{description}</p>
+    </article>
+  );
+}
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "approach";
 }

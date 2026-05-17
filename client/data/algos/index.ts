@@ -19,6 +19,9 @@ import { heapAlgorithms } from "./heaps";
 import { advancedDsAlgorithms } from "./advanced_ds";
 import { patternsAlgorithms } from "./patterns";
 import { generatedStriverAlgorithms } from "./generated_striver_algos";
+import { completeAlgorithmExplanations } from "./explanation_completion";
+import { completeAlgorithmImplementations } from "./implementation_completion";
+import { completeAlgorithmVisualizers } from "./visualizer_completion";
 
 // Base curated algorithms across all standard topics
 const curatedAlgorithms: AlgorithmEntry[] = [
@@ -111,11 +114,16 @@ const mergedCuratedAlgorithms: AlgorithmEntry[] = curatedAlgorithms.map((algo) =
 });
 
 // Aggregator registry for all algorithm modules, filtering out any generated ones that have been curated
-export const AT_ALGORITHMS: AlgorithmEntry[] = [
+const assembledAlgorithms: AlgorithmEntry[] = [
   ...mergedCuratedAlgorithms,
   ...generatedStriverAlgorithms.filter(
     (a) => !curatedIds.has(a.id) && !isPlaceholderApproach(a)
   ),
 ];
+
+export const AT_ALGORITHMS: AlgorithmEntry[] =
+  completeAlgorithmVisualizers(
+    completeAlgorithmImplementations(completeAlgorithmExplanations(assembledAlgorithms))
+  );
 
 export * from "./types";

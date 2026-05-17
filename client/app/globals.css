@@ -63,39 +63,136 @@
     --background: 222 47% 3%;
     --foreground: 210 20% 90%;
     --card: 222 47% 4%;
+    --card-foreground: 210 20% 90%;
+    --popover: 222 47% 5%;
+    --popover-foreground: 210 20% 90%;
     --card-bg: 222 47% 4%;
     --primary: 239 84% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 34% 12%;
+    --secondary-foreground: 210 20% 92%;
+    --muted: 222 30% 12%;
+    --muted-foreground: 215 18% 64%;
     --accent: 235 50% 50%;
+    --accent-foreground: 0 0% 100%;
+    --border: 222 26% 16%;
+    --input: 222 26% 16%;
+    --ring: 239 84% 67%;
+    --activity-bar-background: 222 47% 3%;
+    --activity-bar-foreground: 215 20% 65%;
+    --activity-bar-active: 239 84% 67%;
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 215 20% 65%;
+    --sidebar-border: 222 26% 16%;
+    --sidebar-ring: 239 84% 67%;
+    --sidebar-accent: 239 84% 14%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --editor-background: 222 47% 4%;
+    --editor-foreground: 210 40% 98%;
+    --editor-line: 222 47% 10%;
+    --editor-selection: 239 84% 67% / 30%;
   }
 
   [data-theme='hacker'] {
-    --background: 142 40% 2%;
-    --foreground: 142 70% 45%;
-    --primary: 142 70% 45%;
-    --accent: 142 70% 30%;
-    --border: 142 70% 10%;
-    --card: 142 40% 3%;
-    --card-bg: 142 40% 3%;
+    --background: 150 48% 3%;
+    --foreground: 151 72% 83%;
+    --card: 150 34% 5%;
+    --card-foreground: 151 72% 83%;
+    --popover: 150 34% 5%;
+    --popover-foreground: 151 72% 83%;
+    --card-bg: 150 34% 5%;
+    --primary: 150 76% 54%;
+    --primary-foreground: 156 56% 6%;
+    --secondary: 150 26% 12%;
+    --secondary-foreground: 151 72% 83%;
+    --muted: 150 22% 11%;
+    --muted-foreground: 151 20% 62%;
+    --accent: 188 95% 48%;
+    --accent-foreground: 156 56% 6%;
+    --border: 150 30% 18%;
+    --input: 150 30% 18%;
+    --ring: 150 76% 54%;
+    --activity-bar-background: 150 48% 3%;
+    --activity-bar-foreground: 151 22% 70%;
+    --activity-bar-active: 150 76% 54%;
+    --sidebar-background: 150 34% 4%;
+    --sidebar-foreground: 151 22% 70%;
+    --sidebar-border: 150 30% 18%;
+    --sidebar-ring: 150 76% 54%;
+    --sidebar-accent: 150 42% 12%;
+    --sidebar-accent-foreground: 151 72% 83%;
+    --editor-background: 150 45% 3%;
+    --editor-foreground: 151 72% 83%;
+    --editor-line: 150 30% 10%;
+    --editor-selection: 150 76% 54% / 28%;
   }
 
   [data-theme='solarized'] {
-    --background: 192 100% 10%;
-    --foreground: 192 30% 80%;
-    --primary: 175 100% 40%;
-    --accent: 175 100% 40%;
-    --border: 192 100% 15%;
-    --card: 192 100% 12%;
-    --card-bg: 192 100% 12%;
+    --background: 198 58% 9%;
+    --foreground: 190 34% 86%;
+    --card: 198 42% 12%;
+    --card-foreground: 190 34% 86%;
+    --popover: 198 42% 11%;
+    --popover-foreground: 190 34% 86%;
+    --card-bg: 198 42% 12%;
+    --primary: 184 82% 50%;
+    --primary-foreground: 198 58% 8%;
+    --secondary: 198 34% 17%;
+    --secondary-foreground: 190 34% 86%;
+    --muted: 198 32% 16%;
+    --muted-foreground: 193 22% 68%;
+    --accent: 43 82% 62%;
+    --accent-foreground: 198 58% 8%;
+    --border: 195 36% 22%;
+    --input: 195 36% 22%;
+    --ring: 184 82% 50%;
+    --activity-bar-background: 198 58% 8%;
+    --activity-bar-foreground: 193 22% 68%;
+    --activity-bar-active: 184 82% 50%;
+    --sidebar-background: 198 46% 10%;
+    --sidebar-foreground: 193 22% 68%;
+    --sidebar-border: 195 36% 22%;
+    --sidebar-ring: 184 82% 50%;
+    --sidebar-accent: 198 36% 16%;
+    --sidebar-accent-foreground: 190 34% 86%;
+    --editor-background: 198 52% 8%;
+    --editor-foreground: 190 34% 86%;
+    --editor-line: 198 36% 15%;
+    --editor-selection: 184 82% 50% / 28%;
   }
 
   [data-theme='amoled'] {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --primary: 239 84% 67%;
-    --accent: 239 84% 67%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --card-bg: 0 0% 3%;
+    --primary: 252 95% 72%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 68%;
+    --accent: 160 84% 48%;
+    --accent-foreground: 0 0% 0%;
     --border: 0 0% 10%;
-    --card: 0 0% 0%;
-    --card-bg: 0 0% 0%;
+    --input: 0 0% 10%;
+    --ring: 252 95% 72%;
+    --activity-bar-background: 0 0% 0%;
+    --activity-bar-foreground: 0 0% 68%;
+    --activity-bar-active: 252 95% 72%;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 68%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 252 95% 72%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --editor-background: 0 0% 0%;
+    --editor-foreground: 0 0% 96%;
+    --editor-line: 0 0% 6%;
+    --editor-selection: 252 95% 72% / 28%;
   }
 
   html {
@@ -157,7 +254,7 @@
   }
 
   /* Force pointer cursor on all interactive elements */
-  button, 
+  button:not(:disabled), 
   a, 
   [role="button"],
   .cursor-pointer,
@@ -231,6 +328,17 @@
   opacity: 0.03;
 }
 
+.settings-grid-bg {
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--accent) / 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.settings-top-glow {
+  background: linear-gradient(180deg, hsl(var(--primary) / 0.16), transparent);
+}
+
 .glow-orb {
   background: radial-gradient(circle, hsl(var(--primary) / calc(0.08 + (var(--neon-power) * 0.12))), transparent 70%);
   filter: blur(100px);
@@ -255,6 +363,17 @@
 .glow-disabled .glow-orb,
 .glow-disabled .glow-orb-secondary {
   display: none;
+}
+
+.focus-mode .glow-orb,
+.focus-mode .glow-orb-secondary,
+.focus-mode .noise-bg {
+  display: none;
+}
+
+.focus-mode [data-radix-popper-content-wrapper],
+.focus-mode .scanner-glow::after {
+  animation: none;
 }
 
 /* ============================================

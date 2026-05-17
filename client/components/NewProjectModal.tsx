@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useProjectCreation } from "@/hooks/useProjectCreation";
 import type { SupportedLanguage } from "@shared/types/language";
-import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface Props {
   onClose: () => void;
@@ -13,79 +13,114 @@ interface Props {
 const NewProjectModal: React.FC<Props> = ({ onClose }) => {
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState<SupportedLanguage>("javascript");
+  const [error, setError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const { handleCreate, isAuthenticated } = useProjectCreation();
+
+  const canCreate = title.trim().length > 0 && !isCreating;
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
-      alert("Please login to create a project.");
+      setError("Please login to create a project.");
+      return;
+    }
+
+    if (!title.trim()) {
+      setError("Project title cannot be empty.");
       return;
     }
 
     try {
+      setError("");
+      setIsCreating(true);
       await handleCreate(title, language);
       onClose();
-    } catch (err) {
-      console.error("Failed to create project:", err);
-      alert("Failed to create project.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create project.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={{ opacity: 0, scale: 0.98, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="glass-effect text-foreground p-8 rounded-2xl shadow-2xl w-full max-w-md border border-primary/20 bg-card/90"
+        exit={{ opacity: 0, scale: 0.98, y: 12 }}
+        className="w-full max-w-md rounded-lg border border-white/10 bg-[#0b111c] p-5 text-slate-100 shadow-2xl shadow-black/40"
       >
-        <h2 className="text-2xl font-black mb-6 text-center font-outfit tracking-tight">
-          <span className="text-gradient uppercase">New Project</span>
-        </h2>
-
-        <div className="space-y-4">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Project Title</label>
+            <h2 className="text-lg font-semibold text-white">New Project</h2>
+            <p className="mt-1 text-sm text-slate-400">Choose a name and language for your workspace.</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-md p-2 text-slate-500 transition hover:bg-white/5 hover:text-slate-200"
+            aria-label="Close new project dialog"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form
+          className="space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (canCreate) void handleSubmit();
+          }}
+        >
+          <div>
+            <label className="text-sm font-medium text-slate-200">Project Title</label>
             <input
               type="text"
-              placeholder="e.g. MetaVerse Optimizer"
+              placeholder="e.g. Portfolio API"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 mt-1 bg-black/40 border border-white/5 rounded-xl text-foreground focus:border-primary/50 outline-none transition-colors"
+              disabled={isCreating}
+              className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-[#070b12] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Language</label>
-            <div className="relative">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                className="w-full p-3 mt-1 bg-black/40 border border-white/5 rounded-xl text-foreground focus:border-primary/50 outline-none transition-colors appearance-none cursor-pointer"
-              >
-                <option value="javascript">JavaScript</option>
-                <option value="python">Python</option>
-                <option value="c">C</option>
-                <option value="cpp">C++</option>
-                <option value="java">Java</option>
-              </select>
-            </div>
+            <label className="text-sm font-medium text-slate-200">Language</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
+              disabled={isCreating}
+              className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-white/10 bg-[#070b12] px-3 text-sm text-slate-100 outline-none transition focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="c">C</option>
+              <option value="cpp">C++</option>
+              <option value="java">Java</option>
+              <option value="html">HTML / CSS / JS</option>
+            </select>
           </div>
-        </div>
+        </form>
 
-        <div className="flex justify-end gap-3 mt-8">
-          <Button
-            variant="ghost"
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
             onClick={onClose}
-            className="px-6 hover:bg-white/5 h-12"
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-white/10 px-4 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleSubmit}
-            className="px-8 bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/20"
+            disabled={!canCreate}
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Engine
-          </Button>
+            {isCreating ? "Creating..." : "Create Project"}
+          </button>
         </div>
       </motion.div>
     </div>

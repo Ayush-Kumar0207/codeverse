@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Cpu, 
   History, 
@@ -17,9 +17,11 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import NewProjectModal from "@/components/NewProjectModal";
+import DeploymentModal from "@/components/DeploymentModal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { deployProject } from "@/services/deployment";
 
 // --- Atmosphere Component ---
 const Atmosphere = () => (
@@ -88,7 +90,7 @@ const IDEMockup = () => {
             <span className="text-white">{"{"}</span>
           </motion.div>
           <div className="pl-6 text-muted-foreground opacity-50">
-            // Real-time synchronization active
+            {"// Real-time synchronization active"}
           </div>
           <div className="pl-6 flex gap-2">
             <span className="text-primary">await</span>
@@ -137,10 +139,169 @@ const ArrowCursor = ({ color }: { color: string }) => (
   </svg>
 );
 
+const launchDeploymentFiles = {
+  "index.html": `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CodeVerse Launch Kit</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Live CodeVerse Deployment</p>
+        <h1>Your one-click launch is online.</h1>
+        <p>This page was generated from the landing-page Deploy Now button and served by the CodeVerse deployment engine.</p>
+      </section>
+
+      <section class="grid" aria-label="Deployment checks">
+        <article>
+          <span>Route</span>
+          <strong>Published</strong>
+        </article>
+        <article>
+          <span>Assets</span>
+          <strong>Bundled</strong>
+        </article>
+        <article>
+          <span>Status</span>
+          <strong id="status">Checking</strong>
+        </article>
+      </section>
+    </main>
+    <script src="./script.js"></script>
+  </body>
+</html>`,
+  "style.css": `:root {
+  color-scheme: dark;
+  --bg: #061015;
+  --panel: rgba(12, 28, 37, 0.84);
+  --line: rgba(120, 231, 221, 0.2);
+  --text: #f7fbff;
+  --muted: #9fb8c6;
+  --accent: #2bd4d9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 22% 18%, rgba(43, 212, 217, 0.2), transparent 28rem), #061015;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.shell {
+  width: min(1080px, calc(100vw - 40px));
+  margin: 0 auto;
+  padding: 72px 0;
+}
+
+.hero {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 820px;
+  margin: 0;
+  font-size: clamp(44px, 8vw, 92px);
+  line-height: 0.95;
+}
+
+p {
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+article {
+  min-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 24px;
+}
+
+span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+strong {
+  display: block;
+  margin-top: 32px;
+  font-size: clamp(30px, 5vw, 54px);
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}`,
+  "script.js": `const status = document.querySelector("#status");
+status.textContent = "Live";
+console.log("CodeVerse deployment is live.");`,
+  "README.md": `# CodeVerse Launch Kit
+
+This starter project is deployed directly from the landing page CTA.
+
+## What it proves
+- The deploy button calls the backend deployment API.
+- Workspace files are written to a served deployment route.
+- The result opens as a real hosted preview instead of sending users to login.`,
+};
+
 // --- Component Definition ---
 export default function HomePage() {
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [showDeploymentModal, setShowDeploymentModal] = useState(false);
+  const [deploymentUrl, setDeploymentUrl] = useState<string | undefined>();
+  const [deploymentError, setDeploymentError] = useState<string | undefined>();
+  const [deploying, setDeploying] = useState(false);
+
+  const handleLandingDeploy = async () => {
+    setShowDeploymentModal(true);
+    setDeploymentUrl(undefined);
+    setDeploymentError(undefined);
+    setDeploying(true);
+
+    try {
+      const result = await deployProject({
+        projectId: "codeverse-launch-kit",
+        files: launchDeploymentFiles,
+      });
+      setDeploymentUrl(result.url);
+    } catch (error) {
+      setDeploymentError(error instanceof Error ? error.message : "Deployment failed.");
+    } finally {
+      setDeploying(false);
+    }
+  };
 
   const features = [
     {
@@ -326,7 +487,12 @@ export default function HomePage() {
                   className="flex flex-col items-center gap-2 group cursor-pointer"
                  >
                     <div className="w-16 h-16 rounded-full border-2 border-primary/20 bg-background/80 p-1 group-hover:border-primary transition-all group-hover:scale-110">
-                       <img src={u.avatar} alt={u.name} className="w-full h-full rounded-full" />
+                       <div
+                         role="img"
+                         aria-label={u.name}
+                         className="w-full h-full rounded-full bg-cover bg-center"
+                         style={{ backgroundImage: `url(${u.avatar})` }}
+                       />
                     </div>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-0 group-hover:opacity-100 transition-opacity tracking-widest">{u.name}</span>
                  </motion.div>
@@ -378,15 +544,16 @@ export default function HomePage() {
                 <span className="text-gradient">Next Generation?</span>
               </h2>
               <p className="text-muted-foreground max-w-xl mx-auto mb-10 text-lg leading-relaxed">
-                Join thousands of engineers building the world's most immaculate software with CodeVerse.
+                Join thousands of engineers building the world&apos;s most immaculate software with CodeVerse.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                  <Button 
                    size="lg" 
                    className="h-14 px-10 bg-primary text-white font-bold group"
-                   onClick={() => window.location.href = "/login"}
+                   onClick={handleLandingDeploy}
+                   disabled={deploying}
                  >
-                   Deploy Now
+                   {deploying ? "Deploying" : "Deploy Now"}
                    <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                  </Button>
               </div>
@@ -422,6 +589,15 @@ export default function HomePage() {
       <AnimatePresence>
         {showModal && (
           <NewProjectModal onClose={() => setShowModal(false)} />
+        )}
+        {showDeploymentModal && (
+          <DeploymentModal
+            isOpen={showDeploymentModal}
+            onClose={() => setShowDeploymentModal(false)}
+            deploymentUrl={deploymentUrl}
+            error={deploymentError}
+            projectName="CodeVerse Launch Kit"
+          />
         )}
       </AnimatePresence>
 

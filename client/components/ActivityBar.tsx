@@ -25,6 +25,8 @@ interface PresenceUser {
   username: string;
   avatar?: string;
   status?: string;
+  role?: "organizer" | "collaborator";
+  canEdit?: boolean;
 }
 
 interface PresenceHeaderProps {
@@ -33,6 +35,8 @@ interface PresenceHeaderProps {
   showBackButton?: boolean;
   backHref?: string;
   onDeploy?: () => void;
+  latencyMs?: number | null;
+  connected?: boolean;
 }
 
 export function ActivityBar() {
@@ -164,7 +168,12 @@ export function ActivityBar() {
               )}
             >
                {user?.avatar ? (
-                  <img src={user.avatar} className="w-8 h-8 rounded-full border border-primary/50 group-hover:scale-110 transition-transform" alt="User" />
+                  <div
+                    role="img"
+                    aria-label="User"
+                    className="w-8 h-8 rounded-full border border-primary/50 group-hover:scale-110 transition-transform bg-cover bg-center"
+                    style={{ backgroundImage: `url(${user.avatar})` }}
+                  />
                ) : (
                   <User className={cn("w-6 h-6 group-hover:scale-110 transition-transform", pathname === "/profile" ? "text-primary" : "text-muted-foreground")} />
                )}
@@ -185,25 +194,32 @@ export function PresenceHeader({
   showBackButton = false,
   backHref = "/",
   onDeploy,
+  latencyMs = null,
+  connected = false,
 }: PresenceHeaderProps) {
   return (
-    <header className="h-12 border-b border-[var(--sidebar-border)] bg-background/80 backdrop-blur-md flex items-center justify-between px-4 z-40">
+    <header className="z-40 flex h-12 items-center justify-between border-b border-slate-800 bg-[#090d14]/95 px-4 text-slate-100 backdrop-blur-md">
       <div className="flex items-center space-x-3">
         {showBackButton && (
           <Link
             href={backHref}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-            aria-label="Back to landing page"
-            title="Back to landing page"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-800 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+            aria-label="Back"
+            title="Back"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
         )}
-        <span className="text-xs font-mono text-muted-foreground opacity-50 uppercase tracking-widest">Workspace</span>
-        <span className="text-sm font-medium">{projectTitle || "Untitled Project"}</span>
+        <span className="text-xs font-mono uppercase tracking-widest text-slate-500">Workspace</span>
+        <span className="text-sm font-medium text-slate-100">{projectTitle || "Untitled Project"}</span>
       </div>
 
       <div className="flex items-center space-x-4">
+        <div className="hidden items-center gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:flex">
+          <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "bg-emerald-400" : "bg-rose-400")} />
+          <span>{connected ? `${latencyMs ?? "-"}ms` : "Offline"}</span>
+        </div>
+
         {/* Presence Avatars */}
         <div className="flex -space-x-2">
           {users.slice(0, 3).map((u, i) => (
@@ -211,17 +227,24 @@ export function PresenceHeader({
               <Tooltip>
                 <TooltipTrigger>
                   <div 
-                    className="w-7 h-7 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden ring-1 ring-primary/20"
+                    className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-slate-800 bg-slate-900 ring-1 ring-indigo-500/20"
                   >
                     {u.avatar ? (
-                      <img src={u.avatar} alt={u.username} />
+                      <div
+                        role="img"
+                        aria-label={u.username}
+                        className="h-full w-full bg-cover bg-center"
+                        style={{ backgroundImage: `url(${u.avatar})` }}
+                      />
                     ) : (
                       <span className="text-[10px] uppercase">{u.username?.slice(0, 2)}</span>
                     )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{u.username} ({u.status || "Editing"})</p>
+                  <p>
+                    {u.username} ({u.role === "organizer" ? "Organizer" : u.canEdit === false ? "View only" : u.status || "Editing"})
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -233,11 +256,11 @@ export function PresenceHeader({
           )}
         </div>
 
-        <div className="h-4 w-[1px] bg-border" />
+        <div className="h-4 w-[1px] bg-slate-800" />
         
         <button 
           onClick={onDeploy}
-          className="flex items-center space-x-2 px-3 py-1 bg-primary text-primary-foreground text-xs rounded-md font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+          className="flex items-center space-x-2 rounded-md bg-indigo-500 px-3 py-1 text-xs font-medium text-white shadow-lg shadow-indigo-500/15 transition-colors hover:bg-indigo-400"
         >
           <Github className="w-3 h-3" />
           <span>Deploy</span>

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import React from "react"; // ✅ Needed for typing React.FormEvent
+import React from "react";
 import { registerRequest } from "@/services/auth";
 
 export default function SignUpPage() {
@@ -11,18 +11,21 @@ export default function SignUpPage() {
     password: "",
     email: "",
   });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Proper type for form submit event
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
     try {
       await registerRequest(form);
-        alert("Registration successful!");
-        router.push("/login");
+      router.push("/login");
     } catch (err) {
-      console.error("Registration failed", err);
-      alert("Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -35,6 +38,11 @@ export default function SignUpPage() {
         <h2 className="text-2xl font-bold text-purple-400 text-center">
           Create Account
         </h2>
+        {error && (
+          <p className="rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {error}
+          </p>
+        )}
 
         <input
           className="w-full p-2 bg-gray-800 rounded"
@@ -70,9 +78,10 @@ export default function SignUpPage() {
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full p-2 bg-purple-600 hover:bg-purple-700 rounded"
         >
-          Sign Up
+          {isSubmitting ? "Creating..." : "Sign Up"}
         </button>
       </form>
     </div>

@@ -1,116 +1,94 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import "xterm/css/xterm.css";
+import { useEffect, useRef, useState } from "react";
 
 interface TerminalPanelProps {
   onData?: (data: string) => void;
   output?: string;
 }
 
+const STARTUP_LINES = [
+  "CodeVerse sandbox ready",
+  "Runtime: JavaScript execution layer enabled",
+];
+
 export default function TerminalPanel({ onData, output }: TerminalPanelProps) {
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const xtermRef = useRef<Terminal | null>(null);
-  const fitAddonRef = useRef<FitAddon | null>(null);
+  const [lines, setLines] = useState<string[]>(STARTUP_LINES);
+  const [command, setCommand] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!terminalRef.current) return;
+    if (!output) return;
 
-    // Initialize xterm with Midnight Theme
-    const term = new Terminal({
-      cursorBlink: true,
-      fontSize: 12,
-      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-      theme: {
-        background: "transparent",
-        foreground: "#94a3b8", // slate-400
-        cursor: "#6366f1",     // indigo-500
-        selectionBackground: "rgba(99, 102, 241, 0.3)",
-        black: "#020617",
-        red: "#ef4444",
-        green: "#22c55e",
-        yellow: "#eab308",
-        blue: "#3b82f6",
-        magenta: "#a855f7",
-        cyan: "#06b6d4",
-        white: "#f8fafc",
-      },
-      allowProposedApi: true,
-    });
-
-    const fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
-    
-    term.open(terminalRef.current);
-    
-    const tryFit = () => {
-      if (!terminalRef.current || !xtermRef.current) return;
-      
-      const { offsetWidth, offsetHeight } = terminalRef.current;
-      if (offsetWidth === 0 || offsetHeight === 0) return;
-
-      try {
-        fitAddon.fit();
-      } catch (e) {
-        // xterm-addon-fit can throw if the terminal is not yet fully rendered
-        console.warn("Xterm fit suppressed:", e);
-      }
-    };
-
-    // Initial fit with frame delay to ensure DOM is painted
-    const initialFit = requestAnimationFrame(() => {
-      tryFit();
-    });
-
-    term.writeln("\x1b[38;5;99mCODEVERSE\x1b[0m \x1b[38;5;214mv2.0.4-STABLE\x1b[0m");
-    term.writeln("Ready for enterprise execution secure_layer=enabled");
-    term.write("\r\n\x1b[32muser@codeverse\x1b[0m:\x1b[34m~\x1b[0m$ ");
-
-    term.onData((data) => {
-      // Handle basic interactivity for 'God-Level' feel
-      if (data === "\r") {
-        term.write("\r\n\x1b[32muser@codeverse\x1b[0m:\x1b[34m~\x1b[0m$ ");
-      } else if (data === "\u007f") { // Backspace
-        // Basic backspace handling (simplified)
-        term.write("\b \b");
-      } else {
-        term.write(data);
-      }
-      onData?.(data);
-    });
-
-    xtermRef.current = term;
-    fitAddonRef.current = fitAddon;
-
-    // Use ResizeObserver for accurate container tracking inside resizable panels
-    const resizeObserver = new ResizeObserver(() => {
-       requestAnimationFrame(() => tryFit());
-    });
-    
-    if (terminalRef.current) {
-        resizeObserver.observe(terminalRef.current);
-    }
-
-    return () => {
-      cancelAnimationFrame(initialFit);
-      term.dispose();
-      resizeObserver.disconnect();
-    };
-  }, [onData]);
-
-  // Handle incoming output from execution or sockets
-  useEffect(() => {
-    if (output && xtermRef.current) {
-        xtermRef.current.writeln(`\r\n${output}`);
-        xtermRef.current.write("\x1b[32muser@codeverse\x1b[0m:\x1b[34m~\x1b[0m$ ");
-    }
+    setLines((current) => [
+      ...current,
+      "",
+      ...String(output).replace(/\r/g, "").split("\n"),
+    ]);
   }, [output]);
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [lines]);
+
+  const submitCommand = () => {
+    const trimmed = command.trim();
+    if (!trimmed) {
+      setLines((current) => [...current, "user@codeverse:~$"]);
+      onData?.("\r");
+      return;
+    }
+
+    setLines((current) => [
+      ...current,
+      `user@codeverse:~$ ${trimmed}`,
+      `Command queued locally: ${trimmed}`,
+    ]);
+    onData?.(`${trimmed}\r`);
+    setCommand("");
+  };
+
   return (
-    <div className="w-full h-full bg-transparent p-2">
-      <div ref={terminalRef} className="w-full h-full overflow-hidden" />
+    <div className="h-full w-full overflow-hidden bg-[#05070b] text-slate-200">
+      <div
+        ref={scrollRef}
+        className="h-full overflow-y-auto px-4 py-3 font-mono text-[12px] leading-6 custom-scrollbar"
+      >
+        {lines.map((line, index) => (
+          <div
+            key={`${line}-${index}`}
+            className={
+              line.startsWith("user@codeverse")
+                ? "text-emerald-300"
+                : line.toLowerCase().includes("error")
+                  ? "text-rose-300"
+                  : "text-slate-300"
+            }
+          >
+            {line || "\u00a0"}
+          </div>
+        ))}
+
+        <div className="flex items-center gap-2 text-emerald-300">
+          <span>user@codeverse:~$</span>
+          <input
+            value={command}
+            onChange={(event) => setCommand(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                submitCommand();
+              }
+            }}
+            aria-label="Terminal command"
+            className="min-w-0 flex-1 border-none bg-transparent p-0 text-slate-100 caret-indigo-400 outline-none placeholder:text-slate-600 focus:ring-0"
+            spellCheck={false}
+          />
+        </div>
+      </div>
     </div>
   );
 }
