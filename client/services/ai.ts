@@ -5,6 +5,8 @@ import { getApiBaseUrl } from "./runtime-config";
 type AIPayload = {
   prompt: string;
   model?: string;
+  openAIModel?: string;
+  provider?: "ollama" | "openai" | "auto";
   context?: string;
   systemPrompt?: string;
   maxTokens?: number;

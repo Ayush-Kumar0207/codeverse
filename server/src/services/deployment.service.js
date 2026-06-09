@@ -440,6 +440,7 @@ async function deployProject(projectId, files, options = {}) {
   const baseUrl = options.baseUrl || `http://localhost:${DEFAULT_SERVER_PORT}`;
 
   return {
+    projectId: safeProjectId,
     url: `${baseUrl}/deployments/${encodeURIComponent(safeProjectId)}/`,
     path: projectDeployPath,
     files: Array.from(filesByRelativePath.keys()).sort((a, b) => a.localeCompare(b)),

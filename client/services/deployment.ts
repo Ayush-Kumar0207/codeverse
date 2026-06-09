@@ -3,6 +3,9 @@ import apiClient from "./api";
 type DeployResponse = {
   message: string;
   url: string;
+  bridgeUrl?: string;
+  publicUrl?: string;
+  tunnelActive?: boolean;
   files?: string[];
   timestamp: string;
 };

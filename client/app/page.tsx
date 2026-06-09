@@ -343,7 +343,14 @@ export default function HomePage() {
       }, {
         timeoutMs: 7000,
       });
-      setDeploymentUrl(result.url);
+      setDeploymentUrl(result.publicUrl || result.url);
+      setDeploymentNote(
+        result.publicUrl
+          ? `Public tunnel active. Local route: ${result.url}`
+          : result.bridgeUrl
+            ? `Served locally. Static bridge: ${result.bridgeUrl}`
+            : undefined
+      );
       setDeploymentStatus("Deployment is ready. Open it from the dialog or the link below.");
     } catch (error) {
       const fallbackUrl = createBrowserDeploymentUrl(launchDeploymentFiles);

@@ -10,9 +10,37 @@ connectDB();
 const app = createApp();
 const server = http.createServer(app);
 
+const socketAllowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_FRONTEND_URL,
+  "https://codeverse-rho.vercel.app",
+].filter(Boolean);
+
+function isAllowedSocketOrigin(origin) {
+  if (!origin) return true;
+  if (socketAllowedOrigins.includes(origin)) return true;
+
+  try {
+    return new URL(origin).hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001", "https://codeverse-rho.vercel.app", "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app"],
+    origin(origin, callback) {
+      if (isAllowedSocketOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Socket origin not allowed: " + origin));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -40,6 +68,10 @@ server.listen(PORT, () => {
 const express = require("express");
 const path = require("path");
 const { DEPLOY_DIR } = require("./src/services/deployment.service");
+const {
+  isDeploymentTunnelEnabled,
+  startDeploymentTunnel,
+} = require("./src/services/deploymentTunnel.service");
 const deployApp = express();
 const DEPLOY_PORT = process.env.DEPLOY_PORT || 5001;
 
@@ -58,6 +90,18 @@ deployApp.use('/:projectId', (req, res, next) => {
 
 const deployServer = deployApp.listen(DEPLOY_PORT, () => {
   console.log(`📡 Aegis Deployment Bridge active on port ${DEPLOY_PORT}`);
+
+  if (isDeploymentTunnelEnabled()) {
+    startDeploymentTunnel({ port: DEPLOY_PORT })
+      .then((tunnel) => {
+        if (tunnel?.url) {
+          console.log(`🌐 Public deployment tunnel active at ${tunnel.url}`);
+        }
+      })
+      .catch((error) => {
+        console.error("🌐 Failed to start deployment tunnel:", error.message || error);
+      });
+  }
 });
 
 deployServer.on("error", (error) => {

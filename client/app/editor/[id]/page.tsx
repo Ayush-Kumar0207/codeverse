@@ -109,6 +109,42 @@ function normalizeIdentity(value?: string | null) {
 }
 
 const MAX_WORKSPACE_SNAPSHOTS = 80;
+const MAX_ASSISTANT_CONTEXT_CHARS = 7000;
+const ACTIVE_FILE_CONTEXT_CHARS = 2400;
+const OTHER_FILE_CONTEXT_CHARS = 900;
+
+function clipForAssistant(value: string, limit: number) {
+  if (value.length <= limit) return value;
+  const head = Math.max(0, Math.floor(limit * 0.7));
+  const tail = Math.max(0, limit - head - 48);
+  const tailText = tail > 0 ? value.slice(-tail) : "";
+  return `${value.slice(0, head)}\n...[file shortened for assistant context]...\n${tailText}`;
+}
+
+function buildAssistantWorkspaceContext(files: Record<string, string>, activeFile: string) {
+  const fileNames = Object.keys(files);
+  const orderedNames = [
+    activeFile,
+    ...fileNames.filter((fileName) => fileName !== activeFile).sort((left, right) => left.localeCompare(right)),
+  ].filter(Boolean);
+
+  let remaining = MAX_ASSISTANT_CONTEXT_CHARS;
+  const sections: string[] = [];
+
+  for (const fileName of orderedNames) {
+    if (remaining <= 0) break;
+
+    const content = files[fileName] || "";
+    const perFileLimit = fileName === activeFile ? ACTIVE_FILE_CONTEXT_CHARS : OTHER_FILE_CONTEXT_CHARS;
+    const snippet = clipForAssistant(content, Math.min(perFileLimit, remaining));
+    const section = [`File: ${fileName}`, "```", snippet, "```"].join("\n");
+
+    sections.push(section);
+    remaining -= section.length;
+  }
+
+  return sections.join("\n\n");
+}
 
 function formatExecutionError(error: unknown) {
   if (axios.isAxiosError(error)) {
@@ -221,10 +257,8 @@ function EditorWorkspace() {
   const { combinedPreview } = useHtmlPreview(files, language);
 
   const assistantContext = useMemo(() => {
-    const activeContent = files[activeFile] || "";
-    const activeSnippet =
-      activeContent.length > 1500 ? `${activeContent.slice(0, 1500)}\n...[active file truncated for fast AI]` : activeContent;
     const fileList = Object.keys(files).join(", ");
+    const workspaceContext = buildAssistantWorkspaceContext(files, activeFile);
 
     return [
       `Project: ${project?.title || "CodeVerse workspace"}`,
@@ -232,8 +266,8 @@ function EditorWorkspace() {
       `Language: ${language}`,
       `Workspace files: ${fileList}`,
       "",
-      "Active file content:",
-      activeSnippet,
+      "Workspace file context:",
+      workspaceContext || "No files loaded.",
     ].join("\n");
   }, [activeFile, files, language, project?.title]);
 
@@ -267,18 +301,27 @@ function EditorWorkspace() {
   const [isDeploying, setIsDeploying] = useState(false);
   const [deploymentUrl, setDeploymentUrl] = useState("");
   const [deploymentError, setDeploymentError] = useState("");
+  const [deploymentNote, setDeploymentNote] = useState("");
 
   const handleBeginDeployment = async () => {
     setIsDeploying(true);
     setDeploymentUrl("");
     setDeploymentError("");
+    setDeploymentNote("");
 
     try {
       const res = await deployProject({
         projectId: id as string,
         files
       });
-      setDeploymentUrl(res.url);
+      setDeploymentUrl(res.publicUrl || res.url);
+      setDeploymentNote(
+        res.publicUrl
+          ? `Public tunnel active. Local route: ${res.url}`
+          : res.bridgeUrl
+            ? `Served locally. Static bridge: ${res.bridgeUrl}`
+            : ""
+      );
     } catch (err: unknown) {
       console.warn("Deployment failed", err);
       setDeploymentError(err instanceof Error ? err.message : "Failed to initiate Aegis propagation.");
@@ -1627,6 +1670,7 @@ updateSummary();`;
               deploymentUrl={deploymentUrl}
               error={deploymentError}
               projectName={project.title}
+              note={deploymentNote}
             />
           </AnimatePresence>
 
