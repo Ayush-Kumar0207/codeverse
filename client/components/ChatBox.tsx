@@ -17,6 +17,8 @@ type Props = {
   placeholder?: string;
 };
 
+const pendingAssistantPromptKey = "codeverse:pending-ai-prompt";
+
 export default function ChatBox({
   roomId,
   context,
@@ -35,11 +37,13 @@ export default function ChatBox({
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    const handleAskAIEvent = (event: Event) => {
-      const { stateContext = {}, question = "" } = (event as CustomEvent<{
-        stateContext?: Record<string, unknown>;
-        question?: string;
-      }>).detail || {};
+    if (!aiMode && channel !== "ai") return;
+
+    const prepareAssistantPrompt = (detail?: {
+      stateContext?: Record<string, unknown>;
+      question?: string;
+    }) => {
+      const { stateContext = {}, question = "" } = detail || {};
       
       // Filter out huge structures to prevent payload explosion, but keep arrays simple
       const safeContext = Object.entries(stateContext).map(([k, v]) => {
@@ -52,15 +56,35 @@ export default function ChatBox({
       setInput(fullPrompt);
       
       // Attempt to find the AI Assistant Tab trigger globally and click it to switch tabs instantly
-      const aiTabButton = document.querySelector('[value="assistant"]') as HTMLButtonElement | null;
+      const aiTabButton = document.querySelector('button[value="assistant"], [data-tab-value="assistant"]') as HTMLButtonElement | null;
       if (aiTabButton) aiTabButton.click();
       
       setTimeout(() => resizeTextarea(), 50);
     };
 
+    const handleAskAIEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        stateContext?: Record<string, unknown>;
+        question?: string;
+      }>).detail;
+      prepareAssistantPrompt(detail);
+      window.sessionStorage.removeItem(pendingAssistantPromptKey);
+    };
+
     window.addEventListener('algotrace:ask_ai', handleAskAIEvent);
+
+    const pendingPrompt = window.sessionStorage.getItem(pendingAssistantPromptKey);
+    if (pendingPrompt) {
+      try {
+        prepareAssistantPrompt(JSON.parse(pendingPrompt));
+        window.sessionStorage.removeItem(pendingAssistantPromptKey);
+      } catch {
+        window.sessionStorage.removeItem(pendingAssistantPromptKey);
+      }
+    }
+
     return () => window.removeEventListener('algotrace:ask_ai', handleAskAIEvent);
-  }, [resizeTextarea]);
+  }, [aiMode, channel, resizeTextarea]);
 
   const handleSend = async () => {
     if (!input.trim() || aiLoading) return;
@@ -78,7 +102,7 @@ export default function ChatBox({
   };
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-transparent p-3 text-slate-100">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-transparent p-3 text-foreground">
       <div 
         ref={chatContainerRef} 
         className="flex-1 overflow-y-auto space-y-3 pr-2 no-scrollbar"
@@ -92,12 +116,12 @@ export default function ChatBox({
                 className={cn(
                   "rounded-md px-3 py-2 text-xs shadow-sm transition-all",
                   isOwn
-                    ? "max-w-[85%] border border-indigo-500/25 bg-indigo-500/10 text-slate-100"
-                    : "max-w-full border border-slate-800 bg-slate-950 text-slate-300"
+                    ? "max-w-[85%] border border-primary/25 bg-primary/10 text-foreground"
+                    : "max-w-full border border-border bg-muted/60 text-foreground"
                 )}
               >
                 {!isOwn && (
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                     {msg.user || "Anonymous"}
                   </div>
                 )}
@@ -108,16 +132,16 @@ export default function ChatBox({
                   <div className="ai-markdown leading-relaxed">
                     <ReactMarkdown
                       components={{
-                        h1: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-white first:mt-0">{children}</h3>,
-                        h2: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-white first:mt-0">{children}</h3>,
-                        h3: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-white first:mt-0">{children}</h3>,
+                        h1: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-foreground first:mt-0">{children}</h3>,
+                        h2: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-foreground first:mt-0">{children}</h3>,
+                        h3: ({ children }) => <h3 className="mb-2 mt-3 text-sm font-semibold text-foreground first:mt-0">{children}</h3>,
                         p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
                         ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
                         ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
                         li: ({ children }) => <li className="pl-1">{children}</li>,
-                        strong: ({ children }) => <strong className="font-semibold text-slate-100">{children}</strong>,
+                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
                         code: ({ children }) => (
-                          <code className="rounded border border-slate-700 bg-slate-900 px-1 py-0.5 font-mono text-[11px] text-cyan-100">
+                          <code className="rounded border border-border bg-background px-1 py-0.5 font-mono text-[11px] text-primary">
                             {children}
                           </code>
                         ),
@@ -128,7 +152,7 @@ export default function ChatBox({
                   </div>
                 )}
               </div>
-              <div className="mt-1 px-1 text-[10px] text-slate-600">
+              <div className="mt-1 px-1 text-[10px] text-muted-foreground">
                 {new Date(msg.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -140,7 +164,7 @@ export default function ChatBox({
         <div ref={messageEndRef} />
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-slate-800 pt-3">
+      <div className="mt-4 flex flex-col gap-2 border-t border-border pt-3">
         <textarea
           ref={textareaRef}
           placeholder={placeholder}
@@ -152,15 +176,15 @@ export default function ChatBox({
           onKeyDown={handleKeyPress}
           rows={1}
           disabled={aiLoading}
-          className="max-h-32 w-full resize-none rounded-md border border-slate-800 bg-[#070b12] px-3 py-2 text-xs text-slate-100 shadow-inner outline-none placeholder:text-slate-600 focus:border-indigo-500"
+          className="max-h-32 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-inner outline-none placeholder:text-muted-foreground focus:border-primary"
         />
         <div className="flex justify-between items-center px-1">
-          <span className="text-[10px] text-slate-600">{aiLoading ? "Thinking..." : "Ready"}</span>
+          <span className="text-[10px] text-muted-foreground">{aiLoading ? "Thinking..." : "Ready"}</span>
           <Button
             onClick={handleSend}
             disabled={aiLoading || !input.trim()}
             size="sm"
-            className="h-8 bg-indigo-500 px-4 text-[10px] font-semibold uppercase tracking-widest text-white hover:bg-indigo-400"
+            className="h-8 bg-primary px-4 text-[10px] font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
           >
             {aiLoading ? "Thinking" : "Send"}
           </Button>

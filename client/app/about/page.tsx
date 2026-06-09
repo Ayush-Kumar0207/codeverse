@@ -25,12 +25,6 @@ const navLinks = [
   { label: "Creator", href: "#creator" },
 ];
 
-const metrics = [
-  { value: "One", label: "workspace" },
-  { value: "Live", label: "collaboration" },
-  { value: "AI", label: "in context" },
-];
-
 const productPillars = [
   {
     icon: BrainCircuit,
@@ -125,7 +119,7 @@ function WorkspacePreview() {
             <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <div className="text-sm font-semibold text-white">Realtime editor</div>
-                <div className="text-xs text-slate-500">3 collaborators active</div>
+                <div className="text-xs text-slate-500">Team presence active</div>
               </div>
               <div className="flex -space-x-2">
                 {["A", "S", "J"].map((name, index) => (
@@ -274,17 +268,6 @@ export default function AboutPage() {
           </motion.div>
 
           <WorkspacePreview />
-        </section>
-
-        <section className="border-y border-white/10 bg-white/[0.025]">
-          <div className="mx-auto grid max-w-7xl gap-3 px-6 py-6 md:grid-cols-3 md:px-10">
-            {metrics.map((metric) => (
-              <div key={metric.label} className="rounded border border-white/10 bg-black/20 p-5">
-                <div className="text-2xl font-semibold text-white">{metric.value}</div>
-                <div className="mt-1 text-sm text-slate-500">{metric.label}</div>
-              </div>
-            ))}
-          </div>
         </section>
 
         <section id="mission" className="mx-auto max-w-7xl px-6 py-16 md:px-10">

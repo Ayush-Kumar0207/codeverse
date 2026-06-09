@@ -74,6 +74,10 @@ function TabsTrigger({
   return (
     <button
       type="button"
+      value={value}
+      data-tab-value={value}
+      data-state={isActive ? "active" : "inactive"}
+      aria-selected={isActive}
       onClick={() => setValue(value)}
       className={cn(
         "inline-flex items-center justify-center rounded-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all",

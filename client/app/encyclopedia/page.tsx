@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AT_ALGORITHMS, AlgorithmEntry } from "@/data/algos";
 import { buildAlgorithmLearningProfile } from "@/lib/algo-learning";
 import {
@@ -67,8 +68,10 @@ const getFileExtension = (language: string) => {
 };
 
 export default function EncyclopediaPage() {
+  const searchParams = useSearchParams();
+  const queryFromUrl = searchParams?.get("query") || "";
   const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(AT_ALGORITHMS[0]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(queryFromUrl);
   const [activeApproachIdx, setActiveApproachIdx] = useState(0);
   const [selectedLang, setSelectedLang] = useState("JavaScript");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -130,13 +133,27 @@ export default function EncyclopediaPage() {
     localStorage.setItem("algo-trace-preferred-lang", lang);
   };
 
-  const handleSelectAlgo = (algo: AlgorithmEntry) => {
+  const handleSelectAlgo = useCallback((algo: AlgorithmEntry) => {
     setActiveAlgo(algo);
     setActiveApproachIdx(0);
     setExpandedTopics((prev) => ({ ...prev, [algo.topic || "Uncategorized"]: true }));
     setIsLibraryOpen(false);
     setCopied(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!queryFromUrl.trim()) return;
+
+    setSearchTerm(queryFromUrl);
+    const query = queryFromUrl.trim().toLowerCase();
+    const match = AT_ALGORITHMS.find((algo) =>
+      `${algo.title} ${algo.topic} ${algo.category} ${algo.difficulty} ${algo.frequencyLevel}`
+        .toLowerCase()
+        .includes(query)
+    );
+
+    if (match) handleSelectAlgo(match);
+  }, [handleSelectAlgo, queryFromUrl]);
 
   const toggleTopic = (topic: string) => {
     setExpandedTopics((prev) => ({ ...prev, [topic]: !prev[topic] }));

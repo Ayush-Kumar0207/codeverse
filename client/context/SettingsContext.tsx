@@ -50,6 +50,57 @@ const DEFAULT_SETTINGS: SettingsConfig = {
   },
 };
 
+const THEME_OPTIONS: ThemeType[] = ["midnight", "hacker", "solarized", "amoled"];
+const AUDIO_OPTIONS: AudioProfile[] = ["none", "mechanical", "synth"];
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
+
+const normalizeSettingsConfig = (value: unknown): SettingsConfig => {
+  const candidate = asRecord(value);
+  const appearance = asRecord(candidate.appearance);
+  const kinetics = asRecord(candidate.kinetics);
+  const editor = asRecord(candidate.editor);
+  const audio = asRecord(candidate.audio);
+
+  const theme = typeof appearance.theme === "string" && THEME_OPTIONS.includes(appearance.theme as ThemeType)
+    ? appearance.theme as ThemeType
+    : DEFAULT_SETTINGS.appearance.theme;
+  const scale = typeof appearance.scale === "number" && Number.isFinite(appearance.scale)
+    ? Math.min(1.25, Math.max(0.75, appearance.scale))
+    : DEFAULT_SETTINGS.appearance.scale;
+  const tabSize = [2, 4, 8].includes(editor.tabSize as number)
+    ? editor.tabSize as 2 | 4 | 8
+    : DEFAULT_SETTINGS.editor.tabSize;
+  const audioProfile = AUDIO_OPTIONS.includes(audio.profile as AudioProfile)
+    ? audio.profile as AudioProfile
+    : DEFAULT_SETTINGS.audio.profile;
+
+  return {
+    appearance: {
+      theme,
+      scale,
+    },
+    kinetics: {
+      glowOrbs: typeof kinetics.glowOrbs === "boolean" ? kinetics.glowOrbs : DEFAULT_SETTINGS.kinetics.glowOrbs,
+      animations: typeof kinetics.animations === "boolean" ? kinetics.animations : DEFAULT_SETTINGS.kinetics.animations,
+      neonOverdrive: typeof kinetics.neonOverdrive === "boolean" ? kinetics.neonOverdrive : DEFAULT_SETTINGS.kinetics.neonOverdrive,
+      reducedMotionOverride:
+        typeof kinetics.reducedMotionOverride === "boolean"
+          ? kinetics.reducedMotionOverride
+          : DEFAULT_SETTINGS.kinetics.reducedMotionOverride,
+    },
+    editor: {
+      autocomplete: typeof editor.autocomplete === "boolean" ? editor.autocomplete : DEFAULT_SETTINGS.editor.autocomplete,
+      formatOnSave: typeof editor.formatOnSave === "boolean" ? editor.formatOnSave : DEFAULT_SETTINGS.editor.formatOnSave,
+      tabSize,
+    },
+    audio: {
+      profile: audioProfile,
+    },
+  };
+};
+
 export interface Snapshot {
   id: string;
   timestamp: number;
@@ -162,13 +213,30 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = normalizeSettingsConfig(JSON.parse(saved));
         setSettingsState(parsed);
         setJsonState(JSON.stringify(parsed, null, 2));
       } catch (e) {
         console.error("Failed to parse saved settings", e);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== "codeverse-settings" || !event.newValue) return;
+
+      try {
+        const parsed = normalizeSettingsConfig(JSON.parse(event.newValue));
+        setSettingsState(parsed);
+        setJsonState(JSON.stringify(parsed, null, 2));
+      } catch (e) {
+        console.error("Failed to sync settings from storage", e);
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   // Update logic with persistence
@@ -401,7 +469,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const root = document.documentElement;
     
     // Theme
-    document.documentElement.setAttribute("data-theme", settings.appearance.theme);
+    root.setAttribute("data-theme", settings.appearance.theme);
+    document.body?.setAttribute("data-theme", settings.appearance.theme);
+    root.classList.add("dark");
+    root.style.colorScheme = "dark";
 
     // Scale
     root.style.setProperty("--ui-scale", `${settings.appearance.scale}rem`);

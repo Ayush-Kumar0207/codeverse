@@ -11,6 +11,8 @@ export declare const SOCKET_EVENTS: {
   readonly USER_JOINED: "userJoined";
   readonly USER_LEFT: "userLeft";
   readonly PRESENCE_UPDATE: "presenceUpdate";
+  readonly REMOVE_COLLABORATOR: "collaborator:remove";
+  readonly COLLABORATOR_REMOVED: "collaborator:removed";
   readonly EDIT_PERMISSION_UPDATE: "editPermission:update";
   readonly EDIT_PERMISSION_STATE: "editPermission:state";
   readonly EDIT_PERMISSION_DENIED: "editPermission:denied";

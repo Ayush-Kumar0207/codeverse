@@ -251,6 +251,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 180ms ease, color 180ms ease;
   }
 
   /* Force pointer cursor on all interactive elements */
@@ -318,6 +319,167 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ============================================
+   THEME PROPAGATION COMPATIBILITY
+   Keeps older fixed-color Tailwind utilities listening to data-theme.
+   ============================================ */
+[data-theme] .bg-\[\#020617\],
+[data-theme] .bg-\[\#05080d\],
+[data-theme] .bg-\[\#05090b\],
+[data-theme] .bg-\[\#050910\],
+[data-theme] .bg-\[\#050914\],
+[data-theme] .bg-\[\#06090d\],
+[data-theme] .bg-\[\#06090d\]\/82,
+[data-theme] .bg-\[\#060910\],
+[data-theme] .bg-\[\#061012\],
+[data-theme] .bg-\[\#070b12\] {
+  background-color: hsl(var(--background)) !important;
+}
+
+[data-theme] .bg-\[\#071013\],
+[data-theme] .bg-\[\#071013\]\/80,
+[data-theme] .bg-\[\#071013\]\/90,
+[data-theme] .bg-\[\#080d18\],
+[data-theme] .bg-\[\#081113\],
+[data-theme] .bg-\[\#081113\]\/80,
+[data-theme] .bg-\[\#0a0a0f\],
+[data-theme] .bg-\[\#0a101b\],
+[data-theme] .bg-\[\#0b0f10\],
+[data-theme] .bg-\[\#0b111c\],
+[data-theme] .bg-\[\#1b1b2f\] {
+  background-color: hsl(var(--card)) !important;
+}
+
+[data-theme] .bg-\[\#071519\],
+[data-theme] .bg-\[\#0e0e16\],
+[data-theme] .bg-\[\#0f1725\],
+[data-theme] .bg-\[\#121c2d\],
+[data-theme] .bg-slate-800,
+[data-theme] .bg-slate-900,
+[data-theme] .bg-slate-950,
+[data-theme] .bg-slate-950\/50,
+[data-theme] .bg-slate-950\/60,
+[data-theme] .bg-slate-950\/70 {
+  background-color: hsl(var(--muted)) !important;
+}
+
+[data-theme] .bg-black\/20,
+[data-theme] .bg-black\/25,
+[data-theme] .bg-black\/30,
+[data-theme] .bg-black\/35,
+[data-theme] .bg-black\/40,
+[data-theme] .bg-black\/45,
+[data-theme] .bg-black\/60,
+[data-theme] .bg-white\/10,
+[data-theme] .bg-white\/\[0\.025\],
+[data-theme] .bg-white\/\[0\.03\],
+[data-theme] .bg-white\/\[0\.04\],
+[data-theme] .bg-white\/\[0\.05\],
+[data-theme] .bg-white\/\[0\.06\] {
+  background-color: hsl(var(--muted) / 0.45) !important;
+}
+
+[data-theme] .border-white\/5,
+[data-theme] .border-white\/10,
+[data-theme] .border-white\/20,
+[data-theme] .border-slate-700,
+[data-theme] .border-slate-800,
+[data-theme] .border-gray-600 {
+  border-color: hsl(var(--border)) !important;
+}
+
+[data-theme] .text-slate-100,
+[data-theme] .text-slate-200,
+[data-theme] .text-slate-300 {
+  color: hsl(var(--foreground)) !important;
+}
+
+[data-theme] .text-slate-400,
+[data-theme] .text-slate-500,
+[data-theme] .text-slate-600,
+[data-theme] .text-gray-400,
+[data-theme] .text-gray-500 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+[data-theme] .bg-indigo-500,
+[data-theme] .bg-indigo-400,
+[data-theme] .bg-teal-300,
+[data-theme] .bg-teal-400 {
+  background-color: hsl(var(--primary)) !important;
+}
+
+[data-theme] .bg-indigo-500.text-white,
+[data-theme] .bg-indigo-400.text-white,
+[data-theme] .bg-teal-300.text-black,
+[data-theme] .bg-teal-400.text-black {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+[data-theme] .text-indigo-100,
+[data-theme] .text-indigo-200,
+[data-theme] .text-indigo-300,
+[data-theme] .text-teal-100,
+[data-theme] .text-teal-200,
+[data-theme] .text-teal-300,
+[data-theme] .text-cyan-100,
+[data-theme] .text-cyan-200,
+[data-theme] .text-cyan-300,
+[data-theme] .text-sky-300 {
+  color: hsl(var(--primary)) !important;
+}
+
+[data-theme] .bg-indigo-300\/10,
+[data-theme] .bg-indigo-400\/10,
+[data-theme] .bg-indigo-400\/15,
+[data-theme] .bg-indigo-400\/\[0\.06\],
+[data-theme] .bg-indigo-400\/\[0\.07\],
+[data-theme] .bg-indigo-500\/10,
+[data-theme] .bg-teal-300\/10,
+[data-theme] .bg-cyan-300\/10 {
+  background-color: hsl(var(--primary) / 0.12) !important;
+}
+
+[data-theme] .border-indigo-300\/20,
+[data-theme] .border-indigo-400\/20,
+[data-theme] .border-indigo-400\/25,
+[data-theme] .border-indigo-400\/35,
+[data-theme] .border-indigo-400\/60,
+[data-theme] .border-teal-300\/20,
+[data-theme] .border-cyan-300\/50 {
+  border-color: hsl(var(--primary) / 0.32) !important;
+}
+
+[data-theme] .ring-indigo-500\/20 {
+  --tw-ring-color: hsl(var(--primary) / 0.24) !important;
+}
+
+[data-theme] .bg-amber-300,
+[data-theme] .bg-amber-400 {
+  background-color: hsl(var(--accent)) !important;
+}
+
+[data-theme] .bg-amber-300.text-black,
+[data-theme] .bg-amber-400.text-black {
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+[data-theme] .text-amber-100,
+[data-theme] .text-amber-200,
+[data-theme] .text-amber-300 {
+  color: hsl(var(--accent)) !important;
+}
+
+[data-theme] .bg-amber-300\/10,
+[data-theme] .bg-amber-400\/10 {
+  background-color: hsl(var(--accent) / 0.12) !important;
+}
+
+[data-theme] .border-amber-300\/20,
+[data-theme] .border-amber-400\/20 {
+  border-color: hsl(var(--accent) / 0.32) !important;
 }
 
 /* ============================================

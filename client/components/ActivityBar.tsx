@@ -54,7 +54,7 @@ export function ActivityBar() {
   ];
 
   return (
-    <div className="w-12 flex flex-col items-center py-4 bg-[var(--activity-bar-background)] border-r border-[var(--sidebar-border)] h-full z-50">
+    <div className="w-12 flex flex-col items-center py-4 bg-[hsl(var(--activity-bar-background))] border-r border-[hsl(var(--sidebar-border))] h-full z-50">
       <div className="mb-8">
         <TooltipProvider delay={0}>
           <Tooltip>
@@ -96,7 +96,7 @@ export function ActivityBar() {
                 }}
                 aria-label={item.label}
                 className={cn(
-                  "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-white/5",
+                  "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-muted/50",
                   pathname === item.href || (item.id === "editor" && pathname?.startsWith("/editor"))
                     ? "text-primary"
                     : "text-muted-foreground"
@@ -124,8 +124,8 @@ export function ActivityBar() {
                 router.push("/settings");
               }}
               className={cn(
-                "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-white/5",
-                pathname === "/settings" ? "text-primary bg-white/5" : "text-muted-foreground"
+                "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-muted/50",
+                pathname === "/settings" ? "text-primary bg-muted/50" : "text-muted-foreground"
               )}
             >
               <Settings className="w-6 h-6" />
@@ -144,7 +144,7 @@ export function ActivityBar() {
                 e.stopPropagation();
                 handleLogout();
               }}
-              className="h-10 w-10 flex items-center justify-center rounded-md text-muted-foreground hover:bg-white/5"
+              className="h-10 w-10 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50"
             >
               <LogOut className="w-6 h-6 text-destructive/80" />
             </TooltipTrigger>
@@ -163,8 +163,8 @@ export function ActivityBar() {
                 router.push("/profile");
               }}
               className={cn(
-                "w-full flex justify-center py-4 border-t border-white/10 mt-2 transition-all hover:bg-white/5 group",
-                pathname === "/profile" ? "bg-white/5" : ""
+                "w-full flex justify-center py-4 border-t border-border mt-2 transition-all hover:bg-muted/50 group",
+                pathname === "/profile" ? "bg-muted/50" : ""
               )}
             >
                {user?.avatar ? (
@@ -198,24 +198,24 @@ export function PresenceHeader({
   connected = false,
 }: PresenceHeaderProps) {
   return (
-    <header className="z-40 flex h-12 items-center justify-between border-b border-slate-800 bg-[#090d14]/95 px-4 text-slate-100 backdrop-blur-md">
+    <header className="z-40 flex h-12 items-center justify-between border-b border-border bg-card/95 px-4 text-foreground backdrop-blur-md">
       <div className="flex items-center space-x-3">
         {showBackButton && (
           <Link
             href={backHref}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-800 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Back"
             title="Back"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
         )}
-        <span className="text-xs font-mono uppercase tracking-widest text-slate-500">Workspace</span>
-        <span className="text-sm font-medium text-slate-100">{projectTitle || "Untitled Project"}</span>
+        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Workspace</span>
+        <span className="text-sm font-medium text-foreground">{projectTitle || "Untitled Project"}</span>
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="hidden items-center gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:flex">
+        <div className="hidden items-center gap-2 rounded-md border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:flex">
           <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "bg-emerald-400" : "bg-rose-400")} />
           <span>{connected ? `${latencyMs ?? "-"}ms` : "Offline"}</span>
         </div>
@@ -227,7 +227,7 @@ export function PresenceHeader({
               <Tooltip>
                 <TooltipTrigger>
                   <div 
-                    className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-slate-800 bg-slate-900 ring-1 ring-indigo-500/20"
+                    className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-border bg-muted ring-1 ring-primary/20"
                   >
                     {u.avatar ? (
                       <div
@@ -256,11 +256,11 @@ export function PresenceHeader({
           )}
         </div>
 
-        <div className="h-4 w-[1px] bg-slate-800" />
+        <div className="h-4 w-[1px] bg-border" />
         
         <button 
           onClick={onDeploy}
-          className="flex items-center space-x-2 rounded-md bg-indigo-500 px-3 py-1 text-xs font-medium text-white shadow-lg shadow-indigo-500/15 transition-colors hover:bg-indigo-400"
+          className="flex items-center space-x-2 rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow-lg shadow-black/20 transition-colors hover:bg-primary/90"
         >
           <Github className="w-3 h-3" />
           <span>Deploy</span>

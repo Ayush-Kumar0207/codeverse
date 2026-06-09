@@ -31,6 +31,22 @@ function cleanText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function isMissingColumnError(error) {
+  return error?.code === "42703" || /column .* does not exist/i.test(error?.message || "");
+}
+
+function makeOauthUsername(value, provider, providerId) {
+  const base = cleanText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (base) return base;
+
+  const suffix = cleanText(providerId).slice(0, 8) || "user";
+  return `${provider}-${suffix}`;
+}
+
 function validateRegistration({ username, password, email }) {
   if (!username || !password || !email) {
     throw new HttpError(400, "Username, email, and password are required");
@@ -186,45 +202,128 @@ async function getProfile(username) {
 }
 
 async function processGithubUser(githubUser) {
-  const githubPayload = {
-    username: cleanText(githubUser.username),
-    email: cleanText(githubUser.email) || `${githubUser.githubId}@github.com`,
-    github_id: githubUser.githubId,
+  return processOAuthUser("github", githubUser);
+}
+
+async function processGoogleUser(googleUser) {
+  return processOAuthUser("google", googleUser);
+}
+
+async function processOAuthUser(provider, oauthUser) {
+  const providerIdField = `${provider}_id`;
+  const providerId =
+    cleanText(oauthUser.providerId) ||
+    cleanText(oauthUser[providerIdField]) ||
+    cleanText(oauthUser.id) ||
+    cleanText(oauthUser.githubId) ||
+    cleanText(oauthUser.googleId);
+  const email =
+    cleanText(oauthUser.email) ||
+    (providerId ? `${providerId}@${provider}.local` : "");
+  const username = makeOauthUsername(
+    oauthUser.username || oauthUser.login || oauthUser.displayName || email.split("@")[0],
+    provider,
+    providerId
+  );
+  const oauthPayload = {
+    username,
+    email,
+    [providerIdField]: providerId,
   };
 
   return withAuthStore(
     async () => {
-      const { data: existingUser } = await supabase
-        .from("users")
-        .select("*")
-        .eq("github_id", githubPayload.github_id)
-        .maybeSingle();
+      const existingUser = await findSupabaseOAuthUser(providerIdField, providerId, email, username);
 
       let user = existingUser;
 
       if (!user) {
-        const { data: newUser, error: insertError } = await supabase
-          .from("users")
-          .insert([githubPayload])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        user = newUser;
+        user = await createSupabaseOAuthUser(oauthPayload, providerIdField);
       }
 
       return buildTokenResponse(user);
     },
     async () => {
-      let user = await localAuthStore.findByGithubId(githubPayload.github_id);
+      let user =
+        provider === "github"
+          ? await localAuthStore.findByGithubId(providerId)
+          : await localAuthStore.findByGoogleId(providerId);
+
+      if (!user && email) {
+        user = await localAuthStore.findByEmail(email);
+      }
 
       if (!user) {
-        user = await localAuthStore.createUser(githubPayload);
+        user = await localAuthStore.findByUsername(username);
+      }
+
+      if (!user) {
+        user = await localAuthStore.createUser(oauthPayload);
       }
 
       return buildTokenResponse(user);
     }
   );
+}
+
+async function findSupabaseOAuthUser(providerIdField, providerId, email, username) {
+  if (providerId) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq(providerIdField, providerId)
+      .maybeSingle();
+
+    if (error && !isMissingColumnError(error)) throw error;
+    if (data) return data;
+  }
+
+  if (email) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data) return data;
+  }
+
+  if (username) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("username", username)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data) return data;
+  }
+
+  return null;
+}
+
+async function createSupabaseOAuthUser(oauthPayload, providerIdField) {
+  const insertPayload = { ...oauthPayload };
+  const { data, error } = await supabase
+    .from("users")
+    .insert([insertPayload])
+    .select()
+    .single();
+
+  if (!error) return data;
+
+  if (!isMissingColumnError(error)) throw error;
+
+  delete insertPayload[providerIdField];
+  const retry = await supabase
+    .from("users")
+    .insert([insertPayload])
+    .select()
+    .single();
+
+  if (retry.error) throw retry.error;
+  return retry.data;
 }
 
 async function buildLoginResponse(user, password) {
@@ -250,5 +349,6 @@ module.exports = {
   loginUser,
   getProfile,
   processGithubUser,
+  processGoogleUser,
 };
 

@@ -40,6 +40,7 @@ type PointerMarker = {
 };
 
 const NARRATIVE_KEYS = ["explanation", "narrative", "focus_message", "calculation", "tip", "message"];
+const pendingAssistantPromptKey = "codeverse:pending-ai-prompt";
 const SMART_KEYS = new Set([
   "visualizer",
   "kind",
@@ -901,14 +902,16 @@ function NarrativeRibbon({
   fullState: StateData;
 }) {
   const handleAskAI = () => {
-    window.dispatchEvent(
-      new CustomEvent("algotrace:ask_ai", {
-        detail: {
-          stateContext: fullState,
-          question: `Explain this trace step: "${humanizeKey(title)}".`,
-        },
-      })
-    );
+    const detail = {
+      stateContext: fullState,
+      question: `Explain this trace step: "${humanizeKey(title)}".`,
+    };
+
+    window.sessionStorage.setItem(pendingAssistantPromptKey, JSON.stringify(detail));
+    window.dispatchEvent(new CustomEvent("codeverse:open-assistant-panel"));
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("algotrace:ask_ai", { detail }));
+    }, 120);
   };
 
   return (

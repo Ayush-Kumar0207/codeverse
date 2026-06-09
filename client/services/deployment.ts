@@ -20,9 +20,11 @@ type ApiErrorShape = {
 export async function deployProject(payload: {
   projectId: string;
   files: Record<string, string>;
+}, options?: {
+  timeoutMs?: number;
 }): Promise<DeployResponse> {
   try {
-    const { data } = await apiClient.post("/api/deploy", payload, { timeout: 30000 });
+    const { data } = await apiClient.post("/api/deploy", payload, { timeout: options?.timeoutMs ?? 30000 });
     return data;
   } catch (error) {
     const apiError = error as ApiErrorShape;

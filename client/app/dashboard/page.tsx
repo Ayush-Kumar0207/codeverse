@@ -52,6 +52,7 @@ export default function Dashboard() {
   const [showNewProject, setShowNewProject] = useState(false);
   const [query, setQuery] = useState("");
   const [actionMessage, setActionMessage] = useState("");
+  const [projectServiceAvailable, setProjectServiceAvailable] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -70,8 +71,10 @@ export default function Dashboard() {
         try {
           const projectData = await fetchProjectsByOwner(profileData.user.username);
           setProjects(projectData.projects || []);
+          setProjectServiceAvailable(true);
         } catch {
           setProjects([]);
+          setProjectServiceAvailable(false);
           setActionMessage("Project service unavailable; showing an empty workspace");
         }
       } catch {
@@ -374,12 +377,19 @@ export default function Dashboard() {
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                  <p className="text-slate-500">Backend</p>
-                  <p className="mt-1 font-semibold text-emerald-300">Connected</p>
+                  <p className="text-slate-500">Session</p>
+                  <p className="mt-1 font-semibold text-emerald-300">Authenticated</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                  <p className="text-slate-500">Sync</p>
-                  <p className="mt-1 font-semibold text-slate-200">Ready</p>
+                  <p className="text-slate-500">Projects</p>
+                  <p
+                    className={cn(
+                      "mt-1 font-semibold",
+                      projectServiceAvailable ? "text-emerald-300" : "text-amber-300"
+                    )}
+                  >
+                    {projectServiceAvailable ? "Loaded" : "Limited"}
+                  </p>
                 </div>
               </div>
             </section>

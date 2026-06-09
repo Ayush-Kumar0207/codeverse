@@ -30,7 +30,17 @@ async function findByGithubId(githubId) {
   return users.find((user) => user.github_id === githubId) || null;
 }
 
-async function createUser({ username, password, email, github_id }) {
+async function findByGoogleId(googleId) {
+  const users = await readUsers();
+  return users.find((user) => user.google_id === googleId) || null;
+}
+
+async function findByEmail(email) {
+  const users = await readUsers();
+  return users.find((user) => user.email === email) || null;
+}
+
+async function createUser({ username, password, email, github_id, google_id }) {
   const users = await readUsers();
   const now = new Date().toISOString();
   const user = {
@@ -39,6 +49,7 @@ async function createUser({ username, password, email, github_id }) {
     password,
     email,
     github_id: github_id || null,
+    google_id: google_id || null,
     created_at: now,
   };
 
@@ -50,6 +61,8 @@ async function createUser({ username, password, email, github_id }) {
 
 module.exports = {
   createUser,
+  findByEmail,
   findByGithubId,
+  findByGoogleId,
   findByUsername,
 };

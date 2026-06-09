@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { registerRequest } from "@/services/auth";
+import { getOAuthUrl } from "@/services/oauth";
+import { Github } from "lucide-react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -83,6 +85,30 @@ export default function SignUpPage() {
         >
           {isSubmitting ? "Creating..." : "Sign Up"}
         </button>
+
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          <span className="h-px flex-1 bg-gray-800" />
+          <span>or</span>
+          <span className="h-px flex-1 bg-gray-800" />
+        </div>
+
+        <a
+          href={getOAuthUrl("github")}
+          className="flex w-full items-center justify-center gap-2 rounded border border-gray-700 bg-gray-800 p-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700"
+        >
+          <Github className="h-4 w-4" />
+          Continue with GitHub
+        </a>
+
+        <a
+          href={getOAuthUrl("google")}
+          className="flex w-full items-center justify-center gap-2 rounded border border-gray-700 bg-gray-800 p-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700"
+        >
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-xs font-black text-slate-900">
+            G
+          </span>
+          Continue with Google
+        </a>
       </form>
     </div>
   );

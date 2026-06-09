@@ -27,10 +27,10 @@ export default function DiffViewer({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-4 z-[100] bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col glass-effect"
+      className="fixed inset-4 z-[100] flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-2xl shadow-black/50"
     >
       {/* Header */}
-      <div className="h-14 flex items-center justify-between px-6 border-b border-white/10 bg-black/40">
+      <div className="flex h-14 items-center justify-between border-b border-border bg-muted/40 px-6">
         <div className="flex items-center gap-4">
           <div className="p-2 bg-primary/10 rounded-lg">
             <ArrowLeftRight className="w-5 h-5 text-primary" />
@@ -48,7 +48,7 @@ export default function DiffViewer({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="hover:bg-white/5 text-muted-foreground"
+            className="text-muted-foreground hover:bg-muted"
           >
             <X className="w-4 h-4 mr-2" />
             Dismiss
@@ -56,7 +56,7 @@ export default function DiffViewer({
           <Button
             size="sm"
             onClick={onRevert}
-            className="bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+            className="bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90"
           >
             <Clock className="w-4 h-4 mr-2" />
             Restore This Version
@@ -65,7 +65,7 @@ export default function DiffViewer({
       </div>
 
       {/* Diff Editor Container */}
-      <div className="flex-1 bg-black/20">
+      <div className="flex-1 bg-background/40">
         <DiffEditor
           original={originalCode}
           modified={modifiedCode}
@@ -85,7 +85,7 @@ export default function DiffViewer({
       </div>
 
       {/* Footer Legend */}
-      <div className="h-10 px-6 border-t border-white/10 bg-black/40 flex items-center gap-6">
+      <div className="flex h-10 items-center gap-6 border-t border-border bg-muted/40 px-6">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500/50" />
           <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Original Snapshot</span>

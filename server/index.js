@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("./src/config/env");
 const http = require("http");
 const { Server } = require("socket.io");
 const createApp = require("./src/app");
@@ -23,6 +23,15 @@ app.set("io", io);
 socketHandler(io);
 
 const PORT = process.env.PORT || 5000;
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`⚠️ CodeVerse backend is already running on port ${PORT}. Keep one server process open at a time.`);
+    process.exit(0);
+  }
+
+  throw error;
+});
+
 server.listen(PORT, () => {
   console.log(`🚀 Primary Core running on http://localhost:${PORT}`);
 });
@@ -47,6 +56,15 @@ deployApp.use('/:projectId', (req, res, next) => {
   express.static(projectPath, { extensions: ["html"], index: "index.html" })(req, res, next);
 });
 
-deployApp.listen(DEPLOY_PORT, () => {
+const deployServer = deployApp.listen(DEPLOY_PORT, () => {
   console.log(`📡 Aegis Deployment Bridge active on port ${DEPLOY_PORT}`);
+});
+
+deployServer.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`⚠️ Deployment bridge is already running on port ${DEPLOY_PORT}.`);
+    return;
+  }
+
+  throw error;
 });

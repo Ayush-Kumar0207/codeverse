@@ -69,7 +69,13 @@ function isOrganizerSocket(socket, roomId) {
   );
 }
 
+function isSocketInRoom(socket, roomId) {
+  return Boolean(roomId && socket.rooms?.has?.(roomId));
+}
+
 function canSocketEdit(socket, roomId) {
+  if (!isSocketInRoom(socket, roomId)) return false;
+
   const access = getRoomAccess(roomId);
   if (!access.organizer) return true;
   return access.collaboratorsCanEdit || isOrganizerSocket(socket, roomId);
@@ -113,6 +119,31 @@ function maybeAssignOrganizer(roomId, socket, user) {
   }
 }
 
+function removeRoomUser(io, roomId, targetSocketId, reason = "Removed by organizer.") {
+  const targetPresence = roomUsers[roomId]?.[targetSocketId];
+  const targetSocket = io.sockets.sockets.get(targetSocketId);
+
+  if (!targetPresence || !targetSocket) return false;
+
+  targetSocket.emit(SOCKET_EVENTS.COLLABORATOR_REMOVED, {
+    roomId,
+    reason,
+    username: targetPresence.username,
+  });
+  targetSocket.leave(roomId);
+
+  delete roomUsers[roomId][targetSocketId];
+  io.to(roomId).emit(SOCKET_EVENTS.USER_LEFT, targetPresence);
+  io.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
+
+  if (Object.keys(roomUsers[roomId]).length === 0) {
+    delete roomUsers[roomId];
+    delete roomAccess[roomId];
+  }
+
+  return true;
+}
+
 function socketHandler(io) {
   io.on("connection", (socket) => {
     console.log("🔌 User connected:", socket.id);
@@ -134,6 +165,7 @@ function socketHandler(io) {
         const presence = {
           username: user.username,
           avatar: user.avatar,
+          userId: user.userId,
           status: user.status || "Editing",
           socketId: socket.id,
           role: isOrganizerSocket(socket, roomId) ? "organizer" : "collaborator",
@@ -154,6 +186,11 @@ function socketHandler(io) {
     });
 
     socket.on(SOCKET_EVENTS.CHAT_MESSAGE, (msg) => {
+      if (!msg?.roomId || !isSocketInRoom(socket, msg.roomId)) {
+        emitPermissionDenied(socket, msg?.roomId || "", "You are no longer in this workspace.");
+        return;
+      }
+
       io.to(msg.roomId).emit(SOCKET_EVENTS.CHAT_MESSAGE, msg);
     });
 
@@ -210,19 +247,55 @@ function socketHandler(io) {
       io.to(roomId).emit(SOCKET_EVENTS.EDIT_PERMISSION_STATE, serializeAccessState(roomId));
     });
 
+    socket.on(SOCKET_EVENTS.REMOVE_COLLABORATOR, ({ roomId, username, socketId }) => {
+      if (!roomId) return;
+
+      if (!isOrganizerSocket(socket, roomId)) {
+        emitPermissionDenied(socket, roomId, "Only the organizer can remove collaborators.");
+        return;
+      }
+
+      const room = roomUsers[roomId] || {};
+      const targetEntry = Object.entries(room).find(([candidateSocketId, presence]) => {
+        if (candidateSocketId === socket.id) return false;
+        if (isOrganizerSocket({ id: candidateSocketId, data: presence }, roomId)) return false;
+
+        return (
+          (socketId && candidateSocketId === socketId) ||
+          (username && presence.username === username)
+        );
+      });
+
+      if (!targetEntry) {
+        socket.emit(SOCKET_EVENTS.EDIT_PERMISSION_DENIED, {
+          roomId,
+          reason: "Collaborator is not active in this workspace.",
+          state: serializeAccessState(roomId),
+        });
+        return;
+      }
+
+      removeRoomUser(io, roomId, targetEntry[0]);
+    });
+
     socket.on(SOCKET_EVENTS.EXECUTION_START, ({ roomId, user }) => {
+      if (!isSocketInRoom(socket, roomId)) return;
       socket.to(roomId).emit(SOCKET_EVENTS.EXECUTION_START, { user });
     });
 
     socket.on(SOCKET_EVENTS.EXECUTION_RESULT, ({ roomId, user, output }) => {
+      if (!isSocketInRoom(socket, roomId)) return;
       socket.to(roomId).emit(SOCKET_EVENTS.EXECUTION_RESULT, { user, output });
     });
 
     socket.on(SOCKET_EVENTS.EXECUTION_ERROR, ({ roomId, user, error }) => {
+      if (!isSocketInRoom(socket, roomId)) return;
       socket.to(roomId).emit(SOCKET_EVENTS.EXECUTION_ERROR, { user, error });
     });
     
     socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, ({ roomId, username, status }) => {
+      if (!isSocketInRoom(socket, roomId)) return;
+
       if (roomId && roomUsers[roomId]?.[socket.id]) {
         roomUsers[roomId][socket.id] = {
           ...roomUsers[roomId][socket.id],
@@ -236,6 +309,7 @@ function socketHandler(io) {
 
     socket.on(SOCKET_EVENTS.CURSOR_MOVE, ({ roomId, username, position }) => {
       if (!roomId || !username || !position) return;
+      if (!isSocketInRoom(socket, roomId)) return;
       socket.to(roomId).emit(SOCKET_EVENTS.CURSOR_MOVE, { username, position });
     });
 

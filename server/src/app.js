@@ -4,6 +4,7 @@ const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
 
+require("./config/env");
 require("./config/passport");
 
 const authRoutes = require("./routes/auth.routes");

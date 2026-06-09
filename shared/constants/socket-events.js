@@ -11,6 +11,8 @@ const SOCKET_EVENTS = Object.freeze({
   USER_JOINED: "userJoined",
   USER_LEFT: "userLeft",
   PRESENCE_UPDATE: "presenceUpdate",
+  REMOVE_COLLABORATOR: "collaborator:remove",
+  COLLABORATOR_REMOVED: "collaborator:removed",
   EDIT_PERMISSION_UPDATE: "editPermission:update",
   EDIT_PERMISSION_STATE: "editPermission:state",
   EDIT_PERMISSION_DENIED: "editPermission:denied",

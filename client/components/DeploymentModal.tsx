@@ -20,6 +20,7 @@ interface Props {
   deploymentUrl?: string;
   error?: string;
   projectName: string;
+  note?: string;
 }
 
 const STEPS = [
@@ -34,6 +35,7 @@ export default function DeploymentModal({
   deploymentUrl,
   error,
   projectName,
+  note,
 }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -60,20 +62,20 @@ export default function DeploymentModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-background/80 backdrop-blur-xl"
         onClick={onClose}
       />
       
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-lg bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-[0_20px_100px_rgba(99,102,241,0.2)] overflow-hidden glass-effect"
+        className="relative w-full max-w-lg overflow-hidden rounded-lg border border-border bg-card shadow-2xl shadow-black/40"
       >
         {/* Progress header */}
-        <div className="p-8 border-b border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
+        <div className="relative overflow-hidden border-b border-border p-8">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-muted">
              <motion.div 
-               className="h-full bg-primary shadow-[0_0_20px_rgba(99,102,241,0.8)]"
+               className="h-full bg-primary shadow-lg shadow-primary/30"
                initial={{ width: "0%" }}
                animate={{ width: deploymentUrl ? "100%" : `${(currentStep + 1) * 33}%` }}
                transition={{ duration: 1 }}
@@ -82,7 +84,7 @@ export default function DeploymentModal({
 
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-primary/10 rounded-xl">
+              <div className="rounded-lg bg-primary/10 p-2.5">
                 <Server className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -107,7 +109,7 @@ export default function DeploymentModal({
                   key={step.id} 
                   className={`flex items-center gap-4 transition-all duration-500 ${index <= currentStep ? "opacity-100 translate-x-0" : "opacity-30 translate-x-4"}`}
                 >
-                  <div className={`p-1.5 rounded-full ${index < currentStep ? "bg-green-500/20 text-green-500" : index === currentStep ? "bg-primary/20 text-primary" : "bg-white/5 text-muted-foreground"}`}>
+                  <div className={`p-1.5 rounded-full ${index < currentStep ? "bg-emerald-500/20 text-emerald-400" : index === currentStep ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
                     {index < currentStep ? <CheckCircle2 className="w-4 h-4" /> : <step.icon className="w-4 h-4" />}
                   </div>
                   <span className={`text-xs font-bold uppercase tracking-widest ${index === currentStep ? "text-primary" : "text-muted-foreground"}`}>
@@ -124,16 +126,18 @@ export default function DeploymentModal({
              <motion.div 
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
-               className="p-6 bg-green-500/5 border border-green-500/20 rounded-xl text-center space-y-4"
+               className="space-y-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-6 text-center"
              >
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
-                  <CheckCircle2 className="w-8 h-8 text-green-500" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/20">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                 </div>
                 <h3 className="text-xl font-bold tracking-tight">Deployment Ready</h3>
-                <p className="text-xs text-muted-foreground">Your project is now served by the local CodeVerse deployment server.</p>
+                <p className="text-xs text-muted-foreground">
+                  {note || "Your project is now served by the local CodeVerse deployment server."}
+                </p>
                 
                 <a
-                  className="p-3 bg-black/40 rounded-lg border border-white/5 flex items-center justify-between gap-4 group cursor-pointer hover:bg-black/60 transition-colors"
+                  className="group flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-border bg-muted/50 p-3 transition-colors hover:bg-muted"
                   href={deploymentUrl}
                   target="_blank"
                   rel="noreferrer"
@@ -143,7 +147,7 @@ export default function DeploymentModal({
                 </a>
 
                 <div className="pt-4 flex gap-3">
-                   <Button variant="outline" className="flex-1 text-[10px] h-9 border-white/10" onClick={onClose}>Dismiss</Button>
+                   <Button variant="outline" className="h-9 flex-1 border-border text-[10px]" onClick={onClose}>Dismiss</Button>
                    <a
                      className="group/button inline-flex h-9 flex-1 items-center justify-center rounded-lg bg-primary px-2.5 text-[10px] font-medium text-primary-foreground transition-all hover:bg-primary/80"
                      href={deploymentUrl}
@@ -159,15 +163,15 @@ export default function DeploymentModal({
 
         {/* Console output footer (God-Level touch) */}
         {!deploymentUrl && !error && (
-          <div className="p-4 bg-black/60 font-mono text-[10px] text-muted-foreground h-32 overflow-hidden relative">
+          <div className="relative h-32 overflow-hidden bg-muted/60 p-4 font-mono text-[10px] text-muted-foreground">
              <div className="space-y-1">
-               <div className="text-green-500/70">[{new Date().toLocaleTimeString()}] FILES_READY: Collecting workspace files...</div>
+               <div className="text-emerald-400/70">[{new Date().toLocaleTimeString()}] FILES_READY: Collecting workspace files...</div>
                <div>[{new Date().toLocaleTimeString()}] STATIC_BUILD: Preparing browser assets...</div>
                <div>[{new Date().toLocaleTimeString()}] ROUTE_CHECK: Reserving deployment URL...</div>
                {currentStep >= 1 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] INDEX_READY: Confirming application entry point...</div>}
                {currentStep >= 2 && <div className="text-primary/70">[{new Date().toLocaleTimeString()}] PUBLISH_READY: Serving project from backend...</div>}
              </div>
-             <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+             <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-card to-transparent" />
           </div>
         )}
       </motion.div>

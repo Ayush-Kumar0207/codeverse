@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { AT_ALGORITHMS } from "@/data/algos";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,6 +75,7 @@ import {
   Unlock,
   ShieldCheck,
   Eye,
+  UserMinus,
 } from "lucide-react";
 
 interface PresenceUser {
@@ -84,6 +85,7 @@ interface PresenceUser {
   role?: "organizer" | "collaborator";
   canEdit?: boolean;
   userId?: string;
+  socketId?: string;
 }
 
 interface CollaborationAccess {
@@ -92,11 +94,21 @@ interface CollaborationAccess {
   organizerUserId?: string;
 }
 
+interface WorkspaceSnapshot {
+  id: string;
+  createdAt: string;
+  files: Record<string, string>;
+  activeFile: string;
+  label: string;
+}
+
 type FullscreenPanel = "editor" | "assistant" | "output" | null;
 
 function normalizeIdentity(value?: string | null) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
+
+const MAX_WORKSPACE_SNAPSHOTS = 80;
 
 function formatExecutionError(error: unknown) {
   if (axios.isAxiosError(error)) {
@@ -137,6 +149,11 @@ export default function EditorPage() {
     collaboratorsCanEdit: true,
   });
   const [permissionNotice, setPermissionNotice] = useState("");
+  const [removedFromWorkspace, setRemovedFromWorkspace] = useState(false);
+  const [workspaceSnapshots, setWorkspaceSnapshots] = useState<WorkspaceSnapshot[]>([]);
+  const [currentSnapshotId, setCurrentSnapshotId] = useState<string | null>(null);
+  const lastSnapshotSignatureRef = useRef("");
+  const skipNextTimelineSnapshotRef = useRef(false);
 
   const {
     files,
@@ -168,9 +185,15 @@ export default function EditorPage() {
       .filter(Boolean);
 
     return userIdentities.includes(owner);
-  }, [project?.isDemo, project?.owner, user?._id, user?.email, user?.username]);
+  }, [project, user?._id, user?.email, user?.username]);
 
-  const canEditWorkspace = isProjectOrganizer || collaborationAccess.collaboratorsCanEdit;
+  const canEditWorkspace =
+    !removedFromWorkspace && (isProjectOrganizer || collaborationAccess.collaboratorsCanEdit);
+
+  const timelineStorageKey = useMemo(
+    () => `codeverse:workspace-timeline:${roomId}`,
+    [roomId]
+  );
 
   // Code execution hook
   const { output, outputType, loading, setOutput, setOutputType, setLoading } = useCodeExecution(socket);
@@ -248,13 +271,13 @@ export default function EditorPage() {
     }
   };
 
-  const emitWorkspaceFilesChange = (nextFiles: Record<string, string>, nextActiveFile: string) => {
+  const emitWorkspaceFilesChange = useCallback((nextFiles: Record<string, string>, nextActiveFile: string) => {
     socket?.emit(SOCKET_EVENTS.FILES_CHANGE, {
       roomId,
       files: nextFiles,
       activeFile: nextActiveFile,
     });
-  };
+  }, [roomId, socket]);
 
   const handleCreateFile = () => {
     if (!canEditWorkspace) {
@@ -300,9 +323,123 @@ export default function EditorPage() {
     });
   };
 
+  const handleRemoveCollaborator = (collaborator: PresenceUser) => {
+    if (!isProjectOrganizer || collaborator.username === user?.username) return;
+
+    socket?.emit(SOCKET_EVENTS.REMOVE_COLLABORATOR, {
+      roomId,
+      username: collaborator.username,
+      socketId: collaborator.socketId,
+    });
+  };
+
+  const getWorkspaceSnapshotSignature = useCallback((nextFiles: Record<string, string>) => {
+    return JSON.stringify(Object.entries(nextFiles).sort(([left], [right]) => left.localeCompare(right)));
+  }, []);
+
+  const createWorkspaceSnapshot = useCallback(
+    (
+      label = "Auto snapshot",
+      snapshotFiles: Record<string, string> = files,
+      snapshotActiveFile: string = activeFile
+    ) => {
+      if (!isProjectOrganizer || Object.keys(snapshotFiles).length === 0) return null;
+
+      const signature = getWorkspaceSnapshotSignature(snapshotFiles);
+      if (signature === lastSnapshotSignatureRef.current) return null;
+
+      const snapshot: WorkspaceSnapshot = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: new Date().toISOString(),
+        files: { ...snapshotFiles },
+        activeFile: snapshotActiveFile,
+        label,
+      };
+
+      lastSnapshotSignatureRef.current = signature;
+      setWorkspaceSnapshots((prev) => {
+        const next = [snapshot, ...prev].slice(0, MAX_WORKSPACE_SNAPSHOTS);
+        return next.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+      });
+      setCurrentSnapshotId(snapshot.id);
+      return snapshot;
+    },
+    [activeFile, files, getWorkspaceSnapshotSignature, isProjectOrganizer]
+  );
+
+  const restoreWorkspaceSnapshot = useCallback(
+    (snapshot: WorkspaceSnapshot) => {
+      if (!isProjectOrganizer) {
+        setPermissionNotice("Timeline controls are available only to the organizer.");
+        return;
+      }
+
+      createWorkspaceSnapshot("Before timeline restore", files, activeFile);
+      skipNextTimelineSnapshotRef.current = true;
+      lastSnapshotSignatureRef.current = getWorkspaceSnapshotSignature(snapshot.files);
+      setFiles(snapshot.files);
+      const nextActiveFile = Object.prototype.hasOwnProperty.call(snapshot.files, snapshot.activeFile)
+        ? snapshot.activeFile
+        : Object.keys(snapshot.files)[0] || "";
+      if (nextActiveFile) setActiveFile(nextActiveFile);
+      setCurrentSnapshotId(snapshot.id);
+      setPermissionNotice(`Restored workspace to ${new Date(snapshot.createdAt).toLocaleString()}.`);
+      emitWorkspaceFilesChange(snapshot.files, nextActiveFile);
+    },
+    [
+      activeFile,
+      createWorkspaceSnapshot,
+      emitWorkspaceFilesChange,
+      files,
+      getWorkspaceSnapshotSignature,
+      isProjectOrganizer,
+      setActiveFile,
+      setFiles,
+    ]
+  );
+
+  const currentTimelineIndex = useMemo(() => {
+    if (workspaceSnapshots.length === 0) return -1;
+    if (!currentSnapshotId) return 0;
+    const index = workspaceSnapshots.findIndex((snapshot) => snapshot.id === currentSnapshotId);
+    return index >= 0 ? index : 0;
+  }, [currentSnapshotId, workspaceSnapshots]);
+
+  const restoreWorkspaceSnapshotByTime = useCallback(
+    (isoTimestamp: string) => {
+      const targetTime = Date.parse(isoTimestamp);
+      if (!Number.isFinite(targetTime) || workspaceSnapshots.length === 0) return;
+
+      const sorted = [...workspaceSnapshots].sort(
+        (left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt)
+      );
+      const snapshot =
+        sorted.find((candidate) => Date.parse(candidate.createdAt) <= targetTime) ||
+        sorted[sorted.length - 1];
+
+      if (snapshot) restoreWorkspaceSnapshot(snapshot);
+    },
+    [restoreWorkspaceSnapshot, workspaceSnapshots]
+  );
+
+  const stepWorkspaceTimeline = useCallback(
+    (direction: "back" | "forward") => {
+      const nextIndex = direction === "back" ? currentTimelineIndex + 1 : currentTimelineIndex - 1;
+      const snapshot = workspaceSnapshots[nextIndex];
+      if (snapshot) restoreWorkspaceSnapshot(snapshot);
+    },
+    [currentTimelineIndex, restoreWorkspaceSnapshot, workspaceSnapshots]
+  );
+
+  const returnToLatestWorkspaceSnapshot = useCallback(() => {
+    const latest = workspaceSnapshots[0];
+    if (latest) restoreWorkspaceSnapshot(latest);
+  }, [restoreWorkspaceSnapshot, workspaceSnapshots]);
+
   // Load project
   useEffect(() => {
     if (!id) return;
+    setRemovedFromWorkspace(false);
 
     if (id === "demo-sandbox") {
       // Dynamic Encyclopedia Payload Extraction
@@ -642,9 +779,62 @@ updateSummary();`;
       });
   }, [id, algoId, initializeProjectFiles, setActiveFile, setFiles]);
 
+  useEffect(() => {
+    if (!isProjectOrganizer || typeof window === "undefined") return;
+
+    try {
+      const raw = window.localStorage.getItem(timelineStorageKey);
+      if (!raw) {
+        setWorkspaceSnapshots([]);
+        setCurrentSnapshotId(null);
+        lastSnapshotSignatureRef.current = "";
+        return;
+      }
+
+      const parsed = JSON.parse(raw) as WorkspaceSnapshot[];
+      const validSnapshots = Array.isArray(parsed)
+        ? parsed.filter((snapshot) => snapshot?.id && snapshot?.createdAt && snapshot?.files)
+        : [];
+      setWorkspaceSnapshots(validSnapshots);
+      setCurrentSnapshotId(validSnapshots[0]?.id || null);
+      lastSnapshotSignatureRef.current = validSnapshots[0]
+        ? getWorkspaceSnapshotSignature(validSnapshots[0].files)
+        : "";
+    } catch (error) {
+      console.warn("Failed to load workspace timeline", error);
+      setWorkspaceSnapshots([]);
+      setCurrentSnapshotId(null);
+    }
+  }, [getWorkspaceSnapshotSignature, isProjectOrganizer, timelineStorageKey]);
+
+  useEffect(() => {
+    if (!isProjectOrganizer || typeof window === "undefined") return;
+
+    try {
+      window.localStorage.setItem(timelineStorageKey, JSON.stringify(workspaceSnapshots));
+    } catch (error) {
+      console.warn("Failed to persist workspace timeline", error);
+    }
+  }, [isProjectOrganizer, timelineStorageKey, workspaceSnapshots]);
+
+  useEffect(() => {
+    if (!project || !isProjectOrganizer || Object.keys(files).length === 0) return;
+
+    if (skipNextTimelineSnapshotRef.current) {
+      skipNextTimelineSnapshotRef.current = false;
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      createWorkspaceSnapshot("Auto snapshot");
+    }, 1600);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeFile, createWorkspaceSnapshot, files, isProjectOrganizer, project]);
+
   // Presence Logic
   useEffect(() => {
-    if (!socket || !user || !project) return;
+    if (!socket || !user || !project || removedFromWorkspace) return;
 
     socket.emit(SOCKET_EVENTS.JOIN_ROOM, {
       roomId,
@@ -699,16 +889,27 @@ updateSummary();`;
       ));
     };
 
+    const handleCollaboratorRemoved = (payload: { roomId?: string; username?: string; reason?: string }) => {
+      if (payload.roomId && payload.roomId !== roomId) return;
+      if (payload.username && payload.username !== user.username) return;
+
+      setRemovedFromWorkspace(true);
+      setPermissionNotice(payload.reason || "You were removed from this workspace by the organizer.");
+      setActiveUsers((prev) => prev.filter((activeUser) => activeUser.username !== user.username));
+    };
+
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
     socket.on(SOCKET_EVENTS.USER_LEFT, handleUserLeft);
     socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, handlePresenceUpdate);
+    socket.on(SOCKET_EVENTS.COLLABORATOR_REMOVED, handleCollaboratorRemoved);
 
     return () => {
       socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
       socket.off(SOCKET_EVENTS.USER_LEFT, handleUserLeft);
       socket.off(SOCKET_EVENTS.PRESENCE_UPDATE, handlePresenceUpdate);
+      socket.off(SOCKET_EVENTS.COLLABORATOR_REMOVED, handleCollaboratorRemoved);
     };
-  }, [canEditWorkspace, isProjectOrganizer, project, roomId, socket, user]);
+  }, [canEditWorkspace, isProjectOrganizer, project, removedFromWorkspace, roomId, socket, user]);
 
   useEffect(() => {
     if (!socket) return;
@@ -787,12 +988,9 @@ updateSummary();`;
       if (!payload.files || typeof payload.files !== "object") return;
 
       setFiles(payload.files);
-      const nextActiveFile =
-        payload.activeFile && Object.prototype.hasOwnProperty.call(payload.files, payload.activeFile)
-          ? payload.activeFile
-          : Object.prototype.hasOwnProperty.call(payload.files, activeFile)
-            ? activeFile
-            : Object.keys(payload.files)[0] || "";
+      const nextActiveFile = Object.prototype.hasOwnProperty.call(payload.files, activeFile)
+        ? activeFile
+        : Object.keys(payload.files)[0] || "";
 
       if (nextActiveFile) {
         setActiveFile(nextActiveFile);
@@ -1016,6 +1214,17 @@ updateSummary();`;
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [fullscreenPanel]);
+
+  useEffect(() => {
+    const openAssistantPanel = () => {
+      rightPanelRef.current?.expand();
+      setRightCollapsed(false);
+      setRightTab("assistant");
+    };
+
+    window.addEventListener("codeverse:open-assistant-panel", openAssistantPanel);
+    return () => window.removeEventListener("codeverse:open-assistant-panel", openAssistantPanel);
+  }, []);
 
   const toggleBottomPanel = () => {
     if (bottomCollapsed) {
@@ -1360,6 +1569,21 @@ updateSummary();`;
                             onRevert={canEditWorkspace ? applyCodeToActiveFile : () => setPermissionNotice("Editing is currently organizer-only.")}
                             onCompare={handleCompare}
                             refreshSignal={refreshCount}
+                            isOrganizer={isProjectOrganizer && !removedFromWorkspace}
+                            workspaceSnapshots={workspaceSnapshots}
+                            currentSnapshotId={currentSnapshotId}
+                            onCreateWorkspaceSnapshot={() => {
+                              const snapshot = createWorkspaceSnapshot("Manual snapshot");
+                              if (snapshot) {
+                                setPermissionNotice(`Saved workspace snapshot at ${new Date(snapshot.createdAt).toLocaleString()}.`);
+                              }
+                            }}
+                            onRestoreWorkspaceSnapshot={restoreWorkspaceSnapshot}
+                            onRestoreWorkspaceSnapshotByTime={restoreWorkspaceSnapshotByTime}
+                            onStepWorkspaceSnapshot={stepWorkspaceTimeline}
+                            onReturnToLatestWorkspaceSnapshot={returnToLatestWorkspaceSnapshot}
+                            canStepBack={currentTimelineIndex >= 0 && currentTimelineIndex < workspaceSnapshots.length - 1}
+                            canStepForward={currentTimelineIndex > 0}
                           />
                         </TabsContent>
                      </div>
@@ -1519,13 +1743,60 @@ updateSummary();`;
                         {permissionNotice}
                       </div>
                     )}
+                    <div className="border-b border-slate-800 px-3 py-2">
+                      <div className="flex flex-wrap gap-2">
+                        {activeUsers.map((activeUser) => {
+                          const isSelf = activeUser.username === user?.username;
+                          const canRemove =
+                            isProjectOrganizer &&
+                            !isSelf &&
+                            activeUser.role !== "organizer";
+
+                          return (
+                            <div
+                              key={`${activeUser.socketId || activeUser.username}-${activeUser.username}`}
+                              className="flex h-8 max-w-full items-center gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-2 text-xs text-slate-300"
+                            >
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-[9px] font-semibold uppercase text-indigo-200">
+                                {activeUser.username?.slice(0, 2)}
+                              </span>
+                              <span className="max-w-[120px] truncate">{activeUser.username}</span>
+                              <span className="text-[10px] uppercase tracking-widest text-slate-600">
+                                {activeUser.role === "organizer"
+                                  ? "Organizer"
+                                  : activeUser.canEdit === false
+                                    ? "View"
+                                    : "Edit"}
+                              </span>
+                              {canRemove && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveCollaborator(activeUser)}
+                                  className="ml-1 flex h-6 w-6 items-center justify-center rounded text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-300"
+                                  aria-label={`Remove ${activeUser.username}`}
+                                  title={`Remove ${activeUser.username}`}
+                                >
+                                  <UserMinus className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                     <div className="min-h-0 flex-1">
-                      <ChatBox
-                        roomId={roomId}
-                        aiMode={false}
-                        channel="team"
-                        placeholder="Message everyone in this workspace..."
-                      />
+                      {removedFromWorkspace ? (
+                        <div className="flex h-full items-center justify-center px-6 text-center text-sm text-slate-500">
+                          You no longer have access to this workspace.
+                        </div>
+                      ) : (
+                        <ChatBox
+                          roomId={roomId}
+                          aiMode={false}
+                          channel="team"
+                          placeholder="Message everyone in this workspace..."
+                        />
+                      )}
                     </div>
                   </div>
                 </TabsContent>
