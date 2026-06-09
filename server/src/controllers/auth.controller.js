@@ -11,13 +11,68 @@ function getApiBaseUrl(req) {
   ).replace(/\/$/, "");
 }
 
-function getClientBaseUrl() {
+function getConfiguredClientBaseUrl() {
   return (
     process.env.CLIENT_URL ||
     process.env.FRONTEND_URL ||
     process.env.NEXT_PUBLIC_FRONTEND_URL ||
-    "http://localhost:3000"
+    ""
   ).replace(/\/$/, "");
+}
+
+function getUrlOrigin(value) {
+  if (!value) return "";
+
+  try {
+    return new URL(value).origin.replace(/\/$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function isLocalClientOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
+function isTrustedClientOrigin(origin) {
+  if (!origin) return false;
+
+  const configuredOrigin = getUrlOrigin(getConfiguredClientBaseUrl());
+  if (configuredOrigin && origin === configuredOrigin) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
+function getRequestClientBaseUrl(req) {
+  const candidates = [req.get("origin"), req.get("referer")];
+
+  for (const candidate of candidates) {
+    const origin = getUrlOrigin(candidate);
+    if (isTrustedClientOrigin(origin)) return origin;
+  }
+
+  return "";
+}
+
+function getClientBaseUrl(req) {
+  const configuredBaseUrl = getConfiguredClientBaseUrl();
+  const requestBaseUrl = getRequestClientBaseUrl(req);
+
+  if (configuredBaseUrl && !isLocalClientOrigin(configuredBaseUrl)) {
+    return configuredBaseUrl;
+  }
+
+  return requestBaseUrl || configuredBaseUrl || "http://localhost:3000";
 }
 
 function getRedirectUri(req, provider) {
@@ -33,7 +88,7 @@ function getRedirectUri(req, provider) {
 
 function rememberOAuthState(req, provider) {
   const state = crypto.randomBytes(24).toString("hex");
-  req.session.oauthState = { provider, state };
+  req.session.oauthState = { provider, state, clientBaseUrl: getClientBaseUrl(req) };
   return state;
 }
 
@@ -45,22 +100,24 @@ function validateOAuthState(req, provider) {
   if (expected.provider !== provider || expected.state !== req.query.state) {
     throw new HttpError(401, `${provider} authentication state did not match`);
   }
+
+  return expected;
 }
 
 function encodeOAuthUser(user) {
   return Buffer.from(JSON.stringify(user), "utf8").toString("base64url");
 }
 
-function redirectOAuthSuccess(res, provider, result) {
-  const url = new URL("/oauth-success", getClientBaseUrl());
+function redirectOAuthSuccess(req, res, provider, result, clientBaseUrl) {
+  const url = new URL("/oauth-success", clientBaseUrl || getClientBaseUrl(req));
   url.searchParams.set("provider", provider);
   url.searchParams.set("token", result.token);
   url.searchParams.set("user", encodeOAuthUser(result.user));
   res.redirect(url.toString());
 }
 
-function redirectOAuthError(res, provider, message) {
-  const url = new URL("/login", getClientBaseUrl());
+function redirectOAuthError(req, res, provider, message, clientBaseUrl) {
+  const url = new URL("/login", clientBaseUrl || getClientBaseUrl(req));
   url.searchParams.set("oauth_error", message || `${provider} authentication failed`);
   res.redirect(url.toString());
 }
@@ -96,7 +153,7 @@ const profile = asyncHandler(async (req, res) => {
 
 const githubStart = asyncHandler(async (req, res) => {
   if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
-    redirectOAuthError(res, "github", "GitHub sign-in is not configured on this server.");
+    redirectOAuthError(req, res, "github", "GitHub sign-in is not configured on this server.");
     return;
   }
 
@@ -109,16 +166,22 @@ const githubStart = asyncHandler(async (req, res) => {
 });
 
 const githubCallback = asyncHandler(async (req, res) => {
+  const oauthState = validateOAuthState(req, "github");
+
   if (req.query.error) {
-    redirectOAuthError(res, "github", String(req.query.error_description || req.query.error));
+    redirectOAuthError(
+      req,
+      res,
+      "github",
+      String(req.query.error_description || req.query.error),
+      oauthState?.clientBaseUrl
+    );
     return;
   }
 
-  validateOAuthState(req, "github");
-
   const code = String(req.query.code || "");
   if (!code) {
-    redirectOAuthError(res, "github", "GitHub did not return an authorization code.");
+    redirectOAuthError(req, res, "github", "GitHub did not return an authorization code.", oauthState?.clientBaseUrl);
     return;
   }
 
@@ -167,12 +230,12 @@ const githubCallback = asyncHandler(async (req, res) => {
     email,
   });
 
-  redirectOAuthSuccess(res, "github", result);
+  redirectOAuthSuccess(req, res, "github", result, oauthState?.clientBaseUrl);
 });
 
 const googleStart = asyncHandler(async (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    redirectOAuthError(res, "google", "Google sign-in is not configured on this server.");
+    redirectOAuthError(req, res, "google", "Google sign-in is not configured on this server.");
     return;
   }
 
@@ -187,16 +250,22 @@ const googleStart = asyncHandler(async (req, res) => {
 });
 
 const googleCallback = asyncHandler(async (req, res) => {
+  const oauthState = validateOAuthState(req, "google");
+
   if (req.query.error) {
-    redirectOAuthError(res, "google", String(req.query.error_description || req.query.error));
+    redirectOAuthError(
+      req,
+      res,
+      "google",
+      String(req.query.error_description || req.query.error),
+      oauthState?.clientBaseUrl
+    );
     return;
   }
 
-  validateOAuthState(req, "google");
-
   const code = String(req.query.code || "");
   if (!code) {
-    redirectOAuthError(res, "google", "Google did not return an authorization code.");
+    redirectOAuthError(req, res, "google", "Google did not return an authorization code.", oauthState?.clientBaseUrl);
     return;
   }
 
@@ -227,7 +296,7 @@ const googleCallback = asyncHandler(async (req, res) => {
     email: googleProfile.email,
   });
 
-  redirectOAuthSuccess(res, "google", result);
+  redirectOAuthSuccess(req, res, "google", result, oauthState?.clientBaseUrl);
 });
 
 module.exports = {

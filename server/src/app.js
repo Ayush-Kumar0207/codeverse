@@ -23,10 +23,26 @@ const allowedOrigins = [
   "http://localhost:3001",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3001",
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_FRONTEND_URL,
   "https://codeverse-rho.vercel.app",
   "https://codeverse-q1qyjuzgj-ayush-kumar0207s-projects.vercel.app",
-];
+].filter(Boolean);
 const deploymentsDir = path.join(__dirname, "../../deployments");
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
 
 function createApp() {
   const app = express();
@@ -34,7 +50,7 @@ function createApp() {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (isAllowedOrigin(origin)) {
           callback(null, true);
         } else {
           callback(new Error("❌ Not allowed by CORS: " + origin));
