@@ -3,11 +3,33 @@ const authService = require("../services/auth.service");
 const HttpError = require("../utils/httpError");
 const crypto = require("crypto");
 
+function getRequestProtocol(req) {
+  const forwardedProtocol = String(req.get("x-forwarded-proto") || "")
+    .split(",")[0]
+    .trim();
+
+  if (forwardedProtocol) return forwardedProtocol;
+
+  const protocol = req.protocol || "http";
+  const host = String(req.get("host") || "");
+
+  if (
+    protocol === "http" &&
+    host &&
+    !host.startsWith("localhost") &&
+    !host.startsWith("127.0.0.1")
+  ) {
+    return "https";
+  }
+
+  return protocol;
+}
+
 function getApiBaseUrl(req) {
   return (
     process.env.API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    `${req.protocol}://${req.get("host")}`
+    `${getRequestProtocol(req)}://${req.get("host")}`
   ).replace(/\/$/, "");
 }
 
