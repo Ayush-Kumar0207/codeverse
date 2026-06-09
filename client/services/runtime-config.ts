@@ -1,4 +1,6 @@
 const LOCAL_API_BASE_URL = "http://localhost:5000";
+const PRODUCTION_API_BASE_URL = "https://codeverse-5422.onrender.com";
+const BLOCKED_API_HOSTS = new Set(["codeverse-hp6s.onrender.com"]);
 
 function normalizeUrl(value?: string) {
   return (value || "").trim().replace(/\/$/, "");
@@ -20,6 +22,10 @@ function isLocalUrl(value: string) {
   return isLocalHostname(getHostname(value));
 }
 
+function isBlockedApiUrl(value: string) {
+  return BLOCKED_API_HOSTS.has(getHostname(value));
+}
+
 function isBrowserLocalhost() {
   if (typeof window === "undefined") return false;
   return isLocalHostname(window.location.hostname);
@@ -36,11 +42,11 @@ export function getApiBaseUrl() {
     return configuredUrl || LOCAL_API_BASE_URL;
   }
 
-  if (configuredUrl && !isLocalUrl(configuredUrl)) {
+  if (configuredUrl && !isLocalUrl(configuredUrl) && !isBlockedApiUrl(configuredUrl)) {
     return configuredUrl;
   }
 
-  return "";
+  return PRODUCTION_API_BASE_URL;
 }
 
 export function getMissingApiMessage() {
