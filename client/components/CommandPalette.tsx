@@ -34,6 +34,7 @@ import { AT_ALGORITHMS, type AlgorithmEntry } from "@/data/algos";
 import { useAuth } from "@/context/AuthContext";
 import { useSettings, type ThemeType } from "@/context/SettingsContext";
 import { useShellContext } from "@/hooks/useShellContext";
+import { getApiBaseUrl } from "@/services/runtime-config";
 
 type CommandAction = () => void | Promise<void>;
 type AskAssistantDetail = {
@@ -236,10 +237,9 @@ export function CommandPalette() {
     setNotice("Checking API health...");
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        process.env.NEXT_PUBLIC_API_BASE_URL ||
-        "http://localhost:5000";
+      const baseUrl = getApiBaseUrl();
+      if (!baseUrl) throw new Error("Backend URL is not configured for this deployment.");
+
       const started = performance.now();
       const response = await fetch(`${baseUrl}/api/health`);
       if (!response.ok) throw new Error(`Health check failed (${response.status})`);

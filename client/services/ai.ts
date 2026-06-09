@@ -1,5 +1,6 @@
 import apiClient from "./api";
 import { getToken } from "@/utils/auth";
+import { getApiBaseUrl } from "./runtime-config";
 
 type AIPayload = {
   prompt: string;
@@ -19,7 +20,11 @@ export async function streamCodeSuggestion(
   payload: AIPayload,
   onToken: (token: string) => void
 ): Promise<void> {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) {
+    throw new Error("AI streaming is not configured for this deployment.");
+  }
+
   const token = getToken();
   const response = await fetch(`${apiBaseUrl}/api/ai/suggest/stream`, {
     method: "POST",

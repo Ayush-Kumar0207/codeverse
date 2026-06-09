@@ -9,6 +9,7 @@ import type { SharedUser } from "@shared/types/user";
 import type { SharedProject } from "@shared/types/project";
 import NewProjectModal from "@/components/NewProjectModal";
 import { AnimatePresence } from "framer-motion";
+import { getApiBaseUrl, getMissingApiMessage } from "@/services/runtime-config";
 import {
   Activity,
   ArrowUpRight,
@@ -169,10 +170,12 @@ export default function Dashboard() {
   };
 
   const connectGithub = () => {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "http://localhost:5000";
+    const baseUrl = getApiBaseUrl();
+    if (!baseUrl) {
+      setActionMessage(getMissingApiMessage());
+      return;
+    }
+
     window.location.href = `${baseUrl}/api/auth/github`;
   };
 

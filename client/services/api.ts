@@ -1,7 +1,8 @@
 import axios from "axios";
 import { getToken } from "@/utils/auth";
+import { getApiBaseUrl } from "./runtime-config";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = getApiBaseUrl();
 
 console.log(`[API] Initializing with Base URL: ${API_BASE_URL}`);
 

@@ -1,7 +1,17 @@
+import { getApiBaseUrl, getMissingApiMessage } from "./runtime-config";
+
 export type OAuthProvider = "github" | "google";
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000").replace(/\/$/, "");
-
 export function getOAuthUrl(provider: OAuthProvider) {
-  return `${API_BASE_URL}/api/auth/${provider}`;
+  const apiBaseUrl = getApiBaseUrl();
+
+  if (!apiBaseUrl) {
+    const params = new URLSearchParams({
+      oauth_error: getMissingApiMessage(),
+    });
+
+    return `/login?${params.toString()}`;
+  }
+
+  return `${apiBaseUrl}/api/auth/${provider}`;
 }
