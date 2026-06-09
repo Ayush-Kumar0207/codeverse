@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { AT_ALGORITHMS } from "@/data/algos";
 import { motion, AnimatePresence } from "framer-motion";
@@ -130,6 +130,20 @@ function formatExecutionError(error: unknown) {
 }
 
 export default function EditorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#050910] text-sm font-semibold text-slate-300">
+          Loading workspace...
+        </div>
+      }
+    >
+      <EditorWorkspace />
+    </Suspense>
+  );
+}
+
+function EditorWorkspace() {
   const params = useParams();
   const searchParams = useSearchParams();
   const algoId = searchParams?.get("algo");

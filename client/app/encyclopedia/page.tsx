@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AT_ALGORITHMS, AlgorithmEntry } from "@/data/algos";
 import { buildAlgorithmLearningProfile } from "@/lib/algo-learning";
@@ -68,6 +68,20 @@ const getFileExtension = (language: string) => {
 };
 
 export default function EncyclopediaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#050910] text-sm font-semibold text-slate-300">
+          Loading encyclopedia...
+        </div>
+      }
+    >
+      <EncyclopediaContent />
+    </Suspense>
+  );
+}
+
+function EncyclopediaContent() {
   const searchParams = useSearchParams();
   const queryFromUrl = searchParams?.get("query") || "";
   const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(AT_ALGORITHMS[0]);
