@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_API_BASE_URL = "https://codeverse-5422.onrender.com";
+const DEFAULT_CLIENT_BASE_URL = "https://codeverse-rho.vercel.app";
 const SUPPORTED_PROVIDERS = new Set(["github", "google"]);
 
 function getApiBaseUrl() {
@@ -12,10 +13,14 @@ function getApiBaseUrl() {
 }
 
 function getClientBaseUrl(request: NextRequest) {
+  if (request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1") {
+    return request.nextUrl.origin;
+  }
+
   return (
     process.env.NEXT_PUBLIC_FRONTEND_URL ||
     process.env.CLIENT_URL ||
-    request.nextUrl.origin
+    DEFAULT_CLIENT_BASE_URL
   ).replace(/\/$/, "");
 }
 
