@@ -75,8 +75,45 @@ function isTrustedClientOrigin(origin) {
   }
 }
 
+function getCallbackPath(provider) {
+  return `/api/auth/${provider}/callback`;
+}
+
+function isTrustedCallbackUrl(value, provider) {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    return isTrustedClientOrigin(url.origin) && url.pathname === getCallbackPath(provider);
+  } catch {
+    return false;
+  }
+}
+
+function getRequestedCallbackUrl(req, provider) {
+  const candidates = [req.query.redirect_uri, req.query.callback_url, req.get("x-oauth-callback-url")];
+
+  for (const candidate of candidates) {
+    const value = String(candidate || "").trim().replace(/\/$/, "");
+    if (isTrustedCallbackUrl(value, provider)) return value;
+  }
+
+  return "";
+}
+
+function getRequestedClientBaseUrl(req) {
+  const candidates = [req.query.client_url, req.get("x-client-base-url")];
+
+  for (const candidate of candidates) {
+    const origin = getUrlOrigin(candidate);
+    if (isTrustedClientOrigin(origin)) return origin;
+  }
+
+  return "";
+}
+
 function getRequestClientBaseUrl(req) {
-  const candidates = [req.get("origin"), req.get("referer")];
+  const candidates = [getRequestedClientBaseUrl(req), req.get("origin"), req.get("referer")];
 
   for (const candidate of candidates) {
     const origin = getUrlOrigin(candidate);
@@ -97,7 +134,27 @@ function getClientBaseUrl(req) {
   return requestBaseUrl || configuredBaseUrl || "http://localhost:3000";
 }
 
-function getRedirectUri(req, provider) {
+function getClientCallbackUrl(provider, clientBaseUrl) {
+  if (!clientBaseUrl || isLocalClientOrigin(clientBaseUrl)) return "";
+  if (!isTrustedClientOrigin(clientBaseUrl)) return "";
+  return `${clientBaseUrl}${getCallbackPath(provider)}`;
+}
+
+function getRedirectUri(req, provider, options = {}) {
+  const requestedCallbackUrl = getRequestedCallbackUrl(req, provider);
+  if (requestedCallbackUrl) return requestedCallbackUrl;
+
+  if (options.redirectUri && isTrustedCallbackUrl(options.redirectUri, provider)) {
+    return options.redirectUri;
+  }
+
+  const clientCallbackUrl = getClientCallbackUrl(
+    provider,
+    options.clientBaseUrl || getRequestClientBaseUrl(req)
+  );
+
+  if (clientCallbackUrl) return clientCallbackUrl;
+
   const configuredCallback =
     provider === "github"
       ? process.env.GITHUB_CALLBACK_URL
@@ -105,12 +162,17 @@ function getRedirectUri(req, provider) {
 
   if (configuredCallback) return configuredCallback;
 
-  return `${getApiBaseUrl(req)}/api/auth/${provider}/callback`;
+  return `${getApiBaseUrl(req)}${getCallbackPath(provider)}`;
 }
 
-function rememberOAuthState(req, provider) {
+function rememberOAuthState(req, provider, values = {}) {
   const state = crypto.randomBytes(24).toString("hex");
-  req.session.oauthState = { provider, state, clientBaseUrl: getClientBaseUrl(req) };
+  req.session.oauthState = {
+    provider,
+    state,
+    clientBaseUrl: values.clientBaseUrl || getClientBaseUrl(req),
+    redirectUri: values.redirectUri || "",
+  };
   return state;
 }
 
@@ -179,11 +241,13 @@ const githubStart = asyncHandler(async (req, res) => {
     return;
   }
 
+  const clientBaseUrl = getClientBaseUrl(req);
+  const redirectUri = getRedirectUri(req, "github", { clientBaseUrl });
   const url = new URL("https://github.com/login/oauth/authorize");
   url.searchParams.set("client_id", process.env.GITHUB_CLIENT_ID);
-  url.searchParams.set("redirect_uri", getRedirectUri(req, "github"));
+  url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("scope", "user:email");
-  url.searchParams.set("state", rememberOAuthState(req, "github"));
+  url.searchParams.set("state", rememberOAuthState(req, "github", { clientBaseUrl, redirectUri }));
   res.redirect(url.toString());
 });
 
@@ -217,7 +281,7 @@ const githubCallback = asyncHandler(async (req, res) => {
       client_id: process.env.GITHUB_CLIENT_ID,
       client_secret: process.env.GITHUB_CLIENT_SECRET,
       code,
-      redirect_uri: getRedirectUri(req, "github"),
+      redirect_uri: getRedirectUri(req, "github", oauthState),
     }),
   });
 
@@ -261,13 +325,15 @@ const googleStart = asyncHandler(async (req, res) => {
     return;
   }
 
+  const clientBaseUrl = getClientBaseUrl(req);
+  const redirectUri = getRedirectUri(req, "google", { clientBaseUrl });
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.searchParams.set("client_id", process.env.GOOGLE_CLIENT_ID);
-  url.searchParams.set("redirect_uri", getRedirectUri(req, "google"));
+  url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("scope", "openid email profile");
   url.searchParams.set("prompt", "select_account");
-  url.searchParams.set("state", rememberOAuthState(req, "google"));
+  url.searchParams.set("state", rememberOAuthState(req, "google", { clientBaseUrl, redirectUri }));
   res.redirect(url.toString());
 });
 
@@ -301,7 +367,7 @@ const googleCallback = asyncHandler(async (req, res) => {
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
       code,
       grant_type: "authorization_code",
-      redirect_uri: getRedirectUri(req, "google"),
+      redirect_uri: getRedirectUri(req, "google", oauthState),
     }),
   });
 

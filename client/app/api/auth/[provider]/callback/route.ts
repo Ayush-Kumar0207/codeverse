@@ -27,6 +27,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
   const requestUrl = new URL(request.url);
   const backendCallbackUrl = new URL(`/api/auth/${provider}/callback`, getApiBaseUrl());
   backendCallbackUrl.search = requestUrl.search;
+  backendCallbackUrl.searchParams.set(
+    "redirect_uri",
+    new URL(`/api/auth/${provider}/callback`, request.nextUrl.origin).toString()
+  );
+  backendCallbackUrl.searchParams.set("client_url", request.nextUrl.origin);
 
   return NextResponse.redirect(backendCallbackUrl, 307);
 }
