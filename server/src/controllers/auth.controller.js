@@ -3,6 +3,8 @@ const authService = require("../services/auth.service");
 const HttpError = require("../utils/httpError");
 const crypto = require("crypto");
 
+const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+
 function getRequestProtocol(req) {
   const forwardedProtocol = String(req.get("x-forwarded-proto") || "")
     .split(",")[0]
@@ -165,18 +167,91 @@ function getRedirectUri(req, provider, options = {}) {
   return `${getApiBaseUrl(req)}${getCallbackPath(provider)}`;
 }
 
+function getOAuthStateSecret() {
+  return process.env.SESSION_SECRET || process.env.JWT_SECRET || "super_secret_key";
+}
+
+function signOAuthStatePayload(encodedPayload) {
+  return crypto
+    .createHmac("sha256", getOAuthStateSecret())
+    .update(encodedPayload)
+    .digest("base64url");
+}
+
+function createSignedOAuthState(provider, values = {}) {
+  const payload = {
+    provider,
+    clientBaseUrl: values.clientBaseUrl || "",
+    redirectUri: values.redirectUri || "",
+    nonce: crypto.randomBytes(16).toString("base64url"),
+    issuedAt: Date.now(),
+  };
+
+  const encodedPayload = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const signature = signOAuthStatePayload(encodedPayload);
+  return `${encodedPayload}.${signature}`;
+}
+
+function readSignedOAuthState(state, provider) {
+  const [encodedPayload, signature] = String(state || "").split(".");
+
+  if (!encodedPayload || !signature) return null;
+
+  const expectedSignature = signOAuthStatePayload(encodedPayload);
+  const signatureBuffer = Buffer.from(signature);
+  const expectedSignatureBuffer = Buffer.from(expectedSignature);
+
+  if (signatureBuffer.length !== expectedSignatureBuffer.length) return null;
+
+  if (!crypto.timingSafeEqual(signatureBuffer, expectedSignatureBuffer)) {
+    return null;
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
+  } catch {
+    return null;
+  }
+
+  if (payload.provider !== provider) return null;
+  if (!Number.isFinite(payload.issuedAt) || Date.now() - payload.issuedAt > OAUTH_STATE_TTL_MS) {
+    return null;
+  }
+  if (payload.clientBaseUrl && !isTrustedClientOrigin(payload.clientBaseUrl)) return null;
+  if (payload.redirectUri && !isTrustedCallbackUrl(payload.redirectUri, provider)) return null;
+
+  return {
+    provider: payload.provider,
+    state,
+    clientBaseUrl: payload.clientBaseUrl || "",
+    redirectUri: payload.redirectUri || "",
+  };
+}
+
 function rememberOAuthState(req, provider, values = {}) {
-  const state = crypto.randomBytes(24).toString("hex");
+  const state = createSignedOAuthState(provider, {
+    clientBaseUrl: values.clientBaseUrl || getClientBaseUrl(req),
+    redirectUri: values.redirectUri || "",
+  });
+
   req.session.oauthState = {
     provider,
     state,
     clientBaseUrl: values.clientBaseUrl || getClientBaseUrl(req),
     redirectUri: values.redirectUri || "",
   };
+
   return state;
 }
 
 function validateOAuthState(req, provider) {
+  const signedState = readSignedOAuthState(req.query.state, provider);
+  if (signedState) {
+    if (req.session) req.session.oauthState = null;
+    return signedState;
+  }
+
   const expected = req.session.oauthState;
   req.session.oauthState = null;
 
