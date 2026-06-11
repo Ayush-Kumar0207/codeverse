@@ -9,20 +9,26 @@ import type { SharedUser } from "@shared/types/user";
 import type { SharedProject } from "@shared/types/project";
 import NewProjectModal from "@/components/NewProjectModal";
 import { AnimatePresence } from "framer-motion";
-import { getApiBaseUrl, getMissingApiMessage } from "@/services/runtime-config";
+import { getOAuthUrl } from "@/services/oauth";
 import {
   Activity,
   ArrowUpRight,
   CheckCircle2,
   Clock3,
   Code,
+  Copy,
+  FileText,
+  GitBranch,
   FolderOpen,
   Github,
   Layout,
+  PackageCheck,
   Plus,
   Search,
   Server,
+  ShieldCheck,
   Trash2,
+  UploadCloud,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +52,19 @@ const languageLabel = (value?: string) => {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
+const slugify = (value?: string) => {
+  const slug = (value || "codeverse-workspace")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "codeverse-workspace";
+};
+
+const getProjectKey = (project: SharedProject, index: number) =>
+  project._id || `${slugify(project.title)}-${project.language}-${index}`;
+
 export default function Dashboard() {
   const [user, setUser] = useState<SharedUser | null>(null);
   const [projects, setProjects] = useState<SharedProject[]>([]);
@@ -54,6 +73,9 @@ export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [actionMessage, setActionMessage] = useState("");
   const [projectServiceAvailable, setProjectServiceAvailable] = useState(true);
+  const [selectedRepoProjectKey, setSelectedRepoProjectKey] = useState("");
+  const [repoPrepared, setRepoPrepared] = useState(false);
+  const [copiedRepoItem, setCopiedRepoItem] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -89,6 +111,23 @@ export default function Dashboard() {
     initDashboard();
   }, [router]);
 
+  useEffect(() => {
+    if (projects.length === 0) {
+      setSelectedRepoProjectKey("");
+      setRepoPrepared(false);
+      return;
+    }
+
+    const hasSelectedProject = projects.some(
+      (project, index) => getProjectKey(project, index) === selectedRepoProjectKey
+    );
+
+    if (!hasSelectedProject) {
+      setSelectedRepoProjectKey(getProjectKey(projects[0], 0));
+      setRepoPrepared(false);
+    }
+  }, [projects, selectedRepoProjectKey]);
+
   const filteredProjects = useMemo(
     () =>
       projects.filter((project) =>
@@ -103,6 +142,90 @@ export default function Dashboard() {
         (a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
       )[0],
     [projects]
+  );
+
+  const selectedRepoProject = useMemo(
+    () =>
+      projects.find((project, index) => getProjectKey(project, index) === selectedRepoProjectKey) ||
+      newestProject ||
+      projects[0],
+    [newestProject, projects, selectedRepoProjectKey]
+  );
+
+  const githubConnected = Boolean(user?.githubId);
+  const repositoryName = slugify(selectedRepoProject?.title || "codeverse-workspace");
+  const repositoryOwner = slugify(user?.username || "codeverse");
+  const repositoryFullName = `${repositoryOwner}/${repositoryName}`;
+  const selectedProjectTitle = selectedRepoProject?.title || "CodeVerse Workspace";
+
+  const repoSetupCommand = useMemo(
+    () =>
+      [
+        "git init",
+        "git branch -M main",
+        `git remote add origin https://github.com/${repositoryFullName}.git`,
+        "git add .",
+        `git commit -m "chore: publish ${selectedProjectTitle}"`,
+        "git push -u origin main",
+      ].join("\n"),
+    [repositoryFullName, selectedProjectTitle]
+  );
+
+  const repoFiles = useMemo(
+    () => [
+      {
+        name: "README.md",
+        helper: "Project overview and local run notes",
+        body: `# ${selectedProjectTitle}\n\nSource-controlled from CodeVerse.\n\n## Stack\n- Language: ${languageLabel(
+          selectedRepoProject?.language
+        )}\n- Workspace owner: ${user?.username || "CodeVerse"}\n\n## Run\nOpen the project in CodeVerse, review the generated files, then push to GitHub from your local workspace.`,
+      },
+      {
+        name: ".github/workflows/codeverse-preview.yml",
+        helper: "Preview deployment workflow starter",
+        body: `name: CodeVerse Preview\n\non:\n  pull_request:\n  push:\n    branches: [main]\n\njobs:\n  preview:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Prepare CodeVerse project\n        run: echo "Ready to connect deployment provider for ${repositoryFullName}"`,
+      },
+      {
+        name: "deploy.json",
+        helper: "Deployment handoff metadata",
+        body: JSON.stringify(
+          {
+            project: selectedProjectTitle,
+            repository: repositoryFullName,
+            branch: "main",
+            source: "codeverse-dashboard",
+            preview: true,
+          },
+          null,
+          2
+        ),
+      },
+    ],
+    [repositoryFullName, selectedProjectTitle, selectedRepoProject?.language, user?.username]
+  );
+
+  const repoReadiness = useMemo(
+    () => [
+      {
+        label: "GitHub identity linked",
+        helper: githubConnected ? "OAuth session is connected" : "Authorize GitHub to continue",
+        ready: githubConnected,
+        icon: Github,
+      },
+      {
+        label: "Workspace selected",
+        helper: selectedRepoProject ? selectedProjectTitle : "Create or load a project first",
+        ready: Boolean(selectedRepoProject),
+        icon: FolderOpen,
+      },
+      {
+        label: "Deploy handoff generated",
+        helper: repoPrepared ? "Repository package is ready" : "Prepare when the repo target looks right",
+        ready: repoPrepared,
+        icon: UploadCloud,
+      },
+    ],
+    [githubConnected, repoPrepared, selectedProjectTitle, selectedRepoProject]
   );
 
   const stats = useMemo(
@@ -170,13 +293,44 @@ export default function Dashboard() {
   };
 
   const connectGithub = () => {
-    const baseUrl = getApiBaseUrl();
-    if (!baseUrl) {
-      setActionMessage(getMissingApiMessage());
+    window.location.href = getOAuthUrl("github");
+  };
+
+  const copyRepoText = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedRepoItem(label);
+      setActionMessage(`Copied ${label}`);
+      window.setTimeout(() => setCopiedRepoItem(""), 1600);
+    } catch {
+      setActionMessage(`Could not copy ${label}; select the text manually`);
+    }
+  };
+
+  const prepareRepository = () => {
+    if (!githubConnected) {
+      setActionMessage("Authorize GitHub before preparing a repository");
+      connectGithub();
       return;
     }
 
-    window.location.href = `${baseUrl}/api/auth/github`;
+    if (!selectedRepoProject) {
+      setActionMessage("Create a project before preparing a repository");
+      setShowNewProject(true);
+      return;
+    }
+
+    setRepoPrepared(true);
+    setActionMessage(`${selectedRepoProject.title} is ready for GitHub source control`);
+  };
+
+  const openSelectedRepoProject = () => {
+    if (selectedRepoProject?._id) {
+      router.push(`/editor/${selectedRepoProject._id}`);
+      return;
+    }
+
+    router.push("/editor/demo-sandbox?mode=demo");
   };
 
   if (loading || !user) {
@@ -397,25 +551,217 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-indigo-400/20 bg-indigo-400/[0.06] p-5 shadow-xl shadow-black/15">
+            <section
+              className={cn(
+                "rounded-lg border p-5 shadow-xl shadow-black/15",
+                githubConnected
+                  ? "border-teal-300/25 bg-teal-300/[0.06]"
+                  : "border-indigo-400/20 bg-indigo-400/[0.06]"
+              )}
+            >
               <div className="flex items-start gap-3">
-                <div className="rounded-lg border border-indigo-300/20 bg-indigo-300/10 p-2 text-indigo-200">
+                <div
+                  className={cn(
+                    "rounded-lg border p-2",
+                    githubConnected
+                      ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
+                      : "border-indigo-300/20 bg-indigo-300/10 text-indigo-200"
+                  )}
+                >
                   <Server className="h-4 w-4" />
                 </div>
-                <div>
-                  <h2 className="text-base font-semibold text-white">Connect Repository</h2>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base font-semibold text-white">Connect Repository</h2>
+                    <span
+                      className={cn(
+                        "rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em]",
+                        githubConnected
+                          ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
+                          : "border-amber-300/25 bg-amber-300/10 text-amber-200"
+                      )}
+                    >
+                      {githubConnected ? "Linked" : "Not linked"}
+                    </span>
+                  </div>
                   <p className="mt-1 text-sm leading-6 text-slate-300">
-                    Link GitHub to prepare this workspace for source control and deployments.
+                    {githubConnected
+                      ? "Prepare a selected workspace for GitHub source control, preview automation, and deployment handoff."
+                      : "Authorize GitHub once, then CodeVerse can build a repository-ready package for your workspace."}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={connectGithub}
-                className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-indigo-100"
-              >
-                <Github className="h-4 w-4" />
-                Connect GitHub
-              </button>
+
+              {githubConnected ? (
+                <>
+                  <div className="mt-5 rounded-lg border border-white/10 bg-[#071018]/70 p-3">
+                    <label
+                      htmlFor="repo-project"
+                      className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500"
+                    >
+                      Repository Target
+                    </label>
+                    {projects.length > 0 ? (
+                      <select
+                        id="repo-project"
+                        value={selectedRepoProjectKey}
+                        onChange={(event) => {
+                          setSelectedRepoProjectKey(event.target.value);
+                          setRepoPrepared(false);
+                        }}
+                        className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-[#0b111c] px-3 text-sm font-semibold text-slate-100 outline-none transition focus:border-teal-300/50 focus:ring-2 focus:ring-teal-300/15"
+                      >
+                        {projects.map((project, index) => (
+                          <option key={getProjectKey(project, index)} value={getProjectKey(project, index)}>
+                            {project.title} - {languageLabel(project.language)}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <button
+                        onClick={() => setShowNewProject(true)}
+                        className="mt-2 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-slate-100 transition hover:border-teal-300/35 hover:bg-white/[0.07]"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Create Project
+                      </button>
+                    )}
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Suggested repository:{" "}
+                      <span className="font-mono text-teal-200">{repositoryFullName}</span>
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    {repoReadiness.map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                      >
+                        <div
+                          className={cn(
+                            "mt-0.5 rounded-md border p-1.5",
+                            item.ready
+                              ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
+                              : "border-slate-500/25 bg-slate-500/10 text-slate-400"
+                          )}
+                        >
+                          <item.icon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-100">{item.label}</p>
+                          <p className="mt-0.5 text-xs leading-5 text-slate-500">{item.helper}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 rounded-lg border border-white/10 bg-[#071018]">
+                    <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <GitBranch className="h-4 w-4 text-teal-200" />
+                        <p className="truncate text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                          Push Commands
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => copyRepoText("push commands", repoSetupCommand)}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                        {copiedRepoItem === "push commands" ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                    <pre className="max-h-40 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs leading-5 text-slate-300">
+                      {repoSetupCommand}
+                    </pre>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                      Generated Repo Files
+                    </p>
+                    {repoFiles.map((file) => (
+                      <div
+                        key={file.name}
+                        className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 shrink-0 text-indigo-200" />
+                              <p className="truncate text-sm font-semibold text-slate-100">{file.name}</p>
+                            </div>
+                            <p className="mt-1 text-xs leading-5 text-slate-500">{file.helper}</p>
+                          </div>
+                          <button
+                            onClick={() => copyRepoText(file.name, file.body)}
+                            className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                            {copiedRepoItem === file.name ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {repoPrepared && (
+                    <div className="mt-4 rounded-lg border border-teal-300/25 bg-teal-300/10 p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-md bg-teal-300/15 p-1.5 text-teal-200">
+                          <PackageCheck className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-teal-100">Repository package ready</p>
+                          <p className="mt-1 text-xs leading-5 text-teal-100/70">
+                            {selectedProjectTitle} now has a branch plan, starter workflow, and deployment metadata.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-5 grid grid-cols-1 gap-2">
+                    <button
+                      onClick={prepareRepository}
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-teal-300 px-4 text-sm font-bold text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-200"
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      {repoPrepared ? "Refresh Repository Plan" : "Prepare Repository"}
+                    </button>
+                    <button
+                      onClick={openSelectedRepoProject}
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.07]"
+                    >
+                      <ArrowUpRight className="h-4 w-4" />
+                      Open Selected Project
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mt-5 space-y-2">
+                    {[
+                      "Link your GitHub identity to this CodeVerse account.",
+                      "Unlock repository preparation for saved projects.",
+                      "Generate source-control files and deployment metadata.",
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-300">
+                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-indigo-200" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={connectGithub}
+                    className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-indigo-100"
+                  >
+                    <Github className="h-4 w-4" />
+                    Authorize GitHub
+                  </button>
+                </>
+              )}
             </section>
           </aside>
         </section>

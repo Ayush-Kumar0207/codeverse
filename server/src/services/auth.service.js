@@ -68,6 +68,8 @@ function toAuthUser(user) {
     _id: user.id,
     username: user.username,
     email: user.email,
+    githubId: user.githubId || user.github_id || undefined,
+    avatar: user.avatar || user.avatar_url || undefined,
   };
 }
 
@@ -239,6 +241,8 @@ async function processOAuthUser(provider, oauthUser) {
 
       if (!user) {
         user = await createSupabaseOAuthUser(oauthPayload, providerIdField);
+      } else {
+        user = await linkSupabaseOAuthProvider(user, providerIdField, providerId);
       }
 
       return buildTokenResponse(user);
@@ -259,11 +263,29 @@ async function processOAuthUser(provider, oauthUser) {
 
       if (!user) {
         user = await localAuthStore.createUser(oauthPayload);
+      } else {
+        user = await localAuthStore.linkOAuthProvider(user.username, providerIdField, providerId);
       }
 
       return buildTokenResponse(user);
     }
   );
+}
+
+async function linkSupabaseOAuthProvider(user, providerIdField, providerId) {
+  if (!providerId || user?.[providerIdField]) return user;
+
+  const { data, error } = await supabase
+    .from("users")
+    .update({ [providerIdField]: providerId })
+    .eq("id", user.id)
+    .select()
+    .single();
+
+  if (!error) return data || { ...user, [providerIdField]: providerId };
+  if (isMissingColumnError(error)) return user;
+
+  throw error;
 }
 
 async function findSupabaseOAuthUser(providerIdField, providerId, email, username) {

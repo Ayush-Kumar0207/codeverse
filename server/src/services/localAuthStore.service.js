@@ -59,10 +59,32 @@ async function createUser({ username, password, email, github_id, google_id }) {
   return user;
 }
 
+async function linkOAuthProvider(username, providerIdField, providerId) {
+  if (!username || !providerId || !["github_id", "google_id"].includes(providerIdField)) {
+    const existingUser = username ? await findByUsername(username) : null;
+    return existingUser;
+  }
+
+  const users = await readUsers();
+  const index = users.findIndex((user) => user.username === username);
+  if (index === -1) return null;
+
+  if (!users[index][providerIdField]) {
+    users[index] = {
+      ...users[index],
+      [providerIdField]: providerId,
+    };
+    await writeUsers(users);
+  }
+
+  return users[index];
+}
+
 module.exports = {
   createUser,
   findByEmail,
   findByGithubId,
   findByGoogleId,
   findByUsername,
+  linkOAuthProvider,
 };
