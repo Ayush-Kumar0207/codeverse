@@ -43,11 +43,18 @@ function completeApproachImplementations(
     }
   }
 
-  const requiredImplementations = REQUIRED_LANGUAGES.map((language) => {
-    return createGeneratedImplementation(algorithm, approach, language, sourceLanguages);
+  const specificCodePack = getSpecificCodePack(algorithm, approach);
+  const requiredImplementations = REQUIRED_LANGUAGES.flatMap((language) => {
+    const existing = existingByLanguage.get(language);
+    if (existing) return [existing];
+    if (!specificCodePack) return [];
+
+    return [createGeneratedImplementation(algorithm, approach, language, sourceLanguages, specificCodePack)];
   });
 
-  return [...requiredImplementations, ...extras];
+  return [...requiredImplementations, ...extras].filter(
+    (implementation) => !hasPlaceholderCode(implementation.code || "")
+  );
 }
 
 function canonicalLanguage(language: string): RequiredLanguage | undefined {
@@ -63,23 +70,19 @@ function createGeneratedImplementation(
   algorithm: AlgorithmEntry,
   approach: AlgorithmApproach,
   language: RequiredLanguage,
-  sourceLanguages: string
+  sourceLanguages: string,
+  specificCodePack: CodePack
 ): CodeImplementation {
   return {
     language,
-    code: buildImplementation(algorithm, approach, language, sourceLanguages),
+    code: withHeader(
+      specificCodePack[language],
+      algorithm,
+      approach,
+      language,
+      sourceLanguages
+    ),
   };
-}
-
-function buildImplementation(
-  algorithm: AlgorithmEntry,
-  approach: AlgorithmApproach,
-  language: RequiredLanguage,
-  sourceLanguages: string
-) {
-  const specific = getSpecificCodePack(algorithm, approach);
-  const pack = specific || getPatternCodePack(algorithm, approach);
-  return withHeader(pack[language], algorithm, approach, language, sourceLanguages, Boolean(specific));
 }
 
 function withHeader(
@@ -87,14 +90,12 @@ function withHeader(
   algorithm: AlgorithmEntry,
   approach: AlgorithmApproach,
   language: RequiredLanguage,
-  sourceLanguages: string,
-  isExact: boolean
+  sourceLanguages: string
 ) {
   const prefix = language === "Python" ? "#" : "//";
-  const mode = isExact ? "Problem-specific implementation" : "Pattern implementation";
   const runnableCode = makeRunnableSource(code.trim(), language);
   return [
-    `${prefix} ${mode} for ${safeInline(algorithm.title)}.`,
+    `${prefix} Problem-specific implementation for ${safeInline(algorithm.title)}.`,
     `${prefix} Approach: ${safeInline(approach.name)}`,
     `${prefix} Time: ${safeInline(approach.timeComplexity)} | Space: ${safeInline(approach.spaceComplexity)}`,
     `${prefix} Completed from available source languages: ${safeInline(sourceLanguages)}`,
@@ -570,7 +571,6 @@ function shouldReplaceImplementation(
   implementation: CodeImplementation
 ) {
   const code = implementation.code || "";
-  if (algorithm.id === "print-subarray-with-maximum-sum") return true;
   if (hasPlaceholderCode(code)) return true;
   if (code.includes("Auto-completed") || code.includes("reference scaffold")) return true;
   if (code.includes("Adapt the input/output signature") || code.includes("Implement the selected approach")) return true;
@@ -578,11 +578,10 @@ function shouldReplaceImplementation(
 
   if (language === "C++") {
     return (
-      code.includes(".length") ||
+      /\.length(?!\s*\()/.test(code) ||
       code.includes("return candidate if") ||
       code.includes(" if count ") ||
-      code.includes("# Check") ||
-      /for\s*\(\s*int\s+\w+\s*:\s*nums\s*\)/.test(code)
+      code.includes("# Check")
     );
   }
 

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "algo:audit": "node scripts/audit_algo_catalog.cjs",
     "algo:ollama": "node scripts/run_ollama_algo_pipeline.js",
     "algo:ollama:continuous": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=6 --concurrency=2 --interval-ms=8000",
     "algo:ollama:turbo": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=10 --concurrency=4 --interval-ms=2000 --request-timeout-ms=120000 --num-predict=2800 --temperature=0.06 --attempts=2",

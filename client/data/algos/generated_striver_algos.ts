@@ -18368,56 +18368,6 @@ def minWindow(s, t):
     ],
   },
   {
-    id: "minimum-window-subsequence",
-    title: "Minimum Window Subsequence",
-    topic: "Sliding Window - Hard",
-    category: "Sliding Window",
-    frequencyLevel: "Very High",
-    difficulty: "Hard",
-    overview:
-      "Given strings $S$ and $T$, find the minimum window in $S$ such that $T$ is a **subsequence** of the window. Return the smallest starting index in case of a tie.",
-    leetcodeLink: "https://leetcode.com/problems/minimum-window-subsequence/",
-    useCases: [
-      "Sequence alignment in bioinformatics",
-      "Finding minimal path segments in log flows",
-    ],
-    approaches: [
-      {
-        name: "Two-Pointer (Forward-Reverse Optimization)",
-        description:
-          "### 🧠 Core Intuition\n1. **Forward Search**: Iterate through $S$ to find a match for $T$. Once matched, at index `r` of $S$, we know a window exists.\n2. **Reverse Search**: From `r`, search backwards for $T$ to find the largest possible starting index `l`. This ensures the window $[l, r]$ is minimal for that specific `r`.\n3. Repeat from `l + 1` to find better windows.\n\n### ⏱️ Complexity\n- **Time**: $O(S \times T)$\n- **Space**: $O(1)$",
-        timeComplexity: "O(S * T)",
-        timeComplexityExplanation: "Single forward pass with optimized backtracking.",
-        spaceComplexity: "O(1)",
-        spaceComplexityExplanation: "Constant pointers.",
-        implementations: [
-          {
-            language: "Python",
-            code: `def minWindow(S, T):
-    s_idx, t_idx = 0, 0
-    res, min_len = "", float("inf")
-    while s_idx < len(S):
-        if S[s_idx] == T[t_idx]:
-            t_idx += 1
-            if t_idx == len(T): # Potential end found
-                end = s_idx
-                t_idx -= 1
-                while t_idx >= 0: # Minimize start
-                    if S[s_idx] == T[t_idx]: t_idx -= 1
-                    s_idx -= 1
-                s_idx += 1 # Smallest l for this end
-                if end - s_idx + 1 < min_len:
-                    min_len = end - s_idx + 1
-                    res = S[s_idx:end+1]
-                t_idx = 0 # Restart search
-        s_idx += 1
-    return res`,
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: "introduction-to-priority-queues-using-binary-heaps",
     title: "Introduction to Priority Queues & Binary Heaps",
     topic: "Heaps - Basics",

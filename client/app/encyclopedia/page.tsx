@@ -28,9 +28,11 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import NarratedSlab, { NarratedLine } from "@/components/NarratedSlab";
+import SemanticText from "@/components/SemanticText";
+import SyntaxCodeViewer from "@/components/SyntaxCodeViewer";
+import { codeNarrationLines, narrationLines, walkthroughBlocks, type WalkthroughBlock } from "@/lib/narration";
 
 const difficultyStyles: Record<AlgorithmEntry["difficulty"], string> = {
   Easy: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
@@ -134,6 +136,12 @@ function EncyclopediaContent() {
   const codeFileName = `${activeAlgo.id}-${slugify(activeApproach.name)}.${getFileExtension(
     activeImplementation?.language || selectedLang
   )}`;
+  const narrationPrefix = `${activeAlgo.id}-${slugify(activeApproach.name)}`;
+  const walkthrough = useMemo(() => walkthroughBlocks(activeApproach.description), [activeApproach.description]);
+  const implementationNarration = useMemo(
+    () => codeNarrationLines(activeImplementation?.code || "// No implementation available", activeImplementation?.language || selectedLang),
+    [activeImplementation?.code, activeImplementation?.language, selectedLang]
+  );
 
   useEffect(() => {
     const languages = activeApproach.implementations.map((implementation) => implementation.language);
@@ -196,10 +204,10 @@ function EncyclopediaContent() {
   );
 
   return (
-    <div className="flex h-full min-h-screen w-full overflow-hidden bg-[#050910] text-slate-100">
+    <div className="flex h-full min-h-0 w-full overflow-hidden bg-[#050910] text-slate-100">
       {!isFullscreen && (
         <>
-          <aside className="hidden w-[360px] shrink-0 border-r border-white/10 bg-[#080e18] lg:flex">
+          <aside className="hidden h-full min-h-0 w-[360px] shrink-0 border-r border-white/10 bg-[#080e18] lg:flex">
             {libraryPanel}
           </aside>
 
@@ -216,7 +224,7 @@ function EncyclopediaContent() {
         </>
       )}
 
-      <main className={cn("relative flex min-w-0 flex-1 flex-col overflow-hidden", isFullscreen && "fixed inset-0 z-50 bg-[#050910]")}>
+      <main className={cn("relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden", isFullscreen && "fixed inset-0 z-50 bg-[#050910]")}>
         <div className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-white/10 bg-[#080e18]/95 px-4 backdrop-blur-xl lg:px-6">
           <div className="flex min-w-0 items-center gap-3">
             {!isFullscreen && (
@@ -256,7 +264,7 @@ function EncyclopediaContent() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className={cn("mx-auto flex w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8", isFullscreen ? "max-w-6xl" : "max-w-[1480px]")}>
             <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
               <div className="rounded-lg border border-white/10 bg-[#0a101b] p-5 shadow-2xl shadow-black/20 sm:p-6">
@@ -269,14 +277,16 @@ function EncyclopediaContent() {
 
                 <div className="mt-5 max-w-4xl">
                   <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">{activeAlgo.title}</h1>
-                  <p className="mt-4 text-base leading-7 text-slate-300">{activeAlgo.overview}</p>
+                  <p className="mt-4 text-base leading-7 text-slate-300">
+                    <SemanticText>{activeAlgo.overview}</SemanticText>
+                  </p>
                 </div>
 
                 {activeAlgo.useCases?.length > 0 && (
                   <div className="mt-6 flex flex-wrap gap-2">
                     {activeAlgo.useCases.slice(0, 6).map((useCase) => (
                       <span key={useCase} className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-slate-300">
-                        {useCase}
+                        <SemanticText>{useCase}</SemanticText>
                       </span>
                     ))}
                   </div>
@@ -339,52 +349,55 @@ function EncyclopediaContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 p-4 lg:p-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-                <div className="space-y-5">
-                  <InsightCard title="Mental model" label={learning.family} icon={BrainCircuit}>
-                    <p>{learning.mentalModel}</p>
-                  </InsightCard>
+              <div className="space-y-4 p-4 lg:p-5">
+                <InsightCard
+                  narrationId={`${narrationPrefix}-mental-model`}
+                  title="Mental model"
+                  label={learning.family}
+                  icon={BrainCircuit}
+                  text={learning.mentalModel}
+                />
 
-                  <StepCard title="Execution plan" icon={ListChecks} steps={learning.executionSteps} />
+                <StepCard narrationId={`${narrationPrefix}-execution-plan`} title="Execution plan" icon={ListChecks} steps={learning.executionSteps} />
 
-                  <div className="grid grid-cols-1 gap-5 2xl:grid-cols-2">
-                    <InsightCard title="Invariant" icon={ShieldCheck}>
-                      <p>{learning.invariant}</p>
-                    </InsightCard>
-                    <InsightCard title="Why it works" icon={Target}>
-                      <p>{learning.whyItWorks}</p>
-                    </InsightCard>
-                  </div>
+                <InsightCard narrationId={`${narrationPrefix}-invariant`} title="Invariant" icon={ShieldCheck} text={learning.invariant} />
+                <InsightCard narrationId={`${narrationPrefix}-why-it-works`} title="Why it works" icon={Target} text={learning.whyItWorks} />
 
-                  <div className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
-                    <div className="mb-4 flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-indigo-300" />
-                      <h3 className="text-base font-semibold text-white">Detailed walkthrough</h3>
-                    </div>
-                    <div className="prose prose-invert max-w-none prose-headings:mb-2 prose-headings:mt-5 prose-headings:text-white prose-p:my-2 prose-p:leading-7 prose-p:text-slate-300 prose-strong:text-white prose-code:rounded prose-code:bg-black/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-indigo-200 prose-code:before:content-none prose-code:after:content-none prose-li:my-1 prose-li:text-slate-300 prose-ul:my-3 prose-ol:my-3">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeApproach.description}</ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
+                <DetailedWalkthrough
+                  narrationId={`${narrationPrefix}-walkthrough`}
+                  blocks={walkthrough}
+                />
 
-                <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-                  <ListCard title="Edge cases to test" icon={ShieldCheck} items={learning.edgeCases} tone="emerald" />
-                  <ListCard title="Interview notes" icon={Sparkles} items={learning.interviewNotes} tone="indigo" />
-                  <ComplexityCard
-                    title="Time complexity"
-                    value={activeApproach.timeComplexity}
-                    description={learning.timeExplanation}
-                    icon={Cpu}
-                    tone="amber"
-                  />
-                  <ComplexityCard
-                    title="Space complexity"
-                    value={activeApproach.spaceComplexity}
-                    description={learning.spaceExplanation}
-                    icon={Database}
-                    tone="cyan"
-                  />
-                </aside>
+                <ListCard
+                  narrationId={`${narrationPrefix}-edge-cases`}
+                  title="Edge cases to test"
+                  icon={ShieldCheck}
+                  items={learning.edgeCases}
+                  tone="emerald"
+                />
+                <ListCard
+                  narrationId={`${narrationPrefix}-interview-notes`}
+                  title="Interview notes"
+                  icon={Sparkles}
+                  items={learning.interviewNotes}
+                  tone="indigo"
+                />
+                <ComplexityCard
+                  narrationId={`${narrationPrefix}-time-complexity`}
+                  title="Time complexity"
+                  value={activeApproach.timeComplexity}
+                  description={learning.timeExplanation}
+                  icon={Cpu}
+                  tone="amber"
+                />
+                <ComplexityCard
+                  narrationId={`${narrationPrefix}-space-complexity`}
+                  title="Space complexity"
+                  value={activeApproach.spaceComplexity}
+                  description={learning.spaceExplanation}
+                  icon={Database}
+                  tone="cyan"
+                />
               </div>
             </section>
 
@@ -417,25 +430,44 @@ function EncyclopediaContent() {
                 </div>
               </div>
 
-              <div className="overflow-hidden">
-                <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#070b12] px-4 py-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                    <span className="ml-2 truncate font-mono text-xs text-slate-500">{codeFileName}</span>
-                  </div>
-                  <button
-                    onClick={copySnippet}
-                    className="inline-flex h-8 items-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
-                  >
-                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
-                    {copied ? "Copied" : "Copy"}
-                  </button>
-                </div>
-                <pre className="max-h-[560px] overflow-auto bg-[#05080d] p-5 text-sm leading-7 text-slate-300">
-                  <code>{activeImplementation?.code || "// No implementation available"}</code>
-                </pre>
+              <div className="p-4 lg:p-5">
+                <NarratedSlab
+                  id={`${narrationPrefix}-implementation-${activeImplementation?.language || selectedLang}`}
+                  title={`${activeImplementation?.language || selectedLang} code walkthrough`}
+                  label="Click any code line to hear its explanation"
+                  icon={Code2}
+                  lines={implementationNarration}
+                >
+                  {({ activeIndex, startFrom }) => (
+                    <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070b12]">
+                      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+                          <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+                          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                          <span className="ml-2 truncate font-mono text-xs text-slate-500">{codeFileName}</span>
+                        </div>
+                        <button
+                          onClick={copySnippet}
+                          className="inline-flex h-8 items-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
+                        >
+                          {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
+                          {copied ? "Copied" : "Copy"}
+                        </button>
+                      </div>
+                      <SyntaxCodeViewer
+                        code={activeImplementation?.code || "// No implementation available"}
+                        language={activeImplementation?.language || selectedLang}
+                        fileName={codeFileName}
+                        activeLine={activeIndex === null ? null : implementationNarration[activeIndex]?.sourceLine}
+                        onLineSelect={(sourceLine) => {
+                          const narrationIndex = implementationNarration.findIndex((line) => line.sourceLine === sourceLine);
+                          if (narrationIndex >= 0) startFrom(narrationIndex);
+                        }}
+                      />
+                    </div>
+                  )}
+                </NarratedSlab>
               </div>
             </section>
 
@@ -522,7 +554,7 @@ function LibraryPanel({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
         {Object.keys(groupedAlgos).length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
             <Search className="h-8 w-8 text-slate-600" />
@@ -612,61 +644,68 @@ function Pill({ children, className }: { children: ReactNode; className?: string
 }
 
 function InsightCard({
+  narrationId,
   title,
   label,
   icon: Icon,
-  children,
+  text,
 }: {
+  narrationId: string;
   title: string;
   label?: string;
   icon: LucideIcon;
-  children: ReactNode;
+  text: string;
 }) {
+  const lines = narrationLines(title, [text]);
+
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-300">
-            <Icon className="h-4 w-4" />
-          </div>
-          <h3 className="text-base font-semibold text-white">{title}</h3>
-        </div>
-        {label && <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-xs font-medium text-slate-400">{label}</span>}
-      </div>
-      <div className="text-sm leading-7 text-slate-300">{children}</div>
-    </article>
+    <NarratedSlab id={narrationId} title={title} label={label} icon={Icon} lines={lines}>
+      <NarratedLine index={0} className="text-sm leading-7 text-slate-300">
+        <SemanticText>{text}</SemanticText>
+      </NarratedLine>
+    </NarratedSlab>
   );
 }
 
-function StepCard({ title, icon: Icon, steps }: { title: string; icon: LucideIcon; steps: string[] }) {
+function StepCard({
+  narrationId,
+  title,
+  icon: Icon,
+  steps,
+}: {
+  narrationId: string;
+  title: string;
+  icon: LucideIcon;
+  steps: string[];
+}) {
+  const lines = narrationLines(title, steps);
+
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/10 p-2 text-cyan-300">
-          <Icon className="h-4 w-4" />
-        </div>
-        <h3 className="text-base font-semibold text-white">{title}</h3>
-      </div>
+    <NarratedSlab id={narrationId} title={title} icon={Icon} iconClassName="narrated-slab-icon-cyan" lines={lines}>
       <ol className="space-y-3">
         {steps.map((step, index) => (
-          <li key={step} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 text-sm leading-6 text-slate-300">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
-              {index + 1}
-            </span>
-            <span>{step}</span>
+          <li key={step}>
+            <NarratedLine index={index} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 text-sm leading-6 text-slate-300">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
+                {index + 1}
+              </span>
+              <SemanticText>{step}</SemanticText>
+            </NarratedLine>
           </li>
         ))}
       </ol>
-    </article>
+    </NarratedSlab>
   );
 }
 
 function ListCard({
+  narrationId,
   title,
   icon: Icon,
   items,
   tone,
 }: {
+  narrationId: string;
   title: string;
   icon: LucideIcon;
   items: string[];
@@ -676,34 +715,33 @@ function ListCard({
     tone === "emerald"
       ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
       : "border-indigo-400/20 bg-indigo-400/10 text-indigo-300";
+  const lines = narrationLines(title, items);
 
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <div className={cn("rounded-lg border p-2", toneClass)}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <h3 className="text-base font-semibold text-white">{title}</h3>
-      </div>
+    <NarratedSlab id={narrationId} title={title} icon={Icon} iconClassName={toneClass} lines={lines}>
       <ul className="space-y-2.5">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2 text-sm leading-6 text-slate-300">
-            <Check className="mt-1 h-4 w-4 shrink-0 text-slate-500" />
-            <span>{item}</span>
+        {items.map((item, index) => (
+          <li key={item}>
+            <NarratedLine index={index} className="flex gap-2 text-sm leading-6 text-slate-300">
+              <Check className="mt-1 h-4 w-4 shrink-0 text-slate-500" />
+              <SemanticText>{item}</SemanticText>
+            </NarratedLine>
           </li>
         ))}
       </ul>
-    </article>
+    </NarratedSlab>
   );
 }
 
 function ComplexityCard({
+  narrationId,
   title,
   value,
   description,
   icon: Icon,
   tone,
 }: {
+  narrationId: string;
   title: string;
   value: string;
   description: string;
@@ -714,20 +752,45 @@ function ComplexityCard({
     tone === "amber"
       ? "border-amber-400/20 bg-amber-400/10 text-amber-300"
       : "border-cyan-400/20 bg-cyan-400/10 text-cyan-300";
+  const lines = narrationLines(title, [`${value}. ${description}`]);
 
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0f1725] p-5">
-      <div className="mb-4 flex items-start gap-3">
-        <div className={cn("rounded-lg border p-2", toneClass)}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
-          <p className="mt-2 font-mono text-base font-semibold text-white">{value}</p>
-        </div>
+    <NarratedSlab id={narrationId} title={title} label={value} icon={Icon} iconClassName={toneClass} lines={lines}>
+      <NarratedLine index={0} className="text-sm leading-7 text-slate-300">
+        <SemanticText>{description}</SemanticText>
+      </NarratedLine>
+    </NarratedSlab>
+  );
+}
+
+function DetailedWalkthrough({
+  narrationId,
+  blocks,
+}: {
+  narrationId: string;
+  blocks: WalkthroughBlock[];
+}) {
+  const lines = narrationLines("Detailed walkthrough", blocks.map((block) => block.text));
+
+  return (
+    <NarratedSlab id={narrationId} title="Detailed walkthrough" icon={BookOpen} lines={lines}>
+      <div className="space-y-3">
+        {blocks.map((block, index) => (
+          <NarratedLine
+            key={`${block.kind}-${block.text}-${index}`}
+            index={index}
+            className={cn(
+              "text-sm leading-7 text-slate-300",
+              block.kind === "heading" && "mt-5 text-base font-semibold text-white",
+              block.kind === "list" && "grid grid-cols-[16px_minmax(0,1fr)] gap-2"
+            )}
+          >
+            {block.kind === "list" && <Check className="mt-1.5 h-3.5 w-3.5 text-slate-500" />}
+            <SemanticText>{block.text}</SemanticText>
+          </NarratedLine>
+        ))}
       </div>
-      <p className="text-sm leading-7 text-slate-300">{description}</p>
-    </article>
+    </NarratedSlab>
   );
 }
 

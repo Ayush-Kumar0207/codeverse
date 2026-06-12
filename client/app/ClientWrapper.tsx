@@ -11,6 +11,7 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const isEditorRoute = pathname?.startsWith("/editor/");
+  const isIndependentScrollRoute = isEditorRoute || pathname === "/encyclopedia";
   const canPaintBeforeAuth =
     pathname === "/" ||
     pathname === "/about" ||
@@ -29,7 +30,7 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className={cn("bg-background text-foreground", isIndependentScrollRoute ? "h-screen overflow-hidden" : "min-h-screen")}>
         {children}
       </div>
     );
@@ -40,8 +41,8 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
       <ActivityBar />
       <div className="flex-1 flex flex-col min-w-0">
         <main className={cn(
-          "flex-grow relative",
-          isEditorRoute ? "overflow-hidden" : "overflow-y-auto"
+          "relative min-h-0 flex-grow",
+          isIndependentScrollRoute ? "overflow-hidden" : "overflow-y-auto"
         )}>
           {children}
         </main>

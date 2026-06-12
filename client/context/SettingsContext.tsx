@@ -181,7 +181,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     latency: 0,
     memory: 0,
     load: 12,
-    logs: [{ id: 'init', msg: 'Neural heart initialized.', type: 'sys', timestamp: Date.now() }],
+    logs: [{ id: 'init', msg: 'Neural heart initialized.', type: 'sys', timestamp: 0 }],
     stressMode: false
   });
   const [syncStatus, setSyncStatus] = useState<SettingsContextType['syncStatus']>('idle');

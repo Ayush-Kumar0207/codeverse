@@ -256,6 +256,18 @@ function EditorWorkspace() {
   // HTML preview hook
   const { combinedPreview } = useHtmlPreview(files, language);
 
+  const algoTraceCode = useMemo(() => {
+    const tracer = files["tracer.js"];
+    if (tracer?.trim()) return tracer;
+
+    const activeLanguage = getLanguageFromFilename(activeFile);
+    if (activeLanguage === "javascript" && activeFile !== "script.js") {
+      return files[activeFile] || "";
+    }
+
+    return "";
+  }, [activeFile, files]);
+
   const assistantContext = useMemo(() => {
     const fileList = Object.keys(files).join(", ");
     const workspaceContext = buildAssistantWorkspaceContext(files, activeFile);
@@ -807,6 +819,58 @@ form.addEventListener("submit", (event) => {
 });
 
 updateSummary();`;
+      const tracerJs = `const rawInput = "72, 88, 91, 64";
+const numbers = rawInput.match(/-?\\d+(?:\\.\\d+)?/g).map(Number);
+const totalTraceSteps = numbers.length + 2;
+
+recordTrace({
+  kind: "array",
+  algorithm: { title: "ScoreLens summary", family: "Input parsing" },
+  step: 1,
+  totalSteps: totalTraceSteps,
+  progress: 25,
+  headline: "Read score input",
+  narrative: "ScoreLens starts from the same comma-separated values shown in the demo textarea.",
+  values: rawInput.split(",").map((value) => value.trim()),
+  variables: { rawInput },
+});
+
+const total = numbers.reduce((sum, score, index) => {
+  const nextTotal = sum + score;
+  recordTrace({
+    kind: "array",
+    algorithm: { title: "ScoreLens summary", family: "Reduction" },
+    step: index + 2,
+    totalSteps: totalTraceSteps,
+    progress: Math.round(((index + 2) / totalTraceSteps) * 100),
+    headline: "Add the next score",
+    narrative: \`Adding \${score} moves the running total from \${sum} to \${nextTotal}.\`,
+    values: numbers,
+    pointers: [{ label: "score", index, tone: "emerald" }],
+    variables: { score, runningTotal: nextTotal },
+  });
+  return nextTotal;
+}, 0);
+
+const average = Number((total / numbers.length).toFixed(2));
+const best = Math.max(...numbers);
+
+recordTrace({
+  kind: "array",
+  algorithm: { title: "ScoreLens summary", family: "Result" },
+  step: totalTraceSteps,
+  totalSteps: totalTraceSteps,
+  progress: 100,
+  headline: "Render the summary cards",
+  narrative: "The final values are ready for the Total, Average, Best, and Count cards.",
+  values: numbers,
+  variables: {
+    total,
+    average,
+    best,
+    count: numbers.length,
+  },
+});`;
       
       const demoProject: SharedProject = {
         _id: "demo-sandbox",
@@ -820,7 +884,8 @@ updateSummary();`;
         "index.html": indexHtml,
         "style.css": styleCss,
         "script.js": scriptJs,
-        "README.md": "# ScoreLens\n\nA working single-page web app that calculates totals, averages, best scores, and item counts from any numeric list.\n\n## Files\n- index.html: Page structure\n- style.css: Visual design\n- script.js: Score parsing and calculation logic",
+        "tracer.js": tracerJs,
+        "README.md": "# ScoreLens\n\nA working single-page web app that calculates totals, averages, best scores, and item counts from any numeric list.\n\n## Files\n- index.html: Page structure\n- style.css: Visual design\n- script.js: Score parsing and calculation logic\n- tracer.js: AlgoTrace walkthrough for the summary algorithm",
       });
       setActiveFile("index.html");
       return;
@@ -1861,7 +1926,7 @@ updateSummary();`;
 
                 <TabsContent value="algotrace" className="m-0 h-full min-h-0">
                   <AlgoTraceCanvas
-                    editorCode={files["tracer.js"] || files[activeFile] || ""}
+                    editorCode={algoTraceCode}
                     autoRun={Boolean(algoId)}
                   />
                 </TabsContent>

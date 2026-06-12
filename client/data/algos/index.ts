@@ -48,6 +48,12 @@ const curatedAlgorithms: AlgorithmEntry[] = [
 
 // Create a lookup Set to guarantee O(1) deduplication of IDs
 const curatedIds = new Set(curatedAlgorithms.map(a => a.id));
+const duplicateAliasIds = new Set([
+  "print-subarray-with-maximum-sum",
+  "count-subarrays-with-given-sum",
+  "merge-overlapping-subintervals",
+  "detect-a-loop-in-ll",
+]);
 
 const isPlaceholderApproach = (algo: AlgorithmEntry) =>
   algo.approaches.some((approach) => {
@@ -115,9 +121,9 @@ const mergedCuratedAlgorithms: AlgorithmEntry[] = curatedAlgorithms.map((algo) =
 
 // Aggregator registry for all algorithm modules, filtering out any generated ones that have been curated
 const assembledAlgorithms: AlgorithmEntry[] = [
-  ...mergedCuratedAlgorithms,
+  ...mergedCuratedAlgorithms.filter((algorithm) => !duplicateAliasIds.has(algorithm.id)),
   ...generatedStriverAlgorithms.filter(
-    (a) => !curatedIds.has(a.id) && !isPlaceholderApproach(a)
+    (a) => !curatedIds.has(a.id) && !duplicateAliasIds.has(a.id) && !isPlaceholderApproach(a)
   ),
 ];
 

@@ -8,9 +8,10 @@ import { useCodeAutoComplete } from "@/hooks/useCodeAutoComplete";
 import { useLanguageDetection, getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 import { usePresenceCursors } from "@/hooks/usePresenceCursors";
-import { useSettings, type ThemeType } from "@/context/SettingsContext";
+import { useSettings } from "@/context/SettingsContext";
 import { useAudioHaptics } from "@/hooks/useAudioHaptics";
 import { useKineticFlow } from "@/hooks/useKineticFlow";
+import { defineCodeVerseTheme } from "@/lib/codeverse-monaco-theme";
 
 export type CodeEditorHandle = {
   getCode: () => string;
@@ -61,112 +62,6 @@ const createEditorOptions = (
   wordWrap: "on",
   inlineSuggest: { enabled: settings.editor.autocomplete },
 });
-
-const editorThemePalettes: Record<
-  ThemeType,
-  {
-    comment: string;
-    keyword: string;
-    string: string;
-    number: string;
-    background: string;
-    foreground: string;
-    line: string;
-    lineNumber: string;
-    activeLineNumber: string;
-    cursor: string;
-    selection: string;
-    indent: string;
-    activeIndent: string;
-  }
-> = {
-  midnight: {
-    comment: "64748b",
-    keyword: "7dd3fc",
-    string: "86efac",
-    number: "fde68a",
-    background: "#0b0f17",
-    foreground: "#dbeafe",
-    line: "#111827",
-    lineNumber: "#64748b",
-    activeLineNumber: "#e2e8f0",
-    cursor: "#818cf8",
-    selection: "#334155",
-    indent: "#1f2937",
-    activeIndent: "#475569",
-  },
-  hacker: {
-    comment: "3f7a59",
-    keyword: "34d399",
-    string: "a3e635",
-    number: "fde68a",
-    background: "#031109",
-    foreground: "#b7f7d0",
-    line: "#092014",
-    lineNumber: "#3f7a59",
-    activeLineNumber: "#bbf7d0",
-    cursor: "#34d399",
-    selection: "#064e3b",
-    indent: "#123524",
-    activeIndent: "#2f855a",
-  },
-  solarized: {
-    comment: "6d93a2",
-    keyword: "22d3ee",
-    string: "facc15",
-    number: "f59e0b",
-    background: "#062330",
-    foreground: "#c6e7ec",
-    line: "#0b3342",
-    lineNumber: "#6d93a2",
-    activeLineNumber: "#e0f2fe",
-    cursor: "#22d3ee",
-    selection: "#155e75",
-    indent: "#164e63",
-    activeIndent: "#0891b2",
-  },
-  amoled: {
-    comment: "737373",
-    keyword: "a78bfa",
-    string: "34d399",
-    number: "fbbf24",
-    background: "#000000",
-    foreground: "#f5f5f5",
-    line: "#0a0a0a",
-    lineNumber: "#737373",
-    activeLineNumber: "#ffffff",
-    cursor: "#a78bfa",
-    selection: "#2e1065",
-    indent: "#171717",
-    activeIndent: "#525252",
-  },
-};
-
-function defineCodeVerseTheme(monaco: typeof monacoType, theme: ThemeType) {
-  const palette = editorThemePalettes[theme];
-
-  monaco.editor.defineTheme("codeverse-active", {
-    base: "vs-dark",
-    inherit: true,
-    rules: [
-      { token: "comment", foreground: palette.comment, fontStyle: "italic" },
-      { token: "keyword", foreground: palette.keyword },
-      { token: "string", foreground: palette.string },
-      { token: "number", foreground: palette.number },
-    ],
-    colors: {
-      "editor.background": palette.background,
-      "editor.foreground": palette.foreground,
-      "editor.lineHighlightBackground": palette.line,
-      "editorLineNumber.foreground": palette.lineNumber,
-      "editorLineNumber.activeForeground": palette.activeLineNumber,
-      "editorCursor.foreground": palette.cursor,
-      "editor.selectionBackground": palette.selection,
-      "editorIndentGuide.background1": palette.indent,
-      "editorIndentGuide.activeBackground1": palette.activeIndent,
-    },
-  });
-}
 
 const CodeEditor = forwardRef<CodeEditorHandle, Props>(
   (

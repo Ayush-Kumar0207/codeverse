@@ -13,6 +13,22 @@ const EMPTY_TRACE: StateData = {
   message: "Run a simulation to generate guided trace states.",
 };
 
+const NON_EXECUTABLE_TRACE: StateData = {
+  status: "Ready",
+  message: "Select a JavaScript trace file or open script.js to run a simulation.",
+};
+
+function looksLikeNonExecutableSource(source: string) {
+  const trimmed = source.trimStart();
+  return (
+    !trimmed ||
+    trimmed.startsWith("<") ||
+    trimmed.startsWith("#") ||
+    /^```/.test(trimmed) ||
+    /^(\s*)?(body|html|:root|\.|#)[\s.{:#[]/.test(trimmed)
+  );
+}
+
 export default function AlgoTraceCanvas({
   editorCode = "",
   autoRun = false,
@@ -54,6 +70,14 @@ export default function AlgoTraceCanvas({
   }, []);
 
   const runLocalCode = useCallback(() => {
+    if (looksLikeNonExecutableSource(editorCode)) {
+      setHistory([NON_EXECUTABLE_TRACE]);
+      setActiveStep(0);
+      setIsPlaying(false);
+      setShowFeedback(false);
+      return;
+    }
+
     const capturedTrace: StateData[] = [];
 
     const recordTrace = (state: unknown) => {

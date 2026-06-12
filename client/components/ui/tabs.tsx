@@ -48,6 +48,7 @@ function TabsList({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
+      role="tablist"
       className={cn(
         "inline-flex h-8 items-center gap-1 rounded-md border border-white/10 bg-black/30 p-1",
         className
@@ -74,10 +75,13 @@ function TabsTrigger({
   return (
     <button
       type="button"
+      role="tab"
       value={value}
       data-tab-value={value}
       data-state={isActive ? "active" : "inactive"}
       aria-selected={isActive}
+      aria-controls={`tab-panel-${value}`}
+      id={`tab-trigger-${value}`}
       onClick={() => setValue(value)}
       className={cn(
         "inline-flex items-center justify-center rounded-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all",
@@ -107,7 +111,13 @@ function TabsContent({
   if (activeValue !== value) return null;
 
   return (
-    <div className={cn("flex-1 outline-none", className)} {...props}>
+    <div
+      role="tabpanel"
+      id={`tab-panel-${value}`}
+      aria-labelledby={`tab-trigger-${value}`}
+      className={cn("flex-1 outline-none", className)}
+      {...props}
+    >
       {children}
     </div>
   );
