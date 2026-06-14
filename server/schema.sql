@@ -8,8 +8,13 @@ CREATE TABLE IF NOT EXISTS public.users (
     email TEXT,
     password TEXT,
     github_id TEXT,
+    google_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Upgrade existing users tables created before OAuth provider columns were added.
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS github_id TEXT;
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS google_id TEXT;
 
 -- Projects Table
 CREATE TABLE IF NOT EXISTS public.projects (

@@ -81,11 +81,24 @@ function getCallbackPath(provider) {
   return `/api/auth/${provider}/callback`;
 }
 
+function getConfiguredCallbackUrl(provider) {
+  return (
+    provider === "github"
+      ? process.env.GITHUB_CALLBACK_URL
+      : process.env.GOOGLE_CALLBACK_URL
+  )?.trim().replace(/\/$/, "") || "";
+}
+
 function isTrustedCallbackUrl(value, provider) {
   if (!value) return false;
 
   try {
     const url = new URL(value);
+    const configuredCallback = getConfiguredCallbackUrl(provider);
+    if (configuredCallback && url.toString().replace(/\/$/, "") === configuredCallback) {
+      return true;
+    }
+
     return isTrustedClientOrigin(url.origin) && url.pathname === getCallbackPath(provider);
   } catch {
     return false;
@@ -143,8 +156,8 @@ function getClientCallbackUrl(provider, clientBaseUrl) {
 }
 
 function getRedirectUri(req, provider, options = {}) {
-  const requestedCallbackUrl = getRequestedCallbackUrl(req, provider);
-  if (requestedCallbackUrl) return requestedCallbackUrl;
+  const configuredCallback = getConfiguredCallbackUrl(provider);
+  if (configuredCallback) return configuredCallback;
 
   if (options.redirectUri && isTrustedCallbackUrl(options.redirectUri, provider)) {
     return options.redirectUri;
@@ -157,12 +170,8 @@ function getRedirectUri(req, provider, options = {}) {
 
   if (clientCallbackUrl) return clientCallbackUrl;
 
-  const configuredCallback =
-    provider === "github"
-      ? process.env.GITHUB_CALLBACK_URL
-      : process.env.GOOGLE_CALLBACK_URL;
-
-  if (configuredCallback) return configuredCallback;
+  const requestedCallbackUrl = getRequestedCallbackUrl(req, provider);
+  if (requestedCallbackUrl) return requestedCallbackUrl;
 
   return `${getApiBaseUrl(req)}${getCallbackPath(provider)}`;
 }

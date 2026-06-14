@@ -32,7 +32,12 @@ function cleanText(value) {
 }
 
 function isMissingColumnError(error) {
-  return error?.code === "42703" || /column .* does not exist/i.test(error?.message || "");
+  const message = `${error?.message || ""} ${error?.details || ""}`;
+  return (
+    error?.code === "42703" ||
+    error?.code === "PGRST204" ||
+    /column .* does not exist|could not find .* column .* schema cache/i.test(message)
+  );
 }
 
 function makeOauthUsername(value, provider, providerId) {
