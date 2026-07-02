@@ -10,6 +10,7 @@
     "algo:audit": "node scripts/audit_algo_catalog.cjs",
     "algo:ollama": "node scripts/run_ollama_algo_pipeline.js",
     "algo:ollama:continuous": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=6 --concurrency=2 --interval-ms=8000",
+    "algo:ollama:story-dryruns": "node scripts/run_ollama_algo_pipeline.js --continuous --story-dry-run-only --batch=8 --concurrency=2 --interval-ms=4000 --request-timeout-ms=150000 --num-predict=2200 --temperature=0.12 --attempts=3 --fail-cooldown-min=120",
     "algo:ollama:turbo": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=10 --concurrency=4 --interval-ms=2000 --request-timeout-ms=120000 --num-predict=2800 --temperature=0.06 --attempts=2",
     "algo:ollama:ultra": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=12 --concurrency=5 --interval-ms=1500 --request-timeout-ms=120000 --num-predict=2400 --temperature=0.05 --attempts=2",
     "algo:ollama:bullet": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=16 --concurrency=6 --interval-ms=800 --request-timeout-ms=90000 --num-predict=2000 --temperature=0.04 --attempts=2 --fail-cooldown-min=180 --no-prioritize-easy",

@@ -36,7 +36,26 @@ $env:OLLAMA_REVIEWER_MODEL="llama3.2:latest"
 npm run algo:ollama:turbo
 ```
 
-## 3.2) Bullet mode (max speed for 8c/16t laptops)
+## 3.2) Story dry-run enrichment mode
+
+Use this for the large background task of adding exact, beginner-friendly, story-style dry runs without regenerating existing implementations:
+
+```powershell
+cd client
+$env:OLLAMA_MODEL="qwen2.5-coder:1.5b"
+npm run algo:ollama:story-dryruns
+```
+
+The prompt is intentionally strict because smaller local models can drift into generic explanations. It forces an exact sample input/output, 5-9 stateful steps, variables per step, anti-template rules, and a silent self-audit before JSON output.
+
+Preview the queue without writing:
+
+```powershell
+cd client
+node scripts/run_ollama_algo_pipeline.js --story-dry-run-only --dry-run --batch=10
+```
+
+## 3.3) Bullet mode (max speed for 8c/16t laptops)
 
 Use this first on your HP Aero 13 (16GB RAM) to maximize throughput while preserving validation gates:
 

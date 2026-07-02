@@ -7,6 +7,20 @@ export interface CodeImplementation {
   code: string;
 }
 
+export interface AlgorithmDryRunStep {
+  title: string;
+  state: string;
+  explanation: string;
+  variables?: Record<string, string>;
+}
+
+export interface AlgorithmStoryDryRun {
+  sampleInput: string;
+  sampleOutput: string;
+  steps: AlgorithmDryRunStep[];
+  closingInsight: string;
+}
+
 export interface AlgorithmApproach {
   name: string;
   description: string;
@@ -15,6 +29,7 @@ export interface AlgorithmApproach {
   spaceComplexity: string;
   spaceComplexityExplanation?: string;
   implementations: CodeImplementation[];
+  storyDryRun?: AlgorithmStoryDryRun;
 }
 
 export interface AlgorithmEntry {

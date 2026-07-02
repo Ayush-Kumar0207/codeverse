@@ -667,6 +667,9 @@ function inferComplexity(algorithm: AlgorithmEntry, approach: AlgorithmApproach)
 function getSpecificCodePack(algorithm: AlgorithmEntry, approach: AlgorithmApproach): CodePack | undefined {
   const text = getSearchText(algorithm, approach);
 
+  if (algorithm.id === "3-sum") return threeSumCode();
+  if (algorithm.id === "4-sum") return undefined;
+
   if (text.includes("kadane") || text.includes("maximum subarray")) return kadaneCode();
   if (algorithm.id === "two-sum" || text.includes("two sum")) return twoSumCode();
   if (algorithm.id === "sort-an-array-of-0-s-1-s-and-2-s" || text.includes("sort colors") || text.includes("sort 0s")) return sortColorsCode();

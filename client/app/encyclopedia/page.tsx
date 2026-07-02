@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AT_ALGORITHMS, AlgorithmEntry } from "@/data/algos";
+import { AT_ALGORITHMS, type AlgorithmEntry, type AlgorithmStoryDryRun } from "@/data/algos";
 import { buildAlgorithmLearningProfile } from "@/lib/algo-learning";
 import {
   BookOpen,
@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 import NarratedSlab, { NarratedLine } from "@/components/NarratedSlab";
 import SemanticText from "@/components/SemanticText";
 import SyntaxCodeViewer from "@/components/SyntaxCodeViewer";
-import { codeNarrationLines, narrationLines, walkthroughBlocks, type WalkthroughBlock } from "@/lib/narration";
+import { codeNarrationLines, narrationLines, walkthroughBlocks, type NarrationContext, type WalkthroughBlock } from "@/lib/narration";
 
 const difficultyStyles: Record<AlgorithmEntry["difficulty"], string> = {
   Easy: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
@@ -132,6 +132,16 @@ function EncyclopediaContent() {
     activeApproach.implementations.find((impl) => impl.language === selectedLang) ||
     activeApproach.implementations[0];
   const learning = useMemo(() => buildAlgorithmLearningProfile(activeAlgo, activeApproach), [activeAlgo, activeApproach]);
+  const narrationContext = useMemo<NarrationContext>(
+    () => ({
+      algorithmTitle: activeAlgo.title,
+      difficulty: activeAlgo.difficulty,
+      topic: activeAlgo.topic,
+      approachName: activeApproach.name,
+      family: learning.family,
+    }),
+    [activeAlgo.difficulty, activeAlgo.title, activeAlgo.topic, activeApproach.name, learning.family]
+  );
   const isSearchActive = searchTerm.trim().length > 0;
   const codeFileName = `${activeAlgo.id}-${slugify(activeApproach.name)}.${getFileExtension(
     activeImplementation?.language || selectedLang
@@ -139,8 +149,13 @@ function EncyclopediaContent() {
   const narrationPrefix = `${activeAlgo.id}-${slugify(activeApproach.name)}`;
   const walkthrough = useMemo(() => walkthroughBlocks(activeApproach.description), [activeApproach.description]);
   const implementationNarration = useMemo(
-    () => codeNarrationLines(activeImplementation?.code || "// No implementation available", activeImplementation?.language || selectedLang),
-    [activeImplementation?.code, activeImplementation?.language, selectedLang]
+    () =>
+      codeNarrationLines(
+        activeImplementation?.code || "// No implementation available",
+        activeImplementation?.language || selectedLang,
+        narrationContext
+      ),
+    [activeImplementation?.code, activeImplementation?.language, narrationContext, selectedLang]
   );
 
   useEffect(() => {
@@ -356,17 +371,27 @@ function EncyclopediaContent() {
                   label={learning.family}
                   icon={BrainCircuit}
                   text={learning.mentalModel}
+                  context={narrationContext}
                 />
 
-                <StepCard narrationId={`${narrationPrefix}-execution-plan`} title="Execution plan" icon={ListChecks} steps={learning.executionSteps} />
+                <StepCard narrationId={`${narrationPrefix}-execution-plan`} title="Execution plan" icon={ListChecks} steps={learning.executionSteps} context={narrationContext} />
 
-                <InsightCard narrationId={`${narrationPrefix}-invariant`} title="Invariant" icon={ShieldCheck} text={learning.invariant} />
-                <InsightCard narrationId={`${narrationPrefix}-why-it-works`} title="Why it works" icon={Target} text={learning.whyItWorks} />
+                <InsightCard narrationId={`${narrationPrefix}-invariant`} title="Invariant" icon={ShieldCheck} text={learning.invariant} context={narrationContext} />
+                <InsightCard narrationId={`${narrationPrefix}-why-it-works`} title="Why it works" icon={Target} text={learning.whyItWorks} context={narrationContext} />
 
                 <DetailedWalkthrough
                   narrationId={`${narrationPrefix}-walkthrough`}
                   blocks={walkthrough}
+                  context={narrationContext}
                 />
+
+                {activeApproach.storyDryRun && (
+                  <StoryDryRunCard
+                    narrationId={`${narrationPrefix}-story-dry-run`}
+                    dryRun={activeApproach.storyDryRun}
+                    context={narrationContext}
+                  />
+                )}
 
                 <ListCard
                   narrationId={`${narrationPrefix}-edge-cases`}
@@ -374,6 +399,7 @@ function EncyclopediaContent() {
                   icon={ShieldCheck}
                   items={learning.edgeCases}
                   tone="emerald"
+                  context={narrationContext}
                 />
                 <ListCard
                   narrationId={`${narrationPrefix}-interview-notes`}
@@ -381,6 +407,7 @@ function EncyclopediaContent() {
                   icon={Sparkles}
                   items={learning.interviewNotes}
                   tone="indigo"
+                  context={narrationContext}
                 />
                 <ComplexityCard
                   narrationId={`${narrationPrefix}-time-complexity`}
@@ -389,6 +416,7 @@ function EncyclopediaContent() {
                   description={learning.timeExplanation}
                   icon={Cpu}
                   tone="amber"
+                  context={narrationContext}
                 />
                 <ComplexityCard
                   narrationId={`${narrationPrefix}-space-complexity`}
@@ -397,6 +425,7 @@ function EncyclopediaContent() {
                   description={learning.spaceExplanation}
                   icon={Database}
                   tone="cyan"
+                  context={narrationContext}
                 />
               </div>
             </section>
@@ -649,14 +678,16 @@ function InsightCard({
   label,
   icon: Icon,
   text,
+  context,
 }: {
   narrationId: string;
   title: string;
   label?: string;
   icon: LucideIcon;
   text: string;
+  context?: NarrationContext;
 }) {
-  const lines = narrationLines(title, [text]);
+  const lines = narrationLines(title, [text], context);
 
   return (
     <NarratedSlab id={narrationId} title={title} label={label} icon={Icon} lines={lines}>
@@ -672,13 +703,15 @@ function StepCard({
   title,
   icon: Icon,
   steps,
+  context,
 }: {
   narrationId: string;
   title: string;
   icon: LucideIcon;
   steps: string[];
+  context?: NarrationContext;
 }) {
-  const lines = narrationLines(title, steps);
+  const lines = narrationLines(title, steps, context);
 
   return (
     <NarratedSlab id={narrationId} title={title} icon={Icon} iconClassName="narrated-slab-icon-cyan" lines={lines}>
@@ -698,24 +731,100 @@ function StepCard({
   );
 }
 
+function StoryDryRunCard({
+  narrationId,
+  dryRun,
+  context,
+}: {
+  narrationId: string;
+  dryRun: AlgorithmStoryDryRun;
+  context?: NarrationContext;
+}) {
+  const narrationValues = [
+    `Sample input. ${dryRun.sampleInput}`,
+    ...dryRun.steps.map((step) => `${step.title}. ${step.state}. ${step.explanation}`),
+    `Sample output. ${dryRun.sampleOutput}. ${dryRun.closingInsight}`,
+  ];
+  const lines = narrationLines("Story dry run", narrationValues, context);
+  const finalIndex = dryRun.steps.length + 1;
+
+  return (
+    <NarratedSlab
+      id={narrationId}
+      title="Story dry run"
+      label="Step-by-step example"
+      icon={BookOpen}
+      iconClassName="narrated-slab-icon-cyan"
+      lines={lines}
+    >
+      <div className="space-y-4">
+        <NarratedLine index={0} className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm leading-6 text-slate-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">Sample input</p>
+          <p className="mt-2 font-mono text-xs leading-6 text-slate-200">{dryRun.sampleInput}</p>
+        </NarratedLine>
+
+        <ol className="space-y-3">
+          {dryRun.steps.map((step, index) => {
+            const variables = Object.entries(step.variables || {});
+
+            return (
+              <li key={`${step.title}-${index}`}>
+                <NarratedLine index={index + 1} className="rounded-lg border border-white/10 bg-[#070b12] p-3 text-sm leading-6 text-slate-300">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold text-white">{step.title}</h4>
+                      <p className="mt-1 text-slate-300"><SemanticText>{step.state}</SemanticText></p>
+                      <p className="mt-2 text-slate-400"><SemanticText>{step.explanation}</SemanticText></p>
+                      {variables.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {variables.map(([key, value]) => (
+                            <span key={key} className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-slate-300">
+                              <span className="text-slate-500">{key}</span> = {value}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </NarratedLine>
+              </li>
+            );
+          })}
+        </ol>
+
+        <NarratedLine index={finalIndex} className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm leading-6 text-emerald-50">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">Sample output</p>
+          <p className="mt-2 text-slate-200"><SemanticText>{dryRun.sampleOutput}</SemanticText></p>
+          <p className="mt-2 text-slate-300"><SemanticText>{dryRun.closingInsight}</SemanticText></p>
+        </NarratedLine>
+      </div>
+    </NarratedSlab>
+  );
+}
+
 function ListCard({
   narrationId,
   title,
   icon: Icon,
   items,
   tone,
+  context,
 }: {
   narrationId: string;
   title: string;
   icon: LucideIcon;
   items: string[];
   tone: "emerald" | "indigo";
+  context?: NarrationContext;
 }) {
   const toneClass =
     tone === "emerald"
       ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
       : "border-indigo-400/20 bg-indigo-400/10 text-indigo-300";
-  const lines = narrationLines(title, items);
+  const lines = narrationLines(title, items, context);
 
   return (
     <NarratedSlab id={narrationId} title={title} icon={Icon} iconClassName={toneClass} lines={lines}>
@@ -740,6 +849,7 @@ function ComplexityCard({
   description,
   icon: Icon,
   tone,
+  context,
 }: {
   narrationId: string;
   title: string;
@@ -747,12 +857,13 @@ function ComplexityCard({
   description: string;
   icon: LucideIcon;
   tone: "amber" | "cyan";
+  context?: NarrationContext;
 }) {
   const toneClass =
     tone === "amber"
       ? "border-amber-400/20 bg-amber-400/10 text-amber-300"
       : "border-cyan-400/20 bg-cyan-400/10 text-cyan-300";
-  const lines = narrationLines(title, [`${value}. ${description}`]);
+  const lines = narrationLines(title, [`${value}. ${description}`], context);
 
   return (
     <NarratedSlab id={narrationId} title={title} label={value} icon={Icon} iconClassName={toneClass} lines={lines}>
@@ -766,11 +877,13 @@ function ComplexityCard({
 function DetailedWalkthrough({
   narrationId,
   blocks,
+  context,
 }: {
   narrationId: string;
   blocks: WalkthroughBlock[];
+  context?: NarrationContext;
 }) {
-  const lines = narrationLines("Detailed walkthrough", blocks.map((block) => block.text));
+  const lines = narrationLines("Detailed walkthrough", blocks.map((block) => block.text), context);
 
   return (
     <NarratedSlab id={narrationId} title="Detailed walkthrough" icon={BookOpen} lines={lines}>

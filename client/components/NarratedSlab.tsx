@@ -12,7 +12,7 @@ import {
 } from "react";
 import { Pause, Play, RotateCcw, Square, Volume2, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { NarrationLine } from "@/lib/narration";
+import { narrationVoiceProfile, toSpeakableNarration, type NarrationLine } from "@/lib/narration";
 
 type NarrationState = {
   activeIndex: number | null;
@@ -105,10 +105,11 @@ export default function NarratedSlab({
         }
 
         const line = lines[index];
-        const utterance = new SpeechSynthesisUtterance(`${line.text}. ${line.explanation}`);
-        utterance.rate = 0.88;
-        utterance.pitch = 0.96;
-        utterance.volume = 1;
+        const voiceProfile = narrationVoiceProfile(line, index, lines.length);
+        const utterance = new SpeechSynthesisUtterance(toSpeakableNarration(line));
+        utterance.rate = voiceProfile.rate;
+        utterance.pitch = voiceProfile.pitch;
+        utterance.volume = voiceProfile.volume;
         if (voice) utterance.voice = voice;
         setActiveIndex(index);
         setIsPlaying(true);
@@ -117,7 +118,10 @@ export default function NarratedSlab({
           if (sessionRef.current !== session) return;
           setActiveIndex(index);
         };
-        utterance.onend = () => speakLine(index + 1);
+        utterance.onend = () => {
+          if (sessionRef.current !== session) return;
+          window.setTimeout(() => speakLine(index + 1), voiceProfile.pauseAfterMs);
+        };
         utterance.onerror = () => {
           if (sessionRef.current !== session) return;
           setActiveIndex(null);
