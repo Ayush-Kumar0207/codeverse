@@ -182,11 +182,11 @@ export default function AlgoTraceCanvas({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-hidden">
         <AutoVisualizer state={activeState} previousState={previousState} />
       </div>
 
-      <div className="flex shrink-0 flex-col items-center gap-3 border-t border-slate-800 bg-[#0a0f19] px-4 py-4">
+      <div className="flex max-h-[45%] shrink-0 flex-col items-center gap-3 overflow-y-auto border-t border-slate-800 bg-[#0a0f19] px-4 py-4">
         <FeedbackLoop
           isVisible={showFeedback}
           onClose={() => setShowFeedback(false)}

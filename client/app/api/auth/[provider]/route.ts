@@ -12,8 +12,20 @@ function getApiBaseUrl() {
   ).replace(/\/$/, "");
 }
 
+function isLocalHostname(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
+
+function isLocalUrl(value: string) {
+  try {
+    return isLocalHostname(new URL(value).hostname);
+  } catch {
+    return false;
+  }
+}
+
 function getClientBaseUrl(request: NextRequest) {
-  if (request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1") {
+  if (isLocalHostname(request.nextUrl.hostname)) {
     return request.nextUrl.origin;
   }
 
@@ -38,18 +50,26 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const clientBaseUrl = getClientBaseUrl(request);
+  const apiBaseUrl = getApiBaseUrl();
   const callbackUrl = new URL(`/api/auth/${provider}/callback`, clientBaseUrl).toString();
-  const backendStartUrl = new URL(`/api/auth/${provider}`, getApiBaseUrl());
+  const useBackendCallback = isLocalHostname(request.nextUrl.hostname) && !isLocalUrl(apiBaseUrl);
+  const backendStartUrl = new URL(`/api/auth/${provider}`, apiBaseUrl);
   backendStartUrl.searchParams.set("client_url", clientBaseUrl);
-  backendStartUrl.searchParams.set("callback_url", callbackUrl);
+  if (!useBackendCallback) {
+    backendStartUrl.searchParams.set("callback_url", callbackUrl);
+  }
 
   try {
+    const headers: Record<string, string> = {
+      "x-client-base-url": clientBaseUrl,
+    };
+    if (!useBackendCallback) {
+      headers["x-oauth-callback-url"] = callbackUrl;
+    }
+
     const response = await fetch(backendStartUrl, {
       redirect: "manual",
-      headers: {
-        "x-client-base-url": clientBaseUrl,
-        "x-oauth-callback-url": callbackUrl,
-      },
+      headers,
     });
 
     const location = response.headers.get("location");

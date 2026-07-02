@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import * as THREE from "three";
 import type { StateData, StateValue } from "./AutoVisualizer";
+import { twoSumCinematic3DPreset } from "./cinematic3dPresets";
 
 type PointerState = { label: string; index: number; tone?: string };
 type HoveredTower = { index: number; value: number; role: string };
@@ -27,14 +28,10 @@ type SceneData = {
   rightIndex: number;
 };
 
-const visualizerName = "two-sum-cinematic-3d";
-const pointerColors: Record<string, number> = {
-  cyan: 0x22d3ee,
-  violet: 0xa78bfa,
-  emerald: 0x34d399,
-  rose: 0xfb7185,
-  amber: 0xfbbf24,
-};
+const scenePreset = twoSumCinematic3DPreset;
+const visualizerName = scenePreset.visualizer;
+const pointerColors = scenePreset.colors.pointers as Record<string, number>;
+const comparisonColors = scenePreset.colors.comparison as Record<string, number>;
 
 export default function TwoSumCinematic3D({
   state,
@@ -42,12 +39,30 @@ export default function TwoSumCinematic3D({
   state: StateData;
   previousState?: StateData | null;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [hoveredTower, setHoveredTower] = useState<HoveredTower | null>(null);
   const [resetNonce, setResetNonce] = useState(0);
+  const [isCompact, setIsCompact] = useState(false);
   const sceneData = useMemo(() => buildSceneData(state), [state]);
   const leftValue = sceneData.values[sceneData.leftIndex] ?? 0;
   const rightValue = sceneData.values[sceneData.rightIndex] ?? 0;
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateLayout = () => {
+      const rect = container.getBoundingClientRect();
+      const nextCompact = rect.width < scenePreset.layout.compactWidth || rect.height < scenePreset.layout.compactHeight;
+      setIsCompact((current) => (current === nextCompact ? current : nextCompact));
+    };
+
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const host = mountRef.current;
@@ -55,25 +70,30 @@ export default function TwoSumCinematic3D({
 
     host.innerHTML = "";
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, scenePreset.renderer.maxPixelRatio));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = scenePreset.renderer.toneMappingExposure;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.domElement.dataset.testid = "two-sum-cinematic-canvas";
+    renderer.domElement.dataset.testid = scenePreset.rendererTestId;
     renderer.domElement.style.display = "block";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.width = "100%";
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x030712);
-    scene.fog = new THREE.Fog(0x030712, 13, 25);
+    scene.background = new THREE.Color(scenePreset.scene.background);
+    scene.fog = new THREE.Fog(scenePreset.scene.fog.color, scenePreset.scene.fog.near, scenePreset.scene.fog.far);
 
-    const camera = new THREE.PerspectiveCamera(37, 1, 0.1, 100);
-    const lookAt = new THREE.Vector3(0, 1.85, 0);
-    const controls = { theta: 0.18, elevation: 4.55, radius: sceneData.values.length > 6 ? 13.4 : 12.2 };
+    const camera = new THREE.PerspectiveCamera(scenePreset.camera.fov.wide, 1, 0.1, 100);
+    const lookAt = new THREE.Vector3(scenePreset.camera.lookAt[0], scenePreset.camera.lookAt[1], scenePreset.camera.lookAt[2]);
+    const baseRadius: number = sceneData.values.length > 6 ? scenePreset.camera.radius.dense : scenePreset.camera.radius.default;
+    const controls: { theta: number; elevation: number; radius: number } = {
+      theta: scenePreset.camera.theta,
+      elevation: scenePreset.camera.elevation,
+      radius: baseRadius,
+    };
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const towerMeshes: THREE.Object3D[] = [];
@@ -90,6 +110,8 @@ export default function TwoSumCinematic3D({
       const height = Math.max(1, Math.floor(rect.height));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
+      camera.fov = width < 520 ? scenePreset.camera.fov.compact : width < 760 ? scenePreset.camera.fov.medium : scenePreset.camera.fov.wide;
+      controls.radius = Math.max(controls.radius, width < 520 ? baseRadius + scenePreset.camera.radius.compactBoost : width < 760 ? baseRadius + scenePreset.camera.radius.mediumBoost : baseRadius);
       camera.updateProjectionMatrix();
     };
 
@@ -127,7 +149,7 @@ export default function TwoSumCinematic3D({
     const handlePointerMove = (event: PointerEvent) => {
       if (dragging) {
         controls.theta -= (event.clientX - lastX) * 0.005;
-        controls.elevation = THREE.MathUtils.clamp(controls.elevation + (event.clientY - lastY) * 0.015, 2.75, 6.7);
+        controls.elevation = THREE.MathUtils.clamp(controls.elevation + (event.clientY - lastY) * 0.015, scenePreset.camera.elevationRange[0], scenePreset.camera.elevationRange[1]);
         lastX = event.clientX;
         lastY = event.clientY;
         return;
@@ -151,7 +173,7 @@ export default function TwoSumCinematic3D({
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      controls.radius = THREE.MathUtils.clamp(controls.radius + event.deltaY * 0.01, 8.8, 17.5);
+      controls.radius = THREE.MathUtils.clamp(controls.radius + event.deltaY * 0.01, scenePreset.camera.radius.min, scenePreset.camera.radius.max);
     };
 
     const handlePointerLeave = () => setHoveredTower(null);
@@ -204,25 +226,39 @@ export default function TwoSumCinematic3D({
   }, [sceneData, resetNonce]);
 
   return (
-    <div className="relative h-full min-h-[520px] overflow-hidden bg-[#030712] text-white" data-testid="two-sum-cinematic-3d" data-visualizer={visualizerName}>
-      <div ref={mountRef} className="absolute inset-0" />
-
-      <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 flex flex-col gap-3 lg:left-4 lg:right-4 lg:top-4 lg:flex-row lg:items-start lg:justify-between">
-        <section className="max-w-[520px] rounded-lg border border-white/10 bg-[#050a12]/[0.82] px-3.5 py-3 shadow-2xl shadow-black/35 backdrop-blur-md">
+    <div
+      ref={containerRef}
+      className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#030712] text-white"
+      data-testid="two-sum-cinematic-3d"
+      data-visualizer={visualizerName}
+      data-layout={isCompact ? "compact" : "wide"}
+    >
+      <div
+        className={`z-10 border-b border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/25 backdrop-blur-md ${
+          isCompact
+            ? "space-y-3 px-3 py-3"
+            : "grid grid-cols-[minmax(0,1fr)_minmax(260px,330px)] gap-3 px-4 py-4"
+        }`}
+      >
+        <section className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone="cyan">Cinematic 3D</StatusPill>
             <StatusPill tone="emerald">Step {sceneData.step} / {sceneData.totalSteps}</StatusPill>
             <StatusPill tone={comparisonPillTone(sceneData.comparison)}>{comparisonLabel(sceneData.comparison)}</StatusPill>
           </div>
-          <h2 className="mt-2 text-base font-semibold leading-6 text-white sm:text-lg">{sceneData.headline}</h2>
-          <p className="mt-1 max-w-[50rem] text-xs leading-5 text-slate-300 sm:text-sm">{sceneData.narrative}</p>
+          <h2 className={`${isCompact ? "mt-2 text-sm leading-5" : "mt-2 text-lg leading-6"} break-words font-semibold text-white`}>
+            {sceneData.headline}
+          </h2>
+          <p className={`${isCompact ? "mt-1 text-xs leading-5" : "mt-1 text-sm leading-6"} break-words text-slate-300`}>
+            {sceneData.narrative}
+          </p>
         </section>
 
-        <section className="w-full rounded-lg border border-white/10 bg-[#050a12]/[0.82] p-3 shadow-2xl shadow-black/35 backdrop-blur-md sm:w-[330px]">
+        <section className="min-w-0 rounded-md border border-white/10 bg-white/[0.05] p-3">
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Active comparison</div>
-          <div className="mt-2 flex items-end justify-between gap-3">
-            <div className="font-mono text-xl font-bold text-white">{leftValue} + {rightValue}</div>
-            <div className={`font-mono text-xl font-bold ${comparisonTextClass(sceneData.comparison)}`}>{sceneData.currentSum}</div>
+          <div className="mt-2 flex min-w-0 items-end justify-between gap-3">
+            <div className="min-w-0 break-words font-mono text-lg font-bold text-white">{leftValue} + {rightValue}</div>
+            <div className={`shrink-0 font-mono text-lg font-bold ${comparisonTextClass(sceneData.comparison)}`}>{sceneData.currentSum}</div>
           </div>
           <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
             <MiniMetric label="Target" value={String(sceneData.target)} tone="text-amber-200" />
@@ -232,29 +268,33 @@ export default function TwoSumCinematic3D({
         </section>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 rounded-lg border border-white/10 bg-[#050a12]/[0.84] p-3 shadow-2xl shadow-black/40 backdrop-blur-md lg:inset-x-4 lg:bottom-4">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_240px_auto] lg:items-center">
-          <div>
+      <div className="relative min-h-0 overflow-hidden">
+        <div ref={mountRef} className="absolute inset-0" />
+      </div>
+
+      <div className={`z-10 border-t border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/30 backdrop-blur-md ${isCompact ? "px-3 py-3" : "px-4 py-4"}`}>
+        <div className={isCompact ? "space-y-3" : "grid grid-cols-[minmax(0,1fr)_260px_auto] items-center gap-4"}>
+          <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Decision</div>
-            <p className="mt-1 text-sm font-semibold leading-5 text-slate-100">{sceneData.decision}</p>
-            <p className="mt-1 text-xs leading-5 text-slate-400">{sceneData.invariant}</p>
+            <p className="mt-1 break-words text-sm font-semibold leading-5 text-slate-100">{sceneData.decision}</p>
+            <p className="mt-1 break-words text-xs leading-5 text-slate-400">{sceneData.invariant}</p>
           </div>
-          <div>
-            <div className="mb-2 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
               <span>Trace progress</span>
               <span>{Math.round(sceneData.progress)}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div className={`h-full rounded-full ${progressClass(sceneData.comparison)}`} style={{ width: `${sceneData.progress}%` }} />
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
+            <p className="mt-2 break-words text-xs leading-5 text-slate-400">
               {hoveredTower ? `Index ${hoveredTower.index}: value ${hoveredTower.value} is ${hoveredTower.role}.` : sceneData.lesson}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setResetNonce((value) => value + 1)}
-            className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-white/[0.08] text-slate-200 transition hover:bg-white/[0.15]"
+            className={`${isCompact ? "h-9 w-9" : "h-10 w-10"} inline-flex items-center justify-center rounded-md border border-white/10 bg-white/[0.08] text-slate-200 transition hover:bg-white/[0.15]`}
             aria-label="Reset 3D camera"
             title="Reset 3D camera"
           >
@@ -306,29 +346,29 @@ function buildThreeScene(
   pulseMeshes: THREE.Object3D[],
   flowDots: THREE.Object3D[]
 ) {
-  scene.add(new THREE.HemisphereLight(0xcdefff, 0x08111c, 1.55));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
-  keyLight.position.set(-4.5, 9, 6.5);
+  scene.add(new THREE.HemisphereLight(scenePreset.lights.hemisphere.sky, scenePreset.lights.hemisphere.ground, scenePreset.lights.hemisphere.intensity));
+  const keyLight = new THREE.DirectionalLight(scenePreset.lights.key.color, scenePreset.lights.key.intensity);
+  keyLight.position.set(scenePreset.lights.key.position[0], scenePreset.lights.key.position[1], scenePreset.lights.key.position[2]);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.width = 1024;
   keyLight.shadow.mapSize.height = 1024;
   scene.add(keyLight);
 
-  const leftGlow = new THREE.PointLight(0x22d3ee, 5.5, 11);
-  leftGlow.position.set(-5.4, 3.2, 2.8);
+  const leftGlow = new THREE.PointLight(scenePreset.lights.accents.left.color, scenePreset.lights.accents.left.intensity, scenePreset.lights.accents.left.distance);
+  leftGlow.position.set(scenePreset.lights.accents.left.position[0], scenePreset.lights.accents.left.position[1], scenePreset.lights.accents.left.position[2]);
   scene.add(leftGlow);
-  const rightGlow = new THREE.PointLight(0xa78bfa, 4.8, 11);
-  rightGlow.position.set(5, 3.8, 2.2);
+  const rightGlow = new THREE.PointLight(scenePreset.lights.accents.right.color, scenePreset.lights.accents.right.intensity, scenePreset.lights.accents.right.distance);
+  rightGlow.position.set(scenePreset.lights.accents.right.position[0], scenePreset.lights.accents.right.position[1], scenePreset.lights.accents.right.position[2]);
   scene.add(rightGlow);
-  const answerGlow = new THREE.PointLight(data.comparison === "match" ? 0x34d399 : 0xfbbf24, data.comparison === "match" ? 7 : 3.2, 13);
-  answerGlow.position.set(0, 4.8, -1.6);
+  const answerGlow = new THREE.PointLight(data.comparison === "match" ? colorForComparison("match") : colorForComparison("compare"), data.comparison === "match" ? scenePreset.lights.accents.answer.matchIntensity : scenePreset.lights.accents.answer.defaultIntensity, scenePreset.lights.accents.answer.distance);
+  answerGlow.position.set(scenePreset.lights.accents.answer.position[0], scenePreset.lights.accents.answer.position[1], scenePreset.lights.accents.answer.position[2]);
   scene.add(answerGlow);
 
-  const spacing = 1.72;
-  const stageWidth = Math.max(10.4, (data.values.length - 1) * spacing + 3.4);
+  const spacing = scenePreset.stage.spacing;
+  const stageWidth = Math.max(scenePreset.stage.minWidth, (data.values.length - 1) * spacing + scenePreset.stage.widthPadding);
   const startX = -((data.values.length - 1) * spacing) / 2;
   const maxValue = Math.max(1, data.target, ...data.values);
-  const heights = data.values.map((value) => 0.75 + (value / maxValue) * 3.35);
+  const heights = data.values.map((value) => scenePreset.towers.minHeight + (value / maxValue) * scenePreset.towers.heightScale);
   const positions = data.values.map((_, index) => new THREE.Vector3(startX + index * spacing, 0, 0));
   const pointerByIndex = new Map(data.pointers.map((pointer) => [pointer.index, pointer]));
 
@@ -346,7 +386,7 @@ function buildThreeScene(
     const retired = data.retired.has(index) && !solution;
 
     const tower = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.42, 0.48, height, 48, 1),
+      new THREE.CylinderGeometry(scenePreset.towers.topRadius, scenePreset.towers.bottomRadius, height, scenePreset.towers.segments, 1),
       new THREE.MeshPhysicalMaterial({
         color: tone.color,
         emissive: tone.emissive,
@@ -359,7 +399,7 @@ function buildThreeScene(
         opacity: retired ? 0.3 : active || solution ? 0.98 : 0.78,
       })
     );
-    tower.position.set(x, height / 2 + 0.12, 0);
+    tower.position.set(x, height / 2 + scenePreset.towers.baseYOffset, 0);
     tower.castShadow = true;
     tower.receiveShadow = true;
     tower.userData = { index, value, role };
@@ -394,14 +434,14 @@ function buildThreeScene(
 
 function addStage(stageGroup: THREE.Group, width: number) {
   const platform = new THREE.Mesh(
-    new THREE.BoxGeometry(width, 0.18, 3.65),
+    new THREE.BoxGeometry(width, scenePreset.stage.platformHeight, scenePreset.stage.depth),
     new THREE.MeshStandardMaterial({ color: 0x07111d, metalness: 0.22, roughness: 0.82 })
   );
   platform.receiveShadow = true;
   stageGroup.add(platform);
 
   const surface = new THREE.Mesh(
-    new THREE.PlaneGeometry(width - 0.55, 3.18),
+    new THREE.PlaneGeometry(width - scenePreset.stage.surfaceInset, scenePreset.stage.surfaceDepth),
     new THREE.MeshBasicMaterial({ color: 0x0f1b2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
   );
   surface.rotation.x = -Math.PI / 2;
@@ -409,8 +449,8 @@ function addStage(stageGroup: THREE.Group, width: number) {
   stageGroup.add(surface);
 
   stageGroup.add(
-    cylinderBetween(new THREE.Vector3(-width / 2 + 0.35, 0.16, 1.86), new THREE.Vector3(width / 2 - 0.35, 0.16, 1.86), 0.025, 0x38bdf8, 0.22),
-    cylinderBetween(new THREE.Vector3(-width / 2 + 0.35, 0.16, -1.86), new THREE.Vector3(width / 2 - 0.35, 0.16, -1.86), 0.025, 0xa78bfa, 0.2)
+    cylinderBetween(new THREE.Vector3(-width / 2 + 0.35, 0.16, scenePreset.stage.railZ), new THREE.Vector3(width / 2 - 0.35, 0.16, scenePreset.stage.railZ), 0.025, 0x38bdf8, 0.22),
+    cylinderBetween(new THREE.Vector3(-width / 2 + 0.35, 0.16, -scenePreset.stage.railZ), new THREE.Vector3(width / 2 - 0.35, 0.16, -scenePreset.stage.railZ), 0.025, 0xa78bfa, 0.2)
   );
 }
 
@@ -434,20 +474,21 @@ function addBaseValue(stageGroup: THREE.Group, value: number, index: number, x: 
     textColor: retired ? "#64748b" : featured ? "#ffffff" : "#cbd5e1",
     background: featured ? "rgba(8,47,73,0.82)" : "rgba(2,6,23,0.58)",
     border: featured ? "#67e8f9" : "rgba(148,163,184,0.36)",
-    fontSize: 58,
+    fontSize: scenePreset.labels.baseValue.fontSize,
   });
   label.position.set(x, 0.38, 1.42);
-  label.scale.set(featured ? 0.62 : 0.48, featured ? 0.26 : 0.22, 1);
+  const labelScale = featured ? scenePreset.labels.baseValue.featuredScale : scenePreset.labels.baseValue.defaultScale;
+  label.scale.set(labelScale[0], labelScale[1], labelScale[2]);
   stageGroup.add(label);
 
   const tick = createTextSprite(`i${index}`, {
     textColor: retired ? "#475569" : "#94a3b8",
     background: "rgba(2,6,23,0.35)",
     border: "rgba(148,163,184,0.2)",
-    fontSize: 42,
+    fontSize: scenePreset.labels.indexTick.fontSize,
   });
   tick.position.set(x, 0.25, 1.78);
-  tick.scale.set(0.38, 0.16, 1);
+  tick.scale.set(scenePreset.labels.indexTick.scale[0], scenePreset.labels.indexTick.scale[1], scenePreset.labels.indexTick.scale[2]);
   stageGroup.add(tick);
 }
 
@@ -475,10 +516,10 @@ function addPointerFocus(stageGroup: THREE.Group, pointer: PointerState, value: 
     textColor: "#ffffff",
     background: "rgba(2,6,23,0.82)",
     border: `#${color.toString(16).padStart(6, "0")}`,
-    fontSize: 50,
+    fontSize: scenePreset.labels.pointerTag.fontSize,
   });
   tag.position.set(x, towerHeight + 0.92, -0.08);
-  tag.scale.set(1.08, 0.34, 1);
+  tag.scale.set(scenePreset.labels.pointerTag.scale[0], scenePreset.labels.pointerTag.scale[1], scenePreset.labels.pointerTag.scale[2]);
   stageGroup.add(tag);
 }
 
@@ -492,9 +533,9 @@ function addSolutionHalo(stageGroup: THREE.Group, x: number, towerHeight: number
 }
 
 function addTargetBadge(stageGroup: THREE.Group, data: SceneData) {
-  const badge = createTextSprite(`TARGET ${data.target}`, { textColor: "#fef3c7", background: "rgba(69,26,3,0.72)", border: "#fbbf24", fontSize: 50 });
+  const badge = createTextSprite(`TARGET ${data.target}`, { textColor: "#fef3c7", background: "rgba(69,26,3,0.72)", border: "#fbbf24", fontSize: scenePreset.labels.targetBadge.fontSize });
   badge.position.set(0, 4.9, -1.45);
-  badge.scale.set(1.28, 0.34, 1);
+  badge.scale.set(scenePreset.labels.targetBadge.scale[0], scenePreset.labels.targetBadge.scale[1], scenePreset.labels.targetBadge.scale[2]);
   stageGroup.add(badge);
 }
 
@@ -533,10 +574,10 @@ function addPairBridge(
     textColor: "#ffffff",
     background: data.comparison === "match" ? "rgba(6,78,59,0.86)" : "rgba(2,6,23,0.82)",
     border: `#${bridgeColor.toString(16).padStart(6, "0")}`,
-    fontSize: 54,
+    fontSize: scenePreset.labels.equation.fontSize,
   });
   equation.position.set(midpointX, arcLift + 0.48, -0.42);
-  equation.scale.set(1.52, 0.38, 1);
+  equation.scale.set(scenePreset.labels.equation.scale[0], scenePreset.labels.equation.scale[1], scenePreset.labels.equation.scale[2]);
   stageGroup.add(equation);
 
   if (data.comparison === "match") {
@@ -561,20 +602,17 @@ function roleForIndex(index: number, data: SceneData, pointer?: PointerState) {
 }
 
 function toneForIndex(index: number, data: SceneData, pointer?: PointerState) {
-  if (data.solution.has(index)) return { color: 0x10b981, cap: 0x6ee7b7, emissive: 0x064e3b, emissiveIntensity: 0.88 };
+  if (data.solution.has(index)) return scenePreset.colors.towers.solution;
   if (pointer) {
     const color = pointerColors[pointer.tone || "cyan"] || 0x22d3ee;
     return { color, cap: color, emissive: color, emissiveIntensity: 0.5 };
   }
-  if (data.retired.has(index)) return { color: 0x273449, cap: 0x475569, emissive: 0x020617, emissiveIntensity: 0.06 };
-  return { color: 0x1d4ed8, cap: 0x60a5fa, emissive: 0x082f49, emissiveIntensity: 0.18 };
+  if (data.retired.has(index)) return scenePreset.colors.towers.retired;
+  return scenePreset.colors.towers.default;
 }
 
 function colorForComparison(comparison: string) {
-  if (comparison === "match") return 0x34d399;
-  if (comparison === "too-high") return 0xfb7185;
-  if (comparison === "too-low") return 0x22d3ee;
-  return 0xfbbf24;
+  return comparisonColors[comparison] ?? comparisonColors.compare;
 }
 
 function cylinderBetween(start: THREE.Vector3, end: THREE.Vector3, radius: number, color: number, opacity: number) {
@@ -590,28 +628,38 @@ function cylinderBetween(start: THREE.Vector3, end: THREE.Vector3, radius: numbe
 
 function createTextSprite(text: string, options: { textColor: string; background: string; border: string; fontSize: number }) {
   const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 192;
+  const logicalWidth = 768;
+  const logicalHeight = 256;
+  const textureScale = scenePreset.labels.textureScale;
+  canvas.width = logicalWidth * textureScale;
+  canvas.height = logicalHeight * textureScale;
   const ctx = canvas.getContext("2d");
   if (!ctx) return new THREE.Sprite();
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(textureScale, textureScale);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   ctx.fillStyle = options.background;
-  roundedRect(ctx, 22, 31, canvas.width - 44, canvas.height - 62, 26);
+  roundedRect(ctx, 34, 42, logicalWidth - 68, logicalHeight - 84, 34);
   ctx.fill();
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;
   ctx.strokeStyle = options.border;
   ctx.stroke();
   ctx.fillStyle = options.textColor;
-  ctx.font = `800 ${options.fontSize}px Inter, Arial, sans-serif`;
+  ctx.font = `850 ${options.fontSize}px Inter, Arial, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 2);
+  ctx.fillText(text, logicalWidth / 2, logicalHeight / 2 + 2);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.anisotropy = 8;
   texture.needsUpdate = true;
-  return new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false }));
+  return new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, alphaTest: 0.01 }));
 }
 
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
