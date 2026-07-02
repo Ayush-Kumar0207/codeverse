@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { RotateCcw } from "lucide-react";
+import { Maximize2, RotateCcw } from "lucide-react";
 import * as THREE from "three";
 import type { StateData, StateValue } from "./AutoVisualizer";
 import { twoSumCinematic3DPreset } from "./cinematic3dPresets";
@@ -35,9 +35,13 @@ const comparisonColors = scenePreset.colors.comparison as Record<string, number>
 
 export default function TwoSumCinematic3D({
   state,
+  focusMode = false,
+  onFocusScene,
 }: {
   state: StateData;
   previousState?: StateData | null;
+  focusMode?: boolean;
+  onFocusScene?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -226,6 +230,20 @@ export default function TwoSumCinematic3D({
     };
   }, [sceneData, resetNonce]);
 
+  if (focusMode) {
+    return (
+      <div
+        ref={containerRef}
+        className="relative h-full min-h-0 overflow-hidden bg-[#030712] text-white"
+        data-testid="two-sum-cinematic-3d-focus"
+        data-visualizer={visualizerName}
+        data-layout="focus"
+      >
+        <div ref={mountRef} className="absolute inset-0" />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -238,7 +256,7 @@ export default function TwoSumCinematic3D({
         className={`z-10 shrink-0 border-b border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/25 backdrop-blur-md ${
           isCompact
             ? "space-y-3 px-3 py-3"
-            : "grid grid-cols-[minmax(0,1fr)_minmax(260px,330px)] gap-3 px-4 py-4"
+            : "grid grid-cols-[minmax(0,1fr)_minmax(260px,330px)] gap-4 px-5 py-3"
         }`}
       >
         <section className="min-w-0">
@@ -269,11 +287,22 @@ export default function TwoSumCinematic3D({
         </section>
       </div>
 
-      <div className={`${isCompact ? "min-h-[320px]" : "min-h-[360px]"} relative flex-[1_0_320px] overflow-hidden`}>
+      <div className={`${isCompact ? "min-h-[340px] flex-[1_0_340px]" : "min-h-[clamp(420px,56vh,640px)] flex-[1_1_520px]"} relative overflow-hidden`}>
+        {onFocusScene && (
+          <button
+            type="button"
+            onClick={onFocusScene}
+            className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-slate-950/70 text-slate-200 shadow-lg shadow-black/30 backdrop-blur transition hover:bg-slate-900 hover:text-white"
+            aria-label="Focus 3D scene"
+            title="Focus 3D scene"
+          >
+            <Maximize2 className="h-4 w-4" />
+          </button>
+        )}
         <div ref={mountRef} className="absolute inset-0" />
       </div>
 
-      <div className={`z-10 shrink-0 border-t border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/30 backdrop-blur-md ${isCompact ? "px-3 py-3" : "px-4 py-4"}`}>
+      <div className={`z-10 shrink-0 border-t border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/30 backdrop-blur-md ${isCompact ? "px-3 py-3" : "px-5 py-3"}`}>
         <div className={isCompact ? "space-y-3" : "grid grid-cols-[minmax(0,1fr)_260px_auto] items-center gap-4"}>
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Decision</div>

@@ -32,6 +32,8 @@ export type StateData = Record<string, StateValue>;
 interface AutoVisualizerProps {
   state?: StateData | null;
   previousState?: StateData | null;
+  focusMode?: boolean;
+  onFocusScene?: () => void;
 }
 
 type PointerMarker = {
@@ -99,11 +101,11 @@ const toneClasses: Record<string, string> = {
   slate: "border-slate-700 bg-slate-900/70 text-slate-300 shadow-black/20",
 };
 
-export default function AutoVisualizer({ state, previousState }: AutoVisualizerProps) {
+export default function AutoVisualizer({ state, previousState, focusMode = false, onFocusScene }: AutoVisualizerProps) {
   const entries = state && typeof state === "object" ? Object.entries(state) : [];
 
   if (isTwoSumCinematic3D(state)) {
-    return <TwoSumCinematic3D state={state} previousState={previousState} />;
+    return <TwoSumCinematic3D state={state} previousState={previousState} focusMode={focusMode} onFocusScene={onFocusScene} />;
   }
 
   if (entries.length === 0) {

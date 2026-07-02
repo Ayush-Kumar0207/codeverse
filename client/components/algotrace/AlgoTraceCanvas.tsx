@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, Beaker, Maximize2, Minimize2 } from "lucide-react";
+import { Activity, Beaker, Maximize2, Minimize2, Pause, Play } from "lucide-react";
 import AutoVisualizer, { StateData } from "./AutoVisualizer";
 import PlaybackControls from "./PlaybackControls";
 import FeedbackLoop from "./FeedbackLoop";
@@ -41,12 +41,14 @@ export default function AlgoTraceCanvas({
   const [isPlaying, setIsPlaying] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSceneFocus, setIsSceneFocus] = useState(false);
   const lastAutoRunCodeRef = useRef("");
 
   const safeHistory = useMemo(() => (history.length > 0 ? history : [EMPTY_TRACE]), [history]);
   const activeIndex = Math.min(activeStep, safeHistory.length - 1);
   const activeState = safeHistory[activeIndex] || EMPTY_TRACE;
   const previousState = activeIndex > 0 ? safeHistory[activeIndex - 1] : null;
+  const isCinematic3D = activeState?.visualizer === "two-sum-cinematic-3d";
 
   useEffect(() => {
     if (activeStep > safeHistory.length - 1) {
@@ -63,6 +65,7 @@ export default function AlgoTraceCanvas({
       setActiveStep(0);
       setIsPlaying(false);
       setShowFeedback(false);
+      setIsSceneFocus(false);
     };
 
     window.addEventListener("algotrace:inject", handleInject);
@@ -70,6 +73,8 @@ export default function AlgoTraceCanvas({
   }, []);
 
   const runLocalCode = useCallback(() => {
+    setIsSceneFocus(false);
+
     if (looksLikeNonExecutableSource(editorCode)) {
       setHistory([NON_EXECUTABLE_TRACE]);
       setActiveStep(0);
@@ -123,6 +128,33 @@ export default function AlgoTraceCanvas({
     }, 220);
     return () => window.clearTimeout(timer);
   }, [autoRun, editorCode, runLocalCode]);
+
+  useEffect(() => {
+    if (!isCinematic3D) setIsSceneFocus(false);
+  }, [isCinematic3D]);
+
+  useEffect(() => {
+    if (!isSceneFocus) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsSceneFocus(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSceneFocus]);
+
+  const toggleFocusPlayback = useCallback(() => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      return;
+    }
+
+    if (safeHistory.length <= 1) return;
+    if (activeIndex >= safeHistory.length - 1) setActiveStep(0);
+    setShowFeedback(false);
+    setIsPlaying(true);
+  }, [activeIndex, isPlaying, safeHistory.length]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -183,29 +215,68 @@ export default function AlgoTraceCanvas({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar">
-        <AutoVisualizer state={activeState} previousState={previousState} />
+        <AutoVisualizer
+          state={activeState}
+          previousState={previousState}
+          onFocusScene={isCinematic3D ? () => setIsSceneFocus(true) : undefined}
+        />
       </div>
 
-      <div className="flex shrink-0 flex-col items-center gap-3 border-t border-slate-800 bg-[#0a0f19] px-4 py-4">
+      <div
+        className={cn(
+          "shrink-0 border-t border-slate-800 bg-[#0a0f19] px-4 py-3",
+          showFeedback ? "grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center" : "flex items-center justify-center"
+        )}
+      >
         <FeedbackLoop
           isVisible={showFeedback}
           onClose={() => setShowFeedback(false)}
           codeSnippet={editorCode}
           traceOutput={safeHistory}
+          compact
         />
-        <PlaybackControls
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-          onNext={() => setActiveStep((current) => Math.min(current + 1, safeHistory.length - 1))}
-          onPrev={() => setActiveStep((current) => Math.max(current - 1, 0))}
-          onReset={() => {
-            setActiveStep(0);
-            setIsPlaying(false);
-          }}
-          activeStep={activeIndex}
-          totalSteps={safeHistory.length}
-        />
+        <div className={cn("flex justify-center", showFeedback && "xl:justify-end")}>
+          <PlaybackControls
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
+            onNext={() => setActiveStep((current) => Math.min(current + 1, safeHistory.length - 1))}
+            onPrev={() => setActiveStep((current) => Math.max(current - 1, 0))}
+            onReset={() => {
+              setActiveStep(0);
+              setIsPlaying(false);
+            }}
+            activeStep={activeIndex}
+            totalSteps={safeHistory.length}
+          />
+        </div>
       </div>
+
+      {isSceneFocus && isCinematic3D && (
+        <div className="fixed inset-0 z-[120] bg-[#030712] text-white">
+          <AutoVisualizer state={activeState} previousState={previousState} focusMode />
+          <button
+            type="button"
+            onClick={() => setIsSceneFocus(false)}
+            className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-slate-950/70 text-slate-200 shadow-lg shadow-black/30 backdrop-blur transition hover:bg-slate-900 hover:text-white"
+            aria-label="Exit 3D focus"
+            title="Exit 3D focus"
+          >
+            <Minimize2 className="h-4 w-4" />
+          </button>
+          <div className="pointer-events-none absolute inset-x-0 bottom-5 z-30 flex justify-center px-4">
+            <button
+              type="button"
+              onClick={toggleFocusPlayback}
+              disabled={safeHistory.length <= 1}
+              className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-md border border-emerald-300/20 bg-emerald-400 text-slate-950 shadow-2xl shadow-black/40 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+              aria-label={isPlaying ? "Pause 3D focus" : "Play 3D focus"}
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

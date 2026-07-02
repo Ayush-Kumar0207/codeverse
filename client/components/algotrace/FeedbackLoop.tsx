@@ -11,6 +11,7 @@ interface FeedbackLoopProps {
   onClose: () => void;
   codeSnippet?: string;
   traceOutput?: unknown[];
+  compact?: boolean;
 }
 
 export default function FeedbackLoop({
@@ -18,6 +19,7 @@ export default function FeedbackLoop({
   onClose,
   codeSnippet = "",
   traceOutput = [],
+  compact = false,
 }: FeedbackLoopProps) {
   const [feedbackType, setFeedbackType] = useState<"up" | "down" | null>(null);
   const [comment, setComment] = useState("");
@@ -56,9 +58,9 @@ export default function FeedbackLoop({
           initial={{ y: 8, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 8, opacity: 0 }}
-          className="w-full max-w-md"
+          className={compact ? "w-full min-w-0 max-w-2xl" : "w-full max-w-md"}
         >
-          <div className="relative rounded-md border border-slate-800 bg-slate-950 px-4 py-3 shadow-xl">
+          <div className={`relative rounded-md border border-slate-800 bg-slate-950 ${compact ? "px-3 py-2 shadow-sm" : "px-4 py-3 shadow-xl"}`}>
             <button
               type="button"
               onClick={onClose}
@@ -77,34 +79,36 @@ export default function FeedbackLoop({
                 </div>
               </div>
             ) : (
-              <div className="space-y-3 pr-6">
-                <div>
-                  <div className="text-sm font-semibold text-slate-100">Was this trace useful?</div>
-                  <div className="text-xs text-slate-500">Your note is stored locally for this workspace.</div>
-                </div>
+              <div className={compact ? "space-y-2 pr-6" : "space-y-3 pr-6"}>
+                <div className={compact ? "flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" : ""}>
+                  <div className="min-w-0">
+                    <div className={compact ? "truncate text-xs font-semibold text-slate-100" : "text-sm font-semibold text-slate-100"}>Was this trace useful?</div>
+                    <div className={compact ? "hidden text-[11px] text-slate-500 xl:block" : "text-xs text-slate-500"}>Your note is stored locally for this workspace.</div>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
-                    onClick={() => {
-                      setFeedbackType("up");
-                      handleSubmit("up");
-                    }}
-                  >
-                    <ThumbsUp className="mr-2 h-3.5 w-3.5" />
-                    Helpful
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
-                    onClick={() => setFeedbackType("down")}
-                  >
-                    <ThumbsDown className="mr-2 h-3.5 w-3.5" />
-                    Needs work
-                  </Button>
+                  <div className={compact ? "flex shrink-0 items-center gap-2" : "mt-3 flex items-center gap-2"}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                      onClick={() => {
+                        setFeedbackType("up");
+                        handleSubmit("up");
+                      }}
+                    >
+                      <ThumbsUp className="mr-2 h-3.5 w-3.5" />
+                      Helpful
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
+                      onClick={() => setFeedbackType("down")}
+                    >
+                      <ThumbsDown className="mr-2 h-3.5 w-3.5" />
+                      Needs work
+                    </Button>
+                  </div>
                 </div>
 
                 <AnimatePresence>
