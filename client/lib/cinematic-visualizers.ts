@@ -30,10 +30,10 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
       totalSteps: 5,
       progress: 20,
       phase: "Set the boundaries",
-      headline: "Two search pilots start at the outside values",
+      headline: "Place the two pointers on the sorted edges",
       narrative:
-        "The array is sorted, so the smallest value stands on the left edge and the largest value stands on the right edge. Their sum tells us which boundary can be safely moved.",
-      beginnerPrompt: "Watch the two glowing pointers. They are not guessing; every move removes impossible pairs.",
+        "Sorted order gives the scene a direction: the smallest candidate starts on the left, the largest on the right, and their sum decides which edge can move.",
+      beginnerPrompt: "Watch the highlighted pair only. The algorithm is not guessing; each comparison proves one boundary can be removed.",
       invariant:
         "All valid answers, if one still exists, must stay between the left and right pointers.",
       decision: "1 + 20 = 21, which is larger than the target 17.",
@@ -52,7 +52,7 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
         cue: "wide",
         eliminated: [],
         spotlight: [0, 5],
-        lesson: "A high sum means the right value is too heavy.",
+        lesson: "A high sum proves the right edge must move inward.",
       },
     },
     {
@@ -62,10 +62,10 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
       totalSteps: 5,
       progress: 40,
       phase: "Remove the heavy side",
-      headline: "The right pointer retreats from 20 to 15",
+      headline: "Move the right pointer from 20 to 15",
       narrative:
-        "Since 1 plus 20 is already too large, keeping 20 with any larger left value can never help. The right boundary moves inward to lower the sum.",
-      beginnerPrompt: "Notice how an entire region fades out. That is the proof, not just an animation.",
+        "Because 1 plus 20 is already too large, pairing 20 with any larger left value would only get worse. The clean move is to lower the right edge.",
+      beginnerPrompt: "The faded tower is not decoration. It is the part of the search space that has just been mathematically ruled out.",
       invariant:
         "Every faded pair with value 20 is impossible because all future left values are at least 1.",
       decision: "Discard index 5 and try a smaller right value.",
@@ -85,7 +85,7 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
         cue: "right-retreat",
         eliminated: [5],
         spotlight: [0, 4],
-        lesson: "After lowering the right side, the pair becomes too small.",
+        lesson: "After lowering the right edge, the active pair becomes too small.",
       },
     },
     {
@@ -95,10 +95,10 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
       totalSteps: 5,
       progress: 60,
       phase: "Lift the light side",
-      headline: "The left pointer advances because 1 + 15 is too small",
+      headline: "Move the left pointer because 1 + 15 is too small",
       narrative:
-        "A low sum means the left value is too small. Moving the right pointer left would only make the sum even smaller, so the left pointer must move right.",
-      beginnerPrompt: "The left side lights up because the algorithm needs a larger number, not a different random pair.",
+        "A low sum means the left value is holding the pair down. Moving the right pointer left would shrink the sum again, so the left pointer must advance.",
+      beginnerPrompt: "The left edge moves because the algorithm needs a larger number, not because it is trying a random pair.",
       invariant:
         "Any pair using index 0 with the remaining right values is too small or already tested, so index 0 can retire.",
       decision: "Move left from value 1 to value 4.",
@@ -118,7 +118,7 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
         cue: "left-advance",
         eliminated: [0, 5],
         spotlight: [1, 4],
-        lesson: "The search window tightens from both ends.",
+        lesson: "The remaining corridor tightens from both ends.",
       },
     },
     {
@@ -128,10 +128,10 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
       totalSteps: 5,
       progress: 80,
       phase: "Pinch the search space",
-      headline: "The right pointer slides again to test 4 + 10",
+      headline: "Move the right pointer again to test 4 + 10",
       narrative:
-        "The pair 4 and 15 is too high, so the larger side retreats. The window has shrunk to the only candidates that can still make the target.",
-      beginnerPrompt: "The shrinking golden lane is the remaining search space. Everything outside it has a reason to be gone.",
+        "The pair 4 and 15 overshoots the target, so the larger side retreats. What remains is a small corridor of candidates that still deserve attention.",
+      beginnerPrompt: "The highlighted lane is the remaining search space. Everything outside it has already been eliminated by a comparison.",
       invariant:
         "The answer, if present, must be inside indices 1 through 3 after removing proven-too-small and proven-too-large edges.",
       decision: "Try a smaller right value and keep the scan ordered.",
@@ -151,7 +151,7 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
         cue: "right-retreat",
         eliminated: [0, 4, 5],
         spotlight: [1, 3],
-        lesson: "Only the middle corridor remains alive.",
+        lesson: "Only the middle corridor can still contain the answer.",
       },
     },
     {
@@ -161,10 +161,10 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
       totalSteps: 5,
       progress: 100,
       phase: "Lock the answer",
-      headline: "The pointers land on 7 and 10",
+      headline: "The pointers lock onto 7 and 10",
       narrative:
-        "The left pointer reaches 7 and the right pointer stays at 10. Their bridge lights green because 7 + 10 exactly equals the target.",
-      beginnerPrompt: "This is the whole idea in one picture: sorted order lets the two pointers squeeze until the correct pair is forced.",
+        "The left pointer reaches 7 while the right pointer holds 10. The comparison bridge turns green because the active sum exactly equals the target.",
+      beginnerPrompt: "This is the full strategy in one picture: sorted order lets both pointers squeeze the search space until the answer is forced.",
       invariant:
         "The active pair matches the target, so the algorithm can stop immediately.",
       decision: "Return indices 2 and 3, values 7 and 10.",
@@ -185,7 +185,7 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
         cue: "solution",
         eliminated: [0, 1, 4, 5],
         spotlight: [2, 3],
-        lesson: "The bridge equals the target gate.",
+        lesson: "The bridge turns green because the active sum equals the target.",
       },
     },
   ];
