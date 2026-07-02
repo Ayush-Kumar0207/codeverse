@@ -54,7 +54,7 @@ export default function TwoSumCinematic3D({
 
     const updateLayout = () => {
       const rect = container.getBoundingClientRect();
-      const nextCompact = rect.width < scenePreset.layout.compactWidth || rect.height < scenePreset.layout.compactHeight;
+      const nextCompact = rect.width < scenePreset.layout.compactWidth;
       setIsCompact((current) => (current === nextCompact ? current : nextCompact));
     };
 
@@ -172,6 +172,7 @@ export default function TwoSumCinematic3D({
     };
 
     const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
       controls.radius = THREE.MathUtils.clamp(controls.radius + event.deltaY * 0.01, scenePreset.camera.radius.min, scenePreset.camera.radius.max);
     };
@@ -228,13 +229,13 @@ export default function TwoSumCinematic3D({
   return (
     <div
       ref={containerRef}
-      className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#030712] text-white"
+      className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain bg-[#030712] text-white custom-scrollbar"
       data-testid="two-sum-cinematic-3d"
       data-visualizer={visualizerName}
       data-layout={isCompact ? "compact" : "wide"}
     >
       <div
-        className={`z-10 border-b border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/25 backdrop-blur-md ${
+        className={`z-10 shrink-0 border-b border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/25 backdrop-blur-md ${
           isCompact
             ? "space-y-3 px-3 py-3"
             : "grid grid-cols-[minmax(0,1fr)_minmax(260px,330px)] gap-3 px-4 py-4"
@@ -268,11 +269,11 @@ export default function TwoSumCinematic3D({
         </section>
       </div>
 
-      <div className="relative min-h-0 overflow-hidden">
+      <div className={`${isCompact ? "min-h-[320px]" : "min-h-[360px]"} relative flex-[1_0_320px] overflow-hidden`}>
         <div ref={mountRef} className="absolute inset-0" />
       </div>
 
-      <div className={`z-10 border-t border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/30 backdrop-blur-md ${isCompact ? "px-3 py-3" : "px-4 py-4"}`}>
+      <div className={`z-10 shrink-0 border-t border-white/10 bg-[#050a12]/95 shadow-lg shadow-black/30 backdrop-blur-md ${isCompact ? "px-3 py-3" : "px-4 py-4"}`}>
         <div className={isCompact ? "space-y-3" : "grid grid-cols-[minmax(0,1fr)_260px_auto] items-center gap-4"}>
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Decision</div>
