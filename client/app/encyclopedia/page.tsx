@@ -33,6 +33,7 @@ import NarratedSlab, { NarratedLine } from "@/components/NarratedSlab";
 import SemanticText from "@/components/SemanticText";
 import SyntaxCodeViewer from "@/components/SyntaxCodeViewer";
 import { codeNarrationLines, narrationLines, walkthroughBlocks, type NarrationContext, type WalkthroughBlock } from "@/lib/narration";
+import { hasCinematicVisualizer } from "@/lib/cinematic-visualizers";
 
 const difficultyStyles: Record<AlgorithmEntry["difficulty"], string> = {
   Easy: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
@@ -323,16 +324,22 @@ function EncyclopediaContent() {
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-semibold text-white">Interactive visualizer available</h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">Open this problem in the editor with a ready-made trace script.</p>
+                    <h2 className="text-base font-semibold text-white">
+                      {hasCinematicVisualizer(activeAlgo) ? "Cinematic 3D visualizer available" : "Interactive visualizer available"}
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
+                      {hasCinematicVisualizer(activeAlgo)
+                        ? "Open this problem in the editor as an interactive 3D explanation stage. The Simulate button above keeps the classic 2D trace."
+                        : "Open this problem in the editor with a ready-made trace script."}
+                    </p>
                   </div>
                 </div>
                 <a
-                  href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
+                  href={hasCinematicVisualizer(activeAlgo) ? `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&viz=3d` : `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                 >
                   <Play className="h-4 w-4" />
-                  Open Visualizer
+                  {hasCinematicVisualizer(activeAlgo) ? "Open 3D Visualizer" : "Open Visualizer"}
                 </a>
               </section>
             )}

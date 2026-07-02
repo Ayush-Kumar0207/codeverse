@@ -13,7 +13,6 @@ import {
   ImperativePanelHandle,
 } from "react-resizable-panels";
 import { useAuth } from "@/context/AuthContext";
-import CodeEditor, { CodeEditorHandle } from "@/components/CodeEditor";
 import ChatBox from "@/components/ChatBox";
 import VersionHistory from "@/components/VersionHistory";
 import { useEditorState } from "@/hooks/useEditorState";
@@ -36,6 +35,15 @@ const TerminalPanel = dynamic(() => import("@/components/TerminalPanel"), {
   ssr: false,
 });
 
+const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[#0b0f17] text-xs font-medium text-slate-500">
+      Loading editor
+    </div>
+  ),
+});
+
 // shadcn/ui components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +62,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PresenceHeader } from "@/components/ActivityBar";
 import AlgoTraceCanvas from "@/components/algotrace/AlgoTraceCanvas";
+import { getCinematicVisualizerCode } from "@/lib/cinematic-visualizers";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Icons
@@ -183,10 +192,10 @@ function EditorWorkspace() {
   const params = useParams();
   const searchParams = useSearchParams();
   const algoId = searchParams?.get("algo");
+  const visualizerMode = searchParams?.get("viz");
   
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const roomId = id || "room1";
-  const editorRef = useRef<CodeEditorHandle>(null);
   const { user } = useAuth();
   const { socket } = useSocket(roomId);
 
@@ -531,10 +540,14 @@ function EditorWorkspace() {
          const firstApproach = resolvedAlgo.approaches[0];
          const algoFiles: Record<string, string> = {};
          
-         // Top priority: the generated trace script, so "Open Visualizer" starts in simulation mode.
+         // Top priority: the selected trace script, so algorithm demos start in visualization mode.
          let firstFileName = "";
-         const traceFileName = resolvedAlgo.visualizerCode ? "tracer.js" : "";
-         if (resolvedAlgo.visualizerCode) {
+         const cinematicCode = visualizerMode === "3d" ? getCinematicVisualizerCode(resolvedAlgo) : "";
+         const traceFileName = cinematicCode ? "cinematic-3d.js" : resolvedAlgo.visualizerCode ? "tracer.js" : "";
+         if (cinematicCode) {
+             algoFiles[traceFileName] = cinematicCode;
+             firstFileName = traceFileName;
+         } else if (resolvedAlgo.visualizerCode) {
              algoFiles[traceFileName] = resolvedAlgo.visualizerCode;
              firstFileName = traceFileName;
          }
@@ -899,7 +912,7 @@ recordTrace({
       .catch((err) => {
         console.warn("Failed to load project", err);
       });
-  }, [id, algoId, initializeProjectFiles, setActiveFile, setFiles]);
+  }, [id, algoId, visualizerMode, initializeProjectFiles, setActiveFile, setFiles]);
 
   useEffect(() => {
     if (!isProjectOrganizer || typeof window === "undefined") return;
@@ -1589,7 +1602,6 @@ recordTrace({
 
                 <div className="relative flex-1 bg-[#0b0f17]">
                     <CodeEditor
-                     ref={editorRef}
                      value={files[activeFile] || ""}
                      onChange={(newCode: string) =>
                        setFiles((prev) => ({ ...prev, [activeFile]: newCode }))

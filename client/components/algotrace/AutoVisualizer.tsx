@@ -17,6 +17,7 @@ import {
   Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import TwoSumCinematic3D from "./TwoSumCinematic3D";
 
 export type StateValue =
   | string
@@ -101,6 +102,10 @@ const toneClasses: Record<string, string> = {
 export default function AutoVisualizer({ state, previousState }: AutoVisualizerProps) {
   const entries = state && typeof state === "object" ? Object.entries(state) : [];
 
+  if (isTwoSumCinematic3D(state)) {
+    return <TwoSumCinematic3D state={state} previousState={previousState} />;
+  }
+
   if (entries.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-8 text-center">
@@ -146,6 +151,10 @@ export default function AutoVisualizer({ state, previousState }: AutoVisualizerP
       </div>
     </div>
   );
+}
+
+function isTwoSumCinematic3D(state?: StateData | null): state is StateData {
+  return asString(state?.visualizer) === "two-sum-cinematic-3d";
 }
 
 function SmartTraceView({ state, previousState }: { state: StateData; previousState?: StateData | null }) {
