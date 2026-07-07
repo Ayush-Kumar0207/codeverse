@@ -1,13 +1,27 @@
 import type { AlgorithmEntry } from "@/data/algos";
 
 const TWO_SUM_CINEMATIC_VISUALIZER = "two-sum-cinematic-3d";
+const UNIVERSAL_CINEMATIC_VISUALIZER = "codeverse-cinematic-3d";
+
+const CINEMATIC_ALGORITHM_IDS = new Set([
+  "two-sum",
+  "kadanes-algorithm",
+  "sort-an-array-of-0-s-1-s-and-2-s",
+  "subarray-sum-equals-k",
+  "merge-intervals",
+  "next-permutation",
+  "find-the-duplicate-number",
+  "majority-element-n-2-times",
+  "best-time-to-buy-and-sell-stock",
+  "rearrange-array-elements-by-sign",
+]);
 
 export function hasCinematicVisualizer(algorithm: Pick<AlgorithmEntry, "id">) {
-  return algorithm.id === "two-sum";
+  return CINEMATIC_ALGORITHM_IDS.has(algorithm.id);
 }
-
 export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
   if (!hasCinematicVisualizer(algorithm)) return "";
+  if (algorithm.id !== "two-sum") return getUniversalCinematicVisualizerCode(algorithm);
 
   const payload = {
     id: algorithm.id,
@@ -200,4 +214,94 @@ export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
     "  recordTrace({ algorithm, ...state });",
     "}",
   ].join("\n");
+}
+
+const UNIVERSAL_CINEMATIC_PROFILES: Record<string, { title: string; family: string; mode: string; palette: Record<string, string> }> = {
+  "kadanes-algorithm": {
+    title: "Kadane running energy field",
+    family: "Array DP",
+    mode: "Live subarray",
+    palette: { primary: "#34d399", secondary: "#22d3ee", accent: "#fbbf24", danger: "#fb7185", success: "#6ee7b7", neutral: "#2563eb" },
+  },
+  "sort-an-array-of-0-s-1-s-and-2-s": {
+    title: "Dutch flag partition stage",
+    family: "Sorting",
+    mode: "Partition zones",
+    palette: { primary: "#22d3ee", secondary: "#a78bfa", accent: "#fbbf24", danger: "#fb7185", success: "#34d399", neutral: "#2563eb" },
+  },
+  "subarray-sum-equals-k": {
+    title: "Prefix ledger corridor",
+    family: "Prefix sums",
+    mode: "Prefix ledger",
+    palette: { primary: "#38bdf8", secondary: "#818cf8", accent: "#facc15", danger: "#f472b6", success: "#2dd4bf", neutral: "#1d4ed8" },
+  },
+  "merge-intervals": {
+    title: "Interval timeline merge",
+    family: "Intervals",
+    mode: "Timeline merge",
+    palette: { primary: "#60a5fa", secondary: "#c084fc", accent: "#f59e0b", danger: "#fb7185", success: "#34d399", neutral: "#334155" },
+  },
+  "next-permutation": {
+    title: "Permutation pivot theater",
+    family: "Arrays",
+    mode: "Pivot and suffix",
+    palette: { primary: "#2dd4bf", secondary: "#f0abfc", accent: "#fde047", danger: "#fb7185", success: "#4ade80", neutral: "#2563eb" },
+  },
+  "find-the-duplicate-number": {
+    title: "Cycle chase arena",
+    family: "Cycle detection",
+    mode: "Cycle chase",
+    palette: { primary: "#38bdf8", secondary: "#a78bfa", accent: "#fbbf24", danger: "#fb7185", success: "#34d399", neutral: "#1e40af" },
+  },
+  "majority-element-n-2-times": {
+    title: "Majority vote balance",
+    family: "Voting",
+    mode: "Vote balance",
+    palette: { primary: "#22d3ee", secondary: "#f9a8d4", accent: "#fcd34d", danger: "#fb7185", success: "#86efac", neutral: "#2563eb" },
+  },
+  "best-time-to-buy-and-sell-stock": {
+    title: "Profit skyline scan",
+    family: "Greedy",
+    mode: "Profit scan",
+    palette: { primary: "#2dd4bf", secondary: "#93c5fd", accent: "#fbbf24", danger: "#f43f5e", success: "#34d399", neutral: "#1d4ed8" },
+  },
+  "rearrange-array-elements-by-sign": {
+    title: "Sign weave lanes",
+    family: "Arrays",
+    mode: "Positive-negative weave",
+    palette: { primary: "#22d3ee", secondary: "#c084fc", accent: "#fbbf24", danger: "#fb7185", success: "#34d399", neutral: "#2563eb" },
+  },
+};
+
+function getUniversalCinematicVisualizerCode(algorithm: AlgorithmEntry) {
+  const source = algorithm.visualizerCode?.trim();
+  if (!source) return "";
+
+  const profile = UNIVERSAL_CINEMATIC_PROFILES[algorithm.id] || {
+    title: `${algorithm.title} cinematic stage`,
+    family: algorithm.category || algorithm.topic || "Algorithm",
+    mode: "Shared 3D grammar",
+    palette: { primary: "#22d3ee", secondary: "#a78bfa", accent: "#fbbf24", danger: "#fb7185", success: "#34d399", neutral: "#2563eb" },
+  };
+
+  return [
+    "// CodeVerse shared cinematic 3D visual simulation.",
+    "// This file reuses the generated trace and renders it through reusable 3D props.",
+    `const cinematic3d = ${JSON.stringify({ id: algorithm.id, ...profile }, null, 2)};`,
+    "const capturedTrace = [];",
+    "((recordTrace) => {",
+    indentCode(source),
+    "})((state) => capturedTrace.push(state));",
+    "",
+    "for (const state of capturedTrace) {",
+    `  recordTrace({ ...state, visualizer: "${UNIVERSAL_CINEMATIC_VISUALIZER}", cinematic3d });`,
+    "}",
+  ].join("\n");
+}
+
+function indentCode(code: string) {
+  return code
+    .split("\n")
+    .map((line) => `  ${line}`)
+    .join("\n");
 }

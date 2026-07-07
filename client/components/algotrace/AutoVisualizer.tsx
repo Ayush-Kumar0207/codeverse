@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import TwoSumCinematic3D from "./TwoSumCinematic3D";
+import UniversalCinematic3D from "./UniversalCinematic3D";
 
 export type StateValue =
   | string
@@ -108,6 +109,10 @@ export default function AutoVisualizer({ state, previousState, focusMode = false
     return <TwoSumCinematic3D state={state} previousState={previousState} focusMode={focusMode} onFocusScene={onFocusScene} />;
   }
 
+  if (isUniversalCinematic3D(state)) {
+    return <UniversalCinematic3D state={state} previousState={previousState} focusMode={focusMode} onFocusScene={onFocusScene} />;
+  }
+
   if (entries.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-8 text-center">
@@ -157,6 +162,10 @@ export default function AutoVisualizer({ state, previousState, focusMode = false
 
 function isTwoSumCinematic3D(state?: StateData | null): state is StateData {
   return asString(state?.visualizer) === "two-sum-cinematic-3d";
+}
+
+function isUniversalCinematic3D(state?: StateData | null): state is StateData {
+  return asString(state?.visualizer) === "codeverse-cinematic-3d";
 }
 
 function SmartTraceView({ state, previousState }: { state: StateData; previousState?: StateData | null }) {

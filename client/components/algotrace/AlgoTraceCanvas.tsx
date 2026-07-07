@@ -48,7 +48,7 @@ export default function AlgoTraceCanvas({
   const activeIndex = Math.min(activeStep, safeHistory.length - 1);
   const activeState = safeHistory[activeIndex] || EMPTY_TRACE;
   const previousState = activeIndex > 0 ? safeHistory[activeIndex - 1] : null;
-  const isCinematic3D = activeState?.visualizer === "two-sum-cinematic-3d";
+  const isCinematic3D = activeState?.visualizer === "two-sum-cinematic-3d" || activeState?.visualizer === "codeverse-cinematic-3d";
 
   useEffect(() => {
     if (activeStep > safeHistory.length - 1) {
