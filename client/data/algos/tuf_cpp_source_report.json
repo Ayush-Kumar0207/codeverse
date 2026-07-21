@@ -1,0 +1,1713 @@
+{
+  "generatedAt": "2026-07-21T01:35:43.774Z",
+  "source": "https://takeuforward.org/sitemap.xml",
+  "matched": 250,
+  "unmatched": [
+    {
+      "algorithmId": "subarray-sum-equals-k",
+      "score": 0.42,
+      "candidateUrl": "https://takeuforward.org/data-structure/longest-subarray-with-given-sum-k"
+    },
+    {
+      "algorithmId": "rearrange-array-elements-by-sign",
+      "score": 0.332,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-array-by-k-elements"
+    },
+    {
+      "algorithmId": "rotate-matrix-by-90-degrees",
+      "score": 0.382,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-matrix-anti-clockwise-by-90-degree"
+    },
+    {
+      "algorithmId": "koko-eating-bananas",
+      "score": 0.152,
+      "candidateUrl": "https://takeuforward.org/data-structure/counting-bits"
+    },
+    {
+      "algorithmId": "implement-lower-bound",
+      "score": 0.315,
+      "candidateUrl": "https://takeuforward.org/data-structure/implement-trie-1"
+    },
+    {
+      "algorithmId": "implement-upper-bound",
+      "score": 0.315,
+      "candidateUrl": "https://takeuforward.org/data-structure/implement-trie-1"
+    },
+    {
+      "algorithmId": "search-insert-position",
+      "score": 0.273,
+      "candidateUrl": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix"
+    },
+    {
+      "algorithmId": "floor-ceil-in-sorted-array",
+      "score": 0.379,
+      "candidateUrl": "https://takeuforward.org/data-structure/1st-occurrence-in-a-sorted-array"
+    },
+    {
+      "algorithmId": "first-or-last-occurrence-of-a-number",
+      "score": 0.34,
+      "candidateUrl": "https://takeuforward.org/data-structure/last-occurrence-in-a-sorted-array"
+    },
+    {
+      "algorithmId": "minimum-days-to-make-m-bouquets",
+      "score": 0.253,
+      "candidateUrl": "https://takeuforward.org/data-structure/minimum-insertions-to-make-string-palindrome-dp-29"
+    },
+    {
+      "algorithmId": "find-the-smallest-divisor-given-a-threshold",
+      "score": 0.35,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-the-smallest-element-in-an-array"
+    },
+    {
+      "algorithmId": "capacity-to-ship-packages-within-d-days",
+      "score": 0.149,
+      "candidateUrl": "https://takeuforward.org/data-structure/g-38-cheapest-flights-within-k-stops"
+    },
+    {
+      "algorithmId": "book-allocation-problem",
+      "score": 0.194,
+      "candidateUrl": "https://takeuforward.org/data-structure/m-coloring-problem"
+    },
+    {
+      "algorithmId": "find-the-row-with-maximum-number-of-1s",
+      "score": 0.316,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-minimum-number-of-coins"
+    },
+    {
+      "algorithmId": "search-in-a-2d-matrix-ii",
+      "score": 0.529,
+      "candidateUrl": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix"
+    },
+    {
+      "algorithmId": "find-peak-element-2d-matrix",
+      "score": 0.337,
+      "candidateUrl": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix"
+    },
+    {
+      "algorithmId": "invert-binary-tree",
+      "score": 0.414,
+      "candidateUrl": "https://takeuforward.org/data-structure/top-view-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "lowest-common-ancestor-of-a-binary-search-tree",
+      "score": 0.42,
+      "candidateUrl": "https://takeuforward.org/data-structure/search-in-a-binary-search-tree-2"
+    },
+    {
+      "algorithmId": "triangle",
+      "score": 0.362,
+      "candidateUrl": "https://takeuforward.org/data-structure/program-to-generate-pascals-triangle"
+    },
+    {
+      "algorithmId": "sort-a-ll-of-0-s-1-s-and-2-s",
+      "score": 0.201,
+      "candidateUrl": "https://takeuforward.org/data-structure/linkedlist-in-java"
+    },
+    {
+      "algorithmId": "add-1-to-a-number-represented-by-ll",
+      "score": 0.4,
+      "candidateUrl": "https://takeuforward.org/data-structure/add-two-numbers-represented-as-linked-lists"
+    },
+    {
+      "algorithmId": "clone-graph",
+      "score": 0.259,
+      "candidateUrl": "https://takeuforward.org/data-structure/articulation-point-in-graph-g-56"
+    },
+    {
+      "algorithmId": "bridges-in-graph-tarjan-s-algorithm",
+      "score": 0.259,
+      "candidateUrl": "https://takeuforward.org/data-structure/articulation-point-in-graph-g-56"
+    },
+    {
+      "algorithmId": "palindrome-number",
+      "score": 0.39,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-all-palindrome-numbers-in-a-given-range"
+    },
+    {
+      "algorithmId": "armstrong-numbers",
+      "score": 0.252,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "longest-palindromic-substring",
+      "score": 0.533,
+      "candidateUrl": "https://takeuforward.org/data-structure/longest-palindromic-subsequence-dp-28"
+    },
+    {
+      "algorithmId": "remove-outermost-parenthesis",
+      "score": 0.225,
+      "candidateUrl": "https://takeuforward.org/data-structure/remove-all-vowels-from-the-string"
+    },
+    {
+      "algorithmId": "largest-odd-number-in-a-string",
+      "score": 0.049,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-the-largest-word-in-a-string"
+    },
+    {
+      "algorithmId": "isomorphic-strings",
+      "score": 0.176,
+      "candidateUrl": "https://takeuforward.org/data-structure/palindromic-substrings"
+    },
+    {
+      "algorithmId": "rotate-string",
+      "score": 0.371,
+      "candidateUrl": "https://takeuforward.org/data-structure/reverse-a-string"
+    },
+    {
+      "algorithmId": "roman-number-to-integer",
+      "score": 0.249,
+      "candidateUrl": "https://takeuforward.org/data-structure/number-of-islands"
+    },
+    {
+      "algorithmId": "implement-atoi",
+      "score": 0.335,
+      "candidateUrl": "https://takeuforward.org/data-structure/string-in-java"
+    },
+    {
+      "algorithmId": "sort-characters-by-frequency",
+      "score": 0.389,
+      "candidateUrl": "https://takeuforward.org/data-structure/sort-elements-of-an-array-by-frequency"
+    },
+    {
+      "algorithmId": "maximum-nesting-depth-of-parentheses",
+      "score": 0.345,
+      "candidateUrl": "https://takeuforward.org/data-structure/maximum-depth-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "longest-common-prefix",
+      "score": 0.475,
+      "candidateUrl": "https://takeuforward.org/data-structure/longest-common-substring-dp-27"
+    },
+    {
+      "algorithmId": "string-pattern-matching-rabin-karp",
+      "score": 0.228,
+      "candidateUrl": "https://takeuforward.org/data-structure/string-concatenation-in-c"
+    },
+    {
+      "algorithmId": "generate-parentheses",
+      "score": 0.326,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-for-balanced-parentheses"
+    },
+    {
+      "algorithmId": "subsets",
+      "score": 0.44,
+      "candidateUrl": "https://takeuforward.org/data-structure/subset-sum-sum-of-all-subsets"
+    },
+    {
+      "algorithmId": "fibonacci-number",
+      "score": 0.268,
+      "candidateUrl": "https://takeuforward.org/data-structure/sum-of-digits-of-a-number"
+    },
+    {
+      "algorithmId": "generate-all-binary-strings",
+      "score": 0.255,
+      "candidateUrl": "https://takeuforward.org/data-structure/convert-binary-to-octal"
+    },
+    {
+      "algorithmId": "subset-sum-i",
+      "score": 0.391,
+      "candidateUrl": "https://takeuforward.org/data-structure/subset-sum-equal-to-target-dp-14"
+    },
+    {
+      "algorithmId": "word-break",
+      "score": 0.345,
+      "candidateUrl": "https://takeuforward.org/data-structure/word-search-leetcode"
+    },
+    {
+      "algorithmId": "delete-node-in-a-bst",
+      "score": 0.359,
+      "candidateUrl": "https://takeuforward.org/data-structure/delete-last-node-of-linked-list"
+    },
+    {
+      "algorithmId": "ceil-in-a-bst",
+      "score": 0.22,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-if-binary-tree-is-bst"
+    },
+    {
+      "algorithmId": "floor-in-a-bst",
+      "score": 0.189,
+      "candidateUrl": "https://takeuforward.org/data-structure/inorder-successor-predecessor-in-bst"
+    },
+    {
+      "algorithmId": "assign-cookies",
+      "score": 0.116,
+      "candidateUrl": "https://takeuforward.org/data-structure/insertion-sort-in-c"
+    },
+    {
+      "algorithmId": "jump-game",
+      "score": 0.167,
+      "candidateUrl": "https://takeuforward.org/data-structure/dynamic-programming-frog-jump-dp-3"
+    },
+    {
+      "algorithmId": "gas-station",
+      "score": 0.251,
+      "candidateUrl": "https://takeuforward.org/data-structure/matrix-boundary-traversal"
+    },
+    {
+      "algorithmId": "lemonade-change",
+      "score": 0.319,
+      "candidateUrl": "https://takeuforward.org/data-structure/coin-change-2-dp-22"
+    },
+    {
+      "algorithmId": "valid-parenthesis-string",
+      "score": 0.271,
+      "candidateUrl": "https://takeuforward.org/data-structure/reverse-a-string"
+    },
+    {
+      "algorithmId": "jump-game-ii",
+      "score": 0.219,
+      "candidateUrl": "https://takeuforward.org/data-structure/implement-trie-ii"
+    },
+    {
+      "algorithmId": "candy",
+      "score": 0.123,
+      "candidateUrl": "https://takeuforward.org/data-structure/dynamic-programming-introduction"
+    },
+    {
+      "algorithmId": "lfu-cache",
+      "score": 0.272,
+      "candidateUrl": "https://takeuforward.org/data-structure/implement-lru-cache"
+    },
+    {
+      "algorithmId": "flood-fill",
+      "score": 0.106,
+      "candidateUrl": "https://takeuforward.org/data-structure/infix-to-postfix"
+    },
+    {
+      "algorithmId": "01-matrix-bipartite-graph",
+      "score": 0.391,
+      "candidateUrl": "https://takeuforward.org/data-structure/matrix-addition-in-c"
+    },
+    {
+      "algorithmId": "surrounded-regions",
+      "score": 0.131,
+      "candidateUrl": "https://takeuforward.org/data-structure/unbounded-knapsack-dp-23"
+    },
+    {
+      "algorithmId": "number-of-enclaves",
+      "score": 0.414,
+      "candidateUrl": "https://takeuforward.org/data-structure/number-of-islands"
+    },
+    {
+      "algorithmId": "word-ladder-i",
+      "score": 0.305,
+      "candidateUrl": "https://takeuforward.org/data-structure/word-search-ii"
+    },
+    {
+      "algorithmId": "word-ladder-ii",
+      "score": 0.425,
+      "candidateUrl": "https://takeuforward.org/data-structure/word-search-ii"
+    },
+    {
+      "algorithmId": "introduction-to-bit-manipulation",
+      "score": 0.153,
+      "candidateUrl": "https://takeuforward.org/data-structure/minimum-number-of-k-consecutive-bit-flips"
+    },
+    {
+      "algorithmId": "check-if-a-number-is-odd-or-not",
+      "score": 0.259,
+      "candidateUrl": "https://takeuforward.org/data-structure/longest-even-odd-subarray"
+    },
+    {
+      "algorithmId": "check-if-i-th-bit-is-set-or-not",
+      "score": 0.427,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-if-a-number-is-prime-or-not"
+    },
+    {
+      "algorithmId": "remove-the-last-set-bit",
+      "score": 0.241,
+      "candidateUrl": "https://takeuforward.org/data-structure/remove-spaces-from-a-string"
+    },
+    {
+      "algorithmId": "check-if-a-number-is-power-of-2-or-not",
+      "score": 0.636,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-if-a-number-is-prime-or-not"
+    },
+    {
+      "algorithmId": "count-the-number-of-set-bits",
+      "score": 0.44,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-total-set-bits-in-numbers-from-0-to-n"
+    },
+    {
+      "algorithmId": "swap-two-numbers",
+      "score": 0.387,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "divide-two-integers-without-using-multiplication-division-and-mod-operator",
+      "score": 0.236,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "find-the-number-that-appears-once-and-the-other-numbers-appear-twice",
+      "score": 0.268,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-digits-in-a-number"
+    },
+    {
+      "algorithmId": "power-set",
+      "score": 0.382,
+      "candidateUrl": "https://takeuforward.org/data-structure/power-of-two"
+    },
+    {
+      "algorithmId": "find-median-from-data-stream",
+      "score": 0.432,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-median-of-the-given-array"
+    },
+    {
+      "algorithmId": "top-k-frequent-elements",
+      "score": 0.328,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-array-by-k-elements"
+    },
+    {
+      "algorithmId": "segment-tree-point-update-range-query",
+      "score": 0.268,
+      "candidateUrl": "https://takeuforward.org/data-structure/subtree-of-another-tree"
+    },
+    {
+      "algorithmId": "fenwick-tree-binary-indexed-tree",
+      "score": 0.337,
+      "candidateUrl": "https://takeuforward.org/data-structure/search-in-a-binary-search-tree-2"
+    },
+    {
+      "algorithmId": "pattern-1-square",
+      "score": 0.261,
+      "candidateUrl": "https://takeuforward.org/data-structure/naive-pattern-searching"
+    },
+    {
+      "algorithmId": "pattern-7-triangle-star",
+      "score": 0.255,
+      "candidateUrl": "https://takeuforward.org/data-structure/naive-pattern-searching"
+    },
+    {
+      "algorithmId": "pattern-10-rotational-triangle",
+      "score": 0.253,
+      "candidateUrl": "https://takeuforward.org/data-structure/program-to-generate-pascals-triangle"
+    },
+    {
+      "algorithmId": "user-input-output",
+      "score": 0.118,
+      "candidateUrl": "https://takeuforward.org/data-structure/subset-sum-equal-to-target-dp-14"
+    },
+    {
+      "algorithmId": "data-types",
+      "score": 0.114,
+      "candidateUrl": "https://takeuforward.org/data-structure/set-matrix-zero"
+    },
+    {
+      "algorithmId": "if-else-statements",
+      "score": 0.17,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-if-two-trees-are-identical"
+    },
+    {
+      "algorithmId": "switch-statement",
+      "score": 0.148,
+      "candidateUrl": "https://takeuforward.org/data-structure/edit-distance-dp-33"
+    },
+    {
+      "algorithmId": "for-loops-while-loops",
+      "score": 0.111,
+      "candidateUrl": "https://takeuforward.org/data-structure/overlapping-intervals"
+    },
+    {
+      "algorithmId": "pattern-printing-patterns-1-to-22",
+      "score": 0.241,
+      "candidateUrl": "https://takeuforward.org/data-structure/matrix-in-snake-pattern"
+    },
+    {
+      "algorithmId": "understand-recursion-by-printing-something-n-times",
+      "score": 0.166,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-the-majority-element-that-occurs-more-than-n-2-times"
+    },
+    {
+      "algorithmId": "counting-frequencies-of-array-elements",
+      "score": 0.301,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-array-by-k-elements"
+    },
+    {
+      "algorithmId": "find-the-highest-lowest-frequency-element",
+      "score": 0.271,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-the-smallest-element-in-an-array"
+    },
+    {
+      "algorithmId": "second-largest-element-in-an-array-without-sorting",
+      "score": 0.395,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-the-largest-element-in-an-array"
+    },
+    {
+      "algorithmId": "left-rotate-an-array-by-d-places",
+      "score": 0.482,
+      "candidateUrl": "https://takeuforward.org/data-structure/left-rotate-the-array-by-one"
+    },
+    {
+      "algorithmId": "find-missing-number-in-an-array",
+      "score": 0.391,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-median-of-the-given-array"
+    },
+    {
+      "algorithmId": "find-the-number-that-appears-once",
+      "score": 0.279,
+      "candidateUrl": "https://takeuforward.org/data-structure/number-of-provinces"
+    },
+    {
+      "algorithmId": "find-out-how-many-times-array-has-been-rotated",
+      "score": 0.212,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-inversions-in-an-array"
+    },
+    {
+      "algorithmId": "find-square-root-of-a-number-in-log-n",
+      "score": 0.277,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-minimum-number-of-coins"
+    },
+    {
+      "algorithmId": "kth-missing-positive-number",
+      "score": 0.243,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-whether-a-number-is-positive-or-negative"
+    },
+    {
+      "algorithmId": "split-array-largest-sum",
+      "score": 0.236,
+      "candidateUrl": "https://takeuforward.org/data-structure/partition-array-for-maximum-sum-front-partition-dp-54"
+    },
+    {
+      "algorithmId": "painter-s-partition-problem",
+      "score": 0.25,
+      "candidateUrl": "https://takeuforward.org/data-structure/burst-balloons-partition-dp-dp-51"
+    },
+    {
+      "algorithmId": "minimize-max-distance-to-gas-station",
+      "score": 0.305,
+      "candidateUrl": "https://takeuforward.org/data-structure/edit-distance-dp-33"
+    },
+    {
+      "algorithmId": "count-number-of-substrings",
+      "score": 0.393,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-the-number-of-words-in-a-given-string"
+    },
+    {
+      "algorithmId": "sum-of-beauty-of-all-substrings",
+      "score": 0.317,
+      "candidateUrl": "https://takeuforward.org/data-structure/subset-sum-sum-of-all-subsets"
+    },
+    {
+      "algorithmId": "reverse-every-word-in-a-string",
+      "score": 0.473,
+      "candidateUrl": "https://takeuforward.org/data-structure/reverse-words-in-a-string"
+    },
+    {
+      "algorithmId": "introduction-to-linkedlist-insert-delete",
+      "score": 0.52,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-a-linked-list"
+    },
+    {
+      "algorithmId": "insert-a-node-in-linkedlist",
+      "score": 0.528,
+      "candidateUrl": "https://takeuforward.org/data-structure/insert-node-at-end-of-linked-list"
+    },
+    {
+      "algorithmId": "delete-a-node-in-linkedlist",
+      "score": 0.587,
+      "candidateUrl": "https://takeuforward.org/data-structure/delete-last-node-of-linked-list"
+    },
+    {
+      "algorithmId": "find-the-length-of-the-linkedlist",
+      "score": 0.38,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-intersection-of-two-linked-lists"
+    },
+    {
+      "algorithmId": "search-an-element-in-the-ll",
+      "score": 0.349,
+      "candidateUrl": "https://takeuforward.org/data-structure/flattening-a-linked-list"
+    },
+    {
+      "algorithmId": "insert-a-node-in-dll",
+      "score": 0.329,
+      "candidateUrl": "https://takeuforward.org/data-structure/insert-node-at-end-of-linked-list"
+    },
+    {
+      "algorithmId": "delete-a-node-in-dll",
+      "score": 0.373,
+      "candidateUrl": "https://takeuforward.org/data-structure/delete-last-node-of-linked-list"
+    },
+    {
+      "algorithmId": "length-of-loop-in-ll",
+      "score": 0.299,
+      "candidateUrl": "https://takeuforward.org/data-structure/starting-point-of-loop-in-a-linked-list"
+    },
+    {
+      "algorithmId": "delete-the-middle-node-of-ll",
+      "score": 0.411,
+      "candidateUrl": "https://takeuforward.org/data-structure/delete-head-node-of-linked-list"
+    },
+    {
+      "algorithmId": "sort-ll",
+      "score": 0.381,
+      "candidateUrl": "https://takeuforward.org/data-structure/rotate-a-linked-list"
+    },
+    {
+      "algorithmId": "print-all-subsequences",
+      "score": 0.383,
+      "candidateUrl": "https://takeuforward.org/data-structure/print-longest-common-subsequence-dp-26"
+    },
+    {
+      "algorithmId": "learn-all-patterns-of-subsequences",
+      "score": 0.395,
+      "candidateUrl": "https://takeuforward.org/data-structure/distinct-subsequences-dp-32"
+    },
+    {
+      "algorithmId": "check-if-there-exists-a-subsequence-with-sum-k",
+      "score": 0.464,
+      "candidateUrl": "https://takeuforward.org/data-structure/two-sum-in-bst-check-if-there-exists-a-pair-with-sum-k"
+    },
+    {
+      "algorithmId": "subset-sum-ii",
+      "score": 0.343,
+      "candidateUrl": "https://takeuforward.org/data-structure/subset-sum-equal-to-target-dp-14"
+    },
+    {
+      "algorithmId": "letter-combinations-of-a-phone-number",
+      "score": 0.253,
+      "candidateUrl": "https://takeuforward.org/data-structure/reverse-digits-of-a-number"
+    },
+    {
+      "algorithmId": "expression-add-operators",
+      "score": 0.238,
+      "candidateUrl": "https://takeuforward.org/data-structure/bitwise-operators-in-c"
+    },
+    {
+      "algorithmId": "set-the-i-th-bit",
+      "score": 0.21,
+      "candidateUrl": "https://takeuforward.org/data-structure/set-matrix-zero"
+    },
+    {
+      "algorithmId": "clear-the-i-th-bit",
+      "score": 0.142,
+      "candidateUrl": "https://takeuforward.org/data-structure/remove-n-th-node-from-the-end-of-a-linked-list"
+    },
+    {
+      "algorithmId": "toggle-the-i-th-bit",
+      "score": 0.142,
+      "candidateUrl": "https://takeuforward.org/data-structure/remove-n-th-node-from-the-end-of-a-linked-list"
+    },
+    {
+      "algorithmId": "minimum-bit-flips-to-convert-number",
+      "score": 0.401,
+      "candidateUrl": "https://takeuforward.org/data-structure/minimum-number-of-k-consecutive-bit-flips"
+    },
+    {
+      "algorithmId": "single-number-i",
+      "score": 0.392,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-minimum-number-of-coins"
+    },
+    {
+      "algorithmId": "single-number-ii",
+      "score": 0.36,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-minimum-number-of-coins"
+    },
+    {
+      "algorithmId": "single-number-iii",
+      "score": 0.491,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "xor-of-numbers-in-a-given-range",
+      "score": 0.536,
+      "candidateUrl": "https://takeuforward.org/data-structure/prime-numbers-in-a-given-range"
+    },
+    {
+      "algorithmId": "find-xor-of-numbers-from-l-to-r",
+      "score": 0.291,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "prefix-to-postfix-conversion",
+      "score": 0.456,
+      "candidateUrl": "https://takeuforward.org/data-structure/infix-to-postfix"
+    },
+    {
+      "algorithmId": "postfix-to-prefix-conversion",
+      "score": 0.431,
+      "candidateUrl": "https://takeuforward.org/data-structure/infix-to-prefix"
+    },
+    {
+      "algorithmId": "next-smaller-element",
+      "score": 0.39,
+      "candidateUrl": "https://takeuforward.org/data-structure/next-greater-element-using-stack"
+    },
+    {
+      "algorithmId": "number-of-nges-to-the-right",
+      "score": 0.271,
+      "candidateUrl": "https://takeuforward.org/data-structure/number-of-provinces"
+    },
+    {
+      "algorithmId": "sum-of-subarray-minimums",
+      "score": 0.443,
+      "candidateUrl": "https://takeuforward.org/data-structure/subarray-with-given-sum"
+    },
+    {
+      "algorithmId": "asteroid-collision",
+      "score": 0.131,
+      "candidateUrl": "https://takeuforward.org/data-structure/reorder-list"
+    },
+    {
+      "algorithmId": "sum-of-subarray-ranges",
+      "score": 0.431,
+      "candidateUrl": "https://takeuforward.org/data-structure/subarray-with-given-sum"
+    },
+    {
+      "algorithmId": "remove-k-digits",
+      "score": 0.231,
+      "candidateUrl": "https://takeuforward.org/data-structure/reverse-digits-of-a-number"
+    },
+    {
+      "algorithmId": "stock-span-problem",
+      "score": 0.282,
+      "candidateUrl": "https://takeuforward.org/data-structure/stock-buy-and-sell-dp-35"
+    },
+    {
+      "algorithmId": "the-celebrity-problem",
+      "score": 0.214,
+      "candidateUrl": "https://takeuforward.org/data-structure/m-coloring-problem"
+    },
+    {
+      "algorithmId": "max-consecutive-ones-iii",
+      "score": 0.327,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-maximum-consecutive-ones-in-the-array"
+    },
+    {
+      "algorithmId": "fruit-into-baskets",
+      "score": 0.162,
+      "candidateUrl": "https://takeuforward.org/data-structure/counting-bits"
+    },
+    {
+      "algorithmId": "longest-repeating-character-replacement",
+      "score": 0.386,
+      "candidateUrl": "https://takeuforward.org/data-structure/leftmost-repeating-character-in-a-string"
+    },
+    {
+      "algorithmId": "minimum-window-subsequence",
+      "score": 0.517,
+      "candidateUrl": "https://takeuforward.org/data-structure/minimum-window-substring"
+    },
+    {
+      "algorithmId": "count-number-of-nice-subarrays",
+      "score": 0.415,
+      "candidateUrl": "https://takeuforward.org/data-structure/count-the-number-of-subarrays-with-given-xor-k"
+    },
+    {
+      "algorithmId": "number-of-substrings-containing-all-three-characters",
+      "score": 0.259,
+      "candidateUrl": "https://takeuforward.org/data-structure/number-of-distinct-substrings-in-a-string-using-trie"
+    },
+    {
+      "algorithmId": "maximum-points-you-can-obtain-from-cards",
+      "score": 0.227,
+      "candidateUrl": "https://takeuforward.org/data-structure/maximum-width-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "longest-substring-with-at-most-k-distinct-characters",
+      "score": 0.382,
+      "candidateUrl": "https://takeuforward.org/data-structure/longest-substring-containing-distinct-elements"
+    },
+    {
+      "algorithmId": "subarrays-with-k-different-integers",
+      "score": 0.275,
+      "candidateUrl": "https://takeuforward.org/data-structure/subarray-with-given-sum"
+    },
+    {
+      "algorithmId": "introduction-to-priority-queues-using-binary-heaps",
+      "score": 0.237,
+      "candidateUrl": "https://takeuforward.org/data-structure/nth-root-of-a-number-using-binary-search"
+    },
+    {
+      "algorithmId": "min-heap-and-max-heap-implementation",
+      "score": 0.281,
+      "candidateUrl": "https://takeuforward.org/data-structure/array-implementation-of-deque"
+    },
+    {
+      "algorithmId": "check-if-an-array-is-a-min-heap",
+      "score": 0.536,
+      "candidateUrl": "https://takeuforward.org/data-structure/check-if-an-array-is-sorted"
+    },
+    {
+      "algorithmId": "sort-k-sorted-array",
+      "score": 0.352,
+      "candidateUrl": "https://takeuforward.org/data-structure/minimum-in-rotated-sorted-array"
+    },
+    {
+      "algorithmId": "task-scheduler",
+      "score": 0.123,
+      "candidateUrl": "https://takeuforward.org/data-structure/binary-search-explained"
+    },
+    {
+      "algorithmId": "hand-of-straights",
+      "score": 0.123,
+      "candidateUrl": "https://takeuforward.org/data-structure/palindromic-substrings"
+    },
+    {
+      "algorithmId": "design-twitter",
+      "score": 0.152,
+      "candidateUrl": "https://takeuforward.org/data-structure/insert-new-interval"
+    },
+    {
+      "algorithmId": "merge-k-sorted-lists",
+      "score": 0.555,
+      "candidateUrl": "https://takeuforward.org/data-structure/merge-k-sorted-arrays"
+    },
+    {
+      "algorithmId": "introduction-to-trees",
+      "score": 0.166,
+      "candidateUrl": "https://takeuforward.org/data-structure/intersection-of-two-sorted-arrays"
+    },
+    {
+      "algorithmId": "binary-tree-representation-in-c",
+      "score": 0.383,
+      "candidateUrl": "https://takeuforward.org/data-structure/binary-search-tree-bst-introduction"
+    },
+    {
+      "algorithmId": "print-all-the-nodes-at-a-distance-of-k-in-a-binary-tree",
+      "score": 0.346,
+      "candidateUrl": "https://takeuforward.org/data-structure/print-root-to-node-path-in-a-binary-tree"
+    },
+    {
+      "algorithmId": "minimum-time-taken-to-burn-the-binary-tree",
+      "score": 0.401,
+      "candidateUrl": "https://takeuforward.org/data-structure/bottom-view-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "count-total-nodes-in-a-complete-binary-tree",
+      "score": 0.284,
+      "candidateUrl": "https://takeuforward.org/data-structure/boundary-traversal-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "find-min-max-in-bst",
+      "score": 0.213,
+      "candidateUrl": "https://takeuforward.org/data-structure/find-median-of-the-given-array"
+    },
+    {
+      "algorithmId": "insert-a-given-node-in-bst",
+      "score": 0.315,
+      "candidateUrl": "https://takeuforward.org/data-structure/insert-node-at-end-of-linked-list"
+    },
+    {
+      "algorithmId": "delete-a-node-in-bst",
+      "score": 0.373,
+      "candidateUrl": "https://takeuforward.org/data-structure/delete-last-node-of-linked-list"
+    },
+    {
+      "algorithmId": "lca-in-bst",
+      "score": 0.18,
+      "candidateUrl": "https://takeuforward.org/data-structure/largest-bst-in-binary-tree"
+    },
+    {
+      "algorithmId": "graph-and-types",
+      "score": 0.197,
+      "candidateUrl": "https://takeuforward.org/data-structure/articulation-point-in-graph-g-56"
+    },
+    {
+      "algorithmId": "graph-representation-in-c-java",
+      "score": 0.205,
+      "candidateUrl": "https://takeuforward.org/data-structure/articulation-point-in-graph-g-56"
+    },
+    {
+      "algorithmId": "connected-components",
+      "score": 0.384,
+      "candidateUrl": "https://takeuforward.org/data-structure/kosarajus-algorithm-for-strongly-connected-componentsscc"
+    },
+    {
+      "algorithmId": "01-matrix",
+      "score": 0.346,
+      "candidateUrl": "https://takeuforward.org/data-structure/transpose-of-a-matrix-in-c"
+    },
+    {
+      "algorithmId": "course-schedule-i",
+      "score": 0.377,
+      "candidateUrl": "https://takeuforward.org/data-structure/course-schedule-i-and-ii-pre-requisite-tasks-topological-sort-g-24"
+    },
+    {
+      "algorithmId": "course-schedule-ii",
+      "score": 0.294,
+      "candidateUrl": "https://takeuforward.org/data-structure/course-schedule-i-and-ii-pre-requisite-tasks-topological-sort-g-24"
+    },
+    {
+      "algorithmId": "network-delay-time",
+      "score": 0.139,
+      "candidateUrl": "https://takeuforward.org/data-structure/reorder-list"
+    },
+    {
+      "algorithmId": "swim-in-rising-water",
+      "score": 0.247,
+      "candidateUrl": "https://takeuforward.org/data-structure/container-with-most-water"
+    },
+    {
+      "algorithmId": "unique-paths-ii",
+      "score": 0.471,
+      "candidateUrl": "https://takeuforward.org/data-structure/grid-unique-paths-2-dp-9"
+    },
+    {
+      "algorithmId": "cherry-pickup-ii-3d-dp",
+      "score": 0.137,
+      "candidateUrl": "https://takeuforward.org/data-structure/burst-balloons-partition-dp-dp-51"
+    },
+    {
+      "algorithmId": "longest-word-with-all-prefixes",
+      "score": 0.319,
+      "candidateUrl": "https://takeuforward.org/data-structure/string-in-c"
+    },
+    {
+      "algorithmId": "bit-prerequisites-for-tries",
+      "score": 0.324,
+      "candidateUrl": "https://takeuforward.org/data-structure/bitwise-operators-in-c"
+    },
+    {
+      "algorithmId": "maximum-xor-with-an-element-from-array",
+      "score": 0.448,
+      "candidateUrl": "https://takeuforward.org/data-structure/maximum-xor-of-two-numbers-in-an-array"
+    }
+  ],
+  "added": 105,
+  "newlyAdded": 18,
+  "acceptedSources": [
+    {
+      "algorithmId": "two-sum",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/two-sum-check-if-a-pair-with-given-sum-exists-in-array"
+    },
+    {
+      "algorithmId": "two-sum",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/two-sum-check-if-a-pair-with-given-sum-exists-in-array"
+    },
+    {
+      "algorithmId": "kadanes-algorithm",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/kadanes-algorithm-maximum-subarray-sum-in-an-array"
+    },
+    {
+      "algorithmId": "sort-an-array-of-0-s-1-s-and-2-s",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sort-an-array-of-0s-1s-and-2s"
+    },
+    {
+      "algorithmId": "sort-an-array-of-0-s-1-s-and-2-s",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sort-an-array-of-0s-1s-and-2s"
+    },
+    {
+      "algorithmId": "next-permutation",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/next_permutation-find-next-lexicographically-greater-permutation"
+    },
+    {
+      "algorithmId": "find-the-duplicate-number",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-the-duplicate-in-an-array-of-n1-integers"
+    },
+    {
+      "algorithmId": "majority-element-n-2-times",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-the-majority-element-that-occurs-more-than-n-2-times"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/stock-buy-and-sell-dp-35"
+    },
+    {
+      "algorithmId": "longest-consecutive-sequence",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/longest-consecutive-sequence-in-an-array"
+    },
+    {
+      "algorithmId": "set-matrix-zeroes",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/set-matrix-zero"
+    },
+    {
+      "algorithmId": "set-matrix-zeroes",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/set-matrix-zero"
+    },
+    {
+      "algorithmId": "majority-element-n-3-times",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/majority-elementsn-3-times-find-the-elements-that-appears-more-than-n-3-times-in-the-array"
+    },
+    {
+      "algorithmId": "3-sum",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/3-sum-find-triplets-that-add-up-to-a-zero"
+    },
+    {
+      "algorithmId": "3-sum",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/3-sum-find-triplets-that-add-up-to-a-zero"
+    },
+    {
+      "algorithmId": "4-sum",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/4-sum-find-quads-that-add-up-to-a-target-value"
+    },
+    {
+      "algorithmId": "4-sum",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/4-sum-find-quads-that-add-up-to-a-target-value"
+    },
+    {
+      "algorithmId": "count-number-of-subarrays-with-given-xor-k",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-the-number-of-subarrays-with-given-xor-k"
+    },
+    {
+      "algorithmId": "find-the-repeating-and-missing-number",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-the-repeating-and-missing-numbers"
+    },
+    {
+      "algorithmId": "count-inversions",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-inversions-in-an-array"
+    },
+    {
+      "algorithmId": "maximum-product-subarray",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/maximum-product-subarray-in-an-array"
+    },
+    {
+      "algorithmId": "search-in-rotated-sorted-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-element-in-a-rotated-sorted-array"
+    },
+    {
+      "algorithmId": "search-in-rotated-sorted-array-ii",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-element-in-a-rotated-sorted-array"
+    },
+    {
+      "algorithmId": "aggressive-cows",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/aggressive-cows-detailed-solution"
+    },
+    {
+      "algorithmId": "search-in-a-2d-matrix",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix"
+    },
+    {
+      "algorithmId": "search-in-a-2d-matrix",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-in-a-sorted-2d-matrix"
+    },
+    {
+      "algorithmId": "median-in-a-row-wise-sorted-matrix",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/median-of-row-wise-sorted-matrix"
+    },
+    {
+      "algorithmId": "diameter-of-binary-tree",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-diameter-of-a-binary-tree"
+    },
+    {
+      "algorithmId": "balanced-binary-tree",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-the-binary-tree-is-balanced-binary-tree"
+    },
+    {
+      "algorithmId": "right-left-view-of-binary-tree",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/right-left-view-of-binary-tree"
+    },
+    {
+      "algorithmId": "edit-distance",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/edit-distance-dp-33"
+    },
+    {
+      "algorithmId": "edit-distance",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/edit-distance-dp-33"
+    },
+    {
+      "algorithmId": "reverse-linked-list",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/reverse-a-linked-list"
+    },
+    {
+      "algorithmId": "merge-two-sorted-lists",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/merge-two-sorted-linked-lists"
+    },
+    {
+      "algorithmId": "remove-nth-node-from-the-back-of-the-ll",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/remove-n-th-node-from-the-end-of-a-linked-list"
+    },
+    {
+      "algorithmId": "find-intersection-point-of-y-ll",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-intersection-of-two-linked-lists"
+    },
+    {
+      "algorithmId": "find-intersection-point-of-y-ll",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-intersection-of-two-linked-lists"
+    },
+    {
+      "algorithmId": "clone-a-linked-list-with-random-and-next-pointer",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/clone-linked-list-with-random-and-next-pointer"
+    },
+    {
+      "algorithmId": "sieve-of-eratosthenes",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sieve-of-eratosthenes-find-all-prime-numbers"
+    },
+    {
+      "algorithmId": "count-digits",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-digits-in-a-number"
+    },
+    {
+      "algorithmId": "check-for-prime",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-a-number-is-prime-or-not"
+    },
+    {
+      "algorithmId": "valid-anagram",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-two-strings-are-anagrams-of-each-other"
+    },
+    {
+      "algorithmId": "reverse-words-in-a-given-string",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/reverse-words-in-a-string"
+    },
+    {
+      "algorithmId": "n-queens",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/n-queen-problem-return-all-distinct-solutions-to-the-n-queens-puzzle"
+    },
+    {
+      "algorithmId": "sum-of-first-n-numbers",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sum-of-first-n-natural-numbers"
+    },
+    {
+      "algorithmId": "reverse-an-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/reverse-a-given-array"
+    },
+    {
+      "algorithmId": "reverse-an-array",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/reverse-a-given-array"
+    },
+    {
+      "algorithmId": "check-if-a-string-is-palindrome-or-not",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-the-given-string-is-palindrome-or-not"
+    },
+    {
+      "algorithmId": "inorder-successor-predecessor-in-bst",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/inorder-successor-predecessor-in-bst"
+    },
+    {
+      "algorithmId": "word-search-ii",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/word-search-ii"
+    },
+    {
+      "algorithmId": "number-of-distinct-substrings-in-a-string",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/number-of-distinct-substrings-in-a-string-using-trie"
+    },
+    {
+      "algorithmId": "trapping-rain-water",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/trapping-rainwater"
+    },
+    {
+      "algorithmId": "sliding-window-maximum",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sliding-window-maximum"
+    },
+    {
+      "algorithmId": "print-all-divisors",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/print-all-divisors-of-a-given-number"
+    },
+    {
+      "algorithmId": "check-if-the-array-is-sorted",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-an-array-is-sorted"
+    },
+    {
+      "algorithmId": "remove-duplicates-from-sorted-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/remove-duplicates-in-place-from-sorted-array"
+    },
+    {
+      "algorithmId": "reverse-pairs",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-reverse-pairs"
+    },
+    {
+      "algorithmId": "count-occurrences-of-a-number-in-a-sorted-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-occurrences-in-sorted-array"
+    },
+    {
+      "algorithmId": "search-in-rotated-sorted-array-i",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-element-in-a-rotated-sorted-array"
+    },
+    {
+      "algorithmId": "find-minimum-in-rotated-sorted-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-in-rotated-sorted-array"
+    },
+    {
+      "algorithmId": "single-element-in-a-sorted-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach 1",
+      "sourceUrl": "https://takeuforward.org/data-structure/search-single-element-in-a-sorted-array"
+    },
+    {
+      "algorithmId": "median-of-two-sorted-arrays",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/median-of-two-sorted-arrays-of-different-sizes"
+    },
+    {
+      "algorithmId": "median-of-two-sorted-arrays",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/median-of-two-sorted-arrays-of-different-sizes"
+    },
+    {
+      "algorithmId": "reverse-a-doubly-linkedlist",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/reverse-a-doubly-linked-list"
+    },
+    {
+      "algorithmId": "rotate-a-ll",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/rotate-a-linked-list"
+    },
+    {
+      "algorithmId": "count-total-set-bits",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-total-set-bits-in-numbers-from-0-to-n"
+    },
+    {
+      "algorithmId": "count-total-set-bits",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/count-total-set-bits-in-numbers-from-0-to-n"
+    },
+    {
+      "algorithmId": "trapping-rainwater",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/trapping-rainwater"
+    },
+    {
+      "algorithmId": "minimum-window-substring",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-window-substring"
+    },
+    {
+      "algorithmId": "replace-elements-by-its-rank-in-the-array",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/replace-elements-by-its-rank-in-the-array"
+    },
+    {
+      "algorithmId": "minimum-number-of-platforms-required-for-a-railway",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-number-of-platforms-required-for-a-railway"
+    },
+    {
+      "algorithmId": "check-if-a-tree-is-balanced-or-not",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-the-binary-tree-is-balanced-binary-tree"
+    },
+    {
+      "algorithmId": "flatten-binary-tree-to-linkedlist",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/flatten-binary-tree-to-linked-list"
+    },
+    {
+      "algorithmId": "construct-a-bst-from-a-preorder-traversal",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/construct-a-bst-from-preorder-traversal"
+    },
+    {
+      "algorithmId": "inorder-predecessor-successor-in-bst",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/inorder-successor-predecessor-in-bst"
+    },
+    {
+      "algorithmId": "find-eventual-safe-states",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-eventual-safe-states-dfs-g-20"
+    },
+    {
+      "algorithmId": "evaluate-boolean-expression-to-true",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/evaluate-boolean-expression-to-true-partition-dp-dp-52"
+    },
+    {
+      "algorithmId": "evaluate-boolean-expression-to-true",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/evaluate-boolean-expression-to-true-partition-dp-dp-52"
+    },
+    {
+      "algorithmId": "linked-list-cycle",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/detect-a-cycle-in-a-linked-list"
+    },
+    {
+      "algorithmId": "check-if-ll-is-palindrome-or-not",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-given-linked-list-is-plaindrome"
+    },
+    {
+      "algorithmId": "gcd-or-hcf",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "gcd-or-hcf",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-gcd-of-two-numbers"
+    },
+    {
+      "algorithmId": "move-zeroes-to-end",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/move-all-zeros-to-the-end-of-the-array"
+    },
+    {
+      "algorithmId": "find-peak-element",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/peak-element-in-array"
+    },
+    {
+      "algorithmId": "find-the-nth-root-of-a-number",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute-Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/nth-root-of-a-number-using-binary-search"
+    },
+    {
+      "algorithmId": "find-the-starting-point-in-ll",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/starting-point-of-loop-in-a-linked-list"
+    },
+    {
+      "algorithmId": "find-the-intersection-point-of-y-ll",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-intersection-of-two-linked-lists"
+    },
+    {
+      "algorithmId": "find-the-intersection-point-of-y-ll",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-intersection-of-two-linked-lists"
+    },
+    {
+      "algorithmId": "longest-common-subsequence",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/longest-common-subsequence-dp-25"
+    },
+    {
+      "algorithmId": "longest-common-substring",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/longest-common-substring-dp-27"
+    },
+    {
+      "algorithmId": "grid-unique-paths",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/grid-unique-paths-2-dp-9"
+    },
+    {
+      "algorithmId": "minimum-path-sum-in-grid",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-path-sum-in-a-grid-dp-10"
+    },
+    {
+      "algorithmId": "subset-sum-equal-to-k",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/subset-sum-equal-to-target-dp-14"
+    },
+    {
+      "algorithmId": "0-1-knapsack",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/0-1-knapsack-dp-19"
+    },
+    {
+      "algorithmId": "rod-cutting-problem",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/rod-cutting-problem-dp-24"
+    },
+    {
+      "algorithmId": "frog-jump",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/dynamic-programming-frog-jump-dp-3"
+    },
+    {
+      "algorithmId": "frog-jump-with-k-distances",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/dynamic-programming-frog-jump-with-k-distances-dp-4"
+    },
+    {
+      "algorithmId": "ninja-s-training",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/dynamic-programming-ninjas-training-dp-7"
+    },
+    {
+      "algorithmId": "minimum-coins",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-coins-dp-20"
+    },
+    {
+      "algorithmId": "target-sum",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/target-sum-dp-21"
+    },
+    {
+      "algorithmId": "coin-change-2",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/coin-change-2-dp-22"
+    },
+    {
+      "algorithmId": "unbounded-knapsack",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/unbounded-knapsack-dp-23"
+    },
+    {
+      "algorithmId": "minimum-insertions-to-make-string-palindrome",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-insertions-to-make-string-palindrome-dp-29"
+    },
+    {
+      "algorithmId": "minimum-insertions-deletions-to-convert-string-a-to-string-b",
+      "approach": "Better",
+      "sourceApproach": "Tabulation Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-insertions-deletions-to-convert-string-dp-30"
+    },
+    {
+      "algorithmId": "wildcard-matching",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/wildcard-matching-dp-34"
+    }
+  ],
+  "rejectedAfterSemanticAudit": [
+    {
+      "algorithmId": "sort-a-ll-of-0-s-1-s-and-2-s",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sort-an-array-of-0s-1s-and-2s",
+      "reason": "semantic title mismatch"
+    },
+    {
+      "algorithmId": "sort-a-ll-of-0-s-1-s-and-2-s",
+      "approach": "Better",
+      "sourceApproach": "Better Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/sort-an-array-of-0s-1s-and-2s",
+      "reason": "semantic title mismatch"
+    },
+    {
+      "algorithmId": "check-if-a-number-is-odd-or-not",
+      "approach": "Brute Force",
+      "sourceApproach": "Brute Force Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/check-if-a-number-is-prime-or-not",
+      "reason": "semantic title mismatch"
+    },
+    {
+      "algorithmId": "coin-change",
+      "approach": "Better",
+      "sourceApproach": "Memoization Approach",
+      "sourceUrl": "https://takeuforward.org/data-structure/coin-change-2-dp-22",
+      "reason": "semantic mismatch: minimum coin count vs number of coin combinations"
+    }
+  ],
+  "compileFailures": [
+    {
+      "algorithmId": "middle-of-a-linkedlist",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-middle-element-in-a-linked-list",
+      "error": "<stdin>: In function 'Node* findMiddle(Node*)':\n<stdin>:41:20: error: 'null' was not declared in this scope"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:12:1: error: expected '}' at end of input\n<stdin>:12:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:48:1: error: expected '}' at end of input\n<stdin>:48:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "recover-bst",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/recover-bst-correct-bst-with-two-nodes-swapped",
+      "error": "<stdin>:1:26: fatal error: bits/stdcc++.h: No such file or directory\ncompilation terminated."
+    },
+    {
+      "algorithmId": "middle-of-a-linkedlist",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-middle-element-in-a-linked-list",
+      "error": "<stdin>: In function 'Node* findMiddle(Node*)':\n<stdin>:41:20: error: 'null' was not declared in this scope"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:12:1: error: expected '}' at end of input\n<stdin>:12:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:48:1: error: expected '}' at end of input\n<stdin>:48:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "recover-bst",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/recover-bst-correct-bst-with-two-nodes-swapped",
+      "error": "<stdin>:1:26: fatal error: bits/stdcc++.h: No such file or directory\ncompilation terminated."
+    },
+    {
+      "algorithmId": "middle-of-a-linkedlist",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-middle-element-in-a-linked-list",
+      "error": "<stdin>: In function 'Node* findMiddle(Node*)':\n<stdin>:41:20: error: 'null' was not declared in this scope"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:12:1: error: expected '}' at end of input\n<stdin>:12:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:48:1: error: expected '}' at end of input\n<stdin>:48:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "recover-bst",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/recover-bst-correct-bst-with-two-nodes-swapped",
+      "error": "<stdin>:1:26: fatal error: bits/stdcc++.h: No such file or directory\ncompilation terminated."
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-ii",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-ii-dp-36",
+      "error": "<stdin>:43:1: error: expected '}' at end of input\n<stdin>:43:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-ii",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-ii-dp-36",
+      "error": "<stdin>:38:1: error: expected '}' at end of input\n<stdin>:38:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-iii",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-iii-dp-37",
+      "error": "<stdin>:41:1: error: expected '}' at end of input\n<stdin>:41:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-iii",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-iii-dp-37",
+      "error": "<stdin>:37:1: error: expected '}' at end of input\n<stdin>:37:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-iv",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-iv-dp-38",
+      "error": "<stdin>:41:1: error: expected '}' at end of input\n<stdin>:41:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-iv",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stock-iv-dp-38",
+      "error": "<stdin>:5:19: error: 'vector' is not a type\n<stdin>:36:1: error: expected '}' at end of input\n<stdin>: In member function 'int StockBuySell::maximumProfit(int&, int, int)':\n<stdin>:7:11: error: missing template arguments before '>>' token\n<stdin>:8:11: error: missing template arguments before '>' token\n<stdin>:8:22: error: missing template arguments before '(' token\n<stdin>:8:33: error: 'dp' was not declared in this scope\n<stdin>:15:41: error: invalid types 'int[int]' for array subscript\n<stdin>:20:40: error: invalid types 'int[int]' for array subscript\n<stdin>: In member function 'int StockBuySell::main()':\n<stdin>:30:12: error: missing template arguments before 'prices'\n<stdin>:31:13: error: 'prices' was not declared in this scope\n<stdin>: At global scope:\n<stdin>:36:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-with-cooldown",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stocks-with-cooldown-dp-39",
+      "error": "<stdin>:37:1: error: expected '}' at end of input\n<stdin>:37:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-with-cooldown",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stocks-with-cooldown-dp-39",
+      "error": "<stdin>:38:1: error: expected '}' at end of input\n<stdin>:38:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "minimum-path-sum-in-grid",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/minimum-path-sum-in-a-grid-dp-10",
+      "error": "<stdin>: In function 'int main()':\n<stdin>:53:5: error: 'Solution' was not declared in this scope\n<stdin>:55:37: error: 'obj' was not declared in this scope"
+    },
+    {
+      "algorithmId": "middle-of-a-linkedlist",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/find-middle-element-in-a-linked-list",
+      "error": "<stdin>: In function 'Node* findMiddle(Node*)':\n<stdin>:41:20: error: 'null' was not declared in this scope"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:12:1: error: expected '}' at end of input\n<stdin>:12:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "pow-x-n",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/calculate-the-power-of-a-number-binary-exponentiation",
+      "error": "<stdin>:48:1: error: expected '}' at end of input\n<stdin>:48:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "recover-bst",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/recover-bst-correct-bst-with-two-nodes-swapped",
+      "error": "<stdin>:1:26: fatal error: bits/stdcc++.h: No such file or directory\ncompilation terminated."
+    },
+    {
+      "algorithmId": "longest-palindromic-subsequence",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/longest-palindromic-subsequence-dp-28",
+      "error": "<stdin>: In member function 'int Solution::longestPalinSubseq(std::__cxx11::string)':\n<stdin>:38:24: error: 'lcs' was not declared in this scope"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-with-transaction-fee",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stocks-with-transaction-fees-dp-40",
+      "error": "<stdin>:40:1: error: expected '}' at end of input\n<stdin>:40:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "best-time-to-buy-and-sell-stock-with-transaction-fee",
+      "approach": "Optimal",
+      "sourceUrl": "https://takeuforward.org/data-structure/buy-and-sell-stocks-with-transaction-fees-dp-40",
+      "error": "<stdin>:38:1: error: expected '}' at end of input\n<stdin>:38:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "burst-balloons",
+      "approach": "Brute Force",
+      "sourceUrl": "https://takeuforward.org/data-structure/burst-balloons-partition-dp-dp-51",
+      "error": "<stdin>:36:1: error: expected '}' at end of input\n<stdin>:36:1: error: expected unqualified-id at end of input"
+    },
+    {
+      "algorithmId": "burst-balloons",
+      "approach": "Better",
+      "sourceUrl": "https://takeuforward.org/data-structure/burst-balloons-partition-dp-dp-51",
+      "error": "<stdin>:42:1: error: expected '}' at end of input\n<stdin>:42:1: error: expected unqualified-id at end of input"
+    }
+  ]
+}

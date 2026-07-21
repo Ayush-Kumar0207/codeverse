@@ -155,6 +155,7 @@ export default function VersionHistory({
 
         <div className="flex gap-1.5">
           <input
+            aria-label="Restore workspace by date and time"
             type="datetime-local"
             value={targetTime}
             onChange={(event) => setTargetTime(event.target.value)}

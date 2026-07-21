@@ -39,7 +39,7 @@ const { AT_ALGORITHMS } = require("../data/algos/index.ts");
 const suspiciousTemplates = [
   ["longestWindowAtMostK", /longest.*(?:window|subarray).*at most|longest.*subarray.*sum/i],
   ["prefixTotal", /prefix|range sum/i],
-  ["maxDepth", /depth|height/i],
+  ["maxDepth", /depth|height|diameter/i],
   ["reverseList", /reverse.*(?:linked )?list/i],
   ["nextGreaterElements", /next greater/i],
   ["topKFrequent", /top k frequent/i],
@@ -107,8 +107,28 @@ for (const algorithm of AT_ALGORITHMS) {
   }
 }
 
+const equivalentProblemGroups = [
+  new Set(["balanced-binary-tree", "check-if-a-tree-is-balanced-or-not"]),
+  new Set(["inorder-successor-predecessor-in-bst", "inorder-predecessor-successor-in-bst"]),
+  new Set([
+    "find-the-number-that-appears-once",
+    "find-the-number-that-appears-once-and-the-other-numbers-appear-twice",
+  ]),
+  new Set(["trapping-rain-water", "trapping-rainwater"]),
+  new Set(["find-intersection-point-of-y-ll", "find-the-intersection-point-of-y-ll"]),
+  new Set([
+    "search-in-rotated-sorted-array",
+    "search-in-rotated-sorted-array-i",
+    "search-in-rotated-sorted-array-ii",
+  ]),
+];
+
 for (const owners of codeOwners.values()) {
-  if (owners.size > 1) {
+  const ownerIds = [...owners.keys()];
+  const isVerifiedAliasGroup = equivalentProblemGroups.some(
+    (group) => ownerIds.every((id) => group.has(id))
+  );
+  if (owners.size > 1 && !isVerifiedAliasGroup) {
     failures.push(
       `Identical solution reused across unrelated entries: ${Array.from(owners.entries())
         .map(([id, title]) => `${title} [${id}]`)

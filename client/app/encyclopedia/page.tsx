@@ -470,11 +470,11 @@ function EncyclopediaContent() {
                 <NarratedSlab
                   id={`${narrationPrefix}-implementation-${activeImplementation?.language || selectedLang}`}
                   title={`${activeImplementation?.language || selectedLang} code walkthrough`}
-                  label="Click any code line to hear its explanation"
+                  label="Narration starts only from the playback controls"
                   icon={Code2}
                   lines={implementationNarration}
                 >
-                  {({ activeIndex, startFrom }) => (
+                  {({ activeIndex }) => (
                     <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070b12]">
                       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                         <div className="flex min-w-0 items-center gap-2">
@@ -496,10 +496,6 @@ function EncyclopediaContent() {
                         language={activeImplementation?.language || selectedLang}
                         fileName={codeFileName}
                         activeLine={activeIndex === null ? null : implementationNarration[activeIndex]?.sourceLine}
-                        onLineSelect={(sourceLine) => {
-                          const narrationIndex = implementationNarration.findIndex((line) => line.sourceLine === sourceLine);
-                          if (narrationIndex >= 0) startFrom(narrationIndex);
-                        }}
                       />
                     </div>
                   )}
@@ -577,6 +573,7 @@ function LibraryPanel({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
+            aria-label="Search algorithms"
             placeholder="Search algorithms"
             value={searchTerm}
             onChange={(event) => onSearch(event.target.value)}

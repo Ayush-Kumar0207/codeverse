@@ -111,7 +111,7 @@ interface WorkspaceSnapshot {
   label: string;
 }
 
-type FullscreenPanel = "editor" | "assistant" | "output" | null;
+type FullscreenPanel = "editor" | "explorer" | "assistant" | "output" | null;
 
 function normalizeIdentity(value?: string | null) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -245,6 +245,22 @@ function EditorWorkspace() {
 
     return userIdentities.includes(owner);
   }, [project, user?._id, user?.email, user?.username]);
+
+  const collaborationIdentity = useMemo(() => {
+    if (user?.username) {
+      return {
+        username: user.username,
+        userId: user._id || user.username,
+        avatar: user.avatar,
+      };
+    }
+    if (!project?.isDemo) return null;
+    return {
+      username: "Demo Organizer",
+      userId: `demo-organizer:${roomId}`,
+      avatar: undefined,
+    };
+  }, [project?.isDemo, roomId, user]);
 
   const canEditWorkspace =
     !removedFromWorkspace && (isProjectOrganizer || collaborationAccess.collaboratorsCanEdit);
@@ -390,8 +406,8 @@ function EditorWorkspace() {
     setCollaborationAccess((prev) => ({
       ...prev,
       collaboratorsCanEdit,
-      organizerUsername: user?.username || prev.organizerUsername,
-      organizerUserId: user?._id || prev.organizerUserId,
+      organizerUsername: collaborationIdentity?.username || prev.organizerUsername,
+      organizerUserId: collaborationIdentity?.userId || prev.organizerUserId,
     }));
     setPermissionNotice("");
 
@@ -402,7 +418,7 @@ function EditorWorkspace() {
   };
 
   const handleRemoveCollaborator = (collaborator: PresenceUser) => {
-    if (!isProjectOrganizer || collaborator.username === user?.username) return;
+    if (!isProjectOrganizer || collaborator.username === collaborationIdentity?.username) return;
 
     socket?.emit(SOCKET_EVENTS.REMOVE_COLLABORATOR, {
       roomId,
@@ -969,14 +985,14 @@ recordTrace({
 
   // Presence Logic
   useEffect(() => {
-    if (!socket || !user || !project || removedFromWorkspace) return;
+    if (!socket || !collaborationIdentity || !project || removedFromWorkspace) return;
 
     socket.emit(SOCKET_EVENTS.JOIN_ROOM, {
       roomId,
       user: {
-        username: user.username,
-        avatar: user.avatar,
-        userId: user._id,
+        username: collaborationIdentity.username,
+        avatar: collaborationIdentity.avatar,
+        userId: collaborationIdentity.userId,
         isOrganizer: isProjectOrganizer,
         organizerKnown: Boolean(project.owner && !project.isDemo),
         status: "Editing",
@@ -986,15 +1002,15 @@ recordTrace({
     // Set initial user
     setActiveUsers((prev) => {
       const ownPresence = {
-        username: user.username,
-        avatar: user.avatar,
-        userId: user._id,
+        username: collaborationIdentity.username,
+        avatar: collaborationIdentity.avatar,
+        userId: collaborationIdentity.userId,
         status: "Editing",
         role: isProjectOrganizer ? "organizer" : "collaborator",
         canEdit: canEditWorkspace,
       } satisfies PresenceUser;
 
-      return [ownPresence, ...prev.filter((activeUser) => activeUser.username !== user.username)];
+      return [ownPresence, ...prev.filter((activeUser) => activeUser.username !== collaborationIdentity.username)];
     });
 
     const handleUserJoined = (data: PresenceUser | PresenceUser[]) => {
@@ -1026,11 +1042,11 @@ recordTrace({
 
     const handleCollaboratorRemoved = (payload: { roomId?: string; username?: string; reason?: string }) => {
       if (payload.roomId && payload.roomId !== roomId) return;
-      if (payload.username && payload.username !== user.username) return;
+      if (payload.username && payload.username !== collaborationIdentity.username) return;
 
       setRemovedFromWorkspace(true);
       setPermissionNotice(payload.reason || "You were removed from this workspace by the organizer.");
-      setActiveUsers((prev) => prev.filter((activeUser) => activeUser.username !== user.username));
+      setActiveUsers((prev) => prev.filter((activeUser) => activeUser.username !== collaborationIdentity.username));
     };
 
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined);
@@ -1044,7 +1060,7 @@ recordTrace({
       socket.off(SOCKET_EVENTS.PRESENCE_UPDATE, handlePresenceUpdate);
       socket.off(SOCKET_EVENTS.COLLABORATOR_REMOVED, handleCollaboratorRemoved);
     };
-  }, [canEditWorkspace, isProjectOrganizer, project, removedFromWorkspace, roomId, socket, user]);
+  }, [canEditWorkspace, collaborationIdentity, isProjectOrganizer, project, removedFromWorkspace, roomId, socket]);
 
   useEffect(() => {
     if (!socket) return;
@@ -1220,14 +1236,14 @@ recordTrace({
 
   // Emit presence update when active file changes
   useEffect(() => {
-    if (!socket || !user || !activeFile) return;
+    if (!socket || !collaborationIdentity || !activeFile) return;
     
     socket.emit(SOCKET_EVENTS.PRESENCE_UPDATE, {
       roomId,
-      username: user.username,
+      username: collaborationIdentity.username,
       status: `Editing ${activeFile}`
     });
-  }, [activeFile, socket, user, roomId]);
+  }, [activeFile, collaborationIdentity, socket, roomId]);
 
   // Handle code execution with Adaptive Logic
   const [activeBottomTab, setActiveBottomTab] = useState("terminal");
@@ -1333,22 +1349,86 @@ recordTrace({
   const [bottomCollapsed, setBottomCollapsed] = useState(false);
   const [rightTab, setRightTab] = useState(algoId ? "algotrace" : "assistant");
   const [fullscreenPanel, setFullscreenPanel] = useState<FullscreenPanel>(null);
+  const [isCompactLayout, setIsCompactLayout] = useState(false);
+  const responsivePanelsCollapsedRef = useRef(false);
   const isEditorFullscreen = fullscreenPanel === "editor";
+  const isExplorerFullscreen = fullscreenPanel === "explorer";
   const isAssistantFullscreen = fullscreenPanel === "assistant";
   const isOutputFullscreen = fullscreenPanel === "output";
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    let animationFrame = 0;
+
+    const syncLayout = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        const compact = media.matches;
+        setIsCompactLayout(compact);
+
+        if (compact && project && !responsivePanelsCollapsedRef.current) {
+          leftPanelRef.current?.collapse();
+          rightPanelRef.current?.collapse();
+          setLeftCollapsed(true);
+          setRightCollapsed(true);
+          responsivePanelsCollapsedRef.current = true;
+          return;
+        }
+
+        if (!compact && responsivePanelsCollapsedRef.current) {
+          leftPanelRef.current?.expand();
+          rightPanelRef.current?.expand();
+          setLeftCollapsed(false);
+          setRightCollapsed(false);
+          setFullscreenPanel(null);
+          responsivePanelsCollapsedRef.current = false;
+        }
+      });
+    };
+
+    syncLayout();
+    media.addEventListener("change", syncLayout);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      media.removeEventListener("change", syncLayout);
+    };
+  }, [project]);
+
+  useEffect(() => {
+    if (!project || !isCompactLayout) return;
+
+    const timeout = window.setTimeout(() => {
+      leftPanelRef.current?.collapse();
+      rightPanelRef.current?.collapse();
+      setLeftCollapsed(true);
+      setRightCollapsed(true);
+      responsivePanelsCollapsedRef.current = true;
+    }, 80);
+
+    return () => window.clearTimeout(timeout);
+  }, [isCompactLayout, project]);
 
   useEffect(() => {
     if (!fullscreenPanel) return;
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        const compact = window.matchMedia("(max-width: 1023px)").matches;
+        if (compact && fullscreenPanel === "explorer") {
+          leftPanelRef.current?.collapse();
+          setLeftCollapsed(true);
+        }
+        if (compact && fullscreenPanel === "assistant") {
+          rightPanelRef.current?.collapse();
+          setRightCollapsed(true);
+        }
         setFullscreenPanel(null);
       }
     };
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [fullscreenPanel]);
+  }, [fullscreenPanel, isCompactLayout]);
 
   useEffect(() => {
     const openAssistantPanel = () => {
@@ -1410,23 +1490,43 @@ recordTrace({
           connected={socketConnected}
         />
 
-        <PanelGroup direction="horizontal" className="flex-1">
+        <PanelGroup key={isCompactLayout ? "compact" : "wide"} direction="horizontal" className="flex-1">
           <Panel
             ref={leftPanelRef}
-            defaultSize={15}
-            minSize={12}
+            defaultSize={isCompactLayout ? 0 : 15}
+            minSize={isCompactLayout ? 0 : 12}
             maxSize={24}
             collapsible
             collapsedSize={0}
             onCollapse={() => setLeftCollapsed(true)}
             onExpand={() => setLeftCollapsed(false)}
-            className="flex flex-col border-r border-slate-800 bg-[#0a0f19]"
+            className={cn(
+              "flex flex-col border-r border-slate-800 bg-[#0a0f19]",
+              !isExplorerFullscreen && "max-lg:hidden",
+              isExplorerFullscreen && "fixed inset-0 z-50 h-screen !w-screen !flex-none border border-slate-800 shadow-2xl shadow-black/60"
+            )}
           >
             <div className="flex h-10 items-center justify-between border-b border-slate-800 px-3">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                 Explorer
               </span>
               <div className="flex items-center gap-1">
+                {isExplorerFullscreen && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    onClick={() => {
+                      setFullscreenPanel(null);
+                      setLeftCollapsed(true);
+                      leftPanelRef.current?.collapse();
+                    }}
+                    aria-label="Close explorer"
+                    title="Close explorer"
+                  >
+                    <Minimize2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1506,13 +1606,17 @@ recordTrace({
             </ScrollArea>
           </Panel>
 
-          <PanelResizeHandle className="w-[1px] bg-slate-800 transition-colors hover:bg-indigo-500/50" />
+          <PanelResizeHandle className={cn(
+            "w-[1px] bg-slate-800 transition-colors hover:bg-indigo-500/50",
+            "max-lg:hidden"
+          )} />
 
           <Panel
-            defaultSize={58}
-            minSize={34}
+            defaultSize={isCompactLayout ? 100 : 58}
+            minSize={isCompactLayout ? 100 : 34}
             className={cn(
               "flex flex-col bg-[#070b12]",
+              "max-lg:!flex-[1_1_100%] max-lg:!w-full",
               isEditorFullscreen && "fixed inset-0 z-50 h-screen w-screen border border-slate-800 shadow-2xl shadow-black/60"
             )}
           >
@@ -1608,7 +1712,7 @@ recordTrace({
                      }
                      activeFile={activeFile}
                      roomId={roomId}
-                     currentUser={user?.username || "Guest"}
+                     currentUser={collaborationIdentity?.username || "Guest"}
                      readOnly={!canEditWorkspace}
                      readOnlyMessage="The organizer has paused team editing."
                    />
@@ -1624,7 +1728,7 @@ recordTrace({
 
               <Panel
                 ref={bottomPanelRef}
-                defaultSize={28}
+                defaultSize={30}
                 minSize={10}
                 collapsible
                 collapsedSize={5}
@@ -1710,6 +1814,8 @@ recordTrace({
                               const snapshot = createWorkspaceSnapshot("Manual snapshot");
                               if (snapshot) {
                                 setPermissionNotice(`Saved workspace snapshot at ${new Date(snapshot.createdAt).toLocaleString()}.`);
+                              } else {
+                                setPermissionNotice("Workspace unchanged; the latest snapshot already covers this state.");
                               }
                             }}
                             onRestoreWorkspaceSnapshot={restoreWorkspaceSnapshot}
@@ -1751,12 +1857,15 @@ recordTrace({
             />
           </AnimatePresence>
 
-          <PanelResizeHandle className="w-[1px] bg-slate-800 transition-colors hover:bg-indigo-500/50" />
+          <PanelResizeHandle className={cn(
+            "w-[1px] bg-slate-800 transition-colors hover:bg-indigo-500/50",
+            "max-lg:hidden"
+          )} />
 
           <Panel
             ref={rightPanelRef}
-            defaultSize={27}
-            minSize={22}
+            defaultSize={isCompactLayout ? 0 : 27}
+            minSize={isCompactLayout ? 0 : 22}
             maxSize={38}
             collapsible
             collapsedSize={0}
@@ -1764,27 +1873,28 @@ recordTrace({
             onExpand={() => setRightCollapsed(false)}
             className={cn(
               "flex flex-col border-l border-slate-800 bg-[#0a0f19]",
-              isAssistantFullscreen && "fixed inset-0 z-50 h-screen w-screen border border-slate-800 shadow-2xl shadow-black/60"
+              !isAssistantFullscreen && "max-lg:hidden",
+              isAssistantFullscreen && "fixed inset-0 z-50 h-screen !w-screen !flex-none border border-slate-800 shadow-2xl shadow-black/60"
             )}
           >
             <Tabs value={rightTab} onValueChange={setRightTab} className="flex h-full min-h-0 flex-col">
-              <div className="flex h-11 shrink-0 items-center justify-between border-b border-slate-800 px-3">
-                <TabsList className="h-8 gap-1 rounded-md border border-slate-800 bg-[#070b12] p-1">
+              <div className="flex h-11 shrink-0 items-center justify-between border-b border-slate-800 px-1 xl:px-3">
+                <TabsList className="h-8 gap-0.5 rounded-md border border-slate-800 bg-[#070b12] p-1">
                   <TabsTrigger
                     value="assistant"
-                    className="h-6 rounded px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200"
+                    className="h-6 rounded px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200 xl:px-3"
                   >
                     Assistant
                   </TabsTrigger>
                   <TabsTrigger
                     value="team"
-                    className="h-6 rounded px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200"
+                    className="h-6 rounded px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200 xl:px-3"
                   >
                     Team
                   </TabsTrigger>
                   <TabsTrigger
                     value="algotrace"
-                    className="h-6 rounded px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200"
+                    className="h-6 rounded px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200 xl:px-3"
                   >
                     Trace
                   </TabsTrigger>
@@ -1796,9 +1906,17 @@ recordTrace({
                       size="icon"
                       className="h-7 w-7 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
                       onClick={() => {
+                        if (isAssistantFullscreen) {
+                          setFullscreenPanel(null);
+                          if (window.matchMedia("(max-width: 1023px)").matches) {
+                            rightPanelRef.current?.collapse();
+                            setRightCollapsed(true);
+                          }
+                          return;
+                        }
                         rightPanelRef.current?.expand();
                         setRightCollapsed(false);
-                        setFullscreenPanel(isAssistantFullscreen ? null : "assistant");
+                        setFullscreenPanel("assistant");
                       }}
                       aria-label={isAssistantFullscreen ? "Exit assistant fullscreen" : "Assistant fullscreen"}
                       title={isAssistantFullscreen ? "Exit assistant fullscreen" : "Assistant fullscreen"}
@@ -1881,7 +1999,7 @@ recordTrace({
                     <div className="border-b border-slate-800 px-3 py-2">
                       <div className="flex flex-wrap gap-2">
                         {activeUsers.map((activeUser) => {
-                          const isSelf = activeUser.username === user?.username;
+                          const isSelf = activeUser.username === collaborationIdentity?.username;
                           const canRemove =
                             isProjectOrganizer &&
                             !isSelf &&
@@ -1948,22 +2066,38 @@ recordTrace({
         </PanelGroup>
 
         {/* Floating Toggle for explorer if collapsed */}
-        {leftCollapsed && !fullscreenPanel && (
-           <Button 
-            className="absolute left-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-l-none bg-indigo-500 p-0 text-white hover:bg-indigo-400"
-            onClick={() => leftPanelRef.current?.expand()}
+        {!fullscreenPanel && (
+           <Button
+            className={cn(
+              "absolute left-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-l-none bg-indigo-500 p-0 text-white hover:bg-indigo-400",
+              !leftCollapsed && "lg:hidden"
+            )}
+            onClick={() => {
+              leftPanelRef.current?.expand();
+              setLeftCollapsed(false);
+              if (window.matchMedia("(max-width: 1023px)").matches) setFullscreenPanel("explorer");
+            }}
+            aria-label="Expand explorer"
+            title="Expand explorer"
            >
             <ChevronRight className="w-3 h-3" />
            </Button>
         )}
         
         {/* Floating Toggle for AI if collapsed */}
-        {rightCollapsed && !fullscreenPanel && (
-           <Button 
-            className="absolute right-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-r-none bg-indigo-500 p-0 text-white hover:bg-indigo-400"
-            onClick={() => rightPanelRef.current?.expand()}
-            aria-label="Expand right panel"
-            title="Expand right panel"
+        {!fullscreenPanel && (
+           <Button
+            className={cn(
+              "absolute right-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-r-none bg-indigo-500 p-0 text-white hover:bg-indigo-400",
+              !rightCollapsed && "lg:hidden"
+            )}
+            onClick={() => {
+              rightPanelRef.current?.expand();
+              setRightCollapsed(false);
+              if (window.matchMedia("(max-width: 1023px)").matches) setFullscreenPanel("assistant");
+            }}
+            aria-label="Expand assistant"
+            title="Expand assistant"
            >
             <ChevronLeft className="w-3 h-3" />
            </Button>

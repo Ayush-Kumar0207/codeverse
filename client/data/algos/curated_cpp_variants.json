@@ -1,0 +1,1004 @@
+{
+  "koko-eating-bananas": [
+    {
+      "name": "Brute Force",
+      "description": "Try every integer eating speed from one upward and return the first speed that fits the hour limit.",
+      "timeComplexity": "O(N * M)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long hoursNeeded(const vector<int>& piles, int speed) {\n    long long hours = 0;\n    for (int pile : piles) hours += (pile + speed - 1LL) / speed;\n    return hours;\n}\n\nint minEatingSpeedBrute(const vector<int>& piles, int h) {\n    int maximum = *max_element(piles.begin(), piles.end());\n    for (int speed = 1; speed <= maximum; ++speed) {\n        if (hoursNeeded(piles, speed) <= h) return speed;\n    }\n    return maximum;\n}\n\nint main() {\n    vector<int> piles = {3, 6, 7, 11};\n    cout << minEatingSpeedBrute(piles, 8) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "implement-lower-bound": [
+    {
+      "name": "Brute Force",
+      "description": "Scan from the left and stop at the first value that is not smaller than the target.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint lowerBoundLinear(const vector<int>& values, int target) {\n    for (int index = 0; index < (int)values.size(); ++index) {\n        if (values[index] >= target) return index;\n    }\n    return values.size();\n}\n\nint main() {\n    vector<int> values = {1, 3, 3, 5, 8};\n    cout << lowerBoundLinear(values, 4) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "implement-upper-bound": [
+    {
+      "name": "Brute Force",
+      "description": "Scan from the left and stop at the first value strictly greater than the target.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint upperBoundLinear(const vector<int>& values, int target) {\n    for (int index = 0; index < (int)values.size(); ++index) {\n        if (values[index] > target) return index;\n    }\n    return values.size();\n}\n\nint main() {\n    vector<int> values = {1, 3, 3, 5, 8};\n    cout << upperBoundLinear(values, 3) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "search-insert-position": [
+    {
+      "name": "Brute Force",
+      "description": "Linearly locate the first element not smaller than the target; its index is the insertion position.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint searchInsertLinear(const vector<int>& values, int target) {\n    int index = 0;\n    while (index < (int)values.size() && values[index] < target) ++index;\n    return index;\n}\n\nint main() {\n    vector<int> values = {1, 3, 5, 6};\n    cout << searchInsertLinear(values, 2) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "floor-ceil-in-sorted-array": [
+    {
+      "name": "Brute Force",
+      "description": "Inspect every value and retain the greatest value below the target and the smallest value above it.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\npair<int, int> floorCeilLinear(const vector<int>& values, int target) {\n    int floorValue = INT_MIN;\n    int ceilValue = INT_MAX;\n    for (int value : values) {\n        if (value <= target) floorValue = max(floorValue, value);\n        if (value >= target) ceilValue = min(ceilValue, value);\n    }\n    return {floorValue == INT_MIN ? -1 : floorValue, ceilValue == INT_MAX ? -1 : ceilValue};\n}\n\nint main() {\n    vector<int> values = {1, 2, 4, 6, 8};\n    auto answer = floorCeilLinear(values, 5);\n    cout << answer.first << \" \" << answer.second << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "first-or-last-occurrence-of-a-number": [
+    {
+      "name": "Brute Force",
+      "description": "Visit every position and update the first and last indices whenever the target appears.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\npair<int, int> firstLastLinear(const vector<int>& values, int target) {\n    int first = -1, last = -1;\n    for (int index = 0; index < (int)values.size(); ++index) {\n        if (values[index] != target) continue;\n        if (first == -1) first = index;\n        last = index;\n    }\n    return {first, last};\n}\n\nint main() {\n    vector<int> values = {1, 2, 2, 2, 4};\n    auto answer = firstLastLinear(values, 2);\n    cout << answer.first << \" \" << answer.second << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "minimum-days-to-make-m-bouquets": [
+    {
+      "name": "Brute Force",
+      "description": "Test every calendar day between the earliest and latest bloom and simulate bouquet construction.",
+      "timeComplexity": "O(N * R)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool canMakeBouquets(const vector<int>& bloomDay, int day, int bouquets, int adjacent) {\n    int made = 0, run = 0;\n    for (int bloom : bloomDay) {\n        if (bloom <= day) {\n            if (++run == adjacent) {\n                ++made;\n                run = 0;\n            }\n        } else run = 0;\n    }\n    return made >= bouquets;\n}\n\nint minimumDaysBrute(const vector<int>& bloomDay, int bouquets, int adjacent) {\n    if (1LL * bouquets * adjacent > (long long)bloomDay.size()) return -1;\n    int low = *min_element(bloomDay.begin(), bloomDay.end());\n    int high = *max_element(bloomDay.begin(), bloomDay.end());\n    for (int day = low; day <= high; ++day) {\n        if (canMakeBouquets(bloomDay, day, bouquets, adjacent)) return day;\n    }\n    return -1;\n}\n\nint main() {\n    vector<int> bloomDay = {1, 10, 3, 10, 2};\n    cout << minimumDaysBrute(bloomDay, 3, 1) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-the-smallest-divisor-given-a-threshold": [
+    {
+      "name": "Brute Force",
+      "description": "Try divisors in increasing order and directly compute the rounded-up division sum.",
+      "timeComplexity": "O(N * M)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint smallestDivisorBrute(const vector<int>& values, int threshold) {\n    int maximum = *max_element(values.begin(), values.end());\n    for (int divisor = 1; divisor <= maximum; ++divisor) {\n        long long total = 0;\n        for (int value : values) total += (value + divisor - 1LL) / divisor;\n        if (total <= threshold) return divisor;\n    }\n    return maximum;\n}\n\nint main() {\n    vector<int> values = {1, 2, 5, 9};\n    cout << smallestDivisorBrute(values, 6) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "capacity-to-ship-packages-within-d-days": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every feasible capacity and simulate the number of shipping days it requires.",
+      "timeComplexity": "O(N * S)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint shippingDays(const vector<int>& weights, int capacity) {\n    int days = 1, load = 0;\n    for (int weight : weights) {\n        if (load + weight > capacity) {\n            ++days;\n            load = 0;\n        }\n        load += weight;\n    }\n    return days;\n}\n\nint shipCapacityBrute(const vector<int>& weights, int days) {\n    int low = *max_element(weights.begin(), weights.end());\n    int high = accumulate(weights.begin(), weights.end(), 0);\n    for (int capacity = low; capacity <= high; ++capacity) {\n        if (shippingDays(weights, capacity) <= days) return capacity;\n    }\n    return high;\n}\n\nint main() {\n    vector<int> weights = {1, 2, 3, 4, 5, 6};\n    cout << shipCapacityBrute(weights, 3) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "book-allocation-problem": [
+    {
+      "name": "Brute Force",
+      "description": "Try every possible maximum page limit and greedily count how many students that limit needs.",
+      "timeComplexity": "O(N * S)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint studentsNeeded(const vector<int>& books, int pageLimit) {\n    int students = 1, pages = 0;\n    for (int book : books) {\n        if (pages + book > pageLimit) {\n            ++students;\n            pages = 0;\n        }\n        pages += book;\n    }\n    return students;\n}\n\nint allocateBooksBrute(const vector<int>& books, int students) {\n    if (students > (int)books.size()) return -1;\n    int low = *max_element(books.begin(), books.end());\n    int high = accumulate(books.begin(), books.end(), 0);\n    for (int limit = low; limit <= high; ++limit) {\n        if (studentsNeeded(books, limit) <= students) return limit;\n    }\n    return -1;\n}\n\nint main() {\n    vector<int> books = {12, 34, 67, 90};\n    cout << allocateBooksBrute(books, 2) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-the-row-with-maximum-number-of-1s": [
+    {
+      "name": "Brute Force",
+      "description": "Count the ones in every row and retain the row with the largest count.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint rowWithMostOnesBrute(const vector<vector<int>>& matrix) {\n    int bestRow = -1, bestCount = 0;\n    for (int row = 0; row < (int)matrix.size(); ++row) {\n        int count = accumulate(matrix[row].begin(), matrix[row].end(), 0);\n        if (count > bestCount) {\n            bestCount = count;\n            bestRow = row;\n        }\n    }\n    return bestRow;\n}\n\nint main() {\n    vector<vector<int>> matrix = {{0, 1, 1}, {1, 1, 1}, {0, 0, 1}};\n    cout << rowWithMostOnesBrute(matrix) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "search-in-a-2d-matrix-ii": [
+    {
+      "name": "Brute Force",
+      "description": "Inspect every matrix cell until the target is found.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool searchMatrixBrute(const vector<vector<int>>& matrix, int target) {\n    for (const auto& row : matrix) {\n        for (int value : row) if (value == target) return true;\n    }\n    return false;\n}\n\nint main() {\n    vector<vector<int>> matrix = {{1, 4, 7}, {2, 5, 8}, {3, 6, 9}};\n    cout << boolalpha << searchMatrixBrute(matrix, 6) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-peak-element-2d-matrix": [
+    {
+      "name": "Brute Force",
+      "description": "Check every cell against its four neighbors and return the first local peak.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\npair<int, int> peakGridBrute(const vector<vector<int>>& matrix) {\n    int rows = matrix.size(), columns = matrix[0].size();\n    const int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};\n    for (int row = 0; row < rows; ++row) {\n        for (int column = 0; column < columns; ++column) {\n            bool peak = true;\n            for (const auto& direction : directions) {\n                int nextRow = row + direction[0], nextColumn = column + direction[1];\n                if (nextRow >= 0 && nextRow < rows && nextColumn >= 0 && nextColumn < columns\n                    && matrix[nextRow][nextColumn] >= matrix[row][column]) peak = false;\n            }\n            if (peak) return {row, column};\n        }\n    }\n    return {-1, -1};\n}\n\nint main() {\n    vector<vector<int>> matrix = {{1, 4}, {3, 2}};\n    auto peak = peakGridBrute(matrix);\n    cout << peak.first << \" \" << peak.second << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "kth-missing-positive-number": [
+    {
+      "name": "Brute Force",
+      "description": "Walk through positive integers and count values absent from the sorted input until the kth miss.",
+      "timeComplexity": "O(N + K)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint kthMissingBrute(const vector<int>& values, int k) {\n    int index = 0;\n    for (int candidate = 1;; ++candidate) {\n        if (index < (int)values.size() && values[index] == candidate) ++index;\n        else if (--k == 0) return candidate;\n    }\n}\n\nint main() {\n    vector<int> values = {2, 3, 4, 7, 11};\n    cout << kthMissingBrute(values, 5) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "subarray-sum-equals-k": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every starting point, extend the subarray, and count each running sum equal to k.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countSubarraysBrute(const vector<int>& values, long long target) {\n    long long count = 0;\n    for (int left = 0; left < (int)values.size(); ++left) {\n        long long sum = 0;\n        for (int right = left; right < (int)values.size(); ++right) {\n            sum += values[right];\n            if (sum == target) ++count;\n        }\n    }\n    return count;\n}\n\nint main() {\n    vector<int> values = {1, 1, 1};\n    cout << countSubarraysBrute(values, 2) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "rotate-matrix-by-90-degrees": [
+    {
+      "name": "Brute Force",
+      "description": "Write each source cell into its rotated location in a second matrix.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<vector<int>> rotateWithBuffer(const vector<vector<int>>& matrix) {\n    int size = matrix.size();\n    vector<vector<int>> rotated(size, vector<int>(size));\n    for (int row = 0; row < size; ++row) {\n        for (int column = 0; column < size; ++column) {\n            rotated[column][size - 1 - row] = matrix[row][column];\n        }\n    }\n    return rotated;\n}\n\nint main() {\n    vector<vector<int>> matrix = {{1, 2}, {3, 4}};\n    auto rotated = rotateWithBuffer(matrix);\n    for (const auto& row : rotated) for (int value : row) cout << value << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "left-rotate-an-array-by-d-places": [
+    {
+      "name": "Brute Force",
+      "description": "Perform a one-position left shift exactly d times.",
+      "timeComplexity": "O(N * D)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid rotateLeftRepeated(vector<int>& values, int distance) {\n    if (values.empty()) return;\n    distance %= values.size();\n    while (distance--) {\n        int first = values.front();\n        for (int index = 1; index < (int)values.size(); ++index) values[index - 1] = values[index];\n        values.back() = first;\n    }\n}\n\nint main() {\n    vector<int> values = {1, 2, 3, 4, 5};\n    rotateLeftRepeated(values, 2);\n    for (int value : values) cout << value << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "second-largest-element-in-an-array-without-sorting": [
+    {
+      "name": "Brute Force",
+      "description": "Sort a copy, skip duplicate maxima, and return the next distinct value.",
+      "timeComplexity": "O(N log N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint secondLargestBySorting(vector<int> values) {\n    sort(values.begin(), values.end(), greater<int>());\n    for (int index = 1; index < (int)values.size(); ++index) {\n        if (values[index] != values[0]) return values[index];\n    }\n    return -1;\n}\n\nint main() {\n    cout << secondLargestBySorting({4, 7, 7, 2}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "counting-frequencies-of-array-elements": [
+    {
+      "name": "Brute Force",
+      "description": "For each unprocessed value, scan the full array to count its occurrences.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<pair<int, int>> frequenciesBrute(const vector<int>& values) {\n    vector<pair<int, int>> result;\n    vector<bool> processed(values.size(), false);\n    for (int index = 0; index < (int)values.size(); ++index) {\n        if (processed[index]) continue;\n        int count = 0;\n        for (int other = 0; other < (int)values.size(); ++other) {\n            if (values[other] == values[index]) {\n                ++count;\n                processed[other] = true;\n            }\n        }\n        result.push_back({values[index], count});\n    }\n    return result;\n}\n\nint main() {\n    for (const auto& item : frequenciesBrute({1, 2, 1, 3, 2, 1})) cout << item.first << \":\" << item.second << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-the-highest-lowest-frequency-element": [
+    {
+      "name": "Brute Force",
+      "description": "Count every candidate with a nested scan and track the values with minimum and maximum frequency.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\npair<int, int> frequencyExtremesBrute(const vector<int>& values) {\n    vector<int> uniqueValues;\n    for (int value : values) {\n        if (find(uniqueValues.begin(), uniqueValues.end(), value) == uniqueValues.end()) uniqueValues.push_back(value);\n    }\n    int highValue = -1, lowValue = -1, highCount = -1, lowCount = INT_MAX;\n    for (int candidate : uniqueValues) {\n        int count = 0;\n        for (int value : values) if (value == candidate) ++count;\n        if (count > highCount) highCount = count, highValue = candidate;\n        if (count < lowCount) lowCount = count, lowValue = candidate;\n    }\n    return {highValue, lowValue};\n}\n\nint main() {\n    auto answer = frequencyExtremesBrute({1, 1, 2, 2, 2, 3});\n    cout << answer.first << \" \" << answer.second << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-missing-number-in-an-array": [
+    {
+      "name": "Brute Force",
+      "description": "Try every value in the expected range and linearly search for it in the input.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint missingNumberBrute(const vector<int>& values) {\n    for (int candidate = 0; candidate <= (int)values.size(); ++candidate) {\n        bool present = false;\n        for (int value : values) if (value == candidate) present = true;\n        if (!present) return candidate;\n    }\n    return -1;\n}\n\nint main() {\n    cout << missingNumberBrute({3, 0, 1}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "find-the-union": [
+    {
+      "name": "Better",
+      "description": "Insert both arrays into an ordered set to deduplicate and sort their union.",
+      "timeComplexity": "O((N + M) log(N + M))",
+      "spaceComplexity": "O(N + M)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> unionWithSet(const vector<int>& left, const vector<int>& right) {\n    set<int> merged(left.begin(), left.end());\n    merged.insert(right.begin(), right.end());\n    return {merged.begin(), merged.end()};\n}\n\nint main() {\n    auto result = unionWithSet({1, 1, 3}, {2, 3, 4});\n    for (int value : result) cout << value << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "longest-subarray-with-given-sum-k-positives": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every subarray and retain the longest one whose sum equals k.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestPositiveSubarrayBrute(const vector<int>& values, long long target) {\n    int best = 0;\n    for (int start = 0; start < (int)values.size(); ++start) {\n        long long total = 0;\n        for (int end = start; end < (int)values.size(); ++end) {\n            total += values[end];\n            if (total == target) best = max(best, end - start + 1);\n        }\n    }\n    return best;\n}\n\nint main() {\n    cout << longestPositiveSubarrayBrute({1, 2, 1, 1, 1}, 3) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "longest-subarray-with-given-sum-k-positives-negatives": [
+    {
+      "name": "Brute Force",
+      "description": "Generate all subarrays, including those containing negative values, and track the longest target sum.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestMixedSubarrayBrute(const vector<int>& numbers, long long required) {\n    int longest = 0;\n    for (int left = 0; left < (int)numbers.size(); ++left) {\n        long long running = 0;\n        for (int right = left; right < (int)numbers.size(); ++right) {\n            running += numbers[right];\n            if (running == required) longest = max(longest, right - left + 1);\n        }\n    }\n    return longest;\n}\n\nint main() {\n    cout << longestMixedSubarrayBrute({1, -1, 5, -2, 3}, 3) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "stock-span-problem": [
+    {
+      "name": "Brute Force",
+      "description": "For every day, scan left until a greater price blocks the span.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> stockSpanBrute(const vector<int>& prices) {\n    vector<int> spans(prices.size(), 1);\n    for (int day = 0; day < (int)prices.size(); ++day) {\n        int previous = day - 1;\n        while (previous >= 0 && prices[previous] <= prices[day]) {\n            ++spans[day];\n            --previous;\n        }\n    }\n    return spans;\n}\n\nint main() {\n    for (int span : stockSpanBrute({100, 80, 60, 70, 60, 75, 85})) cout << span << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "sum-of-subarray-minimums": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every subarray while maintaining its current minimum and accumulate the contribution.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long subarrayMinimumsBrute(const vector<int>& values) {\n    const long long modulus = 1000000007;\n    long long answer = 0;\n    for (int left = 0; left < (int)values.size(); ++left) {\n        int minimum = INT_MAX;\n        for (int right = left; right < (int)values.size(); ++right) {\n            minimum = min(minimum, values[right]);\n            answer = (answer + minimum) % modulus;\n        }\n    }\n    return answer;\n}\n\nint main() {\n    cout << subarrayMinimumsBrute({3, 1, 2, 4}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "next-smaller-element": [
+    {
+      "name": "Brute Force",
+      "description": "For every position, scan right until the first strictly smaller value is found.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> nextSmallerBrute(const vector<int>& values) {\n    vector<int> answer(values.size(), -1);\n    for (int index = 0; index < (int)values.size(); ++index) {\n        for (int next = index + 1; next < (int)values.size(); ++next) {\n            if (values[next] < values[index]) {\n                answer[index] = values[next];\n                break;\n            }\n        }\n    }\n    return answer;\n}\n\nint main() {\n    for (int value : nextSmallerBrute({4, 8, 5, 2, 25})) cout << value << \" \";\n    cout << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "subarrays-with-k-different-integers": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every subarray and count it when its distinct-value set has exactly k members.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long subarraysWithKDistinctBrute(const vector<int>& values, int k) {\n    long long answer = 0;\n    for (int left = 0; left < (int)values.size(); ++left) {\n        unordered_set<int> distinct;\n        for (int right = left; right < (int)values.size(); ++right) {\n            distinct.insert(values[right]);\n            if ((int)distinct.size() == k) ++answer;\n            if ((int)distinct.size() > k) break;\n        }\n    }\n    return answer;\n}\n\nint main() {\n    cout << subarraysWithKDistinctBrute({1, 2, 1, 2, 3}, 2) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "longest-substring-with-at-most-k-distinct-characters": [
+    {
+      "name": "Brute Force",
+      "description": "Start at every character and extend while the substring contains at most k distinct characters.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestAtMostKBrute(const string& text, int k) {\n    int best = 0;\n    for (int left = 0; left < (int)text.size(); ++left) {\n        unordered_set<char> distinct;\n        for (int right = left; right < (int)text.size(); ++right) {\n            distinct.insert(text[right]);\n            if ((int)distinct.size() > k) break;\n            best = max(best, right - left + 1);\n        }\n    }\n    return best;\n}\n\nint main() {\n    cout << longestAtMostKBrute(\"eceba\", 2) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "fruit-into-baskets": [
+    {
+      "name": "Brute Force",
+      "description": "Try every starting tree and extend until a third fruit type appears.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint totalFruitBrute(const vector<int>& fruits) {\n    int best = 0;\n    for (int start = 0; start < (int)fruits.size(); ++start) {\n        set<int> kinds;\n        for (int end = start; end < (int)fruits.size(); ++end) {\n            kinds.insert(fruits[end]);\n            if (kinds.size() > 2) break;\n            best = max(best, end - start + 1);\n        }\n    }\n    return best;\n}\n\nint main() {\n    cout << totalFruitBrute({1, 2, 1, 2, 3}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "number-of-substrings-containing-all-three-characters": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every substring and count it once a, b, and c have all appeared.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countABCSubstringsBrute(const string& text) {\n    long long count = 0;\n    for (int left = 0; left < (int)text.size(); ++left) {\n        bool seen[3] = {false, false, false};\n        for (int right = left; right < (int)text.size(); ++right) {\n            if (text[right] >= 'a' && text[right] <= 'c') seen[text[right] - 'a'] = true;\n            if (seen[0] && seen[1] && seen[2]) ++count;\n        }\n    }\n    return count;\n}\n\nint main() {\n    cout << countABCSubstringsBrute(\"abcabc\") << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "longest-repeating-character-replacement": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every substring and compare its length with its most frequent character count.",
+      "timeComplexity": "O(26 * N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint characterReplacementBrute(const string& text, int k) {\n    int best = 0;\n    for (int left = 0; left < (int)text.size(); ++left) {\n        int frequency[26] = {};\n        int maximumFrequency = 0;\n        for (int right = left; right < (int)text.size(); ++right) {\n            maximumFrequency = max(maximumFrequency, ++frequency[text[right] - 'A']);\n            int length = right - left + 1;\n            if (length - maximumFrequency <= k) best = max(best, length);\n        }\n    }\n    return best;\n}\n\nint main() {\n    cout << characterReplacementBrute(\"AABABBA\", 1) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "max-consecutive-ones-iii": [
+    {
+      "name": "Brute Force",
+      "description": "Try every subarray and stop extending when its zero count exceeds k.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestOnesBrute(const vector<int>& values, int k) {\n    int best = 0;\n    for (int left = 0; left < (int)values.size(); ++left) {\n        int zeros = 0;\n        for (int right = left; right < (int)values.size(); ++right) {\n            zeros += values[right] == 0;\n            if (zeros > k) break;\n            best = max(best, right - left + 1);\n        }\n    }\n    return best;\n}\n\nint main() {\n    cout << longestOnesBrute({1, 1, 0, 0, 1, 1, 1}, 1) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "valid-parenthesis-string": [
+    {
+      "name": "Brute Force",
+      "description": "Recursively try each wildcard as an opening parenthesis, closing parenthesis, or empty character.",
+      "timeComplexity": "O(3^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool validFrom(const string& text, int index, int balance) {\n    if (balance < 0) return false;\n    if (index == (int)text.size()) return balance == 0;\n    if (text[index] == '(') return validFrom(text, index + 1, balance + 1);\n    if (text[index] == ')') return validFrom(text, index + 1, balance - 1);\n    return validFrom(text, index + 1, balance + 1)\n        || validFrom(text, index + 1, balance - 1)\n        || validFrom(text, index + 1, balance);\n}\n\nint main() {\n    cout << boolalpha << validFrom(\"(*)\", 0, 0) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "candy": [
+    {
+      "name": "Better",
+      "description": "Compute increasing requirements from both directions and take the larger requirement for each child.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long candyWithTwoArrays(const vector<int>& ratings) {\n    int size = ratings.size();\n    vector<int> left(size, 1), right(size, 1);\n    for (int index = 1; index < size; ++index) {\n        if (ratings[index] > ratings[index - 1]) left[index] = left[index - 1] + 1;\n    }\n    for (int index = size - 2; index >= 0; --index) {\n        if (ratings[index] > ratings[index + 1]) right[index] = right[index + 1] + 1;\n    }\n    long long total = 0;\n    for (int index = 0; index < size; ++index) total += max(left[index], right[index]);\n    return total;\n}\n\nint main() {\n    cout << candyWithTwoArrays({1, 0, 2}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "length-of-loop-in-ll": [
+    {
+      "name": "Brute Force",
+      "description": "Record the visit step of every node; the difference at the first repeated node is the cycle length.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstruct ListNode {\n    int value;\n    ListNode* next;\n    explicit ListNode(int value) : value(value), next(nullptr) {}\n};\n\nint cycleLengthWithMap(ListNode* head) {\n    unordered_map<ListNode*, int> firstSeen;\n    int step = 0;\n    while (head) {\n        if (firstSeen.count(head)) return step - firstSeen[head];\n        firstSeen[head] = step++;\n        head = head->next;\n    }\n    return 0;\n}\n\nint main() {\n    ListNode first(1), second(2), third(3), fourth(4);\n    first.next = &second; second.next = &third; third.next = &fourth; fourth.next = &second;\n    cout << cycleLengthWithMap(&first) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "single-number-i": [
+    {
+      "name": "Brute Force",
+      "description": "Count every value in a hash table and return the one whose frequency is one.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint singleNumberWithFrequency(const vector<int>& values) {\n    unordered_map<int, int> frequency;\n    for (int value : values) ++frequency[value];\n    for (const auto& item : frequency) if (item.second == 1) return item.first;\n    return 0;\n}\n\nint main() {\n    cout << singleNumberWithFrequency({4, 1, 2, 1, 2}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "single-number-ii": [
+    {
+      "name": "Better",
+      "description": "Sort the values so triplicates become adjacent, then locate the group with a single member.",
+      "timeComplexity": "O(N log N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint singleNumberBySorting(vector<int> values) {\n    sort(values.begin(), values.end());\n    for (int index = 0; index < (int)values.size(); index += 3) {\n        if (index + 1 >= (int)values.size() || values[index] != values[index + 1]) return values[index];\n    }\n    return 0;\n}\n\nint main() {\n    cout << singleNumberBySorting({2, 2, 3, 2}) << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "single-number-iii": [
+    {
+      "name": "Better",
+      "description": "Use a frequency map and collect the two values that occur once.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> twoSinglesWithFrequency(const vector<int>& values) {\n    unordered_map<int, int> frequency;\n    for (int value : values) ++frequency[value];\n    vector<int> answer;\n    for (const auto& item : frequency) if (item.second == 1) answer.push_back(item.first);\n    sort(answer.begin(), answer.end());\n    return answer;\n}\n\nint main() {\n    auto answer = twoSinglesWithFrequency({1, 2, 1, 3, 2, 5});\n    cout << answer[0] << \" \" << answer[1] << \"\\n\";\n    return 0;\n}\n"
+    }
+  ],
+  "climbing-stairs": [
+    {
+      "name": "Brute Force",
+      "description": "Recursively branch into one-step and two-step moves from every stair.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long ways(int n) { return n <= 1 ? 1 : ways(n - 1) + ways(n - 2); }\nint main() { cout << ways(5) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the number of ways for each remaining stair so every state is solved once.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int n, vector<long long>& memo) {\n    if (n <= 1) return 1;\n    if (memo[n] != -1) return memo[n];\n    return memo[n] = solve(n - 1, memo) + solve(n - 2, memo);\n}\nint main() { int n = 5; vector<long long> memo(n + 1, -1); cout << solve(n, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "coin-change": [
+    {
+      "name": "Brute Force",
+      "description": "Explore taking the current denomination again or moving to a smaller denomination, retaining the fewest coins.",
+      "timeComplexity": "Exponential",
+      "spaceComplexity": "O(A + C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int INF = 1000000000;\nint solve(int index, int amount, const vector<int>& coins) {\n    if (amount == 0) return 0;\n    if (index < 0) return INF;\n    int skip = solve(index - 1, amount, coins), take = INF;\n    if (coins[index] <= amount) take = 1 + solve(index, amount - coins[index], coins);\n    return min(skip, take);\n}\nint main() { vector<int> coins = {1, 2, 5}; int answer = solve(coins.size() - 1, 11, coins); cout << (answer >= INF ? -1 : answer) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize denomination and remaining-amount states while preserving the unbounded take-or-skip recurrence.",
+      "timeComplexity": "O(C * A)",
+      "spaceComplexity": "O(C * A)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int INF = 1000000000;\nint solve(int index, int amount, const vector<int>& coins, vector<vector<int>>& memo) {\n    if (amount == 0) return 0;\n    if (index < 0) return INF;\n    int& answer = memo[index][amount];\n    if (answer != -1) return answer;\n    answer = solve(index - 1, amount, coins, memo);\n    if (coins[index] <= amount) answer = min(answer, 1 + solve(index, amount - coins[index], coins, memo));\n    return answer;\n}\nint main() { vector<int> coins = {1, 2, 5}; int amount = 11; vector<vector<int>> memo(coins.size(), vector<int>(amount + 1, -1)); int answer = solve(coins.size() - 1, amount, coins, memo); cout << (answer >= INF ? -1 : answer) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "partition-equal-subset-sum": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate include-or-skip choices until a subset reaches half of the total sum.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool subset(int index, int target, const vector<int>& values) {\n    if (target == 0) return true;\n    if (index < 0 || target < 0) return false;\n    return subset(index - 1, target, values) || subset(index - 1, target - values[index], values);\n}\nint main() { vector<int> values = {1, 5, 11, 5}; int sum = accumulate(values.begin(), values.end(), 0); cout << boolalpha << (sum % 2 == 0 && subset(values.size() - 1, sum / 2, values)) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache each index and remaining half-sum state in the subset recurrence.",
+      "timeComplexity": "O(N * S)",
+      "spaceComplexity": "O(N * S)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint subset(int index, int target, const vector<int>& values, vector<vector<int>>& memo) {\n    if (target == 0) return 1;\n    if (index < 0 || target < 0) return 0;\n    int& answer = memo[index][target];\n    if (answer != -1) return answer;\n    return answer = subset(index - 1, target, values, memo) || subset(index - 1, target - values[index], values, memo);\n}\nint main() { vector<int> values = {1, 5, 11, 5}; int sum = accumulate(values.begin(), values.end(), 0); vector<vector<int>> memo(values.size(), vector<int>(sum / 2 + 1, -1)); cout << boolalpha << (sum % 2 == 0 && subset(values.size() - 1, sum / 2, values, memo)) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "longest-increasing-subsequence": [
+    {
+      "name": "Brute Force",
+      "description": "Try taking or skipping every value while carrying the index of the previously selected value.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint lis(int index, int previous, const vector<int>& values) {\n    if (index == (int)values.size()) return 0;\n    int skip = lis(index + 1, previous, values), take = 0;\n    if (previous == -1 || values[index] > values[previous]) take = 1 + lis(index + 1, index, values);\n    return max(skip, take);\n}\nint main() { vector<int> values = {10, 9, 2, 5, 3, 7, 101, 18}; cout << lis(0, -1, values) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Quadratic DP)",
+      "description": "Store the best increasing subsequence ending at every position and extend it from all earlier smaller values.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint lis(const vector<int>& values) {\n    vector<int> length(values.size(), 1);\n    for (int i = 0; i < (int)values.size(); ++i)\n        for (int j = 0; j < i; ++j)\n            if (values[j] < values[i]) length[i] = max(length[i], 1 + length[j]);\n    return values.empty() ? 0 : *max_element(length.begin(), length.end());\n}\nint main() { cout << lis({10, 9, 2, 5, 3, 7, 101, 18}) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "best-time-to-buy-and-sell-stock-ii": [
+    {
+      "name": "Brute Force",
+      "description": "At every day, branch between acting and waiting while tracking whether a share is currently held.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices) {\n    if (day == (int)prices.size()) return 0;\n    if (buy) return max(-prices[day] + solve(day + 1, 0, prices), solve(day + 1, 1, prices));\n    return max(prices[day] + solve(day + 1, 1, prices), solve(day + 1, 0, prices));\n}\nint main() { vector<int> prices = {7, 1, 5, 3, 6, 4}; cout << solve(0, 1, prices) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the day and holding-state recurrence for unlimited transactions.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices, vector<array<long long, 2>>& memo) {\n    if (day == (int)prices.size()) return 0;\n    long long& answer = memo[day][buy];\n    if (answer != LLONG_MIN) return answer;\n    if (buy) return answer = max(-prices[day] + solve(day + 1, 0, prices, memo), solve(day + 1, 1, prices, memo));\n    return answer = max(prices[day] + solve(day + 1, 1, prices, memo), solve(day + 1, 0, prices, memo));\n}\nint main() { vector<int> prices = {7, 1, 5, 3, 6, 4}; vector<array<long long, 2>> memo(prices.size(), {LLONG_MIN, LLONG_MIN}); cout << solve(0, 1, prices, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "best-time-to-buy-and-sell-stock-iii": [
+    {
+      "name": "Brute Force",
+      "description": "Explore buy, sell, and wait decisions while tracking the remaining completed transactions.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, int capacity, const vector<int>& prices) {\n    if (day == (int)prices.size() || capacity == 0) return 0;\n    if (buy) return max(-prices[day] + solve(day + 1, 0, capacity, prices), solve(day + 1, 1, capacity, prices));\n    return max(prices[day] + solve(day + 1, 1, capacity - 1, prices), solve(day + 1, 0, capacity, prices));\n}\nint main() { vector<int> prices = {3, 3, 5, 0, 0, 3, 1, 4}; cout << solve(0, 1, 2, prices) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize the day, holding state, and remaining-transaction state.",
+      "timeComplexity": "O(N * K)",
+      "spaceComplexity": "O(N * K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, int capacity, const vector<int>& prices, vector<vector<vector<long long>>>& memo) {\n    if (day == (int)prices.size() || capacity == 0) return 0;\n    long long& answer = memo[day][buy][capacity];\n    if (answer != LLONG_MIN) return answer;\n    if (buy) return answer = max(-prices[day] + solve(day + 1, 0, capacity, prices, memo), solve(day + 1, 1, capacity, prices, memo));\n    return answer = max(prices[day] + solve(day + 1, 1, capacity - 1, prices, memo), solve(day + 1, 0, capacity, prices, memo));\n}\nint main() { vector<int> prices = {3, 3, 5, 0, 0, 3, 1, 4}; int capacity = 2; vector<vector<vector<long long>>> memo(prices.size(), vector<vector<long long>>(2, vector<long long>(capacity + 1, LLONG_MIN))); cout << solve(0, 1, capacity, prices, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "best-time-to-buy-and-sell-stock-iv": [
+    {
+      "name": "Brute Force",
+      "description": "Explore buy, sell, and wait decisions while tracking the remaining completed transactions.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, int capacity, const vector<int>& prices) {\n    if (day == (int)prices.size() || capacity == 0) return 0;\n    if (buy) return max(-prices[day] + solve(day + 1, 0, capacity, prices), solve(day + 1, 1, capacity, prices));\n    return max(prices[day] + solve(day + 1, 1, capacity - 1, prices), solve(day + 1, 0, capacity, prices));\n}\nint main() { vector<int> prices = {3, 3, 5, 0, 0, 3, 1, 4}; cout << solve(0, 1, 3, prices) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize the day, holding state, and remaining-transaction state.",
+      "timeComplexity": "O(N * K)",
+      "spaceComplexity": "O(N * K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, int capacity, const vector<int>& prices, vector<vector<vector<long long>>>& memo) {\n    if (day == (int)prices.size() || capacity == 0) return 0;\n    long long& answer = memo[day][buy][capacity];\n    if (answer != LLONG_MIN) return answer;\n    if (buy) return answer = max(-prices[day] + solve(day + 1, 0, capacity, prices, memo), solve(day + 1, 1, capacity, prices, memo));\n    return answer = max(prices[day] + solve(day + 1, 1, capacity - 1, prices, memo), solve(day + 1, 0, capacity, prices, memo));\n}\nint main() { vector<int> prices = {3, 3, 5, 0, 0, 3, 1, 4}; int capacity = 3; vector<vector<vector<long long>>> memo(prices.size(), vector<vector<long long>>(2, vector<long long>(capacity + 1, LLONG_MIN))); cout << solve(0, 1, capacity, prices, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "best-time-to-buy-and-sell-stock-with-cooldown": [
+    {
+      "name": "Brute Force",
+      "description": "Branch over buying, selling, and waiting; a sale advances two days to enforce the cooldown.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices) {\n    if (day >= (int)prices.size()) return 0;\n    if (buy) return max(-prices[day] + solve(day + 1, 0, prices), solve(day + 1, 1, prices));\n    return max(prices[day] + solve(day + 2, 1, prices), solve(day + 1, 0, prices));\n}\nint main() { cout << solve(0, 1, vector<int>{1, 2, 3, 0, 2}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache each day and holding state while retaining the two-day jump after a sale.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices, vector<array<long long, 2>>& memo) {\n    if (day >= (int)prices.size()) return 0;\n    long long& answer = memo[day][buy];\n    if (answer != LLONG_MIN) return answer;\n    if (buy) return answer = max(-prices[day] + solve(day + 1, 0, prices, memo), solve(day + 1, 1, prices, memo));\n    return answer = max(prices[day] + solve(day + 2, 1, prices, memo), solve(day + 1, 0, prices, memo));\n}\nint main() { vector<int> prices = {1, 2, 3, 0, 2}; vector<array<long long, 2>> memo(prices.size(), {LLONG_MIN, LLONG_MIN}); cout << solve(0, 1, prices, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "triangle": [
+    {
+      "name": "Brute Force",
+      "description": "Recursively choose the down or down-right child on every row.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int row, int column, const vector<vector<int>>& triangle) {\n    if (row == (int)triangle.size() - 1) return triangle[row][column];\n    return triangle[row][column] + min(solve(row + 1, column, triangle), solve(row + 1, column + 1, triangle));\n}\nint main() { vector<vector<int>> triangle = {{2}, {3, 4}, {6, 5, 7}, {4, 1, 8, 3}}; cout << solve(0, 0, triangle) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache each row and column state in the downward path recurrence.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int row, int column, const vector<vector<int>>& triangle, vector<vector<int>>& memo) {\n    if (row == (int)triangle.size() - 1) return triangle[row][column];\n    int& answer = memo[row][column];\n    if (answer != INT_MAX) return answer;\n    return answer = triangle[row][column] + min(solve(row + 1, column, triangle, memo), solve(row + 1, column + 1, triangle, memo));\n}\nint main() { vector<vector<int>> triangle = {{2}, {3, 4}, {6, 5, 7}, {4, 1, 8, 3}}; vector<vector<int>> memo(triangle.size(), vector<int>(triangle.size(), INT_MAX)); cout << solve(0, 0, triangle, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "matrix-chain-multiplication": [
+    {
+      "name": "Brute Force",
+      "description": "Try every possible final split for each matrix interval.",
+      "timeComplexity": "Exponential",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int left, int right, const vector<int>& dimensions) {\n    if (left == right) return 0;\n    long long answer = LLONG_MAX;\n    for (int split = left; split < right; ++split)\n        answer = min(answer, solve(left, split, dimensions) + solve(split + 1, right, dimensions) + 1LL * dimensions[left - 1] * dimensions[split] * dimensions[right]);\n    return answer;\n}\nint main() { cout << solve(1, 3, vector<int>{10, 30, 5, 60}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the minimum multiplication cost for every matrix interval.",
+      "timeComplexity": "O(N^3)",
+      "spaceComplexity": "O(N^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int left, int right, const vector<int>& dimensions, vector<vector<long long>>& memo) {\n    if (left == right) return 0;\n    long long& answer = memo[left][right];\n    if (answer != -1) return answer;\n    answer = LLONG_MAX;\n    for (int split = left; split < right; ++split)\n        answer = min(answer, solve(left, split, dimensions, memo) + solve(split + 1, right, dimensions, memo) + 1LL * dimensions[left - 1] * dimensions[split] * dimensions[right]);\n    return answer;\n}\nint main() { vector<int> dimensions = {10, 30, 5, 60}; vector<vector<long long>> memo(dimensions.size(), vector<long long>(dimensions.size(), -1)); cout << solve(1, dimensions.size() - 1, dimensions, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "maximum-sum-of-non-adjacent-elements": [
+    {
+      "name": "Brute Force",
+      "description": "At every house, recursively choose between skipping it and taking it while jumping over its neighbor.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int index, const vector<int>& values) {\n    if (index < 0) return 0;\n    return max(solve(index - 1, values), values[index] + solve(index - 2, values));\n}\nint main() { cout << solve(4, vector<int>{2, 7, 9, 3, 1}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the best non-adjacent total ending at each prefix.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int index, const vector<int>& values, vector<long long>& memo) {\n    if (index < 0) return 0;\n    if (memo[index] != -1) return memo[index];\n    return memo[index] = max(solve(index - 1, values, memo), values[index] + solve(index - 2, values, memo));\n}\nint main() { vector<int> values = {2, 7, 9, 3, 1}; vector<long long> memo(values.size(), -1); cout << solve(values.size() - 1, values, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "house-robber": [
+    {
+      "name": "Brute Force",
+      "description": "Solve the two circular cases recursively: exclude the first house or exclude the last house.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long linearRob(int index, int first, const vector<int>& houses) {\n    if (index < first) return 0;\n    return max(linearRob(index - 1, first, houses), houses[index] + linearRob(index - 2, first, houses));\n}\n\nlong long circularRob(const vector<int>& houses) {\n    if (houses.size() == 1) return houses[0];\n    return max(linearRob(houses.size() - 2, 0, houses), linearRob(houses.size() - 1, 1, houses));\n}\n\nint main() { cout << circularRob({2, 3, 2}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize both linear ranges formed by excluding one endpoint of the circular street.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long linearRob(int index, int first, const vector<int>& houses, vector<long long>& memo) {\n    if (index < first) return 0;\n    if (memo[index] != -1) return memo[index];\n    return memo[index] = max(linearRob(index - 1, first, houses, memo), houses[index] + linearRob(index - 2, first, houses, memo));\n}\n\nlong long rangeAnswer(const vector<int>& houses, int first, int last) {\n    vector<long long> memo(houses.size(), -1);\n    return linearRob(last, first, houses, memo);\n}\n\nlong long circularRob(const vector<int>& houses) {\n    if (houses.size() == 1) return houses[0];\n    return max(rangeAnswer(houses, 0, houses.size() - 2), rangeAnswer(houses, 1, houses.size() - 1));\n}\n\nint main() { cout << circularRob({1, 2, 3, 1}) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "unique-paths-ii": [
+    {
+      "name": "Brute Force",
+      "description": "Recursively move down or right while rejecting blocked and out-of-range cells.",
+      "timeComplexity": "O(2^(R+C))",
+      "spaceComplexity": "O(R + C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long paths(int row, int column, const vector<vector<int>>& grid) {\n    if (row < 0 || column < 0 || grid[row][column]) return 0;\n    if (row == 0 && column == 0) return 1;\n    return paths(row - 1, column, grid) + paths(row, column - 1, grid);\n}\nint main() { vector<vector<int>> grid = {{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}; cout << paths(2, 2, grid) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the number of obstacle-safe paths reaching every grid cell.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(R * C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long paths(int row, int column, const vector<vector<int>>& grid, vector<vector<long long>>& memo) {\n    if (row < 0 || column < 0 || grid[row][column]) return 0;\n    if (row == 0 && column == 0) return 1;\n    long long& answer = memo[row][column];\n    if (answer != -1) return answer;\n    return answer = paths(row - 1, column, grid, memo) + paths(row, column - 1, grid, memo);\n}\nint main() { vector<vector<int>> grid = {{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}; vector<vector<long long>> memo(3, vector<long long>(3, -1)); cout << paths(2, 2, grid, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "minimum-falling-path-sum": [
+    {
+      "name": "Brute Force",
+      "description": "Start from every top-row cell and recursively try the three downward moves.",
+      "timeComplexity": "O(3^R * C)",
+      "spaceComplexity": "O(R)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int row, int column, const vector<vector<int>>& matrix) {\n    if (column < 0 || column >= (int)matrix[0].size()) return 1000000000;\n    if (row == (int)matrix.size() - 1) return matrix[row][column];\n    return matrix[row][column] + min({solve(row + 1, column - 1, matrix), solve(row + 1, column, matrix), solve(row + 1, column + 1, matrix)});\n}\nint main() { vector<vector<int>> matrix = {{2, 1, 3}, {6, 5, 4}, {7, 8, 9}}; int answer = INT_MAX; for (int column = 0; column < 3; ++column) answer = min(answer, solve(0, column, matrix)); cout << answer << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the best falling total from each matrix coordinate.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(R * C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int row, int column, const vector<vector<int>>& matrix, vector<vector<int>>& memo) {\n    if (column < 0 || column >= (int)matrix[0].size()) return 1000000000;\n    if (row == (int)matrix.size() - 1) return matrix[row][column];\n    int& answer = memo[row][column];\n    if (answer != INT_MAX) return answer;\n    return answer = matrix[row][column] + min({solve(row + 1, column - 1, matrix, memo), solve(row + 1, column, matrix, memo), solve(row + 1, column + 1, matrix, memo)});\n}\nint main() { vector<vector<int>> matrix = {{2, 1, 3}, {6, 5, 4}, {7, 8, 9}}, memo(3, vector<int>(3, INT_MAX)); int answer = INT_MAX; for (int column = 0; column < 3; ++column) answer = min(answer, solve(0, column, matrix, memo)); cout << answer << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "count-subsets-with-sum-k": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate take-or-skip choices and count leaves whose chosen values total the target.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countSubsets(int index, int target, const vector<int>& values) {\n    if (index < 0) return target == 0;\n    return countSubsets(index - 1, target, values) + (values[index] <= target ? countSubsets(index - 1, target - values[index], values) : 0);\n}\nint main() { cout << countSubsets(3, 3, vector<int>{1, 2, 2, 3}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize every index and remaining-sum count state.",
+      "timeComplexity": "O(N * K)",
+      "spaceComplexity": "O(N * K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countSubsets(int index, int target, const vector<int>& values, vector<vector<long long>>& memo) {\n    if (index < 0) return target == 0;\n    long long& answer = memo[index][target];\n    if (answer != -1) return answer;\n    answer = countSubsets(index - 1, target, values, memo);\n    if (values[index] <= target) answer += countSubsets(index - 1, target - values[index], values, memo);\n    return answer;\n}\nint main() { vector<int> values = {1, 2, 2, 3}; vector<vector<long long>> memo(values.size(), vector<long long>(4, -1)); cout << countSubsets(values.size() - 1, 3, values, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "distinct-subsequences": [
+    {
+      "name": "Brute Force",
+      "description": "Recursively skip each source character or match it to the current target character.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countWays(int i, int j, const string& source, const string& target) {\n    if (j < 0) return 1;\n    if (i < 0) return 0;\n    return countWays(i - 1, j, source, target) + (source[i] == target[j] ? countWays(i - 1, j - 1, source, target) : 0);\n}\nint main() { string source = \"rabbbit\", target = \"rabbit\"; cout << countWays(source.size() - 1, target.size() - 1, source, target) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache source-index and target-index states in the subsequence-count recurrence.",
+      "timeComplexity": "O(N * M)",
+      "spaceComplexity": "O(N * M)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long countWays(int i, int j, const string& source, const string& target, vector<vector<long long>>& memo) {\n    if (j < 0) return 1;\n    if (i < 0) return 0;\n    long long& answer = memo[i][j];\n    if (answer != -1) return answer;\n    return answer = countWays(i - 1, j, source, target, memo) + (source[i] == target[j] ? countWays(i - 1, j - 1, source, target, memo) : 0);\n}\nint main() { string source = \"rabbbit\", target = \"rabbit\"; vector<vector<long long>> memo(source.size(), vector<long long>(target.size(), -1)); cout << countWays(source.size() - 1, target.size() - 1, source, target, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "best-time-to-buy-and-sell-stock-with-transaction-fee": [
+    {
+      "name": "Brute Force",
+      "description": "Explore every buy, sell, and wait decision while charging the fee on each completed sale.",
+      "timeComplexity": "O(2^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices, int fee) {\n    if (day == (int)prices.size()) return 0;\n    if (buy) return max(-prices[day] + solve(day + 1, 0, prices, fee), solve(day + 1, 1, prices, fee));\n    return max(prices[day] - fee + solve(day + 1, 1, prices, fee), solve(day + 1, 0, prices, fee));\n}\nint main() { cout << solve(0, 1, vector<int>{1, 3, 2, 8, 4, 9}, 2) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache each day and holding state while applying the fee exactly once per sale.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long solve(int day, int buy, const vector<int>& prices, int fee, vector<array<long long, 2>>& memo) {\n    if (day == (int)prices.size()) return 0;\n    long long& answer = memo[day][buy];\n    if (answer != LLONG_MIN) return answer;\n    if (buy) return answer = max(-prices[day] + solve(day + 1, 0, prices, fee, memo), solve(day + 1, 1, prices, fee, memo));\n    return answer = max(prices[day] - fee + solve(day + 1, 1, prices, fee, memo), solve(day + 1, 0, prices, fee, memo));\n}\nint main() { vector<int> prices = {1, 3, 2, 8, 4, 9}; vector<array<long long, 2>> memo(prices.size(), {LLONG_MIN, LLONG_MIN}); cout << solve(0, 1, prices, 2, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "minimum-cost-to-cut-the-stick": [
+    {
+      "name": "Brute Force",
+      "description": "Try every remaining cut as the first cut of each current stick interval.",
+      "timeComplexity": "Exponential",
+      "spaceComplexity": "O(C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int left, int right, const vector<int>& cuts) {\n    if (left > right) return 0;\n    int answer = INT_MAX;\n    for (int cut = left; cut <= right; ++cut)\n        answer = min(answer, cuts[right + 1] - cuts[left - 1] + solve(left, cut - 1, cuts) + solve(cut + 1, right, cuts));\n    return answer;\n}\nint main() { vector<int> cuts = {0, 1, 3, 4, 5, 7}; cout << solve(1, cuts.size() - 2, cuts) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the minimum cost for every interval between ordered cuts.",
+      "timeComplexity": "O(C^3)",
+      "spaceComplexity": "O(C^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int left, int right, const vector<int>& cuts, vector<vector<int>>& memo) {\n    if (left > right) return 0;\n    int& answer = memo[left][right];\n    if (answer != -1) return answer;\n    answer = INT_MAX;\n    for (int cut = left; cut <= right; ++cut)\n        answer = min(answer, cuts[right + 1] - cuts[left - 1] + solve(left, cut - 1, cuts, memo) + solve(cut + 1, right, cuts, memo));\n    return answer;\n}\nint main() { vector<int> cuts = {0, 1, 3, 4, 5, 7}; vector<vector<int>> memo(cuts.size(), vector<int>(cuts.size(), -1)); cout << solve(1, cuts.size() - 2, cuts, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "burst-balloons": [
+    {
+      "name": "Brute Force",
+      "description": "Choose every current balloon as the next burst, erase it, and recurse on the smaller sequence.",
+      "timeComplexity": "O(N!)",
+      "spaceComplexity": "O(N^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint burst(vector<int> balloons) {\n    if (balloons.empty()) return 0;\n    int answer = 0;\n    for (int index = 0; index < (int)balloons.size(); ++index) {\n        int left = index == 0 ? 1 : balloons[index - 1], right = index + 1 == (int)balloons.size() ? 1 : balloons[index + 1];\n        vector<int> remaining = balloons;\n        remaining.erase(remaining.begin() + index);\n        answer = max(answer, left * balloons[index] * right + burst(remaining));\n    }\n    return answer;\n}\nint main() { cout << burst({3, 1, 5, 8}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Treat each balloon as the final burst in an interval and cache interval answers.",
+      "timeComplexity": "O(N^3)",
+      "spaceComplexity": "O(N^2)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int left, int right, const vector<int>& values, vector<vector<int>>& memo) {\n    if (left > right) return 0;\n    int& answer = memo[left][right];\n    if (answer != -1) return answer;\n    answer = 0;\n    for (int last = left; last <= right; ++last)\n        answer = max(answer, values[left - 1] * values[last] * values[right + 1] + solve(left, last - 1, values, memo) + solve(last + 1, right, values, memo));\n    return answer;\n}\nint main() { vector<int> values = {1, 3, 1, 5, 8, 1}; vector<vector<int>> memo(values.size(), vector<int>(values.size(), -1)); cout << solve(1, values.size() - 2, values, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "palindrome-partitioning-ii": [
+    {
+      "name": "Brute Force",
+      "description": "Try every palindromic prefix and recursively partition the remaining suffix.",
+      "timeComplexity": "Exponential",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool palindrome(const string& text, int left, int right) { while (left < right) if (text[left++] != text[right--]) return false; return true; }\nint pieces(int index, const string& text) {\n    if (index == (int)text.size()) return 0;\n    int answer = INT_MAX;\n    for (int end = index; end < (int)text.size(); ++end) if (palindrome(text, index, end)) answer = min(answer, 1 + pieces(end + 1, text));\n    return answer;\n}\nint main() { string text = \"aab\"; cout << pieces(0, text) - 1 << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Memoize the minimum number of palindromic pieces for every suffix.",
+      "timeComplexity": "O(N^3)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool palindrome(const string& text, int left, int right) { while (left < right) if (text[left++] != text[right--]) return false; return true; }\nint pieces(int index, const string& text, vector<int>& memo) {\n    if (index == (int)text.size()) return 0;\n    if (memo[index] != -1) return memo[index];\n    int answer = INT_MAX;\n    for (int end = index; end < (int)text.size(); ++end) if (palindrome(text, index, end)) answer = min(answer, 1 + pieces(end + 1, text, memo));\n    return memo[index] = answer;\n}\nint main() { string text = \"aab\"; vector<int> memo(text.size(), -1); cout << pieces(0, text, memo) - 1 << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "partition-array-for-maximum-sum": [
+    {
+      "name": "Brute Force",
+      "description": "Try every legal next block length and recurse on the suffix after multiplying the block maximum by its length.",
+      "timeComplexity": "O(K^N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int index, int limit, const vector<int>& values) {\n    if (index == (int)values.size()) return 0;\n    int answer = 0, maximum = 0;\n    for (int end = index; end < min((int)values.size(), index + limit); ++end) {\n        maximum = max(maximum, values[end]);\n        answer = max(answer, maximum * (end - index + 1) + solve(end + 1, limit, values));\n    }\n    return answer;\n}\nint main() { cout << solve(0, 3, vector<int>{1, 15, 7, 9, 2, 5, 10}) << \"\\n\"; return 0; }\n"
+    },
+    {
+      "name": "Better (Memoization)",
+      "description": "Cache the best partition total obtainable from every starting index.",
+      "timeComplexity": "O(N * K)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int index, int limit, const vector<int>& values, vector<int>& memo) {\n    if (index == (int)values.size()) return 0;\n    if (memo[index] != -1) return memo[index];\n    int answer = 0, maximum = 0;\n    for (int end = index; end < min((int)values.size(), index + limit); ++end) {\n        maximum = max(maximum, values[end]);\n        answer = max(answer, maximum * (end - index + 1) + solve(end + 1, limit, values, memo));\n    }\n    return memo[index] = answer;\n}\nint main() { vector<int> values = {1, 15, 7, 9, 2, 5, 10}, memo(values.size(), -1); cout << solve(0, 3, values, memo) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "merge-intervals": [
+    {
+      "name": "Brute Force",
+      "description": "Repeatedly find and merge any overlapping pair until no pair changes.",
+      "timeComplexity": "O(N^3)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<pair<int,int>> mergeSlow(vector<pair<int,int>> intervals) {\n    bool changed = true;\n    while (changed) {\n        changed = false;\n        for (int i = 0; i < (int)intervals.size() && !changed; ++i) {\n            for (int j = i + 1; j < (int)intervals.size(); ++j) {\n                if (max(intervals[i].first, intervals[j].first) <= min(intervals[i].second, intervals[j].second)) {\n                    intervals[i] = {min(intervals[i].first, intervals[j].first), max(intervals[i].second, intervals[j].second)};\n                    intervals.erase(intervals.begin() + j);\n                    changed = true;\n                    break;\n                }\n            }\n        }\n    }\n    sort(intervals.begin(), intervals.end());\n    return intervals;\n}\nint main() { for (const auto& interval : mergeSlow({{1,3},{2,6},{8,10},{15,18}})) cout << interval.first << \" \" << interval.second << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "leaders-in-an-array": [
+    {
+      "name": "Brute Force",
+      "description": "For every value, scan its suffix and keep it only when no greater value exists to its right.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> leaders(const vector<int>& values) {\n    vector<int> answer;\n    for (int i = 0; i < (int)values.size(); ++i) {\n        bool leader = true;\n        for (int j = i + 1; j < (int)values.size(); ++j) if (values[j] > values[i]) leader = false;\n        if (leader) answer.push_back(values[i]);\n    }\n    return answer;\n}\nint main() { for (int value : leaders({10,22,12,3,0,6})) cout << value << \" \"; return 0; }\n"
+    }
+  ],
+  "largest-subarray-with-0-sum": [
+    {
+      "name": "Brute Force",
+      "description": "Start at every index, extend the subarray, and retain the longest range whose running sum is zero.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestZeroSum(const vector<int>& values) {\n    int best = 0;\n    for (int left = 0; left < (int)values.size(); ++left) {\n        long long sum = 0;\n        for (int right = left; right < (int)values.size(); ++right) {\n            sum += values[right];\n            if (sum == 0) best = max(best, right - left + 1);\n        }\n    }\n    return best;\n}\nint main() { cout << longestZeroSum({9,-3,3,-1,6,-5}) << \"\\n\"; return 0; }\n"
+    }
+  ],
+  "merge-two-sorted-arrays-without-extra-space": [
+    {
+      "name": "Brute Force",
+      "description": "Copy both sorted arrays into one buffer, sort it, and split the values back into the original capacities.",
+      "timeComplexity": "O((N+M) log(N+M))",
+      "spaceComplexity": "O(N+M)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid mergeBuffered(vector<int>& first, vector<int>& second) {\n    vector<int> merged = first;\n    merged.insert(merged.end(), second.begin(), second.end());\n    sort(merged.begin(), merged.end());\n    copy(merged.begin(), merged.begin() + first.size(), first.begin());\n    copy(merged.begin() + first.size(), merged.end(), second.begin());\n}\nint main() { vector<int> first={1,4,8,10}, second={2,3,9}; mergeBuffered(first,second); for(int value:first) cout<<value<<\" \"; for(int value:second) cout<<value<<\" \"; return 0; }\n"
+    }
+  ],
+  "maximum-depth-of-binary-tree": [
+    {
+      "name": "Better (Level-Order BFS)",
+      "description": "Count queue layers from the root until every tree node has been visited.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(W)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstruct Node { int value; Node* left; Node* right; explicit Node(int value): value(value), left(nullptr), right(nullptr) {} };\nint depth(Node* root) {\n    if (!root) return 0;\n    queue<Node*> pending; pending.push(root); int levels = 0;\n    while (!pending.empty()) {\n        int width = pending.size(); ++levels;\n        while (width--) { Node* node=pending.front(); pending.pop(); if(node->left) pending.push(node->left); if(node->right) pending.push(node->right); }\n    }\n    return levels;\n}\nint main() { Node* root=new Node(1); root->left=new Node(2); root->left->left=new Node(3); cout<<depth(root)<<\"\\n\"; return 0; }\n"
+    }
+  ],
+  "invert-binary-tree": [
+    {
+      "name": "Better (Iterative BFS)",
+      "description": "Use a queue to swap every node's children without recursion.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(W)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstruct Node { int value; Node* left; Node* right; explicit Node(int value): value(value), left(nullptr), right(nullptr) {} };\nNode* invert(Node* root) {\n    if (!root) return root;\n    queue<Node*> pending; pending.push(root);\n    while (!pending.empty()) { Node* node=pending.front(); pending.pop(); swap(node->left,node->right); if(node->left) pending.push(node->left); if(node->right) pending.push(node->right); }\n    return root;\n}\nint main() { Node* root=new Node(1); root->left=new Node(2); root->right=new Node(3); invert(root); cout<<root->left->value<<\" \"<<root->right->value<<\"\\n\"; return 0; }\n"
+    }
+  ],
+  "level-order-traversal": [
+    {
+      "name": "Better (Recursive Levels)",
+      "description": "Collect nodes by depth with DFS, creating a result row the first time each depth is reached.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(H)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstruct Node { int value; Node* left; Node* right; explicit Node(int value): value(value), left(nullptr), right(nullptr) {} };\nvoid collect(Node* node, int depth, vector<vector<int>>& levels) { if(!node) return; if(depth==(int)levels.size()) levels.push_back({}); levels[depth].push_back(node->value); collect(node->left,depth+1,levels); collect(node->right,depth+1,levels); }\nint main() { Node* root=new Node(1); root->left=new Node(2); root->right=new Node(3); vector<vector<int>> levels; collect(root,0,levels); for(auto& level:levels){for(int value:level) cout<<value<<\" \"; cout<<\"\\n\";} return 0; }\n"
+    }
+  ],
+  "number-of-islands": [
+    {
+      "name": "Better (Breadth-First Search)",
+      "description": "Launch a queue traversal from every unvisited land cell and mark its full island.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(R * C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint islands(vector<string> grid) {\n    int rows=grid.size(), columns=grid[0].size(), answer=0; const int move[5]={-1,0,1,0,-1};\n    for(int row=0;row<rows;++row) for(int column=0;column<columns;++column) if(grid[row][column]=='1') {\n        ++answer; queue<pair<int,int>> pending; pending.push({row,column}); grid[row][column]='0';\n        while(!pending.empty()){pair<int,int> cell=pending.front(); int r=cell.first,c=cell.second; pending.pop(); for(int d=0;d<4;++d){int nr=r+move[d],nc=c+move[d+1]; if(nr>=0&&nr<rows&&nc>=0&&nc<columns&&grid[nr][nc]=='1'){grid[nr][nc]='0';pending.push({nr,nc});}}}\n    }\n    return answer;\n}\nint main(){cout<<islands({\"11000\",\"11000\",\"00100\",\"00011\"})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "clone-graph": [
+    {
+      "name": "Better (Breadth-First Copy)",
+      "description": "Create cloned nodes lazily while a queue walks each original edge.",
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstruct Node { int value; vector<Node*> neighbors; explicit Node(int value):value(value){} };\nNode* cloneGraph(Node* start) {\n    if(!start) return nullptr; unordered_map<Node*,Node*> copy; copy[start]=new Node(start->value); queue<Node*> pending; pending.push(start);\n    while(!pending.empty()){Node* node=pending.front();pending.pop();for(Node* next:node->neighbors){if(!copy.count(next)){copy[next]=new Node(next->value);pending.push(next);}copy[node]->neighbors.push_back(copy[next]);}}\n    return copy[start];\n}\nint main(){Node* a=new Node(1);Node* b=new Node(2);a->neighbors={b};b->neighbors={a};cout<<cloneGraph(a)->neighbors[0]->value<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "course-schedule": [
+    {
+      "name": "Better (DFS Cycle Detection)",
+      "description": "Color prerequisite nodes during DFS and reject any edge that returns to an active recursion path.",
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool visit(int node,const vector<vector<int>>& graph,vector<int>& color){color[node]=1;for(int next:graph[node]){if(color[next]==1)return false;if(color[next]==0&&!visit(next,graph,color))return false;}color[node]=2;return true;}\nbool canFinish(int courses,const vector<pair<int,int>>& prerequisites){vector<vector<int>> graph(courses);for(const auto& edge:prerequisites)graph[edge.second].push_back(edge.first);vector<int> color(courses);for(int node=0;node<courses;++node)if(color[node]==0&&!visit(node,graph,color))return false;return true;}\nint main(){cout<<boolalpha<<canFinish(2,{{1,0}})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "dijkstra-s-algorithm": [
+    {
+      "name": "Better (Array Selection)",
+      "description": "Select the nearest unvisited vertex with a linear scan and relax its outgoing adjacency-matrix edges.",
+      "timeComplexity": "O(V^2)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> dijkstra(const vector<vector<int>>& weight,int source){int n=weight.size();vector<int> distance(n,INT_MAX);vector<bool> used(n);distance[source]=0;for(int step=0;step<n;++step){int node=-1;for(int i=0;i<n;++i)if(!used[i]&&(node==-1||distance[i]<distance[node]))node=i;if(node==-1||distance[node]==INT_MAX)break;used[node]=true;for(int next=0;next<n;++next)if(weight[node][next]>=0)distance[next]=min(distance[next],distance[node]+weight[node][next]);}return distance;}\nint main(){vector<vector<int>> graph={{0,4,1},{-1,0,2},{-1,1,0}};for(int value:dijkstra(graph,0))cout<<value<<\" \";return 0;}\n"
+    }
+  ],
+  "flood-fill": [
+    {
+      "name": "Better (Breadth-First Search)",
+      "description": "Recolor the connected component iteratively with a queue.",
+      "timeComplexity": "O(R * C)",
+      "spaceComplexity": "O(R * C)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<vector<int>> fill(vector<vector<int>> image,int sr,int sc,int color){int original=image[sr][sc];if(original==color)return image;int rows=image.size(),columns=image[0].size(),move[5]={-1,0,1,0,-1};queue<pair<int,int>> pending;pending.push({sr,sc});image[sr][sc]=color;while(!pending.empty()){pair<int,int> cell=pending.front();int r=cell.first,c=cell.second;pending.pop();for(int d=0;d<4;++d){int nr=r+move[d],nc=c+move[d+1];if(nr>=0&&nr<rows&&nc>=0&&nc<columns&&image[nr][nc]==original){image[nr][nc]=color;pending.push({nr,nc});}}}return image;}\nint main(){auto answer=fill({{1,1,1},{1,1,0},{1,0,1}},1,1,2);cout<<answer[0][0]<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "bipartite-graph": [
+    {
+      "name": "Better (Recursive DFS Coloring)",
+      "description": "Assign opposite colors recursively and fail when an edge connects equal colors.",
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool color(int node,int shade,const vector<vector<int>>& graph,vector<int>& colors){colors[node]=shade;for(int next:graph[node]){if(colors[next]==shade)return false;if(colors[next]==-1&&!color(next,shade^1,graph,colors))return false;}return true;}\nbool bipartite(const vector<vector<int>>& graph){vector<int> colors(graph.size(),-1);for(int node=0;node<(int)graph.size();++node)if(colors[node]==-1&&!color(node,0,graph,colors))return false;return true;}\nint main(){cout<<boolalpha<<bipartite({{1,3},{0,2},{1,3},{0,2}})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "topological-sort": [
+    {
+      "name": "Better (Kahn's BFS)",
+      "description": "Repeatedly remove zero-indegree vertices to form a topological ordering.",
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> topological(const vector<vector<int>>& graph){vector<int> indegree(graph.size());for(auto& edges:graph)for(int next:edges)++indegree[next];queue<int> pending;for(int node=0;node<(int)graph.size();++node)if(indegree[node]==0)pending.push(node);vector<int> order;while(!pending.empty()){int node=pending.front();pending.pop();order.push_back(node);for(int next:graph[node])if(--indegree[next]==0)pending.push(next);}return order;}\nint main(){for(int node:topological({{1,2},{3},{3},{}}))cout<<node<<\" \";return 0;}\n"
+    }
+  ],
+  "undirected-cycle-detection": [
+    {
+      "name": "Better (Breadth-First Parent Tracking)",
+      "description": "Traverse each component with node-parent pairs and detect any visited neighbor other than the parent.",
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool cyclic(const vector<vector<int>>& graph){vector<bool> seen(graph.size());for(int start=0;start<(int)graph.size();++start)if(!seen[start]){queue<pair<int,int>> pending;pending.push({start,-1});seen[start]=true;while(!pending.empty()){pair<int,int> state=pending.front();int node=state.first,parent=state.second;pending.pop();for(int next:graph[node]){if(!seen[next]){seen[next]=true;pending.push({next,node});}else if(next!=parent)return true;}}}return false;}\nint main(){cout<<boolalpha<<cyclic({{1,2},{0,2},{0,1}})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "longest-substring-without-repeating-characters": [
+    {
+      "name": "Brute Force",
+      "description": "Start at every character and extend until the first repeated character.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint longestUnique(const string& text){int best=0;for(int left=0;left<(int)text.size();++left){array<bool,256> seen{};for(int right=left;right<(int)text.size()&&!seen[(unsigned char)text[right]];++right){seen[(unsigned char)text[right]]=true;best=max(best,right-left+1);}}return best;}\nint main(){cout<<longestUnique(\"abcabcbb\")<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "longest-palindromic-substring": [
+    {
+      "name": "Brute Force",
+      "description": "Enumerate every substring and check it from both ends.",
+      "timeComplexity": "O(N^3)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool palindrome(const string& text,int left,int right){while(left<right)if(text[left++]!=text[right--])return false;return true;}\nstring longestPalindrome(const string& text){int bestStart=0,bestLength=0;for(int left=0;left<(int)text.size();++left)for(int right=left;right<(int)text.size();++right)if(right-left+1>bestLength&&palindrome(text,left,right)){bestStart=left;bestLength=right-left+1;}return text.substr(bestStart,bestLength);}\nint main(){cout<<longestPalindrome(\"babad\")<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "rotate-string": [
+    {
+      "name": "Brute Force",
+      "description": "Construct every left rotation and compare it with the target string.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool isRotation(const string& source,const string& target){if(source.size()!=target.size())return false;for(int shift=0;shift<(int)source.size();++shift){string rotated=source.substr(shift)+source.substr(0,shift);if(rotated==target)return true;}return source.empty();}\nint main(){cout<<boolalpha<<isRotation(\"abcde\",\"cdeab\")<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "sort-characters-by-frequency": [
+    {
+      "name": "Better (Comparison Sort)",
+      "description": "Count characters, then sort distinct character-frequency pairs before expanding the answer.",
+      "timeComplexity": "O(N + K log K)",
+      "spaceComplexity": "O(K)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstring frequencySort(const string& text){unordered_map<char,int> count;for(char ch:text)++count[ch];vector<pair<int,char>> items;for(const auto& item:count)items.push_back({item.second,item.first});sort(items.rbegin(),items.rend());string answer;for(const auto& item:items)answer.append(item.first,item.second);return answer;}\nint main(){cout<<frequencySort(\"tree\")<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "longest-common-prefix": [
+    {
+      "name": "Better (Sort First and Last)",
+      "description": "Sort the strings; only the lexicographically first and last strings need to be compared.",
+      "timeComplexity": "O(N log N * L)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nstring prefix(vector<string> words){if(words.empty())return \"\";sort(words.begin(),words.end());int length=0;while(length<(int)min(words.front().size(),words.back().size())&&words.front()[length]==words.back()[length])++length;return words.front().substr(0,length);}\nint main(){cout<<prefix({\"flower\",\"flow\",\"flight\"})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "string-pattern-matching-rabin-karp": [
+    {
+      "name": "Brute Force",
+      "description": "Align the pattern at every valid text position and compare characters directly.",
+      "timeComplexity": "O(N * M)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> search(const string& text,const string& pattern){vector<int> matches;for(int start=0;start+(int)pattern.size()<=(int)text.size();++start){int index=0;while(index<(int)pattern.size()&&text[start+index]==pattern[index])++index;if(index==(int)pattern.size())matches.push_back(start);}return matches;}\nint main(){for(int index:search(\"abracadabra\",\"abra\"))cout<<index<<\" \";return 0;}\n"
+    }
+  ],
+  "valid-parentheses": [
+    {
+      "name": "Brute Force",
+      "description": "Repeatedly erase adjacent bracket pairs until no more pairs can be removed.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool valid(string text){bool changed=true;while(changed){changed=false;for(const string pair: {\"()\",\"[]\",\"{}\"}){size_t position;while((position=text.find(pair))!=string::npos){text.erase(position,2);changed=true;}}}return text.empty();}\nint main(){cout<<boolalpha<<valid(\"{[()]}\")<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "next-greater-element-i": [
+    {
+      "name": "Brute Force",
+      "description": "For each query value, scan rightward in the reference array for the first greater value.",
+      "timeComplexity": "O(Q * N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> nextGreater(const vector<int>& query,const vector<int>& reference){vector<int> answer;for(int value:query){auto position=find(reference.begin(),reference.end(),value);int greater=-1;for(++position;position!=reference.end();++position)if(*position>value){greater=*position;break;}answer.push_back(greater);}return answer;}\nint main(){for(int value:nextGreater({4,1,2},{1,3,4,2}))cout<<value<<\" \";return 0;}\n"
+    }
+  ],
+  "largest-rectangle-in-histogram": [
+    {
+      "name": "Brute Force",
+      "description": "Treat every bar as a starting point, extend rightward, and track the minimum height in each interval.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nlong long largestRectangle(const vector<int>& heights){long long best=0;for(int left=0;left<(int)heights.size();++left){int minimum=INT_MAX;for(int right=left;right<(int)heights.size();++right){minimum=min(minimum,heights[right]);best=max(best,1LL*minimum*(right-left+1));}}return best;}\nint main(){cout<<largestRectangle({2,1,5,6,2,3})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "kth-largest-element-in-an-array": [
+    {
+      "name": "Brute Force",
+      "description": "Sort the complete array in descending order and select the requested rank.",
+      "timeComplexity": "O(N log N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint kthLargest(vector<int> values,int k){sort(values.rbegin(),values.rend());return values[k-1];}\nint main(){cout<<kthLargest({3,2,1,5,6,4},2)<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "top-k-frequent-elements": [
+    {
+      "name": "Better (Full Frequency Sort)",
+      "description": "Count all values, sort every value-frequency pair, and take the first k.",
+      "timeComplexity": "O(N + U log U)",
+      "spaceComplexity": "O(U)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> topK(const vector<int>& values,int k){unordered_map<int,int> count;for(int value:values)++count[value];vector<pair<int,int>> items;for(const auto& item:count)items.push_back({item.second,item.first});sort(items.rbegin(),items.rend());vector<int> answer;for(int i=0;i<k;++i)answer.push_back(items[i].second);return answer;}\nint main(){for(int value:topK({1,1,1,2,2,3},2))cout<<value<<\" \";return 0;}\n"
+    }
+  ],
+  "merge-k-sorted-lists": [
+    {
+      "name": "Brute Force",
+      "description": "Append every list into one buffer and sort the combined values.",
+      "timeComplexity": "O(N log N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> mergeLists(const vector<vector<int>>& lists){vector<int> merged;for(const auto& list:lists)merged.insert(merged.end(),list.begin(),list.end());sort(merged.begin(),merged.end());return merged;}\nint main(){for(int value:mergeLists({{1,4,5},{1,3,4},{2,6}}))cout<<value<<\" \";return 0;}\n"
+    }
+  ],
+  "jump-game": [
+    {
+      "name": "Better (Quadratic DP)",
+      "description": "Mark every index reachable from an earlier reachable index whose jump covers it.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool canJump(const vector<int>& jumps){vector<bool> reachable(jumps.size());reachable[0]=true;for(int i=1;i<(int)jumps.size();++i)for(int previous=0;previous<i;++previous)if(reachable[previous]&&previous+jumps[previous]>=i){reachable[i]=true;break;}return reachable.back();}\nint main(){cout<<boolalpha<<canJump({2,3,1,1,4})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "gas-station": [
+    {
+      "name": "Brute Force",
+      "description": "Simulate a complete circuit from every possible starting station.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint startStation(const vector<int>& gas,const vector<int>& cost){int n=gas.size();for(int start=0;start<n;++start){int fuel=0,steps=0;while(steps<n){int station=(start+steps)%n;fuel+=gas[station]-cost[station];if(fuel<0)break;++steps;}if(steps==n)return start;}return -1;}\nint main(){cout<<startStation({1,2,3,4,5},{3,4,5,1,2})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "jump-game-ii": [
+    {
+      "name": "Better (Quadratic DP)",
+      "description": "Relax the minimum jump count from every reachable position to all positions inside its jump range.",
+      "timeComplexity": "O(N^2)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint minimumJumps(const vector<int>& jumps){vector<int> distance(jumps.size(),INT_MAX);distance[0]=0;for(int index=0;index<(int)jumps.size();++index)if(distance[index]!=INT_MAX)for(int next=index+1;next<(int)jumps.size()&&next<=index+jumps[index];++next)distance[next]=min(distance[next],distance[index]+1);return distance.back();}\nint main(){cout<<minimumJumps({2,3,1,1,4})<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "check-if-a-number-is-odd-or-not": [
+    {
+      "name": "Brute Force",
+      "description": "Use the arithmetic remainder after division by two.",
+      "timeComplexity": "O(1)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool odd(long long value){return value%2!=0;}\nint main(){cout<<boolalpha<<odd(17)<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "check-if-i-th-bit-is-set-or-not": [
+    {
+      "name": "Brute Force",
+      "description": "Repeatedly divide by two until the requested binary digit becomes the least significant digit.",
+      "timeComplexity": "O(I)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool bitSet(unsigned value,int index){while(index--)value/=2;return value%2;}\nint main(){cout<<boolalpha<<bitSet(13,2)<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "check-if-a-number-is-power-of-2-or-not": [
+    {
+      "name": "Brute Force",
+      "description": "Repeatedly divide an even positive number by two and check whether the process ends at one.",
+      "timeComplexity": "O(log N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool powerOfTwo(long long value){if(value<=0)return false;while(value%2==0)value/=2;return value==1;}\nint main(){cout<<boolalpha<<powerOfTwo(64)<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "count-the-number-of-set-bits": [
+    {
+      "name": "Brute Force",
+      "description": "Inspect every binary digit by shifting the number one position at a time.",
+      "timeComplexity": "O(log N)",
+      "spaceComplexity": "O(1)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint setBits(unsigned value){int count=0;while(value){count+=value&1U;value>>=1;}return count;}\nint main(){cout<<setBits(29)<<\"\\n\";return 0;}\n"
+    }
+  ],
+  "find-the-number-that-appears-once-and-the-other-numbers-appear-twice": [
+    {
+      "name": "Brute Force",
+      "description": "Count every value in a hash table and return the value with frequency one.",
+      "timeComplexity": "O(N)",
+      "spaceComplexity": "O(N)",
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint singleNumber(const vector<int>& values){unordered_map<int,int> count;for(int value:values)++count[value];for(const auto& item:count)if(item.second==1)return item.first;return -1;}\nint main(){cout<<singleNumber({4,1,2,1,2})<<\"\\n\";return 0;}\n"
+    }
+  ]
+}

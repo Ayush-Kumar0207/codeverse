@@ -22,6 +22,7 @@ import { generatedStriverAlgorithms } from "./generated_striver_algos";
 import { completeAlgorithmExplanations } from "./explanation_completion";
 import { completeAlgorithmImplementations } from "./implementation_completion";
 import { completeAlgorithmVisualizers } from "./visualizer_completion";
+import { completeCppApproaches } from "./cpp_approach_completion";
 
 // Base curated algorithms across all standard topics
 const curatedAlgorithms: AlgorithmEntry[] = [
@@ -128,8 +129,10 @@ const assembledAlgorithms: AlgorithmEntry[] = [
 ];
 
 export const AT_ALGORITHMS: AlgorithmEntry[] =
-  completeAlgorithmVisualizers(
-    completeAlgorithmImplementations(completeAlgorithmExplanations(assembledAlgorithms))
+  completeCppApproaches(
+    completeAlgorithmVisualizers(
+      completeAlgorithmImplementations(completeAlgorithmExplanations(assembledAlgorithms))
+    )
   );
 
 export * from "./types";

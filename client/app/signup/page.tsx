@@ -293,8 +293,11 @@ export default function SignUpPage() {
                   )}
 
                   <div>
-                    <label className="text-sm font-bold text-slate-200">Username</label>
+                    <label htmlFor="signup-username" className="text-sm font-bold text-slate-200">Username</label>
                     <input
+                      id="signup-username"
+                      name="username"
+                      autoComplete="username"
                       className="mt-2 h-12 w-full rounded-md border border-white/10 bg-black/35 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-teal-300/60 focus:ring-2 focus:ring-teal-300/15"
                       placeholder="Choose a username"
                       value={form.username}
@@ -304,8 +307,11 @@ export default function SignUpPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold text-slate-200">Email</label>
+                    <label htmlFor="signup-email" className="text-sm font-bold text-slate-200">Email</label>
                     <input
+                      id="signup-email"
+                      name="email"
+                      autoComplete="email"
                       className="mt-2 h-12 w-full rounded-md border border-white/10 bg-black/35 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-teal-300/60 focus:ring-2 focus:ring-teal-300/15"
                       type="email"
                       placeholder="you@example.com"
@@ -316,8 +322,11 @@ export default function SignUpPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold text-slate-200">Password</label>
+                    <label htmlFor="signup-password" className="text-sm font-bold text-slate-200">Password</label>
                     <input
+                      id="signup-password"
+                      name="password"
+                      autoComplete="new-password"
                       type="password"
                       className="mt-2 h-12 w-full rounded-md border border-white/10 bg-black/35 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-teal-300/60 focus:ring-2 focus:ring-teal-300/15"
                       placeholder="Create a password"

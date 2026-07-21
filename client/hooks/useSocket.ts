@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import socket from "@/lib/socket";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 
@@ -24,10 +24,6 @@ export function useSocket(roomId?: string) {
     [roomId]
   );
 
-  useEffect(() => {
-    if (!roomId) return;
-    api.joinRoom(roomId);
-  }, [api, roomId]);
 
   return api;
 }

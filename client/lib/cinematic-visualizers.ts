@@ -3,21 +3,10 @@ import type { AlgorithmEntry } from "@/data/algos";
 const TWO_SUM_CINEMATIC_VISUALIZER = "two-sum-cinematic-3d";
 const UNIVERSAL_CINEMATIC_VISUALIZER = "codeverse-cinematic-3d";
 
-const CINEMATIC_ALGORITHM_IDS = new Set([
-  "two-sum",
-  "kadanes-algorithm",
-  "sort-an-array-of-0-s-1-s-and-2-s",
-  "subarray-sum-equals-k",
-  "merge-intervals",
-  "next-permutation",
-  "find-the-duplicate-number",
-  "majority-element-n-2-times",
-  "best-time-to-buy-and-sell-stock",
-  "rearrange-array-elements-by-sign",
-]);
-
-export function hasCinematicVisualizer(algorithm: Pick<AlgorithmEntry, "id">) {
-  return CINEMATIC_ALGORITHM_IDS.has(algorithm.id);
+export function hasCinematicVisualizer(
+  algorithm: Pick<AlgorithmEntry, "id" | "visualizerCode">
+) {
+  return Boolean(algorithm.id && algorithm.visualizerCode?.trim());
 }
 export function getCinematicVisualizerCode(algorithm: AlgorithmEntry) {
   if (!hasCinematicVisualizer(algorithm)) return "";
@@ -278,7 +267,7 @@ function getUniversalCinematicVisualizerCode(algorithm: AlgorithmEntry) {
   if (!source) return "";
 
   const profile = UNIVERSAL_CINEMATIC_PROFILES[algorithm.id] || {
-    title: `${algorithm.title} cinematic stage`,
+    title: algorithm.title,
     family: algorithm.category || algorithm.topic || "Algorithm",
     mode: "Shared 3D grammar",
     palette: { primary: "#22d3ee", secondary: "#a78bfa", accent: "#fbbf24", danger: "#fb7185", success: "#34d399", neutral: "#2563eb" },

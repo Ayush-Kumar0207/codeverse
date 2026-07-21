@@ -64,8 +64,7 @@ function isOrganizerSocket(socket, roomId) {
 
   return (
     organizer.socketId === socket.id ||
-    (organizer.userId && organizer.userId === socket.data.userId) ||
-    (organizer.username && organizer.username === socket.data.username)
+    (organizer.userId && organizer.userId === socket.data.userId)
   );
 }
 
@@ -104,11 +103,12 @@ function maybeAssignOrganizer(roomId, socket, user) {
   const access = getRoomAccess(roomId);
   if (!user?.username) return;
 
-  const shouldClaimOrganizer = user.isOrganizer || (!access.organizer && !user.organizerKnown);
+  const shouldClaimOrganizer =
+    !access.organizer && (user.isOrganizer || !user.organizerKnown);
   const isCurrentOrganizer =
     access.organizer &&
-    ((user.userId && user.userId === access.organizer.userId) ||
-      (user.username && user.username === access.organizer.username));
+    user.userId &&
+    user.userId === access.organizer.userId;
 
   if (shouldClaimOrganizer || isCurrentOrganizer) {
     access.organizer = {
@@ -117,6 +117,30 @@ function maybeAssignOrganizer(roomId, socket, user) {
       userId: user.userId,
     };
   }
+}
+
+function cleanupRoomIfEmpty(roomId) {
+  if (Object.keys(roomUsers[roomId] || {}).length > 0) return;
+  delete roomUsers[roomId];
+  delete roomAccess[roomId];
+  delete roomFiles[roomId];
+}
+
+function leaveTrackedRoom(io, socket, roomId) {
+  const presence = roomUsers[roomId]?.[socket.id];
+  if (presence) {
+    delete roomUsers[roomId][socket.id];
+    socket.to(roomId).emit(SOCKET_EVENTS.USER_LEFT, presence);
+    socket.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
+  }
+
+  const access = roomAccess[roomId];
+  if (access?.organizer?.socketId === socket.id) {
+    access.organizer.socketId = "";
+  }
+
+  socket.leave(roomId);
+  cleanupRoomIfEmpty(roomId);
 }
 
 function removeRoomUser(io, roomId, targetSocketId, reason = "Removed by organizer.") {
@@ -133,13 +157,11 @@ function removeRoomUser(io, roomId, targetSocketId, reason = "Removed by organiz
   targetSocket.leave(roomId);
 
   delete roomUsers[roomId][targetSocketId];
+  if (targetSocket.data.roomId === roomId) targetSocket.data.roomId = "";
   io.to(roomId).emit(SOCKET_EVENTS.USER_LEFT, targetPresence);
   io.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
 
-  if (Object.keys(roomUsers[roomId]).length === 0) {
-    delete roomUsers[roomId];
-    delete roomAccess[roomId];
-  }
+  cleanupRoomIfEmpty(roomId);
 
   return true;
 }
@@ -152,9 +174,17 @@ function socketHandler(io) {
       const { roomId, user } = normalizeJoinPayload(payload);
       if (!roomId) return;
 
-      socket.join(roomId);
+      const previousRoomId = socket.data.roomId;
+      if (previousRoomId && previousRoomId !== roomId) {
+        leaveTrackedRoom(io, socket, previousRoomId);
+      }
+
+      const isRepeatJoin = previousRoomId === roomId && isSocketInRoom(socket, roomId);
+      if (!isRepeatJoin) {
+        socket.join(roomId);
+        console.log(`👥 ${socket.id} joined room ${roomId}`);
+      }
       socket.data.roomId = roomId;
-      console.log(`👥 ${socket.id} joined room ${roomId}`);
 
       if (user?.username) {
         maybeAssignOrganizer(roomId, socket, user);
@@ -172,10 +202,16 @@ function socketHandler(io) {
           canEdit: canSocketEdit(socket, roomId),
         };
 
+        const previousPresence = room[socket.id];
         room[socket.id] = presence;
         roomUsers[roomId] = room;
-        socket.emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
-        socket.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, presence);
+
+        if (!isRepeatJoin || !previousPresence) {
+          socket.emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
+          socket.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, presence);
+        } else if (JSON.stringify(previousPresence) !== JSON.stringify(presence)) {
+          io.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, serializeRoomUsers(roomId));
+        }
       }
 
       socket.emit(SOCKET_EVENTS.EDIT_PERMISSION_STATE, serializeAccessState(roomId));
@@ -293,23 +329,28 @@ function socketHandler(io) {
       socket.to(roomId).emit(SOCKET_EVENTS.EXECUTION_ERROR, { user, error });
     });
     
-    socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, ({ roomId, username, status }) => {
+    socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, ({ roomId, status }) => {
       if (!isSocketInRoom(socket, roomId)) return;
 
       if (roomId && roomUsers[roomId]?.[socket.id]) {
+        const username = roomUsers[roomId][socket.id].username;
         roomUsers[roomId][socket.id] = {
           ...roomUsers[roomId][socket.id],
-          username,
-          status,
+          status: typeof status === "string" ? status.slice(0, 160) : "Editing",
           canEdit: canSocketEdit(socket, roomId),
         };
+        socket.to(roomId).emit(SOCKET_EVENTS.PRESENCE_UPDATE, {
+          username,
+          status: roomUsers[roomId][socket.id].status,
+        });
       }
-      socket.to(roomId).emit(SOCKET_EVENTS.PRESENCE_UPDATE, { username, status });
     });
 
-    socket.on(SOCKET_EVENTS.CURSOR_MOVE, ({ roomId, username, position }) => {
-      if (!roomId || !username || !position) return;
+    socket.on(SOCKET_EVENTS.CURSOR_MOVE, ({ roomId, position }) => {
+      if (!roomId || !position) return;
       if (!isSocketInRoom(socket, roomId)) return;
+      const username = roomUsers[roomId]?.[socket.id]?.username;
+      if (!username) return;
       socket.to(roomId).emit(SOCKET_EVENTS.CURSOR_MOVE, { username, position });
     });
 
@@ -322,15 +363,7 @@ function socketHandler(io) {
 
     socket.on("disconnect", () => {
       const roomId = socket.data.roomId;
-      if (roomId && roomUsers[roomId]?.[socket.id]) {
-        const user = roomUsers[roomId][socket.id];
-        delete roomUsers[roomId][socket.id];
-        socket.to(roomId).emit(SOCKET_EVENTS.USER_LEFT, user);
-        if (Object.keys(roomUsers[roomId]).length === 0) {
-          delete roomUsers[roomId];
-          delete roomAccess[roomId];
-        }
-      }
+      if (roomId) leaveTrackedRoom(io, socket, roomId);
       console.log("❌ User disconnected:", socket.id);
     });
   });

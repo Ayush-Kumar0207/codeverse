@@ -46,7 +46,7 @@ export default function SourcePage() {
             </div>
             <div className="grid gap-2 font-mono text-sm text-teal-100">
               {sourceEntries.map((entry) => (
-                <span key={entry} className="rounded-md border border-white/10 bg-[#05090b] px-3 py-2">
+                <span key={entry} className="min-w-0 break-all rounded-md border border-white/10 bg-[#05090b] px-3 py-2">
                   {entry}
                 </span>
               ))}

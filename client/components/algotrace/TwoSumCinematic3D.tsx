@@ -79,7 +79,7 @@ export default function TwoSumCinematic3D({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = scenePreset.renderer.toneMappingExposure;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.domElement.dataset.testid = scenePreset.rendererTestId;
     renderer.domElement.style.display = "block";
     renderer.domElement.style.height = "100%";
@@ -190,10 +190,12 @@ export default function TwoSumCinematic3D({
     renderer.domElement.addEventListener("pointerleave", handlePointerLeave);
     renderer.domElement.addEventListener("wheel", handleWheel, { passive: false });
 
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     let frame = 0;
     const animate = () => {
-      const elapsed = clock.getElapsedTime();
+      timer.update();
+      const elapsed = timer.getElapsed();
       updateCamera();
 
       for (const object of pulseMeshes) {
@@ -206,17 +208,19 @@ export default function TwoSumCinematic3D({
         const curve = object.userData.curve as THREE.Curve<THREE.Vector3> | undefined;
         if (!curve) continue;
         const phase = Number(object.userData.phase || 0);
-        object.position.copy(curve.getPointAt((elapsed * 0.18 + phase) % 1));
+        const progress = THREE.MathUtils.euclideanModulo(elapsed * 0.18 + phase, 1);
+        curve.getPointAt(progress, object.position);
         object.scale.setScalar(0.85 + Math.sin(elapsed * 4 + phase * 8) * 0.12);
       }
 
       renderer.render(scene, camera);
       frame = window.requestAnimationFrame(animate);
     };
-    animate();
+    frame = window.requestAnimationFrame(animate);
 
     return () => {
       window.cancelAnimationFrame(frame);
+      timer.dispose();
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener("pointerdown", handlePointerDown);
       renderer.domElement.removeEventListener("pointerup", handlePointerUp);

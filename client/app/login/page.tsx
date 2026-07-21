@@ -182,8 +182,11 @@ export default function LoginPage() {
 
             <form className="space-y-4" onSubmit={handleLogin}>
               <div>
-                <label className="text-sm font-bold text-slate-200">Username</label>
+                <label htmlFor="login-username" className="text-sm font-bold text-slate-200">Username</label>
                 <input
+                  id="login-username"
+                  name="username"
+                  autoComplete="username"
                   type="text"
                   placeholder="Enter your username"
                   value={username}
@@ -194,8 +197,11 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="text-sm font-bold text-slate-200">Password</label>
+                <label htmlFor="login-password" className="text-sm font-bold text-slate-200">Password</label>
                 <input
+                  id="login-password"
+                  name="password"
+                  autoComplete="current-password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}

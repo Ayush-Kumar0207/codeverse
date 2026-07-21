@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { NetworkTopology } from "@/components/NetworkTopology";
 import { cn } from "@/lib/utils";
 import { AudioProfile, Snapshot, ThemeType, useSettings } from "@/context/SettingsContext";
+import { useAuth } from "@/context/AuthContext";
 
 const settingsTabs = [
   { id: "appearance", label: "Appearance", icon: Palette },
@@ -96,6 +97,7 @@ const audioProfiles: { id: AudioProfile; label: string; icon: LucideIcon }[] = [
 ];
 
 export default function SettingsHub() {
+  const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>("appearance");
   const [showCode, setShowCode] = useState(false);
   const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
@@ -200,7 +202,7 @@ export default function SettingsHub() {
             </div>
 
             <div className="p-4 sm:p-5">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="sync">
                 {activeTab === "appearance" && (
                   <TabMotion key="appearance">
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.82fr)]">
@@ -451,10 +453,11 @@ export default function SettingsHub() {
                         </div>
                         <Button
                           onClick={() => performSync(true)}
-                          disabled={syncStatus === "syncing"}
+                          disabled={syncStatus === "syncing" || !token}
+                          title={token ? "Synchronize settings with the cloud" : "Sign in to enable cloud sync"}
                           className="h-10 rounded-md bg-primary px-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {syncStatus === "syncing" ? "Syncing" : "Sync Now"}
+                          {syncStatus === "syncing" ? "Syncing" : token ? "Sync Now" : "Sign In to Sync"}
                         </Button>
                       </div>
 
@@ -488,7 +491,11 @@ export default function SettingsHub() {
                 {activeTab === "security" && (
                   <TabMotion key="security">
                     <div className="grid gap-4 lg:grid-cols-3">
-                      <SecurityStatus title="Authenticated Shell" value="Guarded" tone="success" />
+                      <SecurityStatus
+                        title="Authenticated Shell"
+                        value={token ? "Guarded" : "Signed out"}
+                        tone={token ? "success" : "warning"}
+                      />
                       <SecurityStatus title="Local Config" value="Persisted" tone="primary" />
                       <SecurityStatus title="Cloud Sync" value={isSynced ? "Aligned" : "Local"} tone={isSynced ? "success" : "warning"} />
                       <SettingsPanel title="Security Posture" icon={Shield} className="lg:col-span-3">
@@ -860,6 +867,7 @@ function JsonPane({ value, onChange }: { value: string; onChange: (json: string)
         </div>
       </div>
       <textarea
+        aria-label="Settings JSON configuration"
         spellCheck={false}
         value={value}
         onChange={(event) => onChange(event.target.value)}

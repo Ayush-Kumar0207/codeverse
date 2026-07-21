@@ -166,6 +166,7 @@ export default function ChatBox({
 
       <div className="mt-4 flex flex-col gap-2 border-t border-border pt-3">
         <textarea
+          aria-label={aiMode ? "Ask AI assistant" : "Message collaborators"}
           ref={textareaRef}
           placeholder={placeholder}
           value={input}

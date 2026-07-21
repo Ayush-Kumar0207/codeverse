@@ -25,6 +25,7 @@ function completeApproachImplementations(
   const extras: CodeImplementation[] = [];
   const sourceLanguages =
     approach.implementations?.map((implementation) => implementation.language).join(", ") || "none";
+  const specificCodePack = getSpecificCodePack(algorithm, approach);
 
   for (const implementation of approach.implementations || []) {
     const canonical = canonicalLanguage(implementation.language);
@@ -35,7 +36,12 @@ function completeApproachImplementations(
       continue;
     }
 
-    if (!existingByLanguage.has(canonical) && !shouldReplaceImplementation(algorithm, canonical, implementation)) {
+    const shouldUseVerifiedCppPack = canonical === "C++" && Boolean(specificCodePack);
+    if (
+      !existingByLanguage.has(canonical)
+      && !shouldUseVerifiedCppPack
+      && !shouldReplaceImplementation(algorithm, canonical, implementation)
+    ) {
       existingByLanguage.set(canonical, {
         ...implementation,
         language: canonical,
@@ -43,7 +49,6 @@ function completeApproachImplementations(
     }
   }
 
-  const specificCodePack = getSpecificCodePack(algorithm, approach);
   const requiredImplementations = REQUIRED_LANGUAGES.flatMap((language) => {
     const existing = existingByLanguage.get(language);
     if (existing) return [existing];
@@ -676,7 +681,7 @@ function getSpecificCodePack(algorithm: AlgorithmEntry, approach: AlgorithmAppro
   if (text.includes("subarray sum equals k")) return subarraySumKCode();
   if (text.includes("merge intervals")) return mergeIntervalsCode();
   if (text.includes("next permutation")) return nextPermutationCode();
-  if (text.includes("duplicate number")) return findDuplicateCode();
+  if (algorithm.id === "find-the-duplicate-number") return findDuplicateCode();
   if (text.includes("majority element") && (text.includes("n/2") || text.includes("n 2") || text.includes(">n/2"))) return majorityElementCode();
   if (text.includes("best time to buy and sell stock") && !text.includes(" ii") && !text.includes(" iii")) return stockOneCode();
   if (text.includes("rearrange array elements by sign")) return rearrangeBySignCode();

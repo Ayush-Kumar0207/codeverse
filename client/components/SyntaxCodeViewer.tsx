@@ -23,19 +23,16 @@ export default function SyntaxCodeViewer({
   language,
   fileName,
   activeLine,
-  onLineSelect,
 }: {
   code: string;
   language: string;
   fileName: string;
   activeLine?: number | null;
-  onLineSelect?: (line: number) => void;
 }) {
   const { settings } = useSettings();
   const monacoRef = useRef<typeof monacoType | null>(null);
   const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
   const decorationsRef = useRef<monacoType.editor.IEditorDecorationsCollection | null>(null);
-  const onLineSelectRef = useRef(onLineSelect);
   const editorLanguage = languageAliases[language.toLowerCase()] || language.toLowerCase();
   const height = useMemo(() => {
     const lineCount = code.split("\n").length;
@@ -52,16 +49,9 @@ export default function SyntaxCodeViewer({
     defineCodeVerseTheme(monaco, settings.appearance.theme);
     monaco.editor.setTheme("codeverse-active");
     decorationsRef.current = editor.createDecorationsCollection();
-    editor.onMouseDown((event) => {
-      const lineNumber = event.target.position?.lineNumber;
-      if (lineNumber && onLineSelectRef.current) onLineSelectRef.current(lineNumber - 1);
-    });
     editor.layout();
   };
 
-  useEffect(() => {
-    onLineSelectRef.current = onLineSelect;
-  }, [onLineSelect]);
 
   useEffect(() => {
     if (!monacoRef.current) return;
