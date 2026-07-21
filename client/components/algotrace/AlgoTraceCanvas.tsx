@@ -8,6 +8,7 @@ import PlaybackControls from "./PlaybackControls";
 import FeedbackLoop from "./FeedbackLoop";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { applyClearNarrationVoice, isNarrationSupported, resolveNarrationVoice } from "@/lib/speech";
 
 const EMPTY_TRACE: StateData = {
   status: "Ready",
@@ -153,21 +154,23 @@ export default function AlgoTraceCanvas({
   );
 
   useEffect(() => {
-    if (!narrationEnabled || !presentationMode || !("speechSynthesis" in window)) return;
+    if (!narrationEnabled || !presentationMode || !isNarrationSupported()) return;
     if (activeState === EMPTY_TRACE || activeState === NON_EXECUTABLE_TRACE) return;
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(narrationText);
-    const voices = window.speechSynthesis.getVoices();
-    utterance.voice = voices.find((voice) =>
-      /natural|google|aria|jenny|samantha/i.test(voice.name) && /^en/i.test(voice.lang)
-    ) || voices.find((voice) => /^en/i.test(voice.lang)) || null;
-    utterance.rate = 0.94;
-    utterance.pitch = 1.02;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
+    const synthesis = window.speechSynthesis;
+    let disposed = false;
+    synthesis.cancel();
+    void resolveNarrationVoice(synthesis).then((voice) => {
+      if (disposed) return;
+      const utterance = new SpeechSynthesisUtterance(narrationText);
+      applyClearNarrationVoice(utterance, voice);
+      synthesis.speak(utterance);
+    });
 
-    return () => window.speechSynthesis.cancel();
+    return () => {
+      disposed = true;
+      synthesis.cancel();
+    };
   }, [activeState, narrationEnabled, narrationText, presentationMode]);
 
   useEffect(() => {

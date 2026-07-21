@@ -249,14 +249,11 @@ export const toSpeakableNarration = (line: NarrationLine) => {
 };
 
 export const narrationVoiceProfile = (line: NarrationLine, index: number, total: number) => {
-  const seed = hashString(`${line.id}-${line.text}-${index}`);
-  const rateJitter = ((seed % 7) - 3) * 0.008;
-  const pitchJitter = ((seed % 5) - 2) * 0.012;
   const finalPause = index >= total - 1 ? 0 : undefined;
 
   return {
-    rate: clamp((line.rate ?? 0.88) + rateJitter, 0.76, 0.98),
-    pitch: clamp((line.pitch ?? 0.96) + pitchJitter, 0.88, 1.06),
+    rate: clamp(line.rate ?? 0.88, 0.82, 0.94),
+    pitch: 1,
     volume: 1,
     pauseAfterMs: finalPause ?? line.pauseAfterMs ?? 220,
   };

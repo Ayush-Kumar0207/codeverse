@@ -13,6 +13,7 @@ import {
 import { Pause, Play, RotateCcw, Square, Volume2, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { narrationVoiceProfile, toSpeakableNarration, type NarrationLine } from "@/lib/narration";
+import { applyClearNarrationVoice, isNarrationSupported, resolveNarrationVoice } from "@/lib/speech";
 
 type NarrationState = {
   activeIndex: number | null;
@@ -22,27 +23,6 @@ type NarrationState = {
 };
 
 const NarrationContext = createContext<NarrationState | null>(null);
-
-const preferredVoiceNames = [
-  "natural",
-  "neural",
-  "aria",
-  "jenny",
-  "samantha",
-  "serena",
-  "google uk english female",
-];
-
-function selectVoice(voices: SpeechSynthesisVoice[]) {
-  const englishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
-  return (
-    preferredVoiceNames
-      .map((name) => englishVoices.find((voice) => voice.name.toLowerCase().includes(name)))
-      .find(Boolean) ||
-    englishVoices[0] ||
-    voices[0]
-  );
-}
 
 export default function NarratedSlab({
   id,
@@ -72,12 +52,12 @@ export default function NarratedSlab({
   const sessionRef = useRef(0);
 
   useEffect(() => {
-    setIsSupported("speechSynthesis" in window && "SpeechSynthesisUtterance" in window);
+    setIsSupported(isNarrationSupported());
   }, []);
 
   const stop = useCallback(() => {
     sessionRef.current += 1;
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (isNarrationSupported()) {
       const synthesis = window.speechSynthesis;
       if (synthesis.speaking || synthesis.pending || synthesis.paused) synthesis.cancel();
     }
@@ -95,45 +75,49 @@ export default function NarratedSlab({
       if (synthesis.speaking || synthesis.pending || synthesis.paused) synthesis.cancel();
       const session = sessionRef.current + 1;
       sessionRef.current = session;
-      const voice = selectVoice(synthesis.getVoices());
-
-      const speakLine = (index: number) => {
+      void resolveNarrationVoice(synthesis).then((voice) => {
         if (sessionRef.current !== session) return;
-        if (index >= lines.length) {
-          setActiveIndex(null);
-          setIsPlaying(false);
-          setIsPaused(false);
-          return;
-        }
 
-        const line = lines[index];
-        const voiceProfile = narrationVoiceProfile(line, index, lines.length);
-        const utterance = new SpeechSynthesisUtterance(toSpeakableNarration(line));
-        utterance.rate = voiceProfile.rate;
-        utterance.pitch = voiceProfile.pitch;
-        utterance.volume = voiceProfile.volume;
-        if (voice) utterance.voice = voice;
-        setActiveIndex(index);
-        setIsPlaying(true);
-        setIsPaused(false);
-        utterance.onstart = () => {
+        const speakLine = (index: number) => {
           if (sessionRef.current !== session) return;
+          if (index >= lines.length) {
+            setActiveIndex(null);
+            setIsPlaying(false);
+            setIsPaused(false);
+            return;
+          }
+
+          const line = lines[index];
+          const voiceProfile = narrationVoiceProfile(line, index, lines.length);
+          const utterance = new SpeechSynthesisUtterance(toSpeakableNarration(line));
+          applyClearNarrationVoice(utterance, voice, voiceProfile.rate);
           setActiveIndex(index);
+          setIsPlaying(true);
+          setIsPaused(false);
+          utterance.onstart = () => {
+            if (sessionRef.current !== session) return;
+            setActiveIndex(index);
+          };
+          utterance.onend = () => {
+            if (sessionRef.current !== session) return;
+            window.setTimeout(() => speakLine(index + 1), voiceProfile.pauseAfterMs);
+          };
+          utterance.onerror = () => {
+            if (sessionRef.current !== session) return;
+            setActiveIndex(null);
+            setIsPlaying(false);
+            setIsPaused(false);
+          };
+          synthesis.speak(utterance);
         };
-        utterance.onend = () => {
-          if (sessionRef.current !== session) return;
-          window.setTimeout(() => speakLine(index + 1), voiceProfile.pauseAfterMs);
-        };
-        utterance.onerror = () => {
-          if (sessionRef.current !== session) return;
-          setActiveIndex(null);
+
+        window.setTimeout(() => speakLine(Math.min(Math.max(startIndex, 0), lines.length - 1)), 24);
+      }).catch(() => {
+        if (sessionRef.current === session) {
           setIsPlaying(false);
           setIsPaused(false);
-        };
-        synthesis.speak(utterance);
-      };
-
-      window.setTimeout(() => speakLine(Math.min(Math.max(startIndex, 0), lines.length - 1)), 24);
+        }
+      });
     },
     [id, isSupported, lines]
   );
