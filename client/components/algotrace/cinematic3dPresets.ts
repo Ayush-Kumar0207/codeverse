@@ -98,51 +98,51 @@ export const twoSumCinematic3DPreset = {
     compactHeight: 520,
   },
   renderer: {
-    maxPixelRatio: 2,
-    toneMappingExposure: 1.08,
+    maxPixelRatio: 2.5,
+    toneMappingExposure: 1.24,
   },
   scene: {
     background: 0x030712,
     fog: {
       color: 0x030712,
-      near: 13,
-      far: 25,
+      near: 18,
+      far: 36,
     },
   },
   camera: {
     fov: {
       wide: 37,
-      medium: 44,
-      compact: 52,
+      medium: 43,
+      compact: 50,
     },
     theta: 0.18,
-    elevation: 4.55,
+    elevation: 4.45,
     elevationRange: [2.75, 6.7],
-    lookAt: [0, 1.85, 0],
+    lookAt: [0, 1.75, 0],
     radius: {
-      default: 12.2,
-      dense: 13.4,
-      mediumBoost: 1.2,
-      compactBoost: 2.4,
-      min: 8.8,
-      max: 17.5,
+      default: 12.8,
+      dense: 14.2,
+      mediumBoost: 1.1,
+      compactBoost: 2.2,
+      min: 8,
+      max: 18,
     },
   },
   lights: {
     hemisphere: {
       sky: 0xcdefff,
       ground: 0x08111c,
-      intensity: 1.55,
+      intensity: 1.9,
     },
     key: {
       color: 0xffffff,
-      intensity: 2.8,
+      intensity: 3.4,
       position: [-4.5, 9, 6.5],
     },
     accents: {
-      left: { color: 0x22d3ee, intensity: 5.5, distance: 11, position: [-5.4, 3.2, 2.8] },
-      right: { color: 0xa78bfa, intensity: 4.8, distance: 11, position: [5, 3.8, 2.2] },
-      answer: { matchIntensity: 7, defaultIntensity: 3.2, distance: 13, position: [0, 4.8, -1.6] },
+      left: { color: 0x22d3ee, intensity: 6.2, distance: 13, position: [-5.4, 3.2, 2.8] },
+      right: { color: 0xa78bfa, intensity: 5.6, distance: 13, position: [5, 3.8, 2.2] },
+      answer: { matchIntensity: 7.6, defaultIntensity: 4, distance: 15, position: [0, 4.8, -1.6] },
     },
   },
   stage: {
@@ -165,11 +165,11 @@ export const twoSumCinematic3DPreset = {
   },
   labels: {
     textureScale: 3,
-    baseValue: { fontSize: 82, featuredScale: [0.88, 0.38, 1], defaultScale: [0.7, 0.32, 1] },
-    indexTick: { fontSize: 68, scale: [0.62, 0.25, 1] },
-    pointerTag: { fontSize: 76, scale: [1.62, 0.52, 1] },
-    targetBadge: { fontSize: 84, scale: [2.08, 0.58, 1] },
-    equation: { fontSize: 80, scale: [2.2, 0.58, 1] },
+    baseValue: { fontSize: 88, featuredScale: [1.04, 0.48, 1], defaultScale: [0.88, 0.42, 1] },
+    indexTick: { fontSize: 72, scale: [0.78, 0.32, 1] },
+    pointerTag: { fontSize: 82, scale: [1.9, 0.64, 1] },
+    targetBadge: { fontSize: 88, scale: [2.4, 0.68, 1] },
+    equation: { fontSize: 86, scale: [2.55, 0.68, 1] },
   },
   colors: {
     pointers: {
@@ -187,8 +187,8 @@ export const twoSumCinematic3DPreset = {
     },
     towers: {
       solution: { color: 0x10b981, cap: 0x6ee7b7, emissive: 0x064e3b, emissiveIntensity: 0.88 },
-      retired: { color: 0x273449, cap: 0x475569, emissive: 0x020617, emissiveIntensity: 0.06 },
-      default: { color: 0x1d4ed8, cap: 0x60a5fa, emissive: 0x082f49, emissiveIntensity: 0.18 },
+      retired: { color: 0x3b4a62, cap: 0x64748b, emissive: 0x0f172a, emissiveIntensity: 0.14 },
+      default: { color: 0x2563eb, cap: 0x93c5fd, emissive: 0x0c4a6e, emissiveIntensity: 0.28 },
     },
   },
 } as const satisfies Cinematic3DScenePreset;

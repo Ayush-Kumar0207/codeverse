@@ -73,13 +73,13 @@ export default function TwoSumCinematic3D({
     if (!host) return;
 
     host.innerHTML = "";
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, precision: "highp", powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, scenePreset.renderer.maxPixelRatio));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = scenePreset.renderer.toneMappingExposure;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.dataset.testid = scenePreset.rendererTestId;
     renderer.domElement.style.display = "block";
     renderer.domElement.style.height = "100%";
@@ -92,7 +92,7 @@ export default function TwoSumCinematic3D({
 
     const camera = new THREE.PerspectiveCamera(scenePreset.camera.fov.wide, 1, 0.1, 100);
     const lookAt = new THREE.Vector3(scenePreset.camera.lookAt[0], scenePreset.camera.lookAt[1], scenePreset.camera.lookAt[2]);
-    const baseRadius: number = sceneData.values.length > 6 ? scenePreset.camera.radius.dense : scenePreset.camera.radius.default;
+    const baseRadius: number = sceneData.values.length > 5 ? scenePreset.camera.radius.dense : scenePreset.camera.radius.default;
     const controls: { theta: number; elevation: number; radius: number } = {
       theta: scenePreset.camera.theta,
       elevation: scenePreset.camera.elevation,
@@ -112,6 +112,7 @@ export default function TwoSumCinematic3D({
       const rect = host.getBoundingClientRect();
       const width = Math.max(1, Math.floor(rect.width));
       const height = Math.max(1, Math.floor(rect.height));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, scenePreset.renderer.maxPixelRatio));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.fov = width < 520 ? scenePreset.camera.fov.compact : width < 760 ? scenePreset.camera.fov.medium : scenePreset.camera.fov.wide;
@@ -398,8 +399,8 @@ function buildThreeScene(
   const keyLight = new THREE.DirectionalLight(scenePreset.lights.key.color, scenePreset.lights.key.intensity);
   keyLight.position.set(scenePreset.lights.key.position[0], scenePreset.lights.key.position[1], scenePreset.lights.key.position[2]);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.width = 1024;
-  keyLight.shadow.mapSize.height = 1024;
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
   scene.add(keyLight);
 
   const leftGlow = new THREE.PointLight(scenePreset.lights.accents.left.color, scenePreset.lights.accents.left.intensity, scenePreset.lights.accents.left.distance);
@@ -444,7 +445,7 @@ function buildThreeScene(
         clearcoat: 0.45,
         clearcoatRoughness: 0.32,
         transparent: true,
-        opacity: retired ? 0.3 : active || solution ? 0.98 : 0.78,
+        opacity: retired ? 0.48 : active || solution ? 1 : 0.92,
       })
     );
     tower.position.set(x, height / 2 + scenePreset.towers.baseYOffset, 0);
@@ -463,7 +464,7 @@ function buildThreeScene(
         metalness: 0.38,
         roughness: 0.2,
         transparent: true,
-        opacity: retired ? 0.36 : 0.92,
+        opacity: retired ? 0.54 : 0.98,
       })
     );
     topCap.position.set(x, height + 0.19, 0);
@@ -483,14 +484,14 @@ function buildThreeScene(
 function addStage(stageGroup: THREE.Group, width: number) {
   const platform = new THREE.Mesh(
     new THREE.BoxGeometry(width, scenePreset.stage.platformHeight, scenePreset.stage.depth),
-    new THREE.MeshStandardMaterial({ color: 0x07111d, metalness: 0.22, roughness: 0.82 })
+    new THREE.MeshStandardMaterial({ color: 0x0b1728, metalness: 0.18, roughness: 0.64 })
   );
   platform.receiveShadow = true;
   stageGroup.add(platform);
 
   const surface = new THREE.Mesh(
     new THREE.PlaneGeometry(width - scenePreset.stage.surfaceInset, scenePreset.stage.surfaceDepth),
-    new THREE.MeshBasicMaterial({ color: 0x0f1b2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
+    new THREE.MeshBasicMaterial({ color: 0x17263b, transparent: true, opacity: 0.68, side: THREE.DoubleSide })
   );
   surface.rotation.x = -Math.PI / 2;
   surface.position.y = 0.095;
@@ -520,8 +521,8 @@ function addSearchCorridor(stageGroup: THREE.Group, positions: THREE.Vector3[], 
 function addBaseValue(stageGroup: THREE.Group, value: number, index: number, x: number, retired: boolean, featured: boolean) {
   const label = createTextSprite(String(value), {
     textColor: retired ? "#64748b" : featured ? "#ffffff" : "#cbd5e1",
-    background: featured ? "rgba(8,47,73,0.82)" : "rgba(2,6,23,0.58)",
-    border: featured ? "#67e8f9" : "rgba(148,163,184,0.36)",
+    background: featured ? "rgba(8,47,73,0.94)" : "rgba(2,6,23,0.9)",
+    border: featured ? "#a5f3fc" : "rgba(148,163,184,0.62)",
     fontSize: scenePreset.labels.baseValue.fontSize,
   });
   label.position.set(x, 0.38, 1.42);
@@ -531,8 +532,8 @@ function addBaseValue(stageGroup: THREE.Group, value: number, index: number, x: 
 
   const tick = createTextSprite(`i${index}`, {
     textColor: retired ? "#475569" : "#94a3b8",
-    background: "rgba(2,6,23,0.35)",
-    border: "rgba(148,163,184,0.2)",
+    background: "rgba(2,6,23,0.78)",
+    border: "rgba(148,163,184,0.45)",
     fontSize: scenePreset.labels.indexTick.fontSize,
   });
   tick.position.set(x, 0.25, 1.78);
@@ -702,10 +703,10 @@ function createTextSprite(text: string, options: { textColor: string; background
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.generateMipmaps = false;
-  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
-  texture.anisotropy = 8;
+  texture.anisotropy = 16;
   texture.needsUpdate = true;
   const material = new THREE.SpriteMaterial({
     map: texture,

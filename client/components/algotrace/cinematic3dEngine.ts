@@ -59,9 +59,9 @@ export class Cinematic3DEngine {
   private readonly reducedMotion: boolean;
   private readonly onHover: (item: Cinematic3DHover | null) => void;
   private readonly focusMode: boolean;
-  private readonly keyLight = new THREE.DirectionalLight(0xffffff, 2.65);
-  private readonly primaryLight = new THREE.PointLight(0x22d3ee, 4.6, 18);
-  private readonly successLight = new THREE.PointLight(0x34d399, 3.8, 18);
+  private readonly keyLight = new THREE.DirectionalLight(0xffffff, 3.35);
+  private readonly primaryLight = new THREE.PointLight(0x22d3ee, 5.8, 22);
+  private readonly successLight = new THREE.PointLight(0x34d399, 4.8, 22);
 
   private stage = new THREE.Group();
   private interactive: THREE.Object3D[] = [];
@@ -93,14 +93,15 @@ export class Cinematic3DEngine {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
+      precision: "highp",
       powerPreference: "high-performance",
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.focusMode ? 2.5 : 2.25));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = 1.26;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.domElement.dataset.testid = CANVAS_TEST_ID;
     this.renderer.domElement.style.display = "block";
     this.renderer.domElement.style.height = "100%";
@@ -111,11 +112,11 @@ export class Cinematic3DEngine {
     this.host.replaceChildren(this.renderer.domElement);
 
     this.scene.background = new THREE.Color(BACKGROUND);
-    this.scene.fog = new THREE.Fog(BACKGROUND, 15, 38);
-    this.scene.add(new THREE.HemisphereLight(0xcdefff, 0x08111c, 1.48));
+    this.scene.fog = new THREE.Fog(BACKGROUND, 20, 56);
+    this.scene.add(new THREE.HemisphereLight(0xe6f7ff, 0x0b1728, 1.95));
     this.keyLight.position.set(-5, 10, 7);
     this.keyLight.castShadow = true;
-    this.keyLight.shadow.mapSize.set(1024, 1024);
+    this.keyLight.shadow.mapSize.set(2048, 2048);
     this.primaryLight.position.set(-5, 4, 3);
     this.successLight.position.set(5, 5, -2);
     this.scene.add(this.keyLight, this.primaryLight, this.successLight, this.stage);
@@ -207,9 +208,10 @@ export class Cinematic3DEngine {
     const rect = this.host.getBoundingClientRect();
     const width = Math.max(1, Math.floor(rect.width));
     const height = Math.max(1, Math.floor(rect.height));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.focusMode ? 2.5 : 2.25));
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
-    this.camera.fov = width < 520 ? 54 : width < 760 ? 47 : this.focusMode ? 36 : 40;
+    this.camera.fov = width < 520 ? 50 : width < 760 ? 42 : this.focusMode ? 32 : 36;
     this.camera.updateProjectionMatrix();
     if (this.stage.children.length) this.fitCamera();
     this.render();
@@ -270,8 +272,8 @@ export class Cinematic3DEngine {
     event.preventDefault();
     this.controls.radius = THREE.MathUtils.clamp(
       this.controls.radius + event.deltaY * 0.012,
-      6.5,
-      42
+      5.8,
+      38
     );
     this.defaultControls.radius = this.controls.radius;
     this.render();
@@ -292,13 +294,14 @@ export class Cinematic3DEngine {
       const widthDistance = size.x / 2 / Math.max(0.1, Math.tan(horizontalFov / 2));
       const heightDistance = size.y / 2 / Math.max(0.1, Math.tan(verticalFov / 2));
       const fitDistance = Math.max(widthDistance, heightDistance) + size.z * 0.46;
-      this.defaultControls.radius = THREE.MathUtils.clamp(fitDistance * 1.16, 8.5, 38);
+      const cameraMargin = this.focusMode ? 1.02 : 1.08;
+      this.defaultControls.radius = THREE.MathUtils.clamp(fitDistance * cameraMargin, 7.4, 36);
       this.defaultControls.target.copy(sphere.center);
-      this.defaultControls.target.y = Math.max(0.8, sphere.center.y);
+      this.defaultControls.target.y = Math.max(0.62, sphere.center.y * 0.84);
       this.defaultControls.elevation = THREE.MathUtils.clamp(
-        this.defaultControls.target.y + this.defaultControls.radius * 0.34 + 1.35,
-        3.8,
-        10
+        this.defaultControls.target.y + this.defaultControls.radius * 0.28 + 1.15,
+        3.5,
+        9.2
       );
     }
     this.controls.theta = this.defaultControls.theta;
@@ -405,7 +408,7 @@ function addBarScene(
   interactive: THREE.Object3D[],
   pulsing: AnimatedObject[]
 ) {
-  const spacing = data.items.some((item) => item.interval) ? 1.82 : 1.4;
+  const spacing = data.items.some((item) => item.interval) ? 1.86 : 1.45;
   const stageWidth = Math.max(9.5, (data.items.length - 1) * spacing + 3.2);
   const startX = -((data.items.length - 1) * spacing) / 2;
   const maxAbs = Math.max(1, ...data.items.map((item) => Math.abs(item.value)));
@@ -420,21 +423,21 @@ function addBarScene(
     const color = colorForItem(data, item, { marked, isPointer, retired });
     const height = item.interval
       ? 0.5
-      : 0.58 + (Math.abs(item.value) / maxAbs) * 2.8;
+      : 0.68 + (Math.abs(item.value) / maxAbs) * 3.35;
     const width = item.interval
       ? THREE.MathUtils.clamp((item.interval.end - item.interval.start) * 0.36 + 0.72, 0.82, 2.5)
-      : 0.72;
+      : 0.82;
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(width, height, item.interval ? 0.86 : 0.72, 2, 1, 2),
+      new THREE.BoxGeometry(width, height, item.interval ? 0.9 : 0.82, 2, 2, 2),
       itemMaterial(color, marked || isPointer, retired)
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    mesh.position.set(position.x, height / 2 + 0.12, 0);
+    mesh.position.set(position.x, height / 2 + 0.14, 0);
     registerItem(mesh, item, interactive, pulsing, marked || isPointer);
     stage.add(mesh);
 
-    addLabel(stage, item.label, new THREE.Vector3(position.x, 0.2, 0.72), color, 0.52);
+    addLabel(stage, item.label, new THREE.Vector3(position.x, 0.3, 0.88), color, 0.68);
   });
 
   addWindow(stage, data, positions);
@@ -498,7 +501,9 @@ function addNodeScene(
     positions.set(item.index, position.clone());
   });
 
-  data.edges.forEach((edge) => addEdge(stage, edge, nodePositions, data.profile.palette));
+  data.edges.forEach((edge, edgeIndex) =>
+    addEdge(stage, edge, edgeIndex, nodePositions, data.profile.palette)
+  );
 
   data.items.forEach((item) => {
     const position = nodePositions.get(item.id) || new THREE.Vector3();
@@ -521,9 +526,9 @@ function addNodeScene(
     addLabel(
       stage,
       item.label,
-      position.clone().add(new THREE.Vector3(0, 0.82, 0)),
+      position.clone().add(new THREE.Vector3(0, 0.9, 0)),
       color,
-      item.label.length > 8 ? 0.7 : 0.52
+      item.label.length > 8 ? 0.7 : 0.38
     );
   });
 }
@@ -703,6 +708,7 @@ function calculateNodePositions(data: Cinematic3DSceneData) {
 function addEdge(
   stage: THREE.Group,
   edge: Cinematic3DEdge,
+  edgeIndex: number,
   positions: Map<string, THREE.Vector3>,
   palette: Cinematic3DPalette
 ) {
@@ -714,27 +720,34 @@ function addEdge(
   const line = cylinderBetween(start, end, active ? 0.035 : 0.022, color, active ? 0.88 : 0.42);
   stage.add(line);
   if (edge.label) {
-    addLabel(
-      stage,
-      edge.label,
-      start.clone().add(end).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.28, 0)),
-      color,
-      0.36
-    );
+    const direction = end.clone().sub(start);
+    const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x);
+    if (perpendicular.lengthSq() < 0.0001) perpendicular.set(0, 0, 1);
+    const side = edgeIndex % 2 === 0 ? 1 : -1;
+    perpendicular
+      .normalize()
+      .multiplyScalar(side * (0.38 + (edgeIndex % 3) * 0.14));
+    const labelPosition = start
+      .clone()
+      .add(end)
+      .multiplyScalar(0.5)
+      .add(perpendicular);
+    labelPosition.y += 0.42 + (edgeIndex % 4) * 0.14;
+    addLabel(stage, edge.label, labelPosition, color, 0.34);
   }
 }
 
 function addPlatform(stage: THREE.Group, width: number, depth: number, palette: Cinematic3DPalette) {
   const base = new THREE.Mesh(
     new THREE.BoxGeometry(width, 0.18, depth),
-    new THREE.MeshStandardMaterial({ color: 0x07111f, roughness: 0.66, metalness: 0.18 })
+    new THREE.MeshStandardMaterial({ color: 0x0b1728, roughness: 0.58, metalness: 0.16 })
   );
   base.position.y = -0.08;
   base.receiveShadow = true;
   stage.add(base);
   const surface = new THREE.Mesh(
     new THREE.BoxGeometry(Math.max(1, width - 0.65), 0.035, Math.max(1, depth - 0.55)),
-    new THREE.MeshBasicMaterial({ color: palette.primary, transparent: true, opacity: 0.07 })
+    new THREE.MeshBasicMaterial({ color: palette.primary, transparent: true, opacity: 0.13 })
   );
   surface.position.y = 0.04;
   stage.add(surface);
@@ -747,7 +760,7 @@ function addPlatform(stage: THREE.Group, width: number, depth: number, palette: 
   const gridMaterials = Array.isArray(grid.material) ? grid.material : [grid.material];
   gridMaterials.forEach((material) => {
     material.transparent = true;
-    material.opacity = 0.17;
+    material.opacity = 0.3;
   });
   grid.position.y = 0.065;
   stage.add(grid);
@@ -866,13 +879,16 @@ function addSceneBadge(stage: THREE.Group, data: Cinematic3DSceneData) {
     textColor: "#fefce8",
     background: "rgba(2,6,23,0.86)",
     border: hexColor(data.profile.palette.accent),
+    minimumWidth: 768,
   });
   badge.position.set(
     center.x,
-    Math.max(3.6, box.max.y + 0.8),
+    Math.max(3.8, box.max.y + 1),
     box.min.z - Math.max(0.35, size.z * 0.08)
   );
-  badge.scale.set(Math.min(3.6, Math.max(2.1, data.profile.title.length * 0.075)), 0.56, 1);
+  const badgeHeight = 0.82;
+  const badgeAspect = Number(badge.userData.textureAspect) || 4;
+  badge.scale.set(badgeHeight * badgeAspect, badgeHeight, 1);
   badge.userData.excludeFromCameraFit = true;
   stage.add(badge);
 }
@@ -890,38 +906,50 @@ function addLabel(
     border: hexColor(color),
   });
   label.position.copy(position);
-  label.scale.set(Math.max(width, Math.min(2.45, text.length * 0.14)), 0.52, 1);
+  const compactLabel = width <= 0.42;
+  const labelHeight = compactLabel ? 0.42 : width < 0.6 ? 0.52 : 0.64;
+  const textureAspect = Number(label.userData.textureAspect) || 4;
+  label.scale.set(labelHeight * textureAspect, labelHeight, 1);
   stage.add(label);
 }
 
 function createTextSprite(
   text: string,
-  options: { textColor: string; background: string; border: string }
+  options: { textColor: string; background: string; border: string; minimumWidth?: number }
 ) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 256;
+  const visibleText = text.slice(0, 32);
+  const logicalWidth = Math.min(
+    1024,
+    Math.max(options.minimumWidth ?? 384, 260 + visibleText.length * 56)
+  );
+  const logicalHeight = 256;
+  const textureScale = 1;
+  canvas.width = logicalWidth * textureScale;
+  canvas.height = logicalHeight * textureScale;
   const context = canvas.getContext("2d");
   if (!context) return new THREE.Sprite();
+  context.scale(textureScale, textureScale);
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.clearRect(0, 0, logicalWidth, logicalHeight);
   context.fillStyle = options.background;
-  roundedRect(context, 20, 20, canvas.width - 40, canvas.height - 40, 28);
+  roundedRect(context, 18, 18, logicalWidth - 36, logicalHeight - 36, 26);
   context.fill();
-  context.lineWidth = 6;
+  context.lineWidth = 5;
   context.strokeStyle = options.border;
   context.stroke();
   context.fillStyle = options.textColor;
-  context.font = "850 78px Inter, Arial, sans-serif";
+  context.font = "800 88px Inter, Segoe UI, Arial, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText(text.slice(0, 28), canvas.width / 2, canvas.height / 2 + 2);
+  context.fillText(visibleText, logicalWidth / 2, logicalHeight / 2 + 2, logicalWidth - 92);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.generateMipmaps = false;
-  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
+  texture.anisotropy = 8;
   const material = new THREE.SpriteMaterial({
     map: texture,
     transparent: true,
@@ -932,6 +960,7 @@ function createTextSprite(
   });
   const sprite = new THREE.Sprite(material);
   sprite.renderOrder = 100;
+  sprite.userData.textureAspect = logicalWidth / logicalHeight;
   return sprite;
 }
 
@@ -939,11 +968,11 @@ function itemMaterial(color: number, emphasized: boolean, muted: boolean) {
   return new THREE.MeshStandardMaterial({
     color,
     emissive: color,
-    emissiveIntensity: emphasized ? 0.34 : 0.09,
-    roughness: 0.44,
-    metalness: 0.22,
+    emissiveIntensity: emphasized ? 0.48 : 0.2,
+    roughness: 0.36,
+    metalness: 0.18,
     transparent: true,
-    opacity: muted ? 0.38 : 0.95,
+    opacity: muted ? 0.72 : 0.98,
   });
 }
 
@@ -953,7 +982,7 @@ function colorForItem(
   flags: { marked?: boolean; isPointer?: boolean; retired?: boolean }
 ) {
   if (flags.marked || item.state === "done") return data.profile.palette.success;
-  if (flags.retired) return 0x334155;
+  if (flags.retired) return 0x52617a;
   if (item.state === "active" || flags.isPointer) return data.profile.palette.primary;
   if (item.state === "frontier" || item.state === "waiting") return data.profile.palette.accent;
   if (item.value < 0 && data.layout === "bars") return data.profile.palette.danger;
