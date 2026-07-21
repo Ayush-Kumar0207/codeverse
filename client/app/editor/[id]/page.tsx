@@ -85,6 +85,8 @@ import {
   ShieldCheck,
   Eye,
   UserMinus,
+  UserPlus,
+  Check,
 } from "lucide-react";
 
 interface PresenceUser {
@@ -210,6 +212,7 @@ function EditorWorkspace() {
     collaboratorsCanEdit: true,
   });
   const [permissionNotice, setPermissionNotice] = useState("");
+  const [inviteCopied, setInviteCopied] = useState(false);
   const [removedFromWorkspace, setRemovedFromWorkspace] = useState(false);
   const [workspaceSnapshots, setWorkspaceSnapshots] = useState<WorkspaceSnapshot[]>([]);
   const [currentSnapshotId, setCurrentSnapshotId] = useState<string | null>(null);
@@ -416,6 +419,24 @@ function EditorWorkspace() {
     socket?.emit(SOCKET_EVENTS.EDIT_PERMISSION_UPDATE, {
       roomId,
       collaboratorsCanEdit,
+    });
+  };
+
+  const handleCopyInviteLink = () => {
+    if (!isProjectOrganizer || typeof window === "undefined") return;
+
+    const inviteUrl = `${window.location.origin}/editor/${encodeURIComponent(roomId)}`;
+    setInviteCopied(true);
+    setPermissionNotice("Invite link copied. Anyone you share it with can join this workspace.");
+    window.setTimeout(() => setInviteCopied(false), 1800);
+
+    if (!navigator.clipboard?.writeText) {
+      setPermissionNotice(`Copy this invite link: ${inviteUrl}`);
+      return;
+    }
+
+    void navigator.clipboard.writeText(inviteUrl).catch(() => {
+      setPermissionNotice(`Copy this invite link: ${inviteUrl}`);
     });
   };
 
@@ -1952,6 +1973,18 @@ recordTrace({
                       <MessageSquare className="h-3.5 w-3.5 text-indigo-300" />
                       <span>Collaborator Chat</span>
                       <div className="ml-auto flex items-center gap-2">
+                        {isProjectOrganizer && (
+                          <button
+                            type="button"
+                            onClick={handleCopyInviteLink}
+                            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-indigo-400/20 bg-indigo-400/10 px-2 text-[10px] font-semibold uppercase tracking-widest text-indigo-200 transition-colors hover:bg-indigo-400/15"
+                            aria-label="Copy workspace invite link"
+                            title="Copy workspace invite link"
+                          >
+                            {inviteCopied ? <Check className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+                            {inviteCopied ? "Copied" : "Invite"}
+                          </button>
+                        )}
                         {isProjectOrganizer ? (
                           <button
                             type="button"
@@ -2063,6 +2096,7 @@ recordTrace({
                     presentationMode={presentationMode}
                     preferSceneFocus={visualizerMode === "3d"}
                     autoNarrate={narrationRequested}
+                    explanationHref={algoId ? `/encyclopedia?algo=${encodeURIComponent(algoId)}` : undefined}
                   />
                 </TabsContent>
               </div>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Activity, Beaker, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
+import { Activity, ArrowLeft, Beaker, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 import AutoVisualizer, { StateData, StateValue } from "./AutoVisualizer";
 import PlaybackControls from "./PlaybackControls";
 import FeedbackLoop from "./FeedbackLoop";
@@ -36,12 +36,14 @@ export default function AlgoTraceCanvas({
   presentationMode = false,
   preferSceneFocus = false,
   autoNarrate = false,
+  explanationHref,
 }: {
   editorCode?: string;
   autoRun?: boolean;
   presentationMode?: boolean;
   preferSceneFocus?: boolean;
   autoNarrate?: boolean;
+  explanationHref?: string;
 }) {
   const [history, setHistory] = useState<StateData[]>([EMPTY_TRACE]);
   const [activeStep, setActiveStep] = useState(0);
@@ -210,6 +212,17 @@ export default function AlgoTraceCanvas({
     >
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-[#0a0f19] px-4">
         <div className="flex min-w-0 items-center gap-3">
+          {explanationHref && (
+            <a
+              href={explanationHref}
+              className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900/80 px-3 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-200"
+              aria-label="Back to explanation and solutions"
+              title="Back to explanation and solutions"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Explanation</span>
+            </a>
+          )}
           <div className="flex h-9 w-9 items-center justify-center rounded-md border border-indigo-500/20 bg-indigo-500/10 text-indigo-300">
             <Activity className="h-4 w-4" />
           </div>
@@ -305,6 +318,17 @@ export default function AlgoTraceCanvas({
           </div>
           <div className="relative z-30 shrink-0 border-t border-white/10 bg-[#071019]/95 px-3 py-3 shadow-2xl shadow-black/40 backdrop-blur-md">
             <div className="flex flex-wrap items-center justify-center gap-2">
+              {explanationHref && (
+                <a
+                  href={explanationHref}
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 text-xs font-semibold text-slate-200 transition hover:border-emerald-300/25 hover:bg-emerald-300/10 hover:text-emerald-100"
+                  aria-label="Back to explanation and solutions"
+                  title="Back to explanation and solutions"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Explanation</span>
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => setNarrationEnabled((current) => !current)}

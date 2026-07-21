@@ -87,6 +87,7 @@ export default function EncyclopediaPage() {
 function EncyclopediaContent() {
   const searchParams = useSearchParams();
   const queryFromUrl = searchParams?.get("query") || "";
+  const algoFromUrl = searchParams?.get("algo") || "";
   const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(AT_ALGORITHMS[0]);
   const [searchTerm, setSearchTerm] = useState(queryFromUrl);
   const [activeApproachIdx, setActiveApproachIdx] = useState(0);
@@ -179,6 +180,12 @@ function EncyclopediaContent() {
     setIsLibraryOpen(false);
     setCopied(false);
   }, []);
+
+  useEffect(() => {
+    if (!algoFromUrl.trim()) return;
+    const match = AT_ALGORITHMS.find((algo) => algo.id === algoFromUrl.trim());
+    if (match) handleSelectAlgo(match);
+  }, [algoFromUrl, handleSelectAlgo]);
 
   useEffect(() => {
     if (!queryFromUrl.trim()) return;
