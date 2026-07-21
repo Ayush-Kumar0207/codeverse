@@ -3,7 +3,7 @@
 import { Suspense, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AT_ALGORITHMS, type AlgorithmEntry, type AlgorithmStoryDryRun } from "@/data/algos";
-import { buildAlgorithmLearningProfile } from "@/lib/algo-learning";
+import { buildAlgorithmLearningProfile } from "@/lib/approach-learning";
 import {
   BookOpen,
   BrainCircuit,
@@ -355,6 +355,15 @@ function EncyclopediaContent() {
               </div>
 
               <div id="selected-approach-content" className="space-y-4 p-4 lg:p-5">
+                <InsightCard
+                  narrationId={`${narrationPrefix}-approach-strategy`}
+                  title="Approach strategy"
+                  label={activeApproach.name}
+                  icon={Layers3}
+                  text={learning.sourceSummary}
+                  context={narrationContext}
+                />
+
                 <InsightCard
                   narrationId={`${narrationPrefix}-mental-model`}
                   title="Mental model"
