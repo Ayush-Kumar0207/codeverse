@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -126,7 +126,7 @@ export default function AutoVisualizer({ state, previousState, focusMode = false
   }
 
   if (isSmartTrace(state)) {
-    return <SmartTraceView state={state} previousState={previousState} />;
+    return <SmartTraceView state={state} previousState={previousState} guidedMode={focusMode} />;
   }
 
   const narrativeData = entries.filter(([key]) => NARRATIVE_KEYS.includes(key.toLowerCase()));
@@ -168,7 +168,15 @@ function isUniversalCinematic3D(state?: StateData | null): state is StateData {
   return asString(state?.visualizer) === "codeverse-cinematic-3d";
 }
 
-function SmartTraceView({ state, previousState }: { state: StateData; previousState?: StateData | null }) {
+function SmartTraceView({
+  state,
+  previousState,
+  guidedMode = false,
+}: {
+  state: StateData;
+  previousState?: StateData | null;
+  guidedMode?: boolean;
+}) {
   const algorithm = getRecord(state.algorithm);
   const title = asString(algorithm?.title) || "Algorithm simulation";
   const family = asString(algorithm?.family) || humanizeKey(asString(state.kind) || "trace");
@@ -176,81 +184,129 @@ function SmartTraceView({ state, previousState }: { state: StateData; previousSt
   const totalSteps = asNumber(state.totalSteps) || 1;
   const progress = Math.max(0, Math.min(100, asNumber(state.progress) || Math.round((step / totalSteps) * 100)));
   const guide = buildStepGuide(state, previousState);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [focusPhase, setFocusPhase] = useState(0);
+
+  useEffect(() => setFocusPhase(0), [step]);
+
+  useEffect(() => {
+    if (!guidedMode || focusPhase >= 3) return;
+    const timer = window.setTimeout(() => setFocusPhase((current) => Math.min(3, current + 1)), 3400);
+    return () => window.clearTimeout(timer);
+  }, [focusPhase, guidedMode, step]);
+
+  useEffect(() => {
+    if (!guidedMode) return;
+    const timer = window.setTimeout(() => {
+      const target = viewportRef.current?.querySelector('[data-trace-focus="' + focusPhase + '"]');
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [focusPhase, guidedMode, step]);
+
+  const phaseInsight = focusPhase === 0
+    ? { title: "Orient", icon: <Sparkles className="h-4 w-4" />, body: guide.plain }
+    : focusPhase === 1
+      ? { title: "Observe", icon: <Activity className="h-4 w-4" />, body: guide.observe }
+      : focusPhase === 2
+        ? { title: "Decide", icon: <Target className="h-4 w-4" />, body: guide.why }
+        : { title: "Remember", icon: <CheckCircle2 className="h-4 w-4" />, body: guide.remember };
 
   return (
-    <div className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_32%),#070b12] px-3 py-3 custom-scrollbar">
+    <div ref={viewportRef} className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_32%),#070b12] px-3 py-3 custom-scrollbar">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3">
+        {guidedMode && <FocusRail activePhase={focusPhase} />}
         <motion.section
+          data-trace-focus={0}
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-hidden rounded-xl border border-indigo-400/20 bg-[#0d1422]/90 shadow-2xl shadow-black/25"
+          className={cn(
+            "overflow-hidden rounded-xl border bg-[#0d1422]/90 shadow-2xl shadow-black/25 transition-all duration-500",
+            guidedMode && focusPhase === 0
+              ? "border-emerald-300/70 ring-2 ring-emerald-300/30 shadow-[0_0_42px_rgba(52,211,153,0.2)]"
+              : "border-indigo-400/20"
+          )}
         >
-          <div className="border-b border-white/10 p-3">
+          <div className="border-b border-white/10 p-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded-md border border-indigo-400/25 bg-indigo-400/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-200">
-                    {family}
-                  </span>
-                  <span className="rounded-md border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">
-                    Step {step} / {totalSteps}
-                  </span>
+                  <span className="rounded-md border border-indigo-400/25 bg-indigo-400/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-200">{family}</span>
+                  <span className="rounded-md border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">Step {step} / {totalSteps}</span>
                 </div>
-                <h2 className="max-h-12 overflow-hidden text-sm font-semibold leading-6 text-white sm:text-base">{asString(state.headline) || title}</h2>
-                <p className="mt-1 max-h-10 max-w-3xl overflow-hidden text-xs leading-5 text-slate-300">{asString(state.narrative)}</p>
+                <h2 className="text-base font-semibold leading-6 text-white sm:text-lg">{asString(state.headline) || title}</h2>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-300">{asString(state.narrative)}</p>
               </div>
               <div className="grid min-w-[180px] gap-2 rounded-lg border border-white/10 bg-black/20 p-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Progress</div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-900">
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-indigo-400 to-violet-400"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>{asString(state.phase) || "Trace"}</span>
-                  <span>{progress}%</span>
-                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-900"><motion.div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-indigo-400 to-violet-400" initial={{ width: 0 }} animate={{ width: String(progress) + "%" }} /></div>
+                <div className="flex items-center justify-between text-xs text-slate-400"><span>{asString(state.phase) || "Trace"}</span><span>{progress}%</span></div>
               </div>
             </div>
           </div>
 
           <div className="border-b border-white/10 p-3">
-            <LearningGuide guide={guide} />
+            <LearningGuide guide={guide} guidedMode={guidedMode} activePhase={focusPhase} />
           </div>
 
-          <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.75fr)]">
-            <div className="space-y-3">
+          <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
+            <div
+              data-trace-focus={1}
+              className={cn(
+                "space-y-3 rounded-xl transition-all duration-500",
+                guidedMode && focusPhase === 1 && "ring-2 ring-cyan-300/60 shadow-[0_0_42px_rgba(34,211,238,0.2)]"
+              )}
+            >
               <StageRouter state={state} />
               <TimelineRail step={step} totalSteps={totalSteps} />
             </div>
-            <div className="space-y-3">
-              <InsightCard icon={<BrainCircuit className="h-4 w-4" />} title="Beginner focus">
-                {asString(state.beginnerPrompt) || "Watch the highlighted state change before reading the code."}
-              </InsightCard>
-              {asString(state.problemLens) ? (
-                <InsightCard icon={<Sparkles className="h-4 w-4" />} title="Problem lens">
-                  {asString(state.problemLens)}
-                </InsightCard>
-              ) : null}
-              <InsightCard icon={<Target className="h-4 w-4" />} title="Decision">
-                {asString(state.decision) || "This step preserves the algorithm invariant."}
-              </InsightCard>
-              {asString(state.implementationFocus) ? (
-                <InsightCard icon={<Code2 className="h-4 w-4" />} title="Implementation focus">
-                  <span className="font-mono text-xs">{asString(state.implementationFocus)}</span>
-                </InsightCard>
-              ) : null}
-              <InsightCard icon={<CheckCircle2 className="h-4 w-4" />} title="Invariant">
-                {asString(state.invariant) || "The stored state remains correct after this transition."}
-              </InsightCard>
-              <VariablePanel state={state} />
-            </div>
+            {guidedMode ? (
+              <motion.div
+                key={focusPhase}
+                data-trace-focus={focusPhase >= 2 ? focusPhase : undefined}
+                initial={{ opacity: 0.45, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "self-start rounded-xl ring-2 shadow-[0_0_42px_rgba(167,139,250,0.18)]",
+                  focusPhase >= 2 ? "ring-violet-300/60" : "ring-white/5"
+                )}
+              >
+                <InsightCard icon={phaseInsight.icon} title={phaseInsight.title}>{phaseInsight.body}</InsightCard>
+                {focusPhase === 3 && asString(state.implementationFocus) ? (
+                  <div className="mt-3"><InsightCard icon={<Code2 className="h-4 w-4" />} title="Code connection"><span className="font-mono text-xs">{asString(state.implementationFocus)}</span></InsightCard></div>
+                ) : null}
+              </motion.div>
+            ) : (
+              <div className="space-y-3">
+                <InsightCard icon={<BrainCircuit className="h-4 w-4" />} title="Beginner focus">{asString(state.beginnerPrompt) || "Watch the highlighted state change before reading the code."}</InsightCard>
+                {asString(state.problemLens) ? <InsightCard icon={<Sparkles className="h-4 w-4" />} title="Problem lens">{asString(state.problemLens)}</InsightCard> : null}
+                <InsightCard icon={<Target className="h-4 w-4" />} title="Decision">{asString(state.decision) || "This step preserves the algorithm invariant."}</InsightCard>
+                {asString(state.implementationFocus) ? <InsightCard icon={<Code2 className="h-4 w-4" />} title="Implementation focus"><span className="font-mono text-xs">{asString(state.implementationFocus)}</span></InsightCard> : null}
+                <InsightCard icon={<CheckCircle2 className="h-4 w-4" />} title="Invariant">{asString(state.invariant) || "The stored state remains correct after this transition."}</InsightCard>
+                <VariablePanel state={state} />
+              </div>
+            )}
           </div>
         </motion.section>
 
-        <InspectorPanel state={state} />
+        {!guidedMode && <InspectorPanel state={state} />}
+      </div>
+    </div>
+  );
+}
+
+const FOCUS_PHASES = ["Orient", "Observe", "Decide", "Remember"];
+
+function FocusRail({ activePhase }: { activePhase: number }) {
+  return (
+    <div className="sticky top-0 z-20 rounded-xl border border-emerald-300/20 bg-[#08111b]/95 p-2 shadow-xl shadow-black/30 backdrop-blur-xl" data-testid="guided-focus-rail">
+      <div className="grid grid-cols-4 gap-1.5">
+        {FOCUS_PHASES.map((label, index) => (
+          <div key={label} className={cn("rounded-lg border px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.12em] transition-all sm:text-xs", index === activePhase ? "border-emerald-300/60 bg-emerald-300/15 text-emerald-100 shadow-[0_0_24px_rgba(52,211,153,0.18)]" : index < activePhase ? "border-cyan-300/20 bg-cyan-300/10 text-cyan-200" : "border-white/10 bg-white/[0.03] text-slate-500")}>
+            <span className="mr-1 font-mono">{index + 1}</span>{label}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -720,7 +776,15 @@ type StepGuide = {
   code: string;
 };
 
-function LearningGuide({ guide }: { guide: StepGuide }) {
+function LearningGuide({
+  guide,
+  guidedMode = false,
+  activePhase = 0,
+}: {
+  guide: StepGuide;
+  guidedMode?: boolean;
+  activePhase?: number;
+}) {
   const items = [
     ["Look here first", guide.observe],
     ["What changed", guide.changed],
@@ -728,27 +792,29 @@ function LearningGuide({ guide }: { guide: StepGuide }) {
     ["Carry forward", guide.remember],
     ["Code connection", guide.code],
   ];
+  const guidedItem = activePhase === 0 ? ["Question in plain words", guide.plain] : items[Math.min(activePhase - 1, 3)];
 
   return (
     <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.06] p-4">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg border border-cyan-400/25 bg-cyan-400/10 p-2 text-cyan-200">
-          <BrainCircuit className="h-4 w-4" />
-        </div>
+        <div className="rounded-lg border border-cyan-400/25 bg-cyan-400/10 p-2 text-cyan-200"><BrainCircuit className="h-4 w-4" /></div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-white">Step explained from zero</div>
-          <p className="mt-1 text-sm leading-6 text-slate-200">{guide.plain}</p>
-          <div className="mt-3 grid gap-2 xl:grid-cols-5">
-            {items.map(([title, body], index) => (
-              <div key={title} className="rounded-lg border border-white/10 bg-black/20 p-3">
-                <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-200">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400/15 font-mono text-[10px]">{index + 1}</span>
-                  {title}
-                </div>
-                <p className="text-xs leading-5 text-slate-300">{body}</p>
+          <div className="text-sm font-semibold text-white">{guidedMode ? ["Focus ", activePhase + 1, ": ", guidedItem[0]].join("") : "Step explained from zero"}</div>
+          {guidedMode ? (
+            <motion.p key={activePhase} initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} className="mt-2 text-base leading-7 text-slate-100">{guidedItem[1]}</motion.p>
+          ) : (
+            <>
+              <p className="mt-1 text-sm leading-6 text-slate-200">{guide.plain}</p>
+              <div className="mt-3 grid gap-2 xl:grid-cols-5">
+                {items.map(([title, body], index) => (
+                  <div key={title} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                    <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-200"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400/15 font-mono text-[10px]">{index + 1}</span>{title}</div>
+                    <p className="text-xs leading-5 text-slate-300">{body}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

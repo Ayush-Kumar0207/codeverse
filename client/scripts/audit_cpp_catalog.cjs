@@ -41,6 +41,8 @@ let approachCount = 0;
 let cppCount = 0;
 let guidedCount = 0;
 let runnableCount = 0;
+let formattedCount = 0;
+const singleApproachAlgorithms = [];
 
 function canonicalLanguage(value) {
   return value.trim().toLowerCase().replace(/\s+/g, "");
@@ -52,6 +54,14 @@ function addError(scope, message) {
 
 for (const algorithm of AT_ALGORITHMS) {
   approachCounts.set(algorithm.approaches.length, (approachCounts.get(algorithm.approaches.length) || 0) + 1);
+  if (algorithm.approaches.length === 1) {
+    singleApproachAlgorithms.push({
+      id: algorithm.id,
+      title: algorithm.title,
+      topic: algorithm.topic,
+      approach: algorithm.approaches[0]?.name || "Canonical",
+    });
+  }
   for (const approach of algorithm.approaches) {
     approachCount += 1;
     const scope = `${algorithm.title} [${algorithm.id}] / ${approach.name}`;
@@ -87,6 +97,17 @@ for (const algorithm of AT_ALGORITHMS) {
     }
     if (!/#include\s*<bits\/stdc\+\+\.h>/.test(code) && !/#include\s*</.test(code)) {
       addError(scope, "C++ solution has no standard-library include");
+    }
+    const formattingIssues = code.split(/\r?\n/).filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("#")) return false;
+      const statementCount = (line.match(/;/g) || []).length;
+      return line.length > 120 || statementCount >= 4;
+    });
+    if (formattingIssues.length > 0) {
+      addError(scope, `C++ formatting exceeds the readable line budget (${formattingIssues[0].length} characters)`);
+    } else {
+      formattedCount += 1;
     }
     const repeatedBitsInclude = code.match(/^[ \t]*#include\s*<bits\/stdc\+\+\.h>[ \t]*$/gm) || [];
     if (repeatedBitsInclude.length > 1) {
@@ -159,10 +180,72 @@ async function compileAll(queue, concurrency) {
   return failures;
 }
 
+async function compileCombined(queue) {
+  const compiler = locateCompiler();
+  const safeRoot = path.resolve("C:\\tmp");
+  const workingDirectory = path.resolve(safeRoot, "codeverse-cpp-audit-" + process.pid);
+  if (!workingDirectory.startsWith(safeRoot + path.sep + "codeverse-cpp-audit-")) {
+    throw new Error("Unsafe compiler audit temporary path");
+  }
+  fs.mkdirSync(workingDirectory, { recursive: false });
+  const sourcePath = path.join(workingDirectory, "catalog-audit.cpp");
+  const units = ["#include <bits/stdc++.h>"];
+
+  queue.forEach((item, index) => {
+    const macroNames = [...item.code.matchAll(/^\s*#\s*define\s+([A-Za-z_]\w*)/gm)].map((match) => match[1]);
+    const code = item.code.replace(/^\s*#\s*include\s*[^\n]*$/gm, "");
+    units.push("namespace codeverse_audit_" + index + " {");
+    units.push("#define main codeverse_main_" + index);
+    units.push('#line 1 "codeverse_' + index + '.cpp"');
+    units.push(code);
+    units.push("#undef main");
+    units.push("}");
+    for (const macroName of macroNames) units.push("#undef " + macroName);
+  });
+  units.push("int main() { return 0; }");
+  fs.writeFileSync(sourcePath, units.join("\n"));
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(compiler, ["-std=c++17", "-fsyntax-only", sourcePath], {
+      stdio: ["ignore", "ignore", "pipe"],
+      windowsHide: true,
+    });
+    let stderr = "";
+    const cleanup = () => {
+      if (!workingDirectory.startsWith(safeRoot + path.sep + "codeverse-cpp-audit-")) return;
+      fs.rmSync(workingDirectory, { recursive: true, force: true });
+    };
+    child.stderr.on("data", (chunk) => {
+      if (stderr.length < 100000) stderr += chunk.toString();
+    });
+    child.on("error", (error) => {
+      cleanup();
+      reject(error);
+    });
+    child.on("close", (code) => {
+      cleanup();
+      if (code === 0) {
+        resolve([]);
+        return;
+      }
+      const indexes = [...stderr.matchAll(/codeverse_(\d+)\.cpp/g)].map((match) => Number(match[1]));
+      const uniqueIndexes = [...new Set(indexes)].filter((index) => queue[index]);
+      if (uniqueIndexes.length === 0) {
+        resolve([{ scope: "combined catalog", error: stderr.replace(/\r/g, "").trim().slice(0, 8000) }]);
+        return;
+      }
+      resolve(uniqueIndexes.map((index) => ({
+        scope: queue[index].scope,
+        error: stderr.replace(/\r/g, "").trim().slice(0, 8000),
+      })));
+    });
+  });
+}
+
 async function main() {
   let compileFailures = [];
   if (shouldCompile) {
-    compileFailures = await compileAll(compilationQueue, 4);
+    compileFailures = await compileCombined(compilationQueue);
     for (const failure of compileFailures) {
       addError(failure.scope, `does not compile: ${failure.error}`);
     }
@@ -178,8 +261,34 @@ async function main() {
   );
   console.log(`Approach distribution: ${distribution}.`);
   console.log(`Runnable main coverage: ${runnableCount}/${approachCount}; premium-guide coverage: ${guidedCount}/${cppCount}.`);
+  console.log(`Readable-format coverage: ${formattedCount}/${cppCount}; canonical-only algorithms: ${singleApproachAlgorithms.length}.`);
+  if (process.argv.includes("--coverage-report")) {
+    const reportPath = path.resolve(__dirname, "../data/algos/cpp_coverage_report.json");
+    fs.writeFileSync(
+      reportPath,
+      `${JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        algorithms: AT_ALGORITHMS.length,
+        approaches: approachCount,
+        distribution: Object.fromEntries([...approachCounts.entries()].sort(([left], [right]) => left - right)),
+        canonicalOnly: singleApproachAlgorithms,
+      }, null, 2)}\n`
+    );
+    console.log(`Coverage report: ${reportPath}`);
+  }
   if (shouldCompile) {
     console.log(`Compiler coverage: ${compilationQueue.length - compileFailures.length}/${compilationQueue.length}.`);
+    if (process.argv.includes("--compile-report")) {
+      const reportPath = path.resolve(__dirname, "../data/algos/cpp_compile_report.json");
+      fs.writeFileSync(reportPath, `${JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        compiler: locateCompiler(),
+        requested: compilationQueue.length,
+        passed: compilationQueue.length - compileFailures.length,
+        failed: compileFailures.map(({ scope, error }) => ({ scope, error })),
+      }, null, 2)}\n`);
+      console.log(`Compile report: ${reportPath}`);
+    }
   }
 
   if (errors.length) {

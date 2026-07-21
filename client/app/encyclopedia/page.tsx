@@ -129,6 +129,7 @@ function EncyclopediaContent() {
 
   const topicCount = useMemo(() => new Set(AT_ALGORITHMS.map((algo) => algo.topic || "Uncategorized")).size, []);
   const activeApproach = activeAlgo.approaches[activeApproachIdx] || activeAlgo.approaches[0];
+  const approachTabs = useMemo(() => buildApproachTabs(activeAlgo.approaches), [activeAlgo.approaches]);
   const activeImplementation =
     activeApproach.implementations.find((impl) => impl.language === selectedLang) ||
     activeApproach.implementations[0];
@@ -262,7 +263,7 @@ function EncyclopediaContent() {
           <div className="flex shrink-0 items-center gap-2">
             {activeAlgo.visualizerCode && (
               <a
-                href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
+                href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&presentation=1&narrate=1`}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950/35 transition hover:bg-indigo-400 sm:px-4"
               >
                 <Play className="h-4 w-4" />
@@ -335,7 +336,7 @@ function EncyclopediaContent() {
                   </div>
                 </div>
                 <a
-                  href={hasCinematicVisualizer(activeAlgo) ? `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&viz=3d` : `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}`}
+                  href={hasCinematicVisualizer(activeAlgo) ? `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&viz=3d&presentation=1&narrate=1` : `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&presentation=1&narrate=1`}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                 >
                   <Play className="h-4 w-4" />
@@ -349,29 +350,35 @@ function EncyclopediaContent() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Selected approach</p>
                   <h2 className="mt-1 text-lg font-semibold text-white">{activeApproach.name}</h2>
+                  <p className="mt-1 text-xs text-slate-500">{activeAlgo.approaches.length} verified {activeAlgo.approaches.length === 1 ? "solution" : "solutions"}; only available tiers are shown.</p>
                 </div>
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Solution approaches">
                   {activeAlgo.approaches.map((approach, index) => (
                     <button
                       key={`${approach.name}-${index}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeApproachIdx === index}
+                      aria-controls="selected-approach-content"
+                      title={approach.name}
                       onClick={() => {
                         setActiveApproachIdx(index);
                         setCopied(false);
                       }}
                       className={cn(
-                        "inline-flex h-10 max-w-[280px] shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
+                        "inline-flex h-10 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
                         activeApproachIdx === index
                           ? "bg-white text-slate-950 shadow-lg shadow-black/20"
                           : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
                       )}
                     >
-                      <span className="truncate">{index + 1}. {approach.name}</span>
+                      {approachTabs[index]}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4 p-4 lg:p-5">
+              <div id="selected-approach-content" className="space-y-4 p-4 lg:p-5" role="tabpanel">
                 <InsightCard
                   narrationId={`${narrationPrefix}-mental-model`}
                   title="Mental model"
@@ -909,6 +916,25 @@ function DetailedWalkthrough({
       </div>
     </NarratedSlab>
   );
+}
+
+function buildApproachTabs(approaches: AlgorithmEntry["approaches"]) {
+  const bases = approaches.map((approach) => {
+    const name = approach.name.toLowerCase();
+    if (name.includes("brute")) return "Brute";
+    if (name.includes("better")) return "Better";
+    if (name.includes("optimal") || name.includes("optimized")) return "Optimal";
+    return approaches.length === 1 ? "Canonical" : "Optimal";
+  });
+  const totals = bases.reduce<Record<string, number>>((counts, base) => {
+    counts[base] = (counts[base] || 0) + 1;
+    return counts;
+  }, {});
+  const seen: Record<string, number> = {};
+  return bases.map((base) => {
+    seen[base] = (seen[base] || 0) + 1;
+    return totals[base] > 1 ? `${base} ${seen[base]}` : base;
+  });
 }
 
 function slugify(value: string) {

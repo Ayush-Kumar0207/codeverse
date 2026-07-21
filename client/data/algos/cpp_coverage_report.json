@@ -1,0 +1,354 @@
+{
+  "generatedAt": "2026-07-21T05:21:58.725Z",
+  "algorithms": 422,
+  "approaches": 822,
+  "distribution": {
+    "1": 57,
+    "2": 330,
+    "3": 35
+  },
+  "canonicalOnly": [
+    {
+      "id": "implement-atoi",
+      "title": "String to Integer (atoi)",
+      "topic": "Strings - Medium",
+      "approach": "Optimal (State Machine Simulation)"
+    },
+    {
+      "id": "print-1-to-n-using-recursion",
+      "title": "Print 1 to N using recursion",
+      "topic": "Basic Recursion",
+      "approach": "Optimal (Backtracking / Induction)"
+    },
+    {
+      "id": "print-n-to-1-using-recursion",
+      "title": "Print N to 1 using recursion",
+      "topic": "Basic Recursion",
+      "approach": "Optimal (Direct Recursion)"
+    },
+    {
+      "id": "lemonade-change",
+      "title": "Lemonade Change",
+      "topic": "Greedy Algorithms",
+      "approach": "Optimal (Greedy Choice)"
+    },
+    {
+      "id": "fractional-knapsack",
+      "title": "Fractional Knapsack",
+      "topic": "Greedy Algorithms",
+      "approach": "Optimal (Value/Weight Ratio)"
+    },
+    {
+      "id": "selection-sort",
+      "title": "Selection Sort",
+      "topic": "Sorting Algorithms",
+      "approach": "Standard Optimal"
+    },
+    {
+      "id": "introduction-to-bit-manipulation",
+      "title": "Intro to Bit Manipulation",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "The 3 Primary Operations"
+    },
+    {
+      "id": "remove-the-last-set-bit",
+      "title": "Remove Last Set Bit",
+      "topic": "Bit Manipulation - Tricks",
+      "approach": "Optimal (n & n-1)"
+    },
+    {
+      "id": "swap-two-numbers",
+      "title": "Swap Numbers (XOR)",
+      "topic": "Bit Manipulation - Intro",
+      "approach": "Optimal (XOR Swap)"
+    },
+    {
+      "id": "divide-two-integers-without-using-multiplication-division-and-mod-operator",
+      "title": "Divide Two Integers",
+      "topic": "Bit Manipulation - Problems",
+      "approach": "Optimal (Bitwise Exponential Search)"
+    },
+    {
+      "id": "pattern-1-square",
+      "title": "Pattern 1: Square",
+      "topic": "Logical Thinking",
+      "approach": "Optimal (Nested Loops)"
+    },
+    {
+      "id": "pattern-7-triangle-star",
+      "title": "Pattern 7: Star Triangle",
+      "topic": "Logical Thinking",
+      "approach": "Optimal (Math-based Loops)"
+    },
+    {
+      "id": "pattern-10-rotational-triangle",
+      "title": "Pattern 10: Half Diamond",
+      "topic": "Logical Thinking",
+      "approach": "Optimal (Multi-phase Loops)"
+    },
+    {
+      "id": "user-input-output",
+      "title": "User Input / Output",
+      "topic": "Basic Basics - Things to Know",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "data-types",
+      "title": "Data Types",
+      "topic": "Basic Basics - Things to Know",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "if-else-statements",
+      "title": "If Else statements",
+      "topic": "Basic Basics - Things to Know",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "switch-statement",
+      "title": "Switch Statement",
+      "topic": "Basic Basics - Things to Know",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "for-loops-while-loops",
+      "title": "For loops & while loops",
+      "topic": "Basic Basics - Things to Know",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "pattern-printing-patterns-1-to-22",
+      "title": "Pattern Printing (Patterns 1 to 22)",
+      "topic": "Basic Basics - Patterns",
+      "approach": "Optimal (Topic-Specific)"
+    },
+    {
+      "id": "understand-recursion-by-printing-something-n-times",
+      "title": "Understand recursion by printing something N times",
+      "topic": "Basic Basics - Basic Recursion",
+      "approach": "Core Intuition"
+    },
+    {
+      "id": "linear-search",
+      "title": "Linear Search",
+      "topic": "Arrays - Easy",
+      "approach": "Linear Search"
+    },
+    {
+      "id": "introduction-to-linkedlist-insert-delete",
+      "title": "Introduction to Linked List",
+      "topic": "LinkedList - 1D LL",
+      "approach": "Optimal (Node Construction & Traversal)"
+    },
+    {
+      "id": "insert-a-node-in-linkedlist",
+      "title": "Insert Node in LinkedList",
+      "topic": "LinkedList - 1D LL",
+      "approach": "Optimal (Case-based Insertion)"
+    },
+    {
+      "id": "delete-a-node-in-linkedlist",
+      "title": "Delete Node in LinkedList",
+      "topic": "LinkedList - 1D LL",
+      "approach": "Optimal (Pointer Manipulation)"
+    },
+    {
+      "id": "find-the-length-of-the-linkedlist",
+      "title": "Length of LinkedList",
+      "topic": "LinkedList - 1D LL",
+      "approach": "Optimal (Linear Traversal)"
+    },
+    {
+      "id": "search-an-element-in-the-ll",
+      "title": "Search in LinkedList",
+      "topic": "LinkedList - 1D LL",
+      "approach": "Optimal (Linear Search)"
+    },
+    {
+      "id": "introduction-to-doubly-linkedlist",
+      "title": "Introduction to Doubly Linked List",
+      "topic": "LinkedList - Doubly LL",
+      "approach": "Optimal (Node Construction & Mapping)"
+    },
+    {
+      "id": "insert-a-node-in-dll",
+      "title": "Insert Node in DLL",
+      "topic": "LinkedList - Doubly LL",
+      "approach": "Optimal (Bi-directional Linking)"
+    },
+    {
+      "id": "delete-a-node-in-dll",
+      "title": "Delete Node in DLL",
+      "topic": "LinkedList - Doubly LL",
+      "approach": "Optimal (Bi-directional Bypass)"
+    },
+    {
+      "id": "learn-all-patterns-of-subsequences",
+      "title": "Patterns of Subsequences",
+      "topic": "Recursion - Subsequences",
+      "approach": "Conceptual Model (Decisional Tree)"
+    },
+    {
+      "id": "expression-add-operators",
+      "title": "Expression Add Operators",
+      "topic": "Recursion - Hard",
+      "approach": "Optimal (Backtracking with Running Value Maintenance)"
+    },
+    {
+      "id": "set-the-i-th-bit",
+      "title": "Set the i-th Bit",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "Bitwise OR Masking"
+    },
+    {
+      "id": "clear-the-i-th-bit",
+      "title": "Clear the i-th Bit",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "Bitwise AND with Complement Mask"
+    },
+    {
+      "id": "toggle-the-i-th-bit",
+      "title": "Toggle the i-th Bit",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "Bitwise XOR Masking"
+    },
+    {
+      "id": "power-of-2",
+      "title": "Power of 2 Check",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "Bitwise Validation"
+    },
+    {
+      "id": "minimum-bit-flips-to-convert-number",
+      "title": "Min Bit Flips to Convert",
+      "topic": "Bit Manipulation - Basics",
+      "approach": "XOR + Popcount"
+    },
+    {
+      "id": "xor-of-numbers-in-a-given-range",
+      "title": "XOR In Range [0, N]",
+      "topic": "Bit Manipulation - Interview",
+      "approach": "Pattern-based O(1) Method"
+    },
+    {
+      "id": "find-xor-of-numbers-from-l-to-r",
+      "title": "XOR In Range [L, R]",
+      "topic": "Bit Manipulation - Advanced",
+      "approach": "Prefix XOR Logic"
+    },
+    {
+      "id": "implement-stack-using-arrays",
+      "title": "Implement Stack (Array)",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Pointer-based Array"
+    },
+    {
+      "id": "implement-queue-using-arrays",
+      "title": "Implement Queue (Array)",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Two-Pointer Array"
+    },
+    {
+      "id": "implement-stack-using-queue",
+      "title": "Implement Stack via Queues",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Single Queue (Re-enqueue)"
+    },
+    {
+      "id": "implement-queue-using-stack",
+      "title": "Implement Queue via Stacks",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Two Stacks (Amortized O(1))"
+    },
+    {
+      "id": "implement-stack-using-linked-list",
+      "title": "Implement Stack (LinkedList)",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Head-Insertion Method"
+    },
+    {
+      "id": "implement-queue-using-linked-list",
+      "title": "Implement Queue (LinkedList)",
+      "topic": "Stack and Queues - Basics",
+      "approach": "Two-Pointer LinkedList"
+    },
+    {
+      "id": "infix-to-postfix-conversion",
+      "title": "Infix to Postfix (Shunting-Yard)",
+      "topic": "Stack and Queues - Conversions",
+      "approach": "Operator Stack Algorithm"
+    },
+    {
+      "id": "prefix-to-infix-conversion",
+      "title": "Prefix to Infix",
+      "topic": "Stack and Queues - Conversions",
+      "approach": "Reverse Stack Algorithm"
+    },
+    {
+      "id": "prefix-to-postfix-conversion",
+      "title": "Prefix to Postfix",
+      "topic": "Stack and Queues - Conversions",
+      "approach": "Reverse Stack Accumulation"
+    },
+    {
+      "id": "postfix-to-prefix-conversion",
+      "title": "Postfix to Prefix",
+      "topic": "Stack and Queues - Conversions",
+      "approach": "Stack Accumulation (Left-to-Right)"
+    },
+    {
+      "id": "postfix-to-infix-conversion",
+      "title": "Postfix to Infix",
+      "topic": "Stack and Queues - Conversions",
+      "approach": "In-Place Parenthesizing"
+    },
+    {
+      "id": "introduction-to-priority-queues-using-binary-heaps",
+      "title": "Introduction to Priority Queues & Binary Heaps",
+      "topic": "Heaps - Basics",
+      "approach": "Conceptual Model"
+    },
+    {
+      "id": "min-heap-and-max-heap-implementation",
+      "title": "Min Heap Implementation",
+      "topic": "Heaps - Basics",
+      "approach": "Standard Heapify"
+    },
+    {
+      "id": "introduction-to-trees",
+      "title": "Introduction to Trees",
+      "topic": "Binary Trees - Traversals",
+      "approach": "Structure & Concepts"
+    },
+    {
+      "id": "binary-tree-representation-in-c",
+      "title": "Binary Tree Representation",
+      "topic": "Binary Trees - Traversals",
+      "approach": "Pointer-Based Representation"
+    },
+    {
+      "id": "boundary-traversal",
+      "title": "Boundary Traversal",
+      "topic": "Binary Trees - Medium",
+      "approach": "Composite Traversal"
+    },
+    {
+      "id": "graph-and-types",
+      "title": "Graph Anatomy & Types",
+      "topic": "Graphs - Learning",
+      "approach": "Fundamental Taxonomy"
+    },
+    {
+      "id": "bfs",
+      "title": "BFS (Breadth-First Search)",
+      "topic": "Graphs - Traversals",
+      "approach": "Queue-Based Layering"
+    },
+    {
+      "id": "bit-prerequisites-for-tries",
+      "title": "Bitwise Pre-Requisites",
+      "topic": "Tries",
+      "approach": "Fundamental Ops"
+    }
+  ]
+}

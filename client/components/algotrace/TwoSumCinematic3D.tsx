@@ -244,6 +244,14 @@ export default function TwoSumCinematic3D({
         data-layout="focus"
       >
         <div ref={mountRef} className="absolute inset-0" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-[#020617]/95 via-[#020617]/75 to-transparent px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
+          <div className="max-w-2xl rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/40 backdrop-blur-md">
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]"><span className="rounded-md bg-cyan-300/15 px-2 py-1 text-cyan-100">Two pointers</span><span className="rounded-md bg-emerald-300/15 px-2 py-1 text-emerald-100">Step {sceneData.step} / {sceneData.totalSteps}</span></div>
+            <h2 className="mt-2 text-base font-bold leading-6 text-white sm:text-xl">{sceneData.headline}</h2>
+            <p className="mt-1 max-w-xl text-xs leading-5 text-slate-200 sm:text-sm sm:leading-6">{sceneData.narrative}</p>
+            <p className="mt-2 text-xs font-semibold text-amber-100 sm:text-sm">{sceneData.decision}</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -693,7 +701,17 @@ function createTextSprite(text: string, options: { textColor: string; background
   texture.magFilter = THREE.LinearFilter;
   texture.anisotropy = 8;
   texture.needsUpdate = true;
-  return new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, alphaTest: 0.01 }));
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    alphaTest: 0.01,
+    toneMapped: false,
+  });
+  const sprite = new THREE.Sprite(material);
+  sprite.renderOrder = 100;
+  return sprite;
 }
 
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {

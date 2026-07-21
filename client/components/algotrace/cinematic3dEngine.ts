@@ -886,11 +886,11 @@ function addLabel(
 ) {
   const label = createTextSprite(text, {
     textColor: "#effbff",
-    background: "rgba(2,6,23,0.84)",
+    background: "rgba(2,6,23,0.96)",
     border: hexColor(color),
   });
   label.position.copy(position);
-  label.scale.set(Math.max(width, Math.min(1.7, text.length * 0.105)), 0.36, 1);
+  label.scale.set(Math.max(width, Math.min(2.45, text.length * 0.14)), 0.52, 1);
   stage.add(label);
 }
 
@@ -899,21 +899,21 @@ function createTextSprite(
   options: { textColor: string; background: string; border: string }
 ) {
   const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 128;
+  canvas.width = 1024;
+  canvas.height = 256;
   const context = canvas.getContext("2d");
   if (!context) return new THREE.Sprite();
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = options.background;
-  roundedRect(context, 12, 12, canvas.width - 24, canvas.height - 24, 18);
+  roundedRect(context, 20, 20, canvas.width - 40, canvas.height - 40, 28);
   context.fill();
-  context.lineWidth = 3;
+  context.lineWidth = 6;
   context.strokeStyle = options.border;
   context.stroke();
   context.fillStyle = options.textColor;
-  context.font = "600 40px Inter, Arial, sans-serif";
+  context.font = "850 78px Inter, Arial, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillText(text.slice(0, 28), canvas.width / 2, canvas.height / 2 + 2);
@@ -922,14 +922,17 @@ function createTextSprite(
   texture.generateMipmaps = false;
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
-  return new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: texture,
-      transparent: true,
-      depthWrite: false,
-      alphaTest: 0.01,
-    })
-  );
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    alphaTest: 0.01,
+    toneMapped: false,
+  });
+  const sprite = new THREE.Sprite(material);
+  sprite.renderOrder = 100;
+  return sprite;
 }
 
 function itemMaterial(color: number, emphasized: boolean, muted: boolean) {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, Beaker, Maximize2, Minimize2, Pause, Play } from "lucide-react";
-import AutoVisualizer, { StateData } from "./AutoVisualizer";
+import { createPortal } from "react-dom";
+import { Activity, Beaker, Maximize2, Minimize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import AutoVisualizer, { StateData, StateValue } from "./AutoVisualizer";
 import PlaybackControls from "./PlaybackControls";
 import FeedbackLoop from "./FeedbackLoop";
 import { Button } from "@/components/ui/button";
@@ -32,16 +33,23 @@ function looksLikeNonExecutableSource(source: string) {
 export default function AlgoTraceCanvas({
   editorCode = "",
   autoRun = false,
+  presentationMode = false,
+  preferSceneFocus = false,
+  autoNarrate = false,
 }: {
   editorCode?: string;
   autoRun?: boolean;
+  presentationMode?: boolean;
+  preferSceneFocus?: boolean;
+  autoNarrate?: boolean;
 }) {
   const [history, setHistory] = useState<StateData[]>([EMPTY_TRACE]);
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(presentationMode);
   const [isSceneFocus, setIsSceneFocus] = useState(false);
+  const [narrationEnabled, setNarrationEnabled] = useState(autoNarrate);
   const lastAutoRunCodeRef = useRef("");
 
   const safeHistory = useMemo(() => (history.length > 0 ? history : [EMPTY_TRACE]), [history]);
@@ -104,7 +112,7 @@ export default function AlgoTraceCanvas({
             ]
       );
       setActiveStep(0);
-      setIsPlaying(false);
+      setIsPlaying(presentationMode && capturedTrace.length > 1);
       setShowFeedback(false);
     } catch (error: unknown) {
       setHistory([
@@ -117,7 +125,7 @@ export default function AlgoTraceCanvas({
       setIsPlaying(false);
       setShowFeedback(false);
     }
-  }, [editorCode]);
+  }, [editorCode, presentationMode]);
 
   useEffect(() => {
     if (!autoRun || !editorCode.trim() || lastAutoRunCodeRef.current === editorCode) return;
@@ -130,8 +138,35 @@ export default function AlgoTraceCanvas({
   }, [autoRun, editorCode, runLocalCode]);
 
   useEffect(() => {
-    if (!isCinematic3D) setIsSceneFocus(false);
-  }, [isCinematic3D]);
+    if (!isCinematic3D) {
+      setIsSceneFocus(false);
+      return;
+    }
+    if (presentationMode && preferSceneFocus) setIsSceneFocus(true);
+  }, [isCinematic3D, preferSceneFocus, presentationMode]);
+
+  const narrationText = useMemo(
+    () => buildNarration(activeState, activeIndex, safeHistory.length),
+    [activeIndex, activeState, safeHistory.length]
+  );
+
+  useEffect(() => {
+    if (!narrationEnabled || !presentationMode || !("speechSynthesis" in window)) return;
+    if (activeState === EMPTY_TRACE || activeState === NON_EXECUTABLE_TRACE) return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(narrationText);
+    const voices = window.speechSynthesis.getVoices();
+    utterance.voice = voices.find((voice) =>
+      /natural|google|aria|jenny|samantha/i.test(voice.name) && /^en/i.test(voice.lang)
+    ) || voices.find((voice) => /^en/i.test(voice.lang)) || null;
+    utterance.rate = 0.94;
+    utterance.pitch = 1.02;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+
+    return () => window.speechSynthesis.cancel();
+  }, [activeState, narrationEnabled, narrationText, presentationMode]);
 
   useEffect(() => {
     if (!isSceneFocus) return;
@@ -165,14 +200,20 @@ export default function AlgoTraceCanvas({
       return;
     }
 
+    const wordCount = narrationText.split(/\s+/).filter(Boolean).length;
+    const delay = narrationEnabled
+      ? Math.min(16000, Math.max(6500, wordCount * 285 + 1100))
+      : presentationMode
+        ? 14500
+        : 1200;
     const timer = window.setTimeout(() => {
       setActiveStep((current) => Math.min(current + 1, safeHistory.length - 1));
-    }, 1200);
+    }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [activeIndex, isPlaying, safeHistory.length]);
+  }, [activeIndex, isPlaying, narrationEnabled, narrationText, presentationMode, safeHistory.length]);
 
-  return (
+  const canvas = (
     <div
       className={cn(
         "flex flex-col overflow-hidden bg-[#070b12] text-slate-100",
@@ -191,6 +232,21 @@ export default function AlgoTraceCanvas({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-8 w-8 hover:bg-slate-800",
+              narrationEnabled ? "text-emerald-300" : "text-slate-500 hover:text-slate-100"
+            )}
+            onClick={() => setNarrationEnabled((current) => !current)}
+            title={narrationEnabled ? "Turn narration off" : "Turn narration on"}
+            aria-label={narrationEnabled ? "Turn narration off" : "Turn narration on"}
+            aria-pressed={narrationEnabled}
+          >
+            {narrationEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -215,11 +271,14 @@ export default function AlgoTraceCanvas({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar">
-        <AutoVisualizer
-          state={activeState}
-          previousState={previousState}
-          onFocusScene={isCinematic3D ? () => setIsSceneFocus(true) : undefined}
-        />
+        {!isSceneFocus && (
+          <AutoVisualizer
+            state={activeState}
+            previousState={previousState}
+            focusMode={isFullscreen}
+            onFocusScene={isCinematic3D ? () => setIsSceneFocus(true) : undefined}
+          />
+        )}
       </div>
 
       <div
@@ -254,6 +313,10 @@ export default function AlgoTraceCanvas({
       {isSceneFocus && isCinematic3D && (
         <div className="fixed inset-0 z-[120] bg-[#030712] text-white">
           <AutoVisualizer state={activeState} previousState={previousState} focusMode />
+          <div className="pointer-events-none absolute left-4 top-4 z-30 rounded-lg border border-white/10 bg-slate-950/75 px-3 py-2 text-xs text-slate-300 shadow-xl backdrop-blur-md">
+            <span className="font-semibold text-white">Step {activeIndex + 1} of {safeHistory.length}</span>
+            <span className="ml-2 text-slate-400">{narrationEnabled ? "Narration on" : "Narration off"}</span>
+          </div>
           <button
             type="button"
             onClick={() => setIsSceneFocus(false)}
@@ -279,6 +342,29 @@ export default function AlgoTraceCanvas({
       )}
     </div>
   );
+
+  return isFullscreen && typeof document !== "undefined"
+    ? createPortal(canvas, document.body)
+    : canvas;
+}
+
+function buildNarration(state: StateData, activeIndex: number, totalSteps: number) {
+  const algorithm = state.algorithm && typeof state.algorithm === "object" && !Array.isArray(state.algorithm)
+    ? state.algorithm as Record<string, StateValue>
+    : null;
+  const title = typeof algorithm?.title === "string" ? algorithm.title : "this algorithm";
+  const text = (key: string) => typeof state[key] === "string" ? state[key] as string : "";
+  const introduction = activeIndex === 0
+    ? `Welcome to ${title}. ${text("problemLens") || "We will turn the problem into a sequence of small, verifiable decisions."}`
+    : "";
+  return [
+    introduction,
+    `Step ${activeIndex + 1} of ${totalSteps}.`,
+    text("headline"),
+    text("narrative") || text("explanation"),
+    text("decision") ? `Decision: ${text("decision")}` : "",
+    text("invariant") ? `Keep this invariant: ${text("invariant")}` : "",
+  ].filter(Boolean).join(" ").slice(0, 850);
 }
 
 function normalizeTrace(trace: unknown[]) {

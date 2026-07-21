@@ -165,11 +165,11 @@ export const twoSumCinematic3DPreset = {
   },
   labels: {
     textureScale: 3,
-    baseValue: { fontSize: 68, featuredScale: [0.68, 0.29, 1], defaultScale: [0.52, 0.24, 1] },
-    indexTick: { fontSize: 52, scale: [0.44, 0.18, 1] },
-    pointerTag: { fontSize: 64, scale: [1.34, 0.42, 1] },
-    targetBadge: { fontSize: 72, scale: [1.78, 0.48, 1] },
-    equation: { fontSize: 68, scale: [1.9, 0.48, 1] },
+    baseValue: { fontSize: 82, featuredScale: [0.88, 0.38, 1], defaultScale: [0.7, 0.32, 1] },
+    indexTick: { fontSize: 68, scale: [0.62, 0.25, 1] },
+    pointerTag: { fontSize: 76, scale: [1.62, 0.52, 1] },
+    targetBadge: { fontSize: 84, scale: [2.08, 0.58, 1] },
+    equation: { fontSize: 80, scale: [2.2, 0.58, 1] },
   },
   colors: {
     pointers: {

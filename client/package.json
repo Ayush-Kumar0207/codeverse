@@ -19,6 +19,7 @@
     "app:audit": "node scripts/audit_app_routes.cjs",
     "collab:audit": "node scripts/audit_collaboration.cjs",
     "visual:audit": "node scripts/audit_visual_system.cjs",
+    "cpp:format": "node scripts/format_cpp_catalog.cjs",
     "cpp:audit": "node scripts/audit_cpp_catalog.cjs",
     "release:audit": "npm run app:audit && npm run visual:audit && npm run collab:audit && npm run algo:audit && npm run algo:audit:3d && npm run cpp:audit"
   },

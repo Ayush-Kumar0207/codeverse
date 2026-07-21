@@ -193,6 +193,8 @@ function EditorWorkspace() {
   const searchParams = useSearchParams();
   const algoId = searchParams?.get("algo");
   const visualizerMode = searchParams?.get("viz");
+  const presentationMode = searchParams?.get("presentation") === "1";
+  const narrationRequested = searchParams?.get("narrate") === "1";
   
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const roomId = id || "room1";
@@ -2058,6 +2060,9 @@ recordTrace({
                   <AlgoTraceCanvas
                     editorCode={algoTraceCode}
                     autoRun={Boolean(algoId)}
+                    presentationMode={presentationMode}
+                    preferSceneFocus={visualizerMode === "3d"}
+                    autoNarrate={narrationRequested}
                   />
                 </TabsContent>
               </div>
