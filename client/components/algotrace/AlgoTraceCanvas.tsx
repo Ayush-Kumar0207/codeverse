@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Activity, Beaker, Maximize2, Minimize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Activity, Beaker, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 import AutoVisualizer, { StateData, StateValue } from "./AutoVisualizer";
 import PlaybackControls from "./PlaybackControls";
 import FeedbackLoop from "./FeedbackLoop";
@@ -179,18 +179,6 @@ export default function AlgoTraceCanvas({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSceneFocus]);
 
-  const toggleFocusPlayback = useCallback(() => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      return;
-    }
-
-    if (safeHistory.length <= 1) return;
-    if (activeIndex >= safeHistory.length - 1) setActiveStep(0);
-    setShowFeedback(false);
-    setIsPlaying(true);
-  }, [activeIndex, isPlaying, safeHistory.length]);
-
   useEffect(() => {
     if (!isPlaying) return;
 
@@ -311,33 +299,57 @@ export default function AlgoTraceCanvas({
       </div>
 
       {isSceneFocus && isCinematic3D && (
-        <div className="fixed inset-0 z-[120] bg-[#030712] text-white">
-          <AutoVisualizer state={activeState} previousState={previousState} focusMode />
-          <div className="pointer-events-none absolute left-4 top-4 z-30 rounded-lg border border-white/10 bg-slate-950/75 px-3 py-2 text-xs text-slate-300 shadow-xl backdrop-blur-md">
-            <span className="font-semibold text-white">Step {activeIndex + 1} of {safeHistory.length}</span>
-            <span className="ml-2 text-slate-400">{narrationEnabled ? "Narration on" : "Narration off"}</span>
+        <div className="fixed inset-0 z-[120] flex flex-col overflow-hidden bg-[#030712] text-white">
+          <div className="min-h-0 flex-1">
+            <AutoVisualizer state={activeState} previousState={previousState} focusMode />
+          </div>
+          <div className="relative z-30 shrink-0 border-t border-white/10 bg-[#071019]/95 px-3 py-3 shadow-2xl shadow-black/40 backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setNarrationEnabled((current) => !current)}
+                className={cn(
+                  "inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs font-semibold transition",
+                  narrationEnabled
+                    ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100 hover:bg-emerald-300/15"
+                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08]"
+                )}
+                aria-label={narrationEnabled ? "Turn narration off" : "Turn narration on"}
+                aria-pressed={narrationEnabled}
+                title={narrationEnabled ? "Turn narration off" : "Turn narration on"}
+              >
+                {narrationEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                <span className="hidden sm:inline">{narrationEnabled ? "Narration on" : "Narration off"}</span>
+              </button>
+              <PlaybackControls
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                onNext={() => {
+                  setIsPlaying(false);
+                  setActiveStep((current) => Math.min(current + 1, safeHistory.length - 1));
+                }}
+                onPrev={() => {
+                  setIsPlaying(false);
+                  setActiveStep((current) => Math.max(current - 1, 0));
+                }}
+                onReset={() => {
+                  setActiveStep(0);
+                  setIsPlaying(false);
+                }}
+                activeStep={activeIndex}
+                totalSteps={safeHistory.length}
+              />
+            </div>
           </div>
           <button
             type="button"
             onClick={() => setIsSceneFocus(false)}
-            className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-slate-950/70 text-slate-200 shadow-lg shadow-black/30 backdrop-blur transition hover:bg-slate-900 hover:text-white"
+            className="absolute right-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-slate-950/80 text-slate-200 shadow-lg shadow-black/30 backdrop-blur transition hover:bg-slate-900 hover:text-white"
             aria-label="Exit 3D focus"
             title="Exit 3D focus"
           >
             <Minimize2 className="h-4 w-4" />
           </button>
-          <div className="pointer-events-none absolute inset-x-0 bottom-5 z-30 flex justify-center px-4">
-            <button
-              type="button"
-              onClick={toggleFocusPlayback}
-              disabled={safeHistory.length <= 1}
-              className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-md border border-emerald-300/20 bg-emerald-400 text-slate-950 shadow-2xl shadow-black/40 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
-              aria-label={isPlaying ? "Pause 3D focus" : "Play 3D focus"}
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
-            </button>
-          </div>
         </div>
       )}
     </div>

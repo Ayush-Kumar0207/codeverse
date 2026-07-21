@@ -111,7 +111,11 @@ export default function SyntaxCodeViewer({
           readOnly: true,
           renderLineHighlight: "none",
           scrollBeyondLastLine: false,
-          scrollbar: { horizontalScrollbarSize: 8, verticalScrollbarSize: 8 },
+          scrollbar: {
+            alwaysConsumeMouseWheel: false,
+            horizontalScrollbarSize: 8,
+            verticalScrollbarSize: 8,
+          },
           stickyScroll: { enabled: false },
           wordWrap: "on",
         }}

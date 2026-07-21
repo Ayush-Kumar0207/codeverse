@@ -238,19 +238,25 @@ export default function TwoSumCinematic3D({
     return (
       <div
         ref={containerRef}
-        className="relative h-full min-h-0 overflow-hidden bg-[#030712] text-white"
+        className="grid h-full min-h-0 grid-rows-[auto_minmax(260px,1fr)] overflow-hidden bg-[#030712] text-white lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:grid-rows-1"
         data-testid="two-sum-cinematic-3d-focus"
         data-visualizer={visualizerName}
         data-layout="focus"
       >
-        <div ref={mountRef} className="absolute inset-0" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-[#020617]/95 via-[#020617]/75 to-transparent px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
-          <div className="max-w-2xl rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/40 backdrop-blur-md">
-            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]"><span className="rounded-md bg-cyan-300/15 px-2 py-1 text-cyan-100">Two pointers</span><span className="rounded-md bg-emerald-300/15 px-2 py-1 text-emerald-100">Step {sceneData.step} / {sceneData.totalSteps}</span></div>
-            <h2 className="mt-2 text-base font-bold leading-6 text-white sm:text-xl">{sceneData.headline}</h2>
-            <p className="mt-1 max-w-xl text-xs leading-5 text-slate-200 sm:text-sm sm:leading-6">{sceneData.narrative}</p>
-            <p className="mt-2 text-xs font-semibold text-amber-100 sm:text-sm">{sceneData.decision}</p>
+        <aside className="z-10 max-h-[38vh] overflow-y-auto border-b border-white/10 bg-[#071019] px-4 py-4 shadow-2xl shadow-black/30 custom-scrollbar sm:px-5 lg:max-h-none lg:border-b-0 lg:border-r lg:px-6 lg:py-6">
+          <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]">
+            <span className="rounded-md bg-cyan-300/15 px-2 py-1 text-cyan-100">Two pointers</span>
+            <span className="rounded-md bg-emerald-300/15 px-2 py-1 text-emerald-100">Step {sceneData.step} / {sceneData.totalSteps}</span>
           </div>
+          <h2 className="mt-3 text-lg font-bold leading-7 text-white">{sceneData.headline}</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-200">{sceneData.narrative}</p>
+          <div className="mt-4 rounded-lg border border-amber-300/15 bg-amber-300/[0.07] p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200">Current decision</div>
+            <p className="mt-1 text-sm font-semibold leading-6 text-amber-50">{sceneData.decision}</p>
+          </div>
+        </aside>
+        <div className="relative min-h-0 overflow-hidden">
+          <div ref={mountRef} className="absolute inset-0" />
         </div>
       </div>
     );

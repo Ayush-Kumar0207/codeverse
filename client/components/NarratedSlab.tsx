@@ -50,6 +50,7 @@ export default function NarratedSlab({
   label,
   icon: Icon,
   iconClassName,
+  headerActions,
   lines,
   children,
   className,
@@ -59,6 +60,7 @@ export default function NarratedSlab({
   label?: string;
   icon: LucideIcon;
   iconClassName?: string;
+  headerActions?: ReactNode;
   lines: NarrationLine[];
   children: ReactNode | ((state: NarrationState) => ReactNode);
   className?: string;
@@ -169,7 +171,7 @@ export default function NarratedSlab({
   return (
     <NarrationContext.Provider value={state}>
       <article className={cn("narrated-slab", className)}>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className={cn("narrated-slab-icon", iconClassName)}>
               <Icon className="h-4 w-4" />
@@ -179,10 +181,15 @@ export default function NarratedSlab({
               {label && <p className="mt-1 truncate text-xs font-medium text-slate-500">{label}</p>}
             </div>
           </div>
-          {activeIndex !== null && (
-            <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-slate-400">
-              {activeIndex + 1} / {lines.length}
-            </span>
+          {(headerActions || activeIndex !== null) && (
+            <div className="flex max-w-full shrink-0 items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+              {headerActions}
+              {activeIndex !== null && (
+                <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-slate-400">
+                  {activeIndex + 1} / {lines.length}
+                </span>
+              )}
+            </div>
           )}
         </div>
 

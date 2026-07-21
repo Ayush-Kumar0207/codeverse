@@ -352,33 +352,9 @@ function EncyclopediaContent() {
                   <h2 className="mt-1 text-lg font-semibold text-white">{activeApproach.name}</h2>
                   <p className="mt-1 text-xs text-slate-500">{activeAlgo.approaches.length} verified {activeAlgo.approaches.length === 1 ? "solution" : "solutions"}; only available tiers are shown.</p>
                 </div>
-                <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Solution approaches">
-                  {activeAlgo.approaches.map((approach, index) => (
-                    <button
-                      key={`${approach.name}-${index}`}
-                      type="button"
-                      role="tab"
-                      aria-selected={activeApproachIdx === index}
-                      aria-controls="selected-approach-content"
-                      title={approach.name}
-                      onClick={() => {
-                        setActiveApproachIdx(index);
-                        setCopied(false);
-                      }}
-                      className={cn(
-                        "inline-flex h-10 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
-                        activeApproachIdx === index
-                          ? "bg-white text-slate-950 shadow-lg shadow-black/20"
-                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
-                      )}
-                    >
-                      {approachTabs[index]}
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              <div id="selected-approach-content" className="space-y-4 p-4 lg:p-5" role="tabpanel">
+              <div id="selected-approach-content" className="space-y-4 p-4 lg:p-5">
                 <InsightCard
                   narrationId={`${narrationPrefix}-mental-model`}
                   title="Mental model"
@@ -479,10 +455,36 @@ function EncyclopediaContent() {
                   title={`${activeImplementation?.language || selectedLang} code walkthrough`}
                   label="Narration starts only from the playback controls"
                   icon={Code2}
+                  headerActions={(
+                    <div className="flex gap-2" role="tablist" aria-label="Solution approaches">
+                      {activeAlgo.approaches.map((approach, index) => (
+                        <button
+                          key={`${approach.name}-${index}`}
+                          type="button"
+                          role="tab"
+                          aria-selected={activeApproachIdx === index}
+                          aria-controls="implementation-code-panel"
+                          title={approach.name}
+                          onClick={() => {
+                            setActiveApproachIdx(index);
+                            setCopied(false);
+                          }}
+                          className={cn(
+                            "inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
+                            activeApproachIdx === index
+                              ? "bg-white text-slate-950 shadow-lg shadow-black/20"
+                              : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
+                          )}
+                        >
+                          {approachTabs[index]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   lines={implementationNarration}
                 >
                   {({ activeIndex }) => (
-                    <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070b12]">
+                    <div id="implementation-code-panel" role="tabpanel" className="overflow-hidden rounded-lg border border-white/10 bg-[#070b12]">
                       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                         <div className="flex min-w-0 items-center gap-2">
                           <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
