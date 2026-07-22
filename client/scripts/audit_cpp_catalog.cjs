@@ -1,5 +1,6 @@
 const fs = require("fs");
 const Module = require("module");
+const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 const ts = require("typescript");
@@ -122,9 +123,22 @@ for (const algorithm of AT_ALGORITHMS) {
 }
 
 function locateCompiler() {
-  const installedCompiler = "C:\\MinGW\\bin\\g++.exe";
-  if (fs.existsSync(installedCompiler)) return installedCompiler;
-  const result = spawnSync("where.exe", ["g++"], { encoding: "utf8" });
+  const requestedCompiler = process.env.CXX?.trim();
+  if (requestedCompiler) {
+    const result = spawnSync(requestedCompiler, ["--version"], {
+      encoding: "utf8",
+      windowsHide: true,
+    });
+    if (result.status === 0) return requestedCompiler;
+  }
+
+  if (process.platform === "win32") {
+    const installedCompiler = "C:\\MinGW\\bin\\g++.exe";
+    if (fs.existsSync(installedCompiler)) return installedCompiler;
+  }
+
+  const locator = process.platform === "win32" ? "where.exe" : "which";
+  const result = spawnSync(locator, ["g++"], { encoding: "utf8", windowsHide: true });
   const candidate = result.status === 0
     ? result.stdout.split(/\r?\n/).map((value) => value.trim()).find(Boolean)
     : "";
@@ -182,12 +196,14 @@ async function compileAll(queue, concurrency) {
 
 async function compileCombined(queue) {
   const compiler = locateCompiler();
-  const safeRoot = path.resolve("C:\\tmp");
-  const workingDirectory = path.resolve(safeRoot, "codeverse-cpp-audit-" + process.pid);
-  if (!workingDirectory.startsWith(safeRoot + path.sep + "codeverse-cpp-audit-")) {
+  const safeRoot = path.resolve(os.tmpdir());
+  const workingDirectory = fs.mkdtempSync(path.join(safeRoot, "codeverse-cpp-audit-"));
+  if (
+    path.dirname(workingDirectory) !== safeRoot
+    || !path.basename(workingDirectory).startsWith("codeverse-cpp-audit-")
+  ) {
     throw new Error("Unsafe compiler audit temporary path");
   }
-  fs.mkdirSync(workingDirectory, { recursive: false });
   const sourcePath = path.join(workingDirectory, "catalog-audit.cpp");
   const units = ["#include <bits/stdc++.h>"];
 
@@ -212,7 +228,10 @@ async function compileCombined(queue) {
     });
     let stderr = "";
     const cleanup = () => {
-      if (!workingDirectory.startsWith(safeRoot + path.sep + "codeverse-cpp-audit-")) return;
+      if (
+        path.dirname(workingDirectory) !== safeRoot
+        || !path.basename(workingDirectory).startsWith("codeverse-cpp-audit-")
+      ) return;
       fs.rmSync(workingDirectory, { recursive: true, force: true });
     };
     child.stderr.on("data", (chunk) => {
