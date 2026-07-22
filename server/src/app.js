@@ -6,6 +6,7 @@ const path = require("path");
 
 require("./config/env");
 require("./config/passport");
+const { sessionSecret } = require("./config/secrets");
 
 const authRoutes = require("./routes/auth.routes");
 const projectRoutes = require("./routes/projects.routes");
@@ -14,7 +15,6 @@ const aiRoutes = require("./routes/ai.routes");
 const executeRoutes = require("./routes/execute.routes");
 const versionRoutes = require("./routes/versions.routes");
 const deploymentRoutes = require("./routes/deployment.routes");
-const testRoutes = require("./routes/test.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 
@@ -38,7 +38,7 @@ function isAllowedOrigin(origin) {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname.endsWith(".vercel.app");
+    return hostname === "codeverse-rho.vercel.app" || hostname.endsWith("-ayush-kumar0207s-projects.vercel.app");
   } catch {
     return false;
   }
@@ -63,9 +63,16 @@ function createApp() {
   app.use(express.json());
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "super_secret_key",
+      name: "codeverse.sid",
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      },
     })
   );
   app.use(passport.initialize());
@@ -86,7 +93,6 @@ function createApp() {
   app.use("/api/execute", executeRoutes);
   app.use("/api/versions", versionRoutes);
   app.use("/api/deploy", deploymentRoutes);
-  app.use("/api/test", testRoutes);
   app.use("/api/settings", settingsRoutes);
 
   app.get("/", (req, res) => {
@@ -122,4 +128,5 @@ function osLoadAverage() {
 }
 
 module.exports = createApp;
+module.exports.isAllowedOrigin = isAllowedOrigin;
 

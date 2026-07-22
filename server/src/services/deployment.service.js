@@ -17,7 +17,7 @@ function slugifyProjectId(projectId) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 64);
 
-  return slug || `workspace-${Date.now()}`;
+  return /[a-z0-9]/.test(slug) ? slug : `workspace-${Date.now()}`;
 }
 
 function sanitizeRelativeFileName(fileName) {
@@ -451,4 +451,8 @@ async function deployProject(projectId, files, options = {}) {
 module.exports = {
   DEPLOY_DIR,
   deployProject,
+  escapeHtml,
+  resolveDeployFile,
+  sanitizeRelativeFileName,
+  slugifyProjectId,
 };

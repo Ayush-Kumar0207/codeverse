@@ -3,12 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "check": "node --check index.js && node --check src/app.js && node -e \"require('./src/app'); console.log('Server modules loaded')\"",
+    "test": "node --test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "collaborative-ide",
+    "express",
+    "socket.io",
+    "code-execution",
+    "supabase"
+  ],
+  "author": "Ayush Kumar",
+  "license": "MIT",
+  "description": "The Express and Socket.IO backend for CodeVerse collaboration, execution, persistence, AI, and publishing.",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.103.0",
@@ -29,5 +38,14 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ayush-Kumar0207/codeverse.git",
+    "directory": "server"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
   }
 }

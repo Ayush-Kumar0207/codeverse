@@ -1,0 +1,26 @@
+{
+  "name": "codeverse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A collaborative browser IDE with code execution, AI assistance, version recovery, publishing, and interactive algorithm visualization.",
+  "license": "MIT",
+  "author": "Ayush Kumar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ayush-Kumar0207/codeverse.git"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "install:all": "npm ci --prefix client && npm ci --prefix server",
+    "lint": "npm run lint --prefix client",
+    "typecheck": "npm run typecheck --prefix client",
+    "test": "npm test --prefix server",
+    "build": "npm run build --prefix client",
+    "audit:repo": "node scripts/audit_repository.cjs",
+    "audit:release": "npm run release:audit --prefix client",
+    "verify": "npm run audit:repo && npm run test && npm run lint && npm run typecheck && npm run audit:release && npm run build"
+  }
+}

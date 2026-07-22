@@ -26,7 +26,8 @@ function isAllowedSocketOrigin(origin) {
   if (socketAllowedOrigins.includes(origin)) return true;
 
   try {
-    return new URL(origin).hostname.endsWith(".vercel.app");
+    const hostname = new URL(origin).hostname;
+    return hostname === "codeverse-rho.vercel.app" || hostname.endsWith("-ayush-kumar0207s-projects.vercel.app");
   } catch {
     return false;
   }

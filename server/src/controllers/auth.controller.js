@@ -2,6 +2,7 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const authService = require("../services/auth.service");
 const HttpError = require("../utils/httpError");
 const crypto = require("crypto");
+const { sessionSecret } = require("../config/secrets");
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
@@ -177,7 +178,7 @@ function getRedirectUri(req, provider, options = {}) {
 }
 
 function getOAuthStateSecret() {
-  return process.env.SESSION_SECRET || process.env.JWT_SECRET || "super_secret_key";
+  return sessionSecret;
 }
 
 function signOAuthStatePayload(encodedPayload) {

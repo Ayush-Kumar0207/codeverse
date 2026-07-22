@@ -12,6 +12,8 @@
 
   <p>
     <a href="https://codeverse-rho.vercel.app"><img src="https://img.shields.io/badge/vercel-deployed-000000?style=flat-square&logo=vercel" alt="Vercel" /></a>
+    <a href="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/ci.yml"><img src="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/ci.yml/badge.svg" alt="Continuous Integration" /></a>
+    <a href="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/codeql.yml"><img src="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
     <a href="./LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=flat-square" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 15" />
     <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
@@ -114,6 +116,7 @@ curl -s -X POST http://localhost:5000/api/execute \
 - [API Reference & Usage Examples](#-api-reference--usage-examples)
 - [Deployment](#-deployment)
 - [Performance & Diagnostics](#-performance--diagnostics)
+- [Quality Gates](#-quality-gates)
 - [Security](#-security)
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
@@ -593,6 +596,7 @@ CodeVerse/
 # Clone the repository
 git clone https://github.com/Ayush-Kumar0207/codeverse.git
 cd codeverse
+npm run install:all
 ```
 
 ```bash
@@ -925,6 +929,25 @@ cd client && npm run release:audit
 
 ---
 
+## ✅ Quality Gates
+
+Every push and pull request runs repository hygiene, server tests, client linting, TypeScript validation, a production build, the complete release-audit suite, and CodeQL security scanning.
+
+```bash
+# Fast local checks
+npm run audit:repo
+npm run test
+npm run lint
+npm run typecheck
+
+# Complete release verification
+npm run verify
+```
+
+See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of each gate.
+
+---
+
 ## 🔒 Security
 
 ### Built-In Protections
@@ -975,11 +998,14 @@ cd client && npm run release:audit
 - [x] xterm.js terminal emulator panel
 - [x] OAuth flows (GitHub, Google)
 - [x] Comprehensive release audit pipeline (6 audit scripts)
+- [x] Native Node.js server test suite
+- [x] GitHub Actions CI and CodeQL security scanning
+- [x] Dependabot maintenance for client, server, and workflow dependencies
+- [x] Repository-hygiene audit preventing generated artifacts and credential patterns
 - [x] Committed product screenshots in `docs/screenshots/`
 
 ### 🔮 Coming Next
 
-- [ ] GitHub Actions for install, lint, typecheck, and build
 - [ ] Dockerfile and `docker-compose` for one-command local infrastructure
 - [ ] Hardened execution through container isolation for public deployments
 - [ ] Persistent collaboration permissions and room state beyond process memory

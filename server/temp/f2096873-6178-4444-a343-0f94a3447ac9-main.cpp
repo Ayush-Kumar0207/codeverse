@@ -1,1 +1,0 @@
-#include <iostream>\nint main() {\n  std::cout << \"Hello from C++\" << std::endl;\n  return 0;\n}

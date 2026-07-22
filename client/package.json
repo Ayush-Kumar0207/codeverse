@@ -21,7 +21,8 @@
     "visual:audit": "node scripts/audit_visual_system.cjs",
     "cpp:format": "node scripts/format_cpp_catalog.cjs",
     "cpp:audit": "node scripts/audit_cpp_catalog.cjs",
-    "release:audit": "npm run app:audit && npm run visual:audit && npm run collab:audit && npm run algo:audit && npm run algo:audit:3d && npm run cpp:audit"
+    "release:audit": "npm run app:audit && npm run visual:audit && npm run collab:audit && npm run algo:audit && npm run algo:audit:3d && npm run cpp:audit",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
@@ -75,9 +76,24 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   },
-  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "description": "The Next.js client for CodeVerse, a collaborative IDE and interactive algorithm-learning platform.",
+  "keywords": [
+    "collaborative-ide",
+    "nextjs",
+    "monaco-editor",
+    "threejs",
+    "algorithms"
+  ],
+  "author": "Ayush Kumar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ayush-Kumar0207/codeverse.git",
+    "directory": "client"
+  },
+  "homepage": "https://codeverse-rho.vercel.app",
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  }
 }
