@@ -186,7 +186,7 @@ graph LR
 ```
 
 1. **Write** — Monaco Editor with custom themes, multi-file workspaces, 11 language starters, and IntelliSense.
-2. **Run** — Execute locally (Node VM, Python, GCC, G++, Java) or remotely via the Piston API. See results instantly.
+2. **Run** — Execute through the remote Piston sandbox by default. Explicit development-only local runtimes are available behind `ALLOW_LOCAL_EXECUTION=true` and are blocked in production.
 3. **Trace** — AlgoTrace visualizes arrays, matrices, graphs, trees, linked lists, heaps, stacks, queues, recursion frames, bit states, pointers, windows, registers, and raw fields step by step — in both 2D canvas and **cinematic 3D** (Three.js WebGL).
 4. **Learn** — The Algorithm Encyclopedia provides **422 entries across 99 topics** with searchable algorithms, complexity analysis, edge cases, multi-language implementations, and approach breakdowns.
 5. **Collaborate** — Socket.IO rooms with live code sync, team chat, cursor broadcasts, presence roster, organizer permissions, and role-based edit access.
@@ -225,17 +225,17 @@ graph LR
 
 | Runtime | Method | Timeout |
 |---------|--------|:-------:|
-| **JavaScript** | Constrained Node VM context | 10s |
-| **Python** | `python -c` subprocess | 10s |
-| **C** | `gcc` compile + run | 10s |
-| **C++** | `g++` compile + run | 10s |
-| **Java** | `javac` + `java` compile/run | 10s |
+| **JavaScript** | Piston sandbox by default | 15s |
+| **Python** | Piston sandbox by default | 15s |
+| **C** | Piston sandbox by default | 15s |
+| **C++** | Piston sandbox by default | 15s |
+| **Java** | Piston sandbox by default | 15s |
 | **HTML/CSS/Markdown** | Visual output mode | — |
-| **Remote (any)** | Piston API | 15s |
+| **Development opt-in** | Argument-safe local subprocess (`ALLOW_LOCAL_EXECUTION=true`) | 10s |
 
 - Execution start/result/error events broadcast into the active workspace room.
 - Spawn-permission handling with user-readable errors.
-- Remote execution via `EXECUTION_STRATEGY=remote` for sandboxed environments.
+- Remote execution is the default. Local execution is disabled in production and requires an explicit development-only opt-in.
 
 ### 🤖 AI Pair Programming
 
@@ -329,11 +329,11 @@ graph LR
 | **Motion & UI** | Framer Motion, Lucide React, react-resizable-panels, xterm.js terminal emulator |
 | **Markdown** | react-markdown, remark-gfm, github-markdown-css |
 | **Speech & Audio** | Web Speech API narration, Web Audio API haptic feedback |
-| **Backend** | Node.js, Express 5, Socket.IO, JWT, Passport session compatibility |
-| **Auth** | bcrypt password hashing, JWT bearer auth, GitHub OAuth (passport-github2), Google OAuth |
+| **Backend** | Node.js, Express 5, Socket.IO, encrypted HttpOnly cookie authentication, rate limiting |
+| **Auth** | bcrypt password hashing, AES-GCM-sealed JWT cookies, signed OAuth state, GitHub OAuth, Google OAuth |
 | **Database** | Supabase PostgreSQL, local JSON fallback stores, SQL schema |
 | **AI** | Ollama local generation, OpenAI SDK v5 (chat completions), Google Generative AI SDK (maintenance scripts), streaming responses |
-| **Execution** | Node VM, child process runtimes (GCC, G++, Java, Python), optional Piston API |
+| **Execution** | Piston remote sandbox by default; argument-safe local subprocesses only through explicit development opt-in |
 | **Deployment** | Vercel frontend, Node/Express backend, local static publisher, optional localtunnel bridge |
 | **Tooling** | npm, ESLint, Prettier, TypeScript, Tailwind, nodemon, ts-morph |
 
@@ -434,7 +434,7 @@ flowchart LR
 1. The **Next.js app** calls the Express API through `NEXT_PUBLIC_API_BASE_URL`, defaulting to `http://localhost:5000` during local development.
 2. **Realtime collaboration** uses Socket.IO rooms. The server tracks active users, current room files, edit permissions, and room-local events in memory.
 3. **Supabase** stores users, projects, files, versions, and settings snapshots. If Supabase is unavailable, auth/projects/code versions gracefully degrade to **local JSON stores**.
-4. **Execution** is routed to local language runtimes by default. `EXECUTION_STRATEGY=remote` enables the Piston path where a runtime mapping exists.
+4. **Execution** is routed to the Piston sandbox by default. Local language runtimes require `ALLOW_LOCAL_EXECUTION=true`, use argument-safe process APIs, and remain unavailable in production.
 5. **Deployments** write sanitized workspace files into `deployments/` and serve them from the API, static bridge, and optional public localtunnel URL.
 
 ### Deployment Pipeline
@@ -552,7 +552,7 @@ CodeVerse/
 │   │   └── auto_overhaul_gemini.js # Gemini-powered codebase maintenance
 │   └── src/
 │       ├── app.js                  # Express app factory & route registration
-│       ├── config/                 # Env, Supabase, Passport compatibility
+│       ├── config/                 # Environment, secrets, Supabase client
 │       ├── controllers/            # 9 HTTP request handlers
 │       ├── executors/              # Runtime-specific execution helpers
 │       ├── middlewares/            # Auth, async, and error middleware
@@ -676,7 +676,8 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 
 # ─── Execution ────────────────────────────────────────────────────────
-EXECUTION_STRATEGY=local
+EXECUTION_STRATEGY=remote
+ALLOW_LOCAL_EXECUTION=false
 PISTON_URL=https://emkc.org/api/v2/piston/execute
 PISTON_API_KEY=
 
@@ -716,11 +717,12 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `DEPLOY_TUNNEL_*` | Optional | Enables and configures the localtunnel bridge for public deployment URLs. |
 | `CLIENT_URL`, `FRONTEND_URL`, `NEXT_PUBLIC_FRONTEND_URL` | Production | Allowed frontend origins and OAuth redirects. |
 | `NEXT_PUBLIC_API_BASE_URL` | Production | Public backend URL used by the Next.js client. |
-| `SESSION_SECRET` | Production | Express session secret used during OAuth state flow. |
-| `JWT_SECRET` | Production | JWT signing secret for bearer auth. |
+| `SESSION_SECRET` | Production | HMAC secret used to protect OAuth state parameters. |
+| `JWT_SECRET` | Production | JWT signing secret and key material for the encrypted authentication cookie. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Recommended | Enables persistent users, projects, versions, and settings snapshots. |
 | `GITHUB_*`, `GOOGLE_*` | Optional | Enables OAuth login buttons. |
-| `EXECUTION_STRATEGY` | No | `local` for local runtimes, `remote` for Piston where supported. |
+| `EXECUTION_STRATEGY` | No | Defaults to `remote` for Piston. `local` is accepted only with the development opt-in below. |
+| `ALLOW_LOCAL_EXECUTION` | No | Set `true` only for trusted local development; ignored in production. |
 | `PISTON_URL`, `PISTON_API_KEY` | Optional | Remote execution endpoint and optional key. |
 | `AI_PROVIDER` | Optional | `ollama`, `openai`, or `auto`. Defaults to local-first behavior. |
 | `OLLAMA_*`, `AI_MAX_*` | Optional | Local AI assistant model, generation budget, context caps, and keep-alive settings. |
@@ -747,9 +749,10 @@ curl -s -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"ada","email":"ada@example.com","password":"secret123"}'
 
-# Login → returns JWT token
+# Login → stores the encrypted HttpOnly authentication cookie
 curl -s -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
+  -c codeverse.cookies \
   -d '{"username":"ada","password":"secret123"}'
 ```
 
@@ -758,6 +761,7 @@ curl -s -X POST http://localhost:5000/api/auth/login \
 ```bash
 curl -s -X POST http://localhost:5000/api/projects/create \
   -H "Content-Type: application/json" \
+  -b codeverse.cookies \
   -d '{"title":"Launchpad","language":"html","owner":"ada"}'
 ```
 
@@ -775,10 +779,11 @@ curl -s -X POST http://localhost:5000/api/execute \
 # Save
 curl -s -X POST http://localhost:5000/api/code/save \
   -H "Content-Type: application/json" \
+  -b codeverse.cookies \
   -d '{"userId":"local-user-id","fileName":"main.py","code":"print(\"snapshot\")"}'
 
 # Load versions
-curl -s "http://localhost:5000/api/code/versions?userId=local-user-id&fileName=main.py"
+curl -s -b codeverse.cookies "http://localhost:5000/api/code/versions?userId=local-user-id&fileName=main.py"
 ```
 
 ### Ask the AI Assistant
@@ -794,6 +799,7 @@ curl -s -X POST http://localhost:5000/api/ai/suggest \
 ```bash
 curl -s -X POST http://localhost:5000/api/deploy \
   -H "Content-Type: application/json" \
+  -b codeverse.cookies \
   -d '{
     "projectId": "hello-codeverse",
     "files": {
@@ -880,12 +886,15 @@ The deployment service is built into the backend:
 
 ### CI/CD
 
-No GitHub Actions workflow is currently committed. A strong first pipeline would run:
+The `Continuous Integration` workflow runs five independent jobs for every push and pull request:
 
-```bash
-cd client && npm ci && npm run build
-cd ../server && npm ci && node -e "require('./src/app')"
-```
+- Repository hygiene and credential-pattern checks.
+- Server module checks, dependency audit, and 17 backend/integration tests.
+- Client dependency audit, lint, strict TypeScript validation, and production build.
+- Vitest unit/component tests with enforced coverage thresholds plus Playwright Chromium E2E tests.
+- Application, visual-system, collaboration, algorithm, 3D-cinematic, and C++ catalog audits.
+
+CodeQL runs separately for security data-flow analysis, and Dependabot maintains grouped client, server, and workflow updates.
 
 ---
 
@@ -894,7 +903,7 @@ cd ../server && npm ci && node -e "require('./src/app')"
 | Area | Behavior |
 | --- | --- |
 | **Backend health** | `/api/health` reports uptime, memory, timestamp, and load average |
-| **Local execution** | 10-second timeout per process |
+| **Local execution opt-in** | Development-only, 10-second timeout, bounded input/output, argument-safe process launch |
 | **Remote execution** | 15-second timeout via Piston |
 | **Supabase calls** | Race against `SUPABASE_TIMEOUT_MS` (default `2500ms`) |
 | **AI prompt size** | Compacted with configurable max-character caps |
@@ -953,12 +962,12 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 ### Built-In Protections
 
 - **Passwords** hashed with `bcrypt`.
-- **API sessions** use JWT bearer tokens.
-- **OAuth flows** use state validation and provider-specific callbacks.
+- **Authentication** uses AES-256-GCM-sealed JWT payloads in HttpOnly cookies with production `Secure` and `SameSite=None` attributes.
+- **OAuth flows** use signed, expiring state values and restricted callback origins.
 - **CORS** restricted to localhost, configured frontend URLs, and Vercel preview domains.
 - **Deployment paths** sanitized and checked to prevent writes outside the deployment directory.
 - **Project slugs** normalized and length-limited.
-- **Local execution** has timeouts and readable permission-error handling.
+- **Execution** defaults to the remote sandbox; development-only local execution has bounded input/output, timeouts, and argument-safe process launches.
 - **Supabase settings sync** includes a companion RLS setup script.
 
 ### ⚠️ Production Security Notes
@@ -966,11 +975,11 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 > **Do not skip these for any public deployment.**
 
 - Replace fallback secrets before deployment. Never use the default `SESSION_SECRET` or `JWT_SECRET`.
-- Treat local code execution as **trusted-user functionality only**. The Node VM and local compiler paths are not a complete sandbox for hostile code.
+- Treat the local execution opt-in as **trusted-development functionality only**; public and production traffic must remain on isolated remote execution.
 - Prefer remote, containerized, or otherwise isolated execution for public multi-tenant deployments.
 - Do not expose Supabase service-role credentials to the frontend.
 - Restrict OAuth callback URLs to known frontend/backend domains.
-- Add rate limiting before opening execution, AI, and deploy endpoints to the public internet.
+- Keep the built-in global, auth, AI, execution, and standard API rate limits enabled in production.
 
 ---
 
@@ -1010,7 +1019,8 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 - [ ] Hardened execution through container isolation for public deployments
 - [ ] Persistent collaboration permissions and room state beyond process memory
 - [ ] Public status page and production API uptime badge
-- [ ] E2E tests for auth, editor sync, execution, and deployment
+- [x] Vitest component coverage plus Playwright editor, cinematic 3D, and two-browser collaboration tests
+- [ ] Expand browser coverage for OAuth provider callbacks and hosted deployment infrastructure
 - [ ] Multi-cursor collaborative editing (OT/CRDT)
 - [ ] Workspace templates and starter projects gallery
 - [ ] Plugin/extension system for custom panels and tools
@@ -1092,7 +1102,7 @@ Published static projects are written to `deployments/<projectId>/` and served b
 <details>
 <summary><strong>Is local execution safe for untrusted public users?</strong></summary>
 
-No. Use isolated infrastructure or a remote execution provider (Piston) before exposing code execution to untrusted users. The Node VM and local compiler paths are not a complete sandbox.
+No. CodeVerse therefore uses Piston remotely by default and blocks its local-execution opt-in in production. Keep public execution on isolated infrastructure.
 </details>
 
 <details>

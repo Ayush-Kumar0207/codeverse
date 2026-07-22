@@ -62,6 +62,24 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
 
+  frontend-tests:
+    name: Frontend unit and browser tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
   release-audits:
     name: Application and catalog audits
     runs-on: ubuntu-latest

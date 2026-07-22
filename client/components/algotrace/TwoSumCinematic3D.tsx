@@ -79,7 +79,7 @@ export default function TwoSumCinematic3D({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = scenePreset.renderer.toneMappingExposure;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.domElement.dataset.testid = scenePreset.rendererTestId;
     renderer.domElement.style.display = "block";
     renderer.domElement.style.height = "100%";

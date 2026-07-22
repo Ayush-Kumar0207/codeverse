@@ -17,10 +17,14 @@
     "install:all": "npm ci --prefix client && npm ci --prefix server",
     "lint": "npm run lint --prefix client",
     "typecheck": "npm run typecheck --prefix client",
-    "test": "npm test --prefix server",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "npm test --prefix server",
+    "test:client": "npm run test:unit --prefix client",
+    "test:e2e": "npm run test:e2e --prefix client",
     "build": "npm run build --prefix client",
     "audit:repo": "node scripts/audit_repository.cjs",
     "audit:release": "npm run release:audit --prefix client",
-    "verify": "npm run audit:repo && npm run test && npm run lint && npm run typecheck && npm run audit:release && npm run build"
+    "verify": "npm run audit:repo && npm run test && npm run lint && npm run typecheck && npm run audit:release && npm run build",
+    "verify:full": "npm run verify && npm run test:e2e"
   }
 }

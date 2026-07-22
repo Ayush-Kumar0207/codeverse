@@ -58,3 +58,6 @@ deployments/*
 client/errors.txt
 client/tsc-errors.txt
 client/data/algos/line_debug.txt
+client/coverage/
+client/playwright-report/
+client/test-results/

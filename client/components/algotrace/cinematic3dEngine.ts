@@ -101,7 +101,7 @@ export class Cinematic3DEngine {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.26;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.domElement.dataset.testid = CANVAS_TEST_ID;
     this.renderer.domElement.style.display = "block";
     this.renderer.domElement.style.height = "100%";
