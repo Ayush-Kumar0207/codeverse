@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const { clearAuthCookie, setAuthCookie } = require("../src/utils/authCookie");
+const { clearAuthCookie, setAuthCookie, unsealAuthToken } = require("../src/utils/authCookie");
 const createRequestSecurityMiddleware = require("../src/middlewares/requestSecurity.middleware");
 const { executeCode } = require("../src/services/execution.service");
 
@@ -53,6 +53,8 @@ test("authentication cookies are HttpOnly and production-safe", () => {
   }
 
   assert.equal(calls[0][1], "codeverse.auth");
+  assert.notEqual(calls[0][2], "signed-token");
+  assert.equal(unsealAuthToken(calls[0][2]), "signed-token");
   assert.equal(calls[0][3].httpOnly, true);
   assert.equal(calls[0][3].secure, true);
   assert.equal(calls[0][3].sameSite, "none");

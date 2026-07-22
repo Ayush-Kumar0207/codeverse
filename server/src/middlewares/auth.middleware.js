@@ -1,5 +1,5 @@
 const { verifyToken } = require("../utils/jwt");
-const { readCookie } = require("../utils/authCookie");
+const { readCookie, unsealAuthToken } = require("../utils/authCookie");
 const HttpError = require("../utils/httpError");
 
 function bearerToken(req) {
@@ -9,7 +9,7 @@ function bearerToken(req) {
 
 function authMiddleware(req, _res, next) {
   try {
-    const token = readCookie(req) || bearerToken(req);
+    const token = unsealAuthToken(readCookie(req)) || bearerToken(req);
     if (!token) throw new HttpError(401, "Authentication failed: No session provided");
 
     const decoded = verifyToken(token);
