@@ -20,24 +20,24 @@
   "description": "The Express and Socket.IO backend for CodeVerse collaboration, execution, persistence, AI, and publishing.",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@supabase/supabase-js": "^2.103.0",
-    "axios": "^1.10.0",
+    "@supabase/supabase-js": "^2.110.8",
+    "axios": "^1.18.1",
     "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^16.6.1",
-    "express": "^5.1.0",
-    "express-session": "^1.18.1",
-    "jsonwebtoken": "^9.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.3",
     "localtunnel": "^2.0.2",
     "openai": "^5.3.0",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
-    "socket.io": "^4.8.1",
+    "socket.io": "^4.8.3",
     "ts-morph": "^27.0.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.14"
   },
   "repository": {
     "type": "git",
