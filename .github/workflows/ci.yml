@@ -71,6 +71,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
+      - name: Install C++ compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes g++
       - run: npm ci --prefix server
       - run: npm ci --prefix client
       - run: npm run release:audit --prefix client
