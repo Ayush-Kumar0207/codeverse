@@ -69,6 +69,7 @@ server.listen(PORT, () => {
 const express = require("express");
 const path = require("path");
 const { DEPLOY_DIR } = require("./src/services/deployment.service");
+const { slugifyProjectId } = require("./src/utils/slug");
 const {
   isDeploymentTunnelEnabled,
   startDeploymentTunnel,
@@ -81,10 +82,7 @@ deployApp.use(require("cors")());
 
 // Dynamic static serving for all projects
 deployApp.use('/:projectId', (req, res, next) => {
-  const projectId = String(req.params.projectId || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  const projectId = slugifyProjectId(req.params.projectId);
   const projectPath = path.join(DEPLOY_DIR, projectId);
   express.static(projectPath, { extensions: ["html"], index: "index.html" })(req, res, next);
 });

@@ -3,6 +3,7 @@ const authService = require("../services/auth.service");
 const HttpError = require("../utils/httpError");
 const crypto = require("crypto");
 const { sessionSecret } = require("../config/secrets");
+const { clearAuthCookie, setAuthCookie } = require("../utils/authCookie");
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
@@ -72,7 +73,10 @@ function isTrustedClientOrigin(origin) {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".vercel.app");
+    return hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "codeverse-rho.vercel.app" ||
+      hostname.endsWith("-ayush-kumar0207s-projects.vercel.app");
   } catch {
     return false;
   }
@@ -240,48 +244,24 @@ function readSignedOAuthState(state, provider) {
 }
 
 function rememberOAuthState(req, provider, values = {}) {
-  const state = createSignedOAuthState(provider, {
+  return createSignedOAuthState(provider, {
     clientBaseUrl: values.clientBaseUrl || getClientBaseUrl(req),
     redirectUri: values.redirectUri || "",
   });
-
-  req.session.oauthState = {
-    provider,
-    state,
-    clientBaseUrl: values.clientBaseUrl || getClientBaseUrl(req),
-    redirectUri: values.redirectUri || "",
-  };
-
-  return state;
 }
 
 function validateOAuthState(req, provider) {
   const signedState = readSignedOAuthState(req.query.state, provider);
-  if (signedState) {
-    if (req.session) req.session.oauthState = null;
-    return signedState;
+  if (!signedState) {
+    throw new HttpError(401, provider + " authentication state is invalid or expired");
   }
-
-  const expected = req.session.oauthState;
-  req.session.oauthState = null;
-
-  if (!expected) return;
-  if (expected.provider !== provider || expected.state !== req.query.state) {
-    throw new HttpError(401, `${provider} authentication state did not match`);
-  }
-
-  return expected;
-}
-
-function encodeOAuthUser(user) {
-  return Buffer.from(JSON.stringify(user), "utf8").toString("base64url");
+  return signedState;
 }
 
 function redirectOAuthSuccess(req, res, provider, result, clientBaseUrl) {
+  setAuthCookie(res, result.token);
   const url = new URL("/oauth-success", clientBaseUrl || getClientBaseUrl(req));
   url.searchParams.set("provider", provider);
-  url.searchParams.set("token", result.token);
-  url.searchParams.set("user", encodeOAuthUser(result.user));
   res.redirect(url.toString());
 }
 
@@ -312,7 +292,13 @@ const register = asyncHandler(async (req, res) => {
 
 const login = asyncHandler(async (req, res) => {
   const result = await authService.loginUser(req.body);
-  res.json(result);
+  setAuthCookie(res, result.token);
+  res.json({ user: result.user });
+});
+
+const logout = asyncHandler(async (_req, res) => {
+  clearAuthCookie(res);
+  res.status(204).end();
 });
 
 const profile = asyncHandler(async (req, res) => {
@@ -475,6 +461,7 @@ const googleCallback = asyncHandler(async (req, res) => {
 module.exports = {
   register,
   login,
+  logout,
   profile,
   githubStart,
   githubCallback,

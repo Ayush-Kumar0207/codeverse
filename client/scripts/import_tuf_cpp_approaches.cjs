@@ -162,14 +162,22 @@ const manualSlugs = {
 };
 
 function decodeEntities(value) {
-  return value
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)));
+  const named = {
+    "&lt;": "<",
+    "&gt;": ">",
+    "&amp;": "&",
+    "&quot;": '"',
+    "&#39;": "'",
+    "&apos;": "'",
+    "&nbsp;": " ",
+  };
+  return value.replace(/&(?:lt|gt|amp|quot|apos|nbsp|#39|#\d+);/g, (entity) => {
+    if (Object.prototype.hasOwnProperty.call(named, entity)) return named[entity];
+    const codePoint = Number(entity.slice(2, -1));
+    return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
+      ? String.fromCodePoint(codePoint)
+      : entity;
+  });
 }
 
 function stripHtml(value) {

@@ -1,18 +1,19 @@
-// client/context/AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type { SharedUser } from "@shared/types/user";
+import { fetchProfile, logoutRequest } from "@/services/auth";
 
 type AuthContextType = {
   user: SharedUser | null;
   token: string | null;
   loading: boolean;
-  login: (user: SharedUser, token: string) => void;
+  login: (user: SharedUser) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const SESSION_MARKER = "http-only-cookie";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<SharedUser | null>(null);
@@ -20,28 +21,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    let active = true;
+    window.localStorage.removeItem("token");
+    window.localStorage.removeItem("user");
+    fetchProfile()
+      .then(({ user: profile }) => {
+        if (!active) return;
+        setUser(profile);
+        setToken(SESSION_MARKER);
+      })
+      .catch(() => {
+        if (!active) return;
+        setUser(null);
+        setToken(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const login = (user: SharedUser, token: string) => {
-    setUser(user);
-    setToken(token);
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+  const login = (nextUser: SharedUser) => {
+    setUser(nextUser);
+    setToken(SESSION_MARKER);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    void logoutRequest();
   };
 
   return (

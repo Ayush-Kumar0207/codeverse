@@ -48,6 +48,7 @@ for (const packagePath of ["package.json", "client/package.json", "server/packag
 }
 
 const oversizedFiles = trackedFiles
+  .filter((file) => fs.existsSync(path.join(root, file)))
   .map((file) => ({ file, size: fs.statSync(path.join(root, file)).size }))
   .filter(({ size }) => size > 10 * 1024 * 1024);
 

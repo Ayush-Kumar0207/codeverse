@@ -466,7 +466,7 @@ function EditorWorkspace() {
       if (signature === lastSnapshotSignatureRef.current) return null;
 
       const snapshot: WorkspaceSnapshot = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         files: { ...snapshotFiles },
         activeFile: snapshotActiveFile,

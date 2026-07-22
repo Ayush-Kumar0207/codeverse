@@ -250,7 +250,7 @@ export function useCodeAutoComplete(
               ],
             };
           },
-          freeInlineCompletions: () => {},
+          disposeInlineCompletions: () => {},
         }),
       ]);
 

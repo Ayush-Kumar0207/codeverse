@@ -1,42 +1,29 @@
 const axios = require("axios");
-const { execSync, execFile } = require("child_process");
+const { execFile } = require("child_process");
 const fs = require("fs").promises;
 const os = require("os");
 const path = require("path");
-const vm = require("vm");
 const HttpError = require("../utils/httpError");
 const { SOCKET_EVENTS } = require("../../../shared/constants/socket-events");
-const { SUPPORTED_LANGUAGES } = require("../../../shared/constants/languages");
 const { getPistonRuntime } = require("../utils/languageRuntime");
 
-/**
- * Probes the system PATH to see if a command exists for a given language.
- */
-function probeSystem(command) {
-  try {
-    const checkCmd = process.platform === "win32" ? `where ${command}` : `which ${command}`;
-    execSync(checkCmd, { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
+const EXECUTION_TIMEOUT_MS = 10000;
+const MAX_CODE_BYTES = 100 * 1024;
+const MAX_OUTPUT_BYTES = 256 * 1024;
+const VISUAL_LANGUAGES = new Set(["html", "css", "markdown"]);
+
+function assertExecutionInput({ code, language, roomId }) {
+  if (typeof code !== "string" || !language || !roomId) {
+    throw new HttpError(400, "Code, language, and roomId are required");
+  }
+  if (Buffer.byteLength(code, "utf8") > MAX_CODE_BYTES) {
+    throw new HttpError(413, "Code exceeds the 100 KB execution limit.");
   }
 }
 
 function isSpawnPermissionError(error) {
   const message = `${error?.message || ""} ${error?.code || ""}`;
   return error?.code === "EPERM" || /spawn(?:Sync)?\s+\S*\s*EPERM/i.test(message);
-}
-
-function stringifyConsoleValue(value) {
-  if (typeof value === "string") return value;
-  if (value instanceof Error) return value.stack || value.message;
-
-  try {
-    const json = JSON.stringify(value);
-    return json === undefined ? String(value) : json;
-  } catch {
-    return String(value);
-  }
 }
 
 function localRuntimeBlockedMessage(command) {
@@ -46,176 +33,27 @@ function localRuntimeBlockedMessage(command) {
     `Reason: the backend process is not allowed to launch '${command}' (spawn EPERM).`,
     "",
     "This is a runtime permission problem, not a problem in your solution code.",
-    "Start the backend from a normal terminal with process-launch permission, or configure EXECUTION_STRATEGY=remote with a reachable execution service.",
+    "Use the remote execution service or start a development backend with process-launch permission.",
   ].join("\n");
 }
 
-async function executeJavaScriptInProcess(code) {
-  const start = Date.now();
-  const output = [];
-  const consoleSink = (...values) => {
-    output.push(values.map(stringifyConsoleValue).join(" "));
-    return undefined;
-  };
-  const sandbox = {
-    console: {
-      log: consoleSink,
-      info: consoleSink,
-      warn: consoleSink,
-      error: consoleSink,
-    },
-  };
-
-  sandbox.global = sandbox;
-  sandbox.globalThis = sandbox;
-
-  try {
-    const result = vm.runInNewContext(code, sandbox, {
-      timeout: 10000,
-      displayErrors: true,
-    });
-
-    if (result !== undefined) {
-      output.push(stringifyConsoleValue(result));
-    }
-
-    return {
-      output: output.join("\n") || "✅ Execution completed with no output",
-      type: "terminal",
-      stats: { strategy: "local-js-vm", command: "vm", duration: `${Date.now() - start}ms` },
-    };
-  } catch (error) {
-    return {
-      output: `❌ Execution failed:\n${error.stack || error.message || String(error)}`,
-      type: "terminal",
-      stats: { strategy: "local-js-vm", command: "vm", phase: "run", duration: `${Date.now() - start}ms` },
-    };
-  }
+function runFile(command, args, options = {}) {
+  return new Promise((resolve) => {
+    execFile(
+      command,
+      args,
+      {
+        maxBuffer: MAX_OUTPUT_BYTES,
+        timeout: EXECUTION_TIMEOUT_MS,
+        windowsHide: true,
+        ...options,
+      },
+      (error, stdout, stderr) => resolve({ error, stdout, stderr })
+    );
+  });
 }
 
-/**
- * Adaptive Local Executor
- * Intelligently determines how to run a file based on its extension or content.
- */
-async function executeLocal(code, language, fileName = "") {
-  let type = "terminal";
-
-  // 1. Check for Visual Content (HTML, Style, Markdown)
-  const visualLangs = ["html", "css", "markdown"];
-  if (visualLangs.includes(language) || fileName.endsWith(".html") || fileName.endsWith(".md")) {
-    return {
-      output: code,
-      type: "visual",
-      stats: { strategy: "visual-render", language },
-    };
-  }
-
-  // 2. Map Standard Languages to Commands
-  const CMD_MAP = {
-    javascript: "node",
-    python: "python",
-    cpp: "g++",
-    c: "gcc",
-    java: "java",
-    go: "go",
-    rust: "rustc",
-  };
-
-  let bin = CMD_MAP[language] || language;
-
-  // 3. Command Probing (Adaptive Discovery)
-  if (!probeSystem(bin)) {
-    const ext = fileName.split(".").pop();
-    if (ext && CMD_MAP[ext] && probeSystem(CMD_MAP[ext])) {
-      bin = CMD_MAP[ext];
-    } else {
-      throw new HttpError(
-        400,
-        `No local runtime found for '${language}'. Install the compiler/interpreter or switch EXECUTION_STRATEGY to remote.`
-      );
-    }
-  }
-
-  const start = Date.now();
-  const run = (cmd, args, options = {}) =>
-    new Promise((resolve) => {
-      let settled = false;
-      const finish = (payload) => {
-        if (settled) return;
-        settled = true;
-        resolve(payload);
-      };
-
-      try {
-        const child = execFile(
-          cmd,
-          args,
-          { timeout: 10000, windowsHide: true, ...options },
-          (error, stdout, stderr) => {
-            finish({ error, stdout, stderr });
-          }
-        );
-
-        child.once("error", (error) => {
-          finish({ error, stdout: "", stderr: "" });
-        });
-      } catch (error) {
-        finish({ error, stdout: "", stderr: "" });
-      }
-    });
-
-  let workDir = null;
-
-  try {
-    if (bin === "node") {
-      return await executeJavaScriptInProcess(code);
-    }
-
-    if (bin === "python") {
-      const result = await run("python", ["-c", code]);
-      return formatExecResult(result, start, type, { strategy: "local-adaptive", command: "python" });
-    }
-
-    workDir = await fs.mkdtemp(path.join(os.tmpdir(), "codeverse-run-"));
-
-    if (language === "c" || bin === "gcc") {
-      const sourcePath = path.join(workDir, "main.c");
-      const outPath = path.join(workDir, process.platform === "win32" ? "main.exe" : "main");
-      await fs.writeFile(sourcePath, code);
-      const compile = await run("gcc", [sourcePath, "-O2", "-Wall", "-o", outPath], { cwd: workDir });
-      if (compile.error) return formatCompileFailure(compile, "C", "gcc");
-      const result = await run(outPath, [], { cwd: workDir });
-      return formatExecResult(result, start, type, { strategy: "local-compiled", command: "gcc" });
-    }
-
-    if (language === "cpp" || bin === "g++") {
-      const sourcePath = path.join(workDir, "main.cpp");
-      const outPath = path.join(workDir, process.platform === "win32" ? "main.exe" : "main");
-      await fs.writeFile(sourcePath, code);
-      const compile = await run("g++", [sourcePath, "-std=c++17", "-O2", "-Wall", "-o", outPath], { cwd: workDir });
-      if (compile.error) return formatCompileFailure(compile, "C++", "g++");
-      const result = await run(outPath, [], { cwd: workDir });
-      return formatExecResult(result, start, type, { strategy: "local-compiled", command: "g++" });
-    }
-
-    if (language === "java" || bin === "java") {
-      const sourcePath = path.join(workDir, "Main.java");
-      await fs.writeFile(sourcePath, code);
-      const compile = await run("javac", [sourcePath], { cwd: workDir });
-      if (compile.error) return formatCompileFailure(compile, "Java", "javac");
-      const result = await run("java", ["-cp", workDir, "Main"], { cwd: workDir });
-      return formatExecResult(result, start, type, { strategy: "local-compiled", command: "javac/java" });
-    }
-
-    throw new HttpError(400, `Local execution for '${language}' is not configured yet.`);
-  } finally {
-    if (workDir) {
-      fs.rm(workDir, { recursive: true, force: true }).catch(() => {});
-    }
-  }
-}
-
-function formatCompileFailure(result, label, command = label) {
+function formatCompileFailure(result, label, command) {
   if (isSpawnPermissionError(result.error)) {
     return {
       output: localRuntimeBlockedMessage(command),
@@ -223,49 +61,94 @@ function formatCompileFailure(result, label, command = label) {
       stats: { strategy: "local-compiled", command, phase: "compile", blocked: true },
     };
   }
-
   return {
-    output: `❌ ${label} compilation failed:\n${result.stderr || result.stdout || result.error.message}`,
+    output: `❌ ${label} compilation failed:\n${result.stderr || result.stdout || result.error?.message || "Unknown compiler error"}`,
     type: "terminal",
-    stats: { strategy: "local-compiled", phase: "compile" },
+    stats: { strategy: "local-compiled", command, phase: "compile" },
   };
 }
 
-function formatExecResult(result, start, type, stats) {
-  const duration = Date.now() - start;
-  if (result.error && result.error.killed) {
-    return { output: "🛑 Execution timed out (10s limit)", type, stats: { ...stats, duration: `${duration}ms` } };
+function formatExecResult(result, start, stats) {
+  const duration = `${Date.now() - start}ms`;
+  if (result.error?.killed) {
+    return { output: "🛑 Execution timed out (10s limit)", type: "terminal", stats: { ...stats, duration } };
+  }
+  if (result.error) {
+    const output = isSpawnPermissionError(result.error)
+      ? localRuntimeBlockedMessage(stats.command)
+      : result.stderr || result.stdout || result.error.message || "Unknown runtime error";
+    return { output: `❌ Execution failed:\n${output}`, type: "terminal", stats: { ...stats, duration, phase: "run" } };
+  }
+  return {
+    output: result.stdout || result.stderr || "✅ Execution completed with no output",
+    type: "terminal",
+    stats: { ...stats, duration },
+  };
+}
+
+async function executeLocal(code, language) {
+  if (process.env.NODE_ENV === "production" || process.env.ALLOW_LOCAL_EXECUTION !== "true") {
+    throw new HttpError(503, "Local execution is disabled. Configure the remote execution service.");
   }
 
-  if (result.error) {
-    if (isSpawnPermissionError(result.error)) {
-      return {
-        output: localRuntimeBlockedMessage(stats.command || "runtime"),
-        type,
-        stats: { ...stats, duration: `${duration}ms`, phase: "spawn", blocked: true },
-      };
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "codeverse-run-"));
+  const start = Date.now();
+
+  try {
+    if (language === "javascript") {
+      const sourcePath = path.join(workDir, "main.js");
+      await fs.writeFile(sourcePath, code, { encoding: "utf8", flag: "wx" });
+      return formatExecResult(await runFile("node", [sourcePath], { cwd: workDir }), start, {
+        strategy: "local-isolated-process",
+        command: "node",
+      });
     }
 
-    return {
-      output: `❌ Execution failed:\n${result.stderr || result.stdout || result.error.message || "Unknown runtime error"}`,
-      type,
-      stats: { ...stats, duration: `${duration}ms`, phase: "run" },
-    };
-  }
+    if (language === "python") {
+      const sourcePath = path.join(workDir, "main.py");
+      await fs.writeFile(sourcePath, code, { encoding: "utf8", flag: "wx" });
+      return formatExecResult(await runFile("python", [sourcePath], { cwd: workDir }), start, {
+        strategy: "local-isolated-process",
+        command: "python",
+      });
+    }
 
-  const output = result.stdout || result.stderr || "✅ Execution completed with no output";
-  return {
-    output,
-    type,
-    stats: { ...stats, duration: `${duration}ms` },
-  };
+    if (language === "c" || language === "cpp") {
+      const cpp = language === "cpp";
+      const sourcePath = path.join(workDir, cpp ? "main.cpp" : "main.c");
+      const outPath = path.join(workDir, process.platform === "win32" ? "main.exe" : "main");
+      const compiler = cpp ? "g++" : "gcc";
+      await fs.writeFile(sourcePath, code, { encoding: "utf8", flag: "wx" });
+      const compileArgs = cpp
+        ? [sourcePath, "-std=c++17", "-O2", "-Wall", "-o", outPath]
+        : [sourcePath, "-O2", "-Wall", "-o", outPath];
+      const compile = await runFile(compiler, compileArgs, { cwd: workDir });
+      if (compile.error) return formatCompileFailure(compile, cpp ? "C++" : "C", compiler);
+      return formatExecResult(await runFile(outPath, [], { cwd: workDir }), start, {
+        strategy: "local-isolated-process",
+        command: compiler,
+      });
+    }
+
+    if (language === "java") {
+      const sourcePath = path.join(workDir, "Main.java");
+      await fs.writeFile(sourcePath, code, { encoding: "utf8", flag: "wx" });
+      const compile = await runFile("javac", [sourcePath], { cwd: workDir });
+      if (compile.error) return formatCompileFailure(compile, "Java", "javac");
+      return formatExecResult(await runFile("java", ["-cp", workDir, "Main"], { cwd: workDir }), start, {
+        strategy: "local-isolated-process",
+        command: "java",
+      });
+    }
+
+    throw new HttpError(400, `Local execution for '${language}' is not supported.`);
+  } finally {
+    await fs.rm(workDir, { recursive: true, force: true }).catch(() => undefined);
+  }
 }
 
-/**
- * Executes code remotely via Piston API.
- */
-async function executeRemote(code, language, runtime) {
-  const PISTON_URL = process.env.PISTON_URL || "https://emkc.org/api/v2/piston/execute";
+async function executeRemote(code, runtime) {
+  const pistonUrl = process.env.PISTON_URL || "https://emkc.org/api/v2/piston/execute";
   const payload = {
     language: runtime.language,
     version: runtime.version,
@@ -273,16 +156,16 @@ async function executeRemote(code, language, runtime) {
   };
 
   try {
-    const response = await axios.post(PISTON_URL, payload, {
+    const response = await axios.post(pistonUrl, payload, {
       timeout: 15000,
-      headers: { 
+      maxContentLength: MAX_OUTPUT_BYTES,
+      headers: {
         "Content-Type": "application/json",
-        ...(process.env.PISTON_API_KEY && { "X-Api-Key": process.env.PISTON_API_KEY })
+        ...(process.env.PISTON_API_KEY ? { "X-Api-Key": process.env.PISTON_API_KEY } : {}),
       },
     });
-
     const run = response?.data?.run || {};
-    const output = run.stdout || run.stderr || "✅ No output";
+    const output = String(run.stdout || run.stderr || "✅ No output").slice(0, MAX_OUTPUT_BYTES);
     return { output, type: "terminal", stats: { strategy: "remote" } };
   } catch (error) {
     const upstreamMessage = error?.response?.data?.message || error.message || "Execution failed.";
@@ -290,31 +173,22 @@ async function executeRemote(code, language, runtime) {
   }
 }
 
-async function executeCode({ code, language, roomId, user, fileName }) {
-  if (!code || !language || !roomId) {
-    throw new HttpError(400, "Code, language, and roomId are required");
+async function executeCode(request) {
+  assertExecutionInput(request);
+  const { code, language, roomId, user } = request;
+  global._io?.to(roomId).emit(SOCKET_EVENTS.EXECUTION_START, { user });
+
+  if (VISUAL_LANGUAGES.has(language)) {
+    return { output: code, type: "visual", stats: { strategy: "visual-render", language } };
   }
 
-  const io = global._io;
-  if (io) {
-    io.to(roomId).emit(SOCKET_EVENTS.EXECUTION_START, { user });
-  }
+  const strategy = process.env.EXECUTION_STRATEGY || "remote";
+  if (strategy === "local") return executeLocal(code, language);
+  if (strategy !== "remote") throw new HttpError(500, "Invalid execution strategy configuration.");
 
-  const strategy = process.env.EXECUTION_STRATEGY || "local";
-
-  if (strategy === "local" || ["html", "css", "markdown"].includes(language)) {
-    return await executeLocal(code, language, fileName);
-  } else {
-    const runtime = getPistonRuntime(language);
-    if (!runtime) {
-      // Fallback to local adaptive if no remote mapping exists
-      return await executeLocal(code, language, fileName);
-    }
-    return await executeRemote(code, language, runtime);
-  }
+  const runtime = getPistonRuntime(language);
+  if (!runtime) throw new HttpError(400, `Remote execution for '${language}' is not supported.`);
+  return executeRemote(code, runtime);
 }
 
-module.exports = {
-  executeCode,
-};
-
+module.exports = { executeCode };

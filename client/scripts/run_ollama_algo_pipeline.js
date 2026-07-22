@@ -69,9 +69,6 @@ function tsModuleToObject(tsContent) {
   return context.module.exports;
 }
 
-function escapeTemplate(code) {
-  return (code || "").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
-}
 
 function q(v) {
   return JSON.stringify(v ?? "");
@@ -95,7 +92,7 @@ function serializeAlgorithms(algorithms) {
             .map(
               (impl) => `            {
               language: ${q(impl.language)},
-              code: \`${escapeTemplate(impl.code)}\`
+              code: ${q(impl.code)}
             }`
             )
             .join(",\n");

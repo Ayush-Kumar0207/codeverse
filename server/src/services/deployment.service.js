@@ -1,23 +1,13 @@
 const fs = require("fs").promises;
 const path = require("path");
 const { buildAlgorithmDeploymentIndex } = require("./algorithmDeploymentPage.service");
+const { slugifyProjectId } = require("../utils/slug");
 
 const DEPLOY_DIR = path.join(__dirname, "../../../deployments");
 const DEFAULT_SERVER_PORT = process.env.PORT || 5000;
 
 async function ensureDeployDir() {
   await fs.mkdir(DEPLOY_DIR, { recursive: true });
-}
-
-function slugifyProjectId(projectId) {
-  const slug = String(projectId || "workspace")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 64);
-
-  return /[a-z0-9]/.test(slug) ? slug : `workspace-${Date.now()}`;
 }
 
 function sanitizeRelativeFileName(fileName) {

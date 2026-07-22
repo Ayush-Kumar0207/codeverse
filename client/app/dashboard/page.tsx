@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getToken, removeToken } from "../../utils/auth";
 import { useRouter } from "next/navigation";
 import { fetchProfile } from "@/services/auth";
 import { deleteProject, fetchProjectsByOwner } from "@/services/projects";
@@ -79,12 +78,6 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     const initDashboard = async () => {
       try {
         const profileData = await fetchProfile();
@@ -101,7 +94,6 @@ export default function Dashboard() {
           setActionMessage("Project service unavailable; showing an empty workspace");
         }
       } catch {
-        removeToken();
         router.push("/login");
       } finally {
         setLoading(false);

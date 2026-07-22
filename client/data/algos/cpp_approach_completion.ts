@@ -37,15 +37,25 @@ const approachTier = (name: string) => {
   return "";
 };
 
-const guideLine = (value: string, maximum = 180) =>
-  value
-    .replace(/[#*_`$]/g, "")
-    .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
-    .replace(/\/\//g, "/ /")
-    .replace(/\*\//g, "* /")
-    .trim()
-    .slice(0, maximum);
+const guideLine = (value: string, maximum = 180) => {
+  const forbidden = new Set(["#", "*", "_", "`", "$", "<", ">", "\r", "\n"]);
+  let cleaned = "";
+  let pendingSpace = false;
+
+  for (const character of value) {
+    if (forbidden.has(character)) continue;
+    if (/\s/u.test(character)) {
+      pendingSpace = cleaned.length > 0;
+      continue;
+    }
+    if (pendingSpace && cleaned.length < maximum) cleaned += " ";
+    pendingSpace = false;
+    if (cleaned.length < maximum) cleaned += character;
+    if (cleaned.length >= maximum) break;
+  }
+
+  return cleaned.split("//").join("/ /").split("*/").join("* /").trim();
+};
 
 const withPremiumGuide = (
   algorithm: AlgorithmEntry,

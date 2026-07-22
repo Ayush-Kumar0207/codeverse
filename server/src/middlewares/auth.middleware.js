@@ -1,32 +1,25 @@
 const { verifyToken } = require("../utils/jwt");
+const { readCookie } = require("../utils/authCookie");
 const HttpError = require("../utils/httpError");
 
-/**
- * Middleware to authenticate users using JWT
- */
-const authMiddleware = (req, res, next) => {
+function bearerToken(req) {
+  const header = String(req.headers.authorization || "");
+  return header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+}
+
+function authMiddleware(req, _res, next) {
   try {
-    const authHeader = req.headers.authorization;
+    const token = readCookie(req) || bearerToken(req);
+    if (!token) throw new HttpError(401, "Authentication failed: No session provided");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new HttpError(401, "Authentication failed: No token provided");
-    }
-
-    const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
+    if (!decoded) throw new HttpError(401, "Authentication failed: Invalid session");
 
-    if (!decoded) {
-      throw new HttpError(401, "Authentication failed: Invalid token");
-    }
-
-    // Attach decoded user info to request
     req.user = decoded;
     next();
   } catch (error) {
     next(new HttpError(401, error.message || "Authentication failed"));
   }
-};
+}
 
 module.exports = authMiddleware;
-
-

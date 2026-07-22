@@ -1,12 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session");
-const passport = require("passport");
 const path = require("path");
 
 require("./config/env");
-require("./config/passport");
-const { sessionSecret } = require("./config/secrets");
 
 const authRoutes = require("./routes/auth.routes");
 const projectRoutes = require("./routes/projects.routes");
@@ -17,6 +13,8 @@ const versionRoutes = require("./routes/versions.routes");
 const deploymentRoutes = require("./routes/deployment.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
+const { apiLimiter } = require("./middlewares/rateLimit.middleware");
+const createRequestSecurityMiddleware = require("./middlewares/requestSecurity.middleware");
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -60,23 +58,9 @@ function createApp() {
       credentials: true,
     })
   );
-  app.use(express.json());
-  app.use(
-    session({
-      name: "codeverse.sid",
-      secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      },
-    })
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.use(express.json({ limit: "256kb" }));
+  app.use("/api", apiLimiter);
+  app.use("/api", createRequestSecurityMiddleware(isAllowedOrigin));
 
   app.use(
     "/deployments",

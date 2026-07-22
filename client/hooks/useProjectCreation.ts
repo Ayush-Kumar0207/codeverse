@@ -13,12 +13,11 @@ interface User {
 
 export function useProjectCreation() {
   const router = useRouter();
-  const [storedUser] = useLocalStorage<User | null>("user", null);
   const { user: authUser } = useAuth();
 
   const handleCreate = useCallback(
     async (title: string, language: SupportedLanguage) => {
-      const owner = authUser?.username || storedUser?.username;
+      const owner = authUser?.username;
 
       if (!owner) {
         throw new Error("No authenticated user found for project creation");
@@ -38,11 +37,11 @@ export function useProjectCreation() {
         router.push(`/editor/${response.project._id}`);
       }
     },
-    [authUser, storedUser, router]
+    [authUser, router]
   );
 
   return {
     handleCreate,
-    isAuthenticated: !!authUser || !!storedUser,
+    isAuthenticated: !!authUser,
   };
 }

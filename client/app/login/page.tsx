@@ -124,7 +124,7 @@ export default function LoginPage() {
     try {
       setIsSubmitting(true);
       const data = await loginRequest({ username, password });
-      login(data.user, data.token);
+      login(data.user);
       router.push("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
