@@ -18,7 +18,8 @@
     <img src="https://img.shields.io/badge/Socket.IO-Realtime-010101?style=flat-square&logo=socket.io&logoColor=white" alt="Socket.IO" />
     <img src="https://img.shields.io/badge/Monaco-Editor-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white" alt="Monaco Editor" />
     <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+    <img src="https://img.shields.io/badge/Three.js-3D_Viz-000000?style=flat-square&logo=threedotjs&logoColor=white" alt="Three.js" />
     <img src="https://img.shields.io/badge/Ollama-AI-FF6600?style=flat-square" alt="Ollama" />
     <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
     <img src="https://img.shields.io/badge/Framer_Motion-Animations-FF0066?style=flat-square&logo=framer&logoColor=white" alt="Framer Motion" />
@@ -63,11 +64,32 @@
 
 ## 📸 Preview
 
-<!-- Replace these placeholders with committed screenshots in docs/screenshots/ when product captures are available. -->
-
-| Workspace | Collaboration | Algorithm Trace |
-| :---: | :---: | :---: |
-| *Monaco editor, multi-file explorer, resizable panels* | *Team chat, live presence, cursor broadcasts, permissions* | *AlgoTrace step-through with arrays, trees, graphs, heaps* |
+<table>
+  <tr>
+    <td align="center"><strong>Landing Page</strong></td>
+    <td align="center"><strong>Demo Workspace</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/landing-hero.png" alt="CodeVerse Landing — multiplayer IDE hero with glassmorphism workspace preview" width="480" /></td>
+    <td><img src="docs/screenshots/demo-workspace.png" alt="Demo workspace — Monaco editor, file explorer, team panel, terminal" width="480" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Algorithm Encyclopedia</strong></td>
+    <td align="center"><strong>Collaboration & Team</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/algorithm-encyclopedia.png" alt="Algorithm Encyclopedia — 422 entries, topic sidebar, complexity cards, 3D visualizer" width="480" /></td>
+    <td><img src="docs/screenshots/collaboration-team.png" alt="Team panel — organizer controls, collaborator presence, edit access, terminal" width="480" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Feature Highlights</strong></td>
+    <td align="center"><strong>Code Execution</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/features-highlights.png" alt="Feature cards — Shared IDE, Deploy Loop, Time Travel, Run Anywhere" width="480" /></td>
+    <td><img src="docs/screenshots/code-execution.png" alt="Code execution results in the output panel" width="480" /></td>
+  </tr>
+</table>
 
 **Quick API test:**
 
@@ -162,8 +184,8 @@ graph LR
 
 1. **Write** — Monaco Editor with custom themes, multi-file workspaces, 11 language starters, and IntelliSense.
 2. **Run** — Execute locally (Node VM, Python, GCC, G++, Java) or remotely via the Piston API. See results instantly.
-3. **Trace** — AlgoTrace visualizes arrays, matrices, graphs, trees, linked lists, heaps, stacks, queues, recursion frames, bit states, pointers, windows, registers, and raw fields step by step.
-4. **Learn** — The Algorithm Encyclopedia provides searchable topics, complexity analysis, edge cases, and multi-language implementations. Demo payloads seed directly into the editor.
+3. **Trace** — AlgoTrace visualizes arrays, matrices, graphs, trees, linked lists, heaps, stacks, queues, recursion frames, bit states, pointers, windows, registers, and raw fields step by step — in both 2D canvas and **cinematic 3D** (Three.js WebGL).
+4. **Learn** — The Algorithm Encyclopedia provides **422 entries across 99 topics** with searchable algorithms, complexity analysis, edge cases, multi-language implementations, and approach breakdowns.
 5. **Collaborate** — Socket.IO rooms with live code sync, team chat, cursor broadcasts, presence roster, organizer permissions, and role-based edit access.
 6. **Deploy** — Publish static workspaces with one click. CodeVerse writes sanitized files, generates an `index.html` if needed, and optionally exposes a public localtunnel URL.
 
@@ -180,6 +202,8 @@ graph LR
 - **Markdown rendering** with GitHub Flavored Markdown support.
 - **Resizable panels** for explorer, editor, terminal/output/history, assistant, team, and trace views.
 - **Command palette** with fuzzy-search across all workspace actions.
+- **Code autocomplete snippets** — language-aware CodeVerse snippets (`cv:` prefix) for JavaScript, TypeScript, Python, C, C++, Java, HTML, and CSS with Monaco IntelliSense integration.
+- **xterm.js terminal** emulator panel with fit-addon for responsive terminal UI.
 - Settings modal with theme profiles, UI scale, animation toggles, glow, reduced-motion, autocomplete, tab-size, and audio profiles.
 
 ### 👥 Real-Time Collaboration
@@ -215,7 +239,8 @@ graph LR
 > _Your AI copilot — local by default, cloud when you need it._
 
 - **Ollama-backed** assistant with `qwen2.5-coder:1.5b` as the default model.
-- **Optional OpenAI-compatible** provider via `AI_PROVIDER=openai` or `AI_PROVIDER=auto`.
+- **Optional OpenAI-compatible** provider via `AI_PROVIDER=openai` or `AI_PROVIDER=auto` (uses the `openai` SDK v5).
+- **Gemini-powered maintenance** — `@google/generative-ai` SDK for automated codebase overhaul scripts (`server/scripts/auto_overhaul_gemini.js`).
 - Streaming and non-streaming suggestion endpoints.
 - **Local fast-path responses** for simple conversational prompts.
 - **Prompt and context compaction** with configurable max-character caps to keep latency predictable.
@@ -253,9 +278,10 @@ graph LR
 
 > _Don't just run algorithms. **Watch them think.**_
 
-- **Algorithm encyclopedia** with searchable topics, approaches, complexity notes, edge cases, and multi-language implementations.
+- **Algorithm encyclopedia** with **422 entries across 99 topics** — searchable by name, grouped by category (Arrays, Binary Search, BST, Dynamic Programming, Graphs, Greedy, Heaps, Linked Lists, Math, Patterns, Recursion, Sorting, Stacks & Queues, Strings, Trees, Tries, Bit Manipulation, Advanced DS).
+- **Multi-language implementations** with approach breakdowns, complexity analysis, edge cases, and difficulty/frequency tags.
 - **Demo editor payloads** seeded from encyclopedia entries — click a topic, see the code, run it.
-- **AlgoTrace visualizer** supporting:
+- **AlgoTrace 2D visualizer** supporting:
 
 | Data Structure | Visualization |
 |---|---|
@@ -270,7 +296,15 @@ graph LR
 | Bit States | Binary representation and bitwise operation tracing |
 | Registers | Low-level state tracking |
 
+- **Cinematic 3D visualizer** (Three.js WebGL) — interactive, physically-based 3D algorithm stages with:
+  - ACES filmic tone mapping, PCF soft shadows, hemisphere + directional + point lighting
+  - Orbit controls with mouse drag, zoom, and auto-fit camera framing
+  - Per-element raycasting and hover tooltips
+  - Animated transitions for swaps, comparisons, highlights, and pointer movement
+  - Cinematic presets for different algorithm categories (sorting, searching, two-pointer, etc.)
 - **Step explanations** — beginner-focused narratives for invariants, decisions, and implementation focus.
+- **Speech narration** — Web Speech API integration with configurable voice selection, rate control, and preferred female voice mapping.
+- **Audio haptics** — Web Audio API feedback tones for interactions (clicks, transitions, completions) with configurable volume and low-pass filtering.
 - **"Ask AI" handoff** — jump from a trace narrative directly into the AI assistant panel.
 
 ### 🎨 Settings & Diagnostics
@@ -286,17 +320,19 @@ graph LR
 
 | Layer | Technologies |
 | --- | --- |
-| **Frontend** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn-style components, Radix UI, Base UI |
-| **Editor** | Monaco Editor, Monaco diff views, custom themes, language detection |
-| **Motion & UI** | Framer Motion, Lucide React, react-resizable-panels, xterm |
+| **Frontend** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 3, shadcn-style components, Radix UI, Base UI |
+| **Editor** | Monaco Editor, Monaco diff views, custom themes, language detection, CodeVerse autocomplete snippets |
+| **3D Visualization** | Three.js (WebGL), cinematic rendering engine, ACES tone mapping, raycasting interactions |
+| **Motion & UI** | Framer Motion, Lucide React, react-resizable-panels, xterm.js terminal emulator |
 | **Markdown** | react-markdown, remark-gfm, github-markdown-css |
+| **Speech & Audio** | Web Speech API narration, Web Audio API haptic feedback |
 | **Backend** | Node.js, Express 5, Socket.IO, JWT, Passport session compatibility |
-| **Auth** | bcrypt password hashing, JWT bearer auth, GitHub OAuth, Google OAuth |
+| **Auth** | bcrypt password hashing, JWT bearer auth, GitHub OAuth (passport-github2), Google OAuth |
 | **Database** | Supabase PostgreSQL, local JSON fallback stores, SQL schema |
-| **AI** | Ollama local generation, OpenAI-compatible chat completions, streaming responses |
+| **AI** | Ollama local generation, OpenAI SDK v5 (chat completions), Google Generative AI SDK (maintenance scripts), streaming responses |
 | **Execution** | Node VM, child process runtimes (GCC, G++, Java, Python), optional Piston API |
 | **Deployment** | Vercel frontend, Node/Express backend, local static publisher, optional localtunnel bridge |
-| **Tooling** | npm, ESLint, Prettier, TypeScript, Tailwind, ts-morph |
+| **Tooling** | npm, ESLint, Prettier, TypeScript, Tailwind, nodemon, ts-morph |
 
 ---
 
@@ -439,16 +475,20 @@ CodeVerse/
 ├── client/                          # Next.js 15 Frontend
 │   ├── app/                         # App Router pages and layouts
 │   │   ├── page.tsx                 # Landing page (27K LOC)
-│   │   ├── globals.css              # Design tokens & theme system (20K)
-│   │   ├── editor/                  # IDE workspace page
+│   │   ├── globals.css              # Design tokens & theme system (21K)
+│   │   ├── editor/[id]/             # IDE workspace page
 │   │   ├── dashboard/               # User dashboard
-│   │   ├── demo/                    # Demo workspace
-│   │   ├── encyclopedia/            # Algorithm encyclopedia
+│   │   ├── demo/                    # Demo workspace (no auth required)
+│   │   ├── encyclopedia/            # Algorithm encyclopedia (422 entries)
 │   │   ├── login/ · signup/         # Auth flows
 │   │   ├── settings/                # User preferences
 │   │   ├── profile/                 # Public user profile
+│   │   ├── source/                  # Repository entry-point reference
+│   │   ├── oauth-success/           # Generic OAuth callback handler
+│   │   ├── github-success/          # GitHub OAuth callback handler
+│   │   ├── google-success/          # Google OAuth callback handler
 │   │   └── about/ · privacy/ · terms/  # Static pages
-│   ├── components/                  # 21 UI components
+│   ├── components/                  # 23 UI components + subdirectories
 │   │   ├── CodeEditor.tsx           # Monaco editor wrapper
 │   │   ├── ChatBox.tsx              # Team & AI chat
 │   │   ├── CommandPalette.tsx       # Fuzzy-search command palette (25K)
@@ -458,34 +498,73 @@ CodeVerse/
 │   │   ├── SettingsModal.tsx        # Theme & preference controls
 │   │   ├── BSTVisualizer.tsx        # Binary search tree visualizer
 │   │   ├── NetworkTopology.tsx      # Network graph visualization
+│   │   ├── NarratedSlab.tsx         # Narrated step explanation panel
+│   │   ├── SemanticText.tsx         # Semantic text rendering
+│   │   ├── SyntaxCodeViewer.tsx     # Syntax-highlighted code viewer
+│   │   ├── TerminalPanel.tsx        # xterm.js terminal emulator
 │   │   ├── algotrace/              # AlgoTrace visualizer components
-│   │   └── ui/                     # Shared UI primitives
+│   │   │   ├── AlgoTraceCanvas.tsx  # 2D canvas visualizer
+│   │   │   ├── AutoVisualizer.tsx   # Auto-detection visualizer (52K)
+│   │   │   ├── TwoSumCinematic3D.tsx  # Two Sum 3D cinematic (38K)
+│   │   │   ├── UniversalCinematic3D.tsx  # Universal 3D cinematic
+│   │   │   ├── cinematic3dEngine.ts # Three.js WebGL engine (37K)
+│   │   │   ├── cinematic3dAdapter.ts  # Trace → 3D scene adapter
+│   │   │   ├── cinematic3dPresets.ts  # Cinematic preset configs
+│   │   │   ├── FeedbackLoop.tsx     # Feedback collection panel
+│   │   │   └── PlaybackControls.tsx # Step playback controls
+│   │   └── ui/                     # 13 shared UI primitives (Radix/shadcn)
 │   ├── context/                    # Auth and settings providers
-│   ├── data/algos/                 # Algorithm encyclopedia entries
-│   ├── hooks/                      # Editor, socket, execution, AI, settings, preview hooks
-│   ├── lib/                        # Utility helpers and algorithm builders
-│   ├── services/                   # API clients for auth, projects, execution, deploy, AI
+│   ├── data/                       # Algorithm encyclopedia data
+│   │   ├── algorithms.ts           # Algorithm catalog index
+│   │   └── algos/                  # 32 data files (3M+ of algorithm content)
+│   │       ├── arrays.ts · binary_search.ts · bst.ts · dynamic_programming.ts
+│   │       ├── graphs.ts · graphs_advanced.ts · greedy.ts · heaps.ts
+│   │       ├── linked_list.ts · math.ts · patterns.ts · recursion.ts
+│   │       ├── sorting.ts · stacks_queues.ts · strings.ts · trees.ts
+│   │       ├── tries.ts · bit_manipulation.ts · advanced_ds.ts
+│   │       └── generated_striver_algos.ts  # Auto-generated (1M+)
+│   ├── hooks/                      # 22 custom React hooks
+│   │   ├── useCodeAutoComplete.ts  # Language-aware snippet provider
+│   │   ├── useAudioHaptics.ts      # Web Audio API feedback
+│   │   ├── usePresenceCursors.ts   # Collaborative cursor tracking
+│   │   ├── useChatMessages.ts      # Chat message management
+│   │   ├── useEditorState.ts       # Editor state management
+│   │   └── ... (17 more hooks)
+│   ├── lib/                        # 9 utility modules
+│   │   ├── algo-learning.ts        # Algorithm topic builder
+│   │   ├── cinematic-visualizers.ts  # 3D visualizer registry
+│   │   ├── codeverse-monaco-theme.ts  # Custom Monaco themes
+│   │   ├── narration.ts            # Step narration builder
+│   │   ├── speech.ts               # Web Speech API integration
+│   │   └── ... (4 more modules)
+│   ├── services/                   # 9 API client modules
 │   └── public/                     # Static assets
 │
 ├── server/                          # Express 5 Backend
 │   ├── index.js                    # API server, Socket.IO server, deployment bridge
-│   ├── schema.sql                  # Supabase/Postgres schema
-│   ├── scripts/                    # Cloud sync setup & maintenance scripts
+│   ├── schema.sql                  # Supabase/Postgres schema (5 tables)
+│   ├── scripts/                    # Cloud sync & maintenance scripts
+│   │   ├── cloud_sync_setup.sql    # RLS setup for settings sync
+│   │   ├── oauth_schema_migration.sql  # OAuth column migrations
+│   │   └── auto_overhaul_gemini.js # Gemini-powered codebase maintenance
 │   └── src/
 │       ├── app.js                  # Express app factory & route registration
 │       ├── config/                 # Env, Supabase, Passport compatibility
-│       ├── controllers/            # HTTP request handlers
+│       ├── controllers/            # 9 HTTP request handlers
 │       ├── executors/              # Runtime-specific execution helpers
 │       ├── middlewares/            # Auth, async, and error middleware
-│       ├── routes/                 # API route modules
-│       ├── services/              # Auth, projects, AI, execution, deploy, settings
+│       ├── routes/                 # 9 API route modules
+│       ├── services/              # 13 services (auth, projects, AI, execution, deploy, settings, local stores)
 │       ├── sockets/               # Socket.IO collaboration server
 │       └── utils/                 # JWT, errors, language runtime helpers
 │
 ├── shared/                          # Shared Contracts
-│   ├── constants/                  # Language and socket-event contracts
-│   └── types/                     # Shared TypeScript declarations
+│   ├── index.d.ts                  # Shared TypeScript declarations
+│   ├── constants/                  # Language definitions and socket-event contracts
+│   └── types/                     # Shared TypeScript type definitions
 │
+├── docs/                            # Documentation assets
+│   └── screenshots/               # Product screenshots for README
 ├── deployments/                     # Published static workspaces
 ├── scripts/                         # Repository-level maintenance scripts
 ├── LICENSE.txt
@@ -642,6 +721,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `AI_PROVIDER` | Optional | `ollama`, `openai`, or `auto`. Defaults to local-first behavior. |
 | `OLLAMA_*`, `AI_MAX_*` | Optional | Local AI assistant model, generation budget, context caps, and keep-alive settings. |
 | `OPENAI_*` | Optional | OpenAI-compatible chat completion provider settings. |
+| `GEMINI_API_KEY` | Optional | Only used by `server/scripts/auto_overhaul_gemini.js` for automated maintenance. |
 
 </details>
 
@@ -818,6 +898,24 @@ cd ../server && npm ci && node -e "require('./src/app')"
 | **Workspace timeline** | Organizer snapshots capped at 80 states in memory |
 | **Settings snapshots** | Cloud history pruned to latest 20 snapshots per user |
 
+### Quality Audit Scripts
+
+CodeVerse includes a comprehensive audit pipeline that validates system integrity:
+
+```bash
+# Run the full release audit
+cd client && npm run release:audit
+```
+
+| Script | Purpose |
+| --- | --- |
+| `app:audit` | Validates all Next.js routes, pages, and layouts |
+| `visual:audit` | Checks visual system consistency across themes |
+| `collab:audit` | Verifies collaboration socket event contracts |
+| `algo:audit` | Audits the 422-entry algorithm catalog completeness |
+| `algo:audit:3d` | Validates cinematic 3D visualizer coverage |
+| `cpp:audit` | Checks C++ variant catalog integrity |
+
 **Recommended future benchmarks:**
 
 - Socket.IO edit propagation latency across 2, 10, and 50 clients.
@@ -867,13 +965,20 @@ cd ../server && npm ci && node -e "require('./src/app')"
 - [x] OpenAI-compatible assistant provider fallback
 - [x] Version history, diff compare, and workspace timeline restore
 - [x] Static workspace publishing with optional public tunnel
-- [x] Algorithm encyclopedia and AlgoTrace visualizer
+- [x] Algorithm encyclopedia (422 entries, 99 topics) and AlgoTrace 2D visualizer
+- [x] Cinematic 3D visualizer powered by Three.js WebGL
 - [x] Command palette with fuzzy search
 - [x] 4 theme profiles with glassmorphism design system
+- [x] Language-aware code autocomplete snippets
+- [x] Speech narration via Web Speech API
+- [x] Audio haptics via Web Audio API
+- [x] xterm.js terminal emulator panel
+- [x] OAuth flows (GitHub, Google)
+- [x] Comprehensive release audit pipeline (6 audit scripts)
+- [x] Committed product screenshots in `docs/screenshots/`
 
 ### 🔮 Coming Next
 
-- [ ] Committed screenshots and a short product demo GIF/video
 - [ ] GitHub Actions for install, lint, typecheck, and build
 - [ ] Dockerfile and `docker-compose` for one-command local infrastructure
 - [ ] Hardened execution through container isolation for public deployments
@@ -976,6 +1081,18 @@ The repo contains the production frontend URL and localhost backend defaults, bu
 Yes. Set `OLLAMA_MODEL` to any model available in your local Ollama installation. The system includes a fallback list and will try alternative models if the primary one is unavailable.
 </details>
 
+<details>
+<summary><strong>How does the 3D cinematic visualizer work?</strong></summary>
+
+The cinematic engine uses Three.js with WebGL to render algorithm steps as interactive 3D scenes. It supports orbit camera controls, raycasting for element hover, physically-based lighting (ACES filmic tone mapping), and animated transitions. The engine adapts to different data structures through cinematic presets and the `cinematic3dAdapter.ts` bridge.
+</details>
+
+<details>
+<summary><strong>What are the CodeVerse autocomplete snippets?</strong></summary>
+
+CodeVerse registers language-specific snippet providers (prefixed with `cv:`) into Monaco's IntelliSense. These include common patterns like function declarations, loops, class templates, and data structures for JavaScript, TypeScript, Python, C, C++, Java, HTML, and CSS.
+</details>
+
 ---
 
 ## 📜 License
@@ -1000,7 +1117,7 @@ Distributed under the **MIT License**. See [LICENSE.txt](./LICENSE.txt) for deta
   </tr>
 </table>
 
-Built with excellent open-source tools including Next.js, React, Monaco Editor, Socket.IO, Supabase, Tailwind CSS, Framer Motion, Lucide, Ollama, and Piston.
+Built with excellent open-source tools including Next.js, React, Monaco Editor, Socket.IO, Supabase, Tailwind CSS, Framer Motion, Three.js, Lucide, Ollama, OpenAI SDK, and Piston.
 
 ---
 
