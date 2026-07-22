@@ -74,9 +74,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
       - run: npm ci
       - run: npm run test:unit
+      - name: Install server dependencies for E2E
+        run: npm ci
+        working-directory: server
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
