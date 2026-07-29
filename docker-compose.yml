@@ -1,7 +1,8 @@
 services:
   server:
     build:
-      context: ./server
+      context: .
+      dockerfile: server/Dockerfile
     image: codeverse-server:local
     restart: unless-stopped
     env_file:
@@ -14,8 +15,8 @@ services:
       - "5000:5000"
       - "5001:5001"
     volumes:
-      - codeverse_data:/app/.data
-      - codeverse_deployments:/app/deployments
+      - codeverse_data:/workspace/server/.data
+      - codeverse_deployments:/workspace/server/deployments
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000/api/health"]
       interval: 30s
@@ -25,7 +26,8 @@ services:
 
   client:
     build:
-      context: ./client
+      context: .
+      dockerfile: client/Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: http://localhost:5000
     image: codeverse-client:local
