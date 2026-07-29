@@ -1,0 +1,37 @@
+name: Refresh Server Lockfile
+
+on:
+  push:
+    branches: [agent/cloud-infrastructure]
+    paths:
+      - .github/workflows/refresh-server-lock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/cloud-infrastructure
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Upgrade vulnerable transitive dependencies
+        working-directory: server
+        run: npm audit fix --package-lock-only
+      - name: Verify clean production audit
+        working-directory: server
+        run: npm audit --omit=dev --audit-level=high
+      - name: Commit refreshed lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/package-lock.json
+          git diff --cached --quiet || git commit -m "Refresh server dependency lockfile"
+          git push
