@@ -11,8 +11,7 @@ metadata:
 data:
   NODE_ENV: production
   PORT: "5000"
-  CLIENT_URL: http://codeverse-client
-  NEXT_PUBLIC_API_BASE_URL: http://codeverse-server:5000
+  CLIENT_URL: https://codeverse.example.com
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,7 +19,12 @@ metadata:
   name: codeverse-server
   namespace: codeverse
 spec:
-  replicas: 2
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: codeverse-server
@@ -29,9 +33,12 @@ spec:
       labels:
         app: codeverse-server
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: server
           image: ghcr.io/ayush-kumar0207/codeverse-server:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           envFrom:
@@ -45,12 +52,16 @@ spec:
               port: 5000
             initialDelaySeconds: 10
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /api/health
               port: 5000
             initialDelaySeconds: 30
             periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m
@@ -78,6 +89,11 @@ metadata:
   namespace: codeverse
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: codeverse-client
@@ -86,26 +102,30 @@ spec:
       labels:
         app: codeverse-client
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: client
           image: ghcr.io/ayush-kumar0207/codeverse-client:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
-          envFrom:
-            - configMapRef:
-                name: codeverse-config
           readinessProbe:
             httpGet:
               path: /
               port: 3000
             initialDelaySeconds: 15
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m
@@ -125,4 +145,35 @@ spec:
   ports:
     - port: 80
       targetPort: 3000
-  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: codeverse
+  namespace: codeverse
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: codeverse.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: codeverse-client
+                port:
+                  number: 80
+    - host: api.codeverse.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: codeverse-server
+                port:
+                  number: 5000
