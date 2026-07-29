@@ -1,26 +1,27 @@
-FROM node:20-alpine AS dependencies
-WORKDIR /app
-COPY package.json package-lock.json ./
+FROM node:22-alpine AS dependencies
+WORKDIR /workspace/client
+COPY client/package.json client/package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
-WORKDIR /app
+FROM node:22-alpine AS builder
+WORKDIR /workspace/client
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY . .
-ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+COPY --from=dependencies /workspace/client/node_modules ./node_modules
+COPY client/ ./
+COPY shared/ ../shared/
+ARG NEXT_PUBLIC_API_BASE_URL=""
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 RUN npm run build
 
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup -S codeverse && adduser -S codeverse -G codeverse
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=codeverse:codeverse /workspace/client/package.json /workspace/client/package-lock.json ./
+COPY --from=builder --chown=codeverse:codeverse /workspace/client/node_modules ./node_modules
+COPY --from=builder --chown=codeverse:codeverse /workspace/client/.next ./.next
+COPY --from=builder --chown=codeverse:codeverse /workspace/client/public ./public
 USER codeverse
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
