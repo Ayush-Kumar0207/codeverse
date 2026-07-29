@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: codeverse
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codeverse-config
+  namespace: codeverse
+data:
+  NODE_ENV: production
+  PORT: "5000"
+  CLIENT_URL: http://codeverse-client
+  NEXT_PUBLIC_API_BASE_URL: http://codeverse-server:5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codeverse-server
+  namespace: codeverse
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: codeverse-server
+  template:
+    metadata:
+      labels:
+        app: codeverse-server
+    spec:
+      containers:
+        - name: server
+          image: ghcr.io/ayush-kumar0207/codeverse-server:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: codeverse-config
+            - secretRef:
+                name: codeverse-secrets
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codeverse-server
+  namespace: codeverse
+spec:
+  selector:
+    app: codeverse-server
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codeverse-client
+  namespace: codeverse
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: codeverse-client
+  template:
+    metadata:
+      labels:
+        app: codeverse-client
+    spec:
+      containers:
+        - name: client
+          image: ghcr.io/ayush-kumar0207/codeverse-client:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: codeverse-config
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codeverse-client
+  namespace: codeverse
+spec:
+  selector:
+    app: codeverse-client
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer
