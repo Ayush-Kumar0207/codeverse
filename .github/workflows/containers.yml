@@ -16,15 +16,16 @@ jobs:
       matrix:
         service:
           - name: client
-            context: ./client
+            dockerfile: client/Dockerfile
           - name: server
-            context: ./server
+            dockerfile: server/Dockerfile
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.service.context }}
+          context: .
+          file: ${{ matrix.service.dockerfile }}
           push: false
           tags: codeverse-${{ matrix.service.name }}:ci
           cache-from: type=gha
