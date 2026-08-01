@@ -87,7 +87,7 @@
     "typescript": "^5",
     "vitest": "^4.1.10"
   },
-  "description": "The Next.js client for CodeVerse, a collaborative IDE and interactive algorithm-learning platform.",
+  "description": "The EvidenceOS workspace for verifiable human-and-AI collaborative engineering.",
   "keywords": [
     "collaborative-ide",
     "nextjs",

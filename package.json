@@ -2,7 +2,7 @@
   "name": "codeverse",
   "version": "1.0.0",
   "private": true,
-  "description": "A collaborative browser IDE with code execution, AI assistance, version recovery, publishing, and interactive algorithm visualization.",
+  "description": "A verifiable collaborative engineering platform with tamper-evident replay, proof-carrying changes, adversarial review, and understanding assessment.",
   "license": "MIT",
   "author": "Ayush Kumar",
   "repository": {

@@ -2,6 +2,12 @@
 
 import { useCallback, useState } from "react";
 import { deployProject } from "@/services/deployment";
+function recordDeployment(type: string, summary: string, payload: Record<string, unknown>) {
+  window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+    detail: { type, summary, source: "deployment", payload },
+  }));
+}
+
 
 export function useWorkspaceDeployment(projectId: string, files: Record<string, string>) {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -14,6 +20,7 @@ export function useWorkspaceDeployment(projectId: string, files: Record<string, 
     setDeploymentUrl("");
     setDeploymentError("");
     setDeploymentNote("");
+    recordDeployment("deployment.attempted", "Deployment attempt started.", { projectId, files: Object.keys(files) });
     try {
       const response = await deployProject({ projectId, files });
       setDeploymentUrl(response.publicUrl || response.url);
@@ -24,8 +31,11 @@ export function useWorkspaceDeployment(projectId: string, files: Record<string, 
             ? `Served locally. Static bridge: ${response.bridgeUrl}`
             : ""
       );
+      recordDeployment("deployment.succeeded", "Workspace deployment succeeded.", { projectId, url: response.publicUrl || response.url });
     } catch (error) {
-      setDeploymentError(error instanceof Error ? error.message : "Failed to initiate Aegis propagation.");
+      const message = error instanceof Error ? error.message : "Failed to initiate Aegis propagation.";
+      setDeploymentError(message);
+      recordDeployment("deployment.failed", "Workspace deployment failed.", { projectId, error: message });
     }
   }, [files, projectId]);
 

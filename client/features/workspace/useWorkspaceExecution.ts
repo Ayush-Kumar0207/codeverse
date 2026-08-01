@@ -8,6 +8,7 @@ import type { ExecutionOutputType } from "@/hooks/useCodeExecution";
 import { getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { executeCode } from "@/services/execution";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
+import type { EngineeringEventType } from "@shared/types/evidence";
 
 interface WorkspaceExecutionOptions {
   socket: Socket | null;
@@ -33,6 +34,18 @@ function formatExecutionError(error: unknown) {
   return error instanceof Error ? error.message : "Error during execution.";
 }
 
+function emitEvidence(type: EngineeringEventType, summary: string, fileName: string, payload: Record<string, unknown>) {
+  window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+    detail: {
+      type,
+      summary,
+      source: "runner",
+      fileName,
+      payload,
+    },
+  }));
+}
+
 export function useWorkspaceExecution({
   socket,
   roomId,
@@ -54,6 +67,13 @@ export function useWorkspaceExecution({
     openBottomPanel();
     setActiveBottomTab(["html", "css", "markdown"].includes(language) ? "output" : "terminal");
     socket?.emit(SOCKET_EVENTS.EXECUTION_START, { user: username, roomId, language });
+    emitEvidence(
+      "command.executed",
+      "Executed " + executableFile + " in the shared runner.",
+      executableFile,
+      { language, bytes: executableCode.length }
+    );
+
 
     try {
       const response = await executeCode({
@@ -66,8 +86,22 @@ export function useWorkspaceExecution({
       setOutput(response.output || "No output");
       setOutputType((response.type as ExecutionOutputType) || "terminal");
       setActiveBottomTab(response.type === "visual" ? "output" : "terminal");
+      const evidenceType: EngineeringEventType = /(?:test|spec)/i.test(executableFile) ? "test.passed" : "runtime.succeeded";
+      emitEvidence(
+        evidenceType,
+        executableFile + " completed successfully.",
+        executableFile,
+        { language, output: (response.output || "").slice(0, 4000), stats: response.stats || {} }
+      );
     } catch (error) {
-      setOutput(formatExecutionError(error));
+      const errorMessage = formatExecutionError(error);
+      setOutput(errorMessage);
+      emitEvidence(
+        /(?:test|spec)/i.test(executableFile) ? "test.failed" : "runtime.failed",
+        executableFile + " failed during execution.",
+        executableFile,
+        { language, error: errorMessage.slice(0, 4000) }
+      );
       setOutputType("terminal");
       setActiveBottomTab("terminal");
     } finally {

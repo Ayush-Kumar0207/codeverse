@@ -28,6 +28,9 @@ export function useCodeSave(
       });
       alert("✅ Saved and snapshot created.");
       onSaveSuccess?.();
+      window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+        detail: { type: "snapshot.created", summary: "Saved a versioned code checkpoint.", source: "version-history", fileName: activeFile, payload: { bytes: code.length } },
+      }));
     } catch (err) {
       console.error(err);
       alert("❌ Failed to save.");

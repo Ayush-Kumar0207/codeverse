@@ -2,9 +2,9 @@
 
   # ⚡ CodeVerse
 
-  ### _"Write it. See it. Ship it. — Together."_
+  ### _"Build it. Prove it. Understand it. — Together."_
 
-  **A real-time collaborative IDE where teams write code, trace algorithms visually, pair with AI, and publish live workspaces — all from one browser tab.**
+  **A verifiable collaborative engineering platform where humans and AI build, debug, review, and ship software—and every change carries evidence that it works and is understood.**
 
   <p>
     <a href="https://codeverse-rho.vercel.app"><img src="https://img.shields.io/badge/🌐_Live-codeverse--rho.vercel.app-000?style=for-the-badge&labelColor=000" alt="Live Website" /></a>
@@ -63,6 +63,35 @@
 > **Zero-config local development.** CodeVerse runs locally without cloud credentials for the core IDE flow. Supabase, OAuth, Ollama, and remote execution are optional integrations that unlock persistence, sign-in providers, AI help, and sandboxed execution.
 
 ---
+
+## 🛡 CodeVerse EvidenceOS
+
+EvidenceOS turns the existing multiplayer IDE into a proof-carrying engineering environment. Its features share one tamper-evident project ledger instead of storing disconnected UI state:
+
+- **Engineering Evidence Graph** links requirements, decisions, changes, tests, runtime results, security review, understanding, and deployment.
+- **Session Replay** records replayable workspace snapshots between commits and can branch the active workspace from any captured code state.
+- **Proof Packages** score requirement coverage, tests, execution, security, review, comprehension, and rollback readiness.
+- **Adversarial Review Board** runs Builder, Correctness, Security, Test, Performance, Architecture, and Devil's Advocate roles over the same change.
+- **Understanding Verification** generates code-specific questions and scores explanations of purpose, invariants, failures, and trust boundaries.
+- **Assessment Scorecard** reports correctness, process, debugging, test quality, comprehension, security awareness, AI dependence, and evidence integrity.
+- **Engineering Digital Twin** derives file, service, API, data, test, and configuration relationships and predicts blast radius.
+
+Every recorded event includes its predecessor hash and a SHA-256 integrity hash. Cloud workspaces persist events, reviews, proof packages, and verification results in PostgreSQL/Supabase; local development falls back to the ignored `server/.data/evidence.json` store, and the demo remains fully interactive in browser storage.
+
+### EvidenceOS API
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/evidence/:projectId` | Reconstruct the evidence graph and assessment scorecard |
+| `POST` | `/api/evidence/:projectId/events` | Append a sealed engineering event |
+| `POST` | `/api/evidence/:projectId/packages` | Create and score a proof package |
+| `POST` | `/api/evidence/:projectId/reviews` | Run the seven-agent adversarial board |
+| `POST` | `/api/evidence/:projectId/challenges` | Generate an understanding challenge |
+| `POST` | `/api/evidence/:projectId/verifications` | Score and persist developer explanations |
+| `POST` | `/api/evidence/:projectId/twin` | Build the engineering digital twin and impact prediction |
+
+---
+
 
 ## 📸 Preview
 

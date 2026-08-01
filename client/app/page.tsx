@@ -11,7 +11,6 @@ import {
   GitBranch,
   Globe2,
   History,
-  Play,
   Rocket,
   ShieldCheck,
   Sparkles,
@@ -135,37 +134,37 @@ This starter project is deployed directly from the landing page CTA.`,
 };
 
 const navLinks = [
-  { label: "Technology", href: "#technology" },
-  { label: "Features", href: "#features" },
+  { label: "EvidenceOS", href: "#features" },
+  { label: "Assessment", href: "#technology" },
   { label: "Collaboration", href: "#collaboration" },
 ];
 
 const featureRows = [
   {
-    title: "Shared IDE",
-    desc: "Live file updates, local file focus, collaborator permissions, and readable presence in one workspace.",
-    icon: Users,
+    title: "Evidence Graph",
+    desc: "Requirements, code changes, tests, runtime behavior, review, and deployment stay causally connected.",
+    icon: ShieldCheck,
     accent: "text-teal-300",
     bg: "bg-teal-300/10",
   },
   {
-    title: "Deploy Loop",
-    desc: "Ship a static project route from the workspace, inspect the result, and keep iterating without leaving the app.",
-    icon: Rocket,
+    title: "Session Replay",
+    desc: "Replay the work between commits, inspect the moment a failure appeared, and branch from recorded state.",
+    icon: History,
     accent: "text-amber-300",
     bg: "bg-amber-300/10",
   },
   {
-    title: "Time Travel",
-    desc: "Organizer snapshots let a team step back, compare state, and return to the newest working version.",
-    icon: History,
+    title: "Review Board",
+    desc: "Seven adversarial AI roles challenge correctness, security, tests, performance, and architecture.",
+    icon: Sparkles,
     accent: "text-rose-300",
     bg: "bg-rose-300/10",
   },
   {
-    title: "Run Anywhere",
-    desc: "Execute code, preview web files, and keep outputs scoped to each contributor's workflow.",
-    icon: Play,
+    title: "Verified Understanding",
+    desc: "Prove the developer can explain invariants, failure paths, and trust boundaries behind AI-assisted code.",
+    icon: Users,
     accent: "text-cyan-300",
     bg: "bg-cyan-300/10",
   },
@@ -184,10 +183,10 @@ function Atmosphere() {
 
 function ProductStage() {
   const codeLines = [
-    "const room = await CodeVerse.join('launch-team');",
-    "room.permissions.set('collaborators', 'edit');",
-    "room.deploy({ route: '/deployments/launch-kit' });",
-    "timeline.snapshot('stable-auth-flow');",
+    "const session = await CodeVerse.evidence.start();",
+    "session.linkRequirement('safe token rotation');",
+    "await session.review({ agents: 7 });",
+    "session.proof.seal({ tests: 'passed' });",
   ];
 
   return (
@@ -392,7 +391,7 @@ export default function HomePage() {
       disabled={authLoading}
       className="h-12 rounded-md bg-teal-300 px-7 font-bold text-black shadow-xl shadow-teal-300/20 hover:bg-teal-200 disabled:opacity-70"
     >
-      New Project
+      Open EvidenceOS
       <ArrowRight className="ml-2 h-4 w-4" />
     </Button>
   ) : (
@@ -400,7 +399,7 @@ export default function HomePage() {
       href="/signup"
       className="inline-flex h-12 items-center justify-center rounded-md bg-teal-300 px-7 text-sm font-bold text-black shadow-xl shadow-teal-300/20 transition hover:bg-teal-200"
     >
-      Start Building
+      Try EvidenceOS
       <ArrowRight className="ml-2 h-4 w-4" />
     </Link>
   );
@@ -456,14 +455,14 @@ export default function HomePage() {
             >
               <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-teal-100">
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                Live collaborative coding
+                Verifiable collaborative engineering
               </div>
               <h1 className="text-5xl font-black leading-none tracking-tight text-white drop-shadow-[0_18px_44px_rgba(0,0,0,0.9)] sm:text-7xl md:text-8xl">
                 CodeVerse
               </h1>
               <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-200 md:text-xl">
-                A multiplayer IDE where teams code together, keep organizer control, run files independently,
-                and recover clean workspace states when work gets messy.
+                Humans and AI build, debug, and review together—while every change carries replayable proof
+                that it works, is safe, and is genuinely understood.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -537,7 +536,7 @@ export default function HomePage() {
                 <div>
                   <div className="mb-4 text-xs font-black uppercase tracking-[0.32em] text-teal-300">Features</div>
                   <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">
-                    A sharper first impression for the real product underneath.
+                    Proof-carrying changes, not another generic coding agent.
                   </h2>
                 </div>
                 <Link
@@ -573,10 +572,10 @@ export default function HomePage() {
             <div className="mx-auto max-w-7xl">
               <div className="mb-8 max-w-2xl">
                 <div className="mb-4 text-xs font-black uppercase tracking-[0.32em] text-rose-300">Collaboration</div>
-                <h2 className="text-4xl font-black tracking-tight md:text-5xl">Independent work, shared truth.</h2>
+                <h2 className="text-4xl font-black tracking-tight md:text-5xl">Multiplayer work. One verifiable truth.</h2>
                 <p className="mt-5 text-base leading-8 text-slate-400">
-                  Each collaborator can open a different file, but anyone who joins the same file sees live edits.
-                  The organizer stays in control of edit access and team membership.
+                  Code, AI prompts, tests, runtime failures, decisions, reviews, and deployments become one causal history.
+                  Teams keep live collaboration while evaluators gain evidence of both correctness and understanding.
                 </p>
               </div>
 

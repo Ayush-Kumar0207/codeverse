@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CodeVerse – Real-time AI Code Editor",
-  description: "Collaborate, edit, and chat with AI in real-time.",
+  title: "CodeVerse EvidenceOS – Verifiable Collaborative Engineering",
+  description: "Build with humans and AI in a multiplayer workspace where every change carries replayable evidence.",
 };
 
 export default function RootLayout({

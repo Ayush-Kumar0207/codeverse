@@ -81,6 +81,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
     const editorRef = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<typeof monacoType | null>(null);
     const languageRef = useRef(getLanguageFromFilename(activeFile));
+    const activeFileRef = useRef(activeFile);
     const applyingRemoteChangeRef = useRef(false);
     const onChangeRef = useRef(onChange);
     const { socket, on } = useSocket(roomId);
@@ -101,7 +102,8 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
 
     useEffect(() => {
       languageRef.current = language;
-    }, [language]);
+      activeFileRef.current = activeFile;
+    }, [activeFile, language]);
 
     useEffect(() => {
       onChangeRef.current = onChange;
@@ -174,6 +176,15 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
 
       editor.onKeyDown((event) => {
         playKeySound(event.browserEvent.key);
+      editor.onDidChangeCursorPosition((event) => {
+        window.dispatchEvent(new CustomEvent("codeverse:evidence-focus", {
+          detail: {
+            fileName: activeFileRef.current,
+            lineNumber: event.position.lineNumber,
+            column: event.position.column,
+          },
+        }));
+      });
       });
     };
 

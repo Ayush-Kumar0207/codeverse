@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { CollaborationAccess, FullscreenPanel, PresenceUser } from "./types";
+import type { useEvidenceOS } from "./useEvidenceOS";
+import { EvidenceOSPanel } from "./EvidenceOSPanel";
 import { WorkspaceTeamPanel } from "./WorkspaceTeamPanel";
 
 const AlgoTraceCanvas = dynamic(() => import("@/components/algotrace/AlgoTraceCanvas"), {
@@ -47,6 +49,7 @@ interface WorkspaceRightPanelProps {
   presentationMode: boolean;
   visualizerMode?: string | null;
   narrationRequested: boolean;
+  evidenceOS: ReturnType<typeof useEvidenceOS>;
 }
 
 export function WorkspaceRightPanel({
@@ -75,6 +78,7 @@ export function WorkspaceRightPanel({
   presentationMode,
   visualizerMode,
   narrationRequested,
+  evidenceOS,
 }: WorkspaceRightPanelProps) {
   return (
           <Panel
@@ -108,6 +112,12 @@ export function WorkspaceRightPanel({
                     Team
                   </TabsTrigger>
                   <TabsTrigger
+                    value="evidence"
+                    className="h-6 rounded px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-cyan-500/15 data-[state=active]:text-cyan-200 xl:px-3"
+                  >
+                    Proof
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="algotrace"
                     className="h-6 rounded px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 data-[state=active]:bg-indigo-500/15 data-[state=active]:text-indigo-200 xl:px-3"
                   >
@@ -115,7 +125,7 @@ export function WorkspaceRightPanel({
                   </TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-1">
-                  {rightTab === "assistant" && (
+                  {(rightTab === "assistant" || rightTab === "evidence") && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -173,6 +183,24 @@ export function WorkspaceRightPanel({
                     onCopyInvite={handleCopyInviteLink}
                     onToggleEditing={handleToggleTeamEditing}
                     onRemoveCollaborator={handleRemoveCollaborator}
+                  />
+                </TabsContent>
+                <TabsContent value="evidence" className="m-0 h-full min-h-0">
+                  <EvidenceOSPanel
+                    snapshot={evidenceOS.snapshot}
+                    twin={evidenceOS.twin}
+                    challenge={evidenceOS.challenge}
+                    loading={evidenceOS.loading}
+                    syncing={evidenceOS.syncing}
+                    offline={evidenceOS.offline}
+                    notice={evidenceOS.notice}
+                    coverage={evidenceOS.evidenceCoverage}
+                    focusedLocation={evidenceOS.focusedLocation}
+                    onCreatePackage={evidenceOS.createPackage}
+                    onRunReview={evidenceOS.runReview}
+                    onGenerateChallenge={evidenceOS.generateChallenge}
+                    onSubmitUnderstanding={evidenceOS.submitUnderstanding}
+                    onBranchFromEvent={evidenceOS.branchFromEvent}
                   />
                 </TabsContent>
                 <TabsContent value="algotrace" className="m-0 h-full min-h-0">

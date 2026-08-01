@@ -74,3 +74,68 @@ CREATE TABLE IF NOT EXISTS public.setting_snapshots (
     config JSONB NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- EvidenceOS: tamper-evident causal history for each engineering workspace.
+-- project_id remains TEXT so local/offline projects and cloud UUID projects share one contract.
+CREATE TABLE IF NOT EXISTS public.engineering_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    sequence BIGINT NOT NULL,
+    type TEXT NOT NULL,
+    actor JSONB NOT NULL,
+    summary TEXT NOT NULL,
+    source TEXT NOT NULL,
+    file_name TEXT,
+    payload JSONB NOT NULL DEFAULT '{}'::JSONB,
+    caused_by TEXT,
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    previous_hash TEXT NOT NULL,
+    integrity_hash TEXT NOT NULL,
+    UNIQUE(project_id, sequence)
+);
+
+CREATE TABLE IF NOT EXISTS public.evidence_packages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    requirement TEXT NOT NULL DEFAULT '',
+    rationale TEXT NOT NULL DEFAULT '',
+    rollback TEXT NOT NULL DEFAULT '',
+    files JSONB NOT NULL DEFAULT '[]'::JSONB,
+    checks JSONB NOT NULL DEFAULT '[]'::JSONB,
+    score INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'needs-evidence',
+    created_by JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.evidence_reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id TEXT NOT NULL,
+    requirement TEXT NOT NULL DEFAULT '',
+    verdict TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    agents JSONB NOT NULL DEFAULT '[]'::JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.understanding_verifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id TEXT NOT NULL,
+    challenge_id TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    passed BOOLEAN NOT NULL DEFAULT FALSE,
+    feedback JSONB NOT NULL DEFAULT '[]'::JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS engineering_events_project_sequence_idx
+    ON public.engineering_events(project_id, sequence);
+CREATE INDEX IF NOT EXISTS evidence_packages_project_created_idx
+    ON public.evidence_packages(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS evidence_reviews_project_created_idx
+    ON public.evidence_reviews(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS understanding_verifications_project_created_idx
+    ON public.understanding_verifications(project_id, created_at DESC);

@@ -57,6 +57,16 @@ export function useWorkspaceTimeline({
           .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
       );
       setCurrentSnapshotId(snapshot.id);
+      window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+        detail: {
+          type: "snapshot.created",
+          summary: "Created workspace checkpoint: " + label + ".",
+          source: "timeline",
+          fileName: snapshotActiveFile,
+          payload: { snapshotId: snapshot.id, label, activeFile: snapshotActiveFile, fileCount: Object.keys(snapshotFiles).length },
+        },
+      }));
+
       return snapshot;
     },
     [activeFile, files, isOrganizer]

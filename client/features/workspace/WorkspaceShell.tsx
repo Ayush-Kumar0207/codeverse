@@ -22,6 +22,7 @@ import { useWorkspaceCollaboration } from "@/features/workspace/useWorkspaceColl
 import { useWorkspaceTimeline } from "@/features/workspace/useWorkspaceTimeline";
 import { useWorkspaceDeployment } from "@/features/workspace/useWorkspaceDeployment";
 import { useWorkspaceExecution } from "@/features/workspace/useWorkspaceExecution";
+import { useEvidenceOS } from "@/features/workspace/useEvidenceOS";
 import { useWorkspaceLayout } from "@/features/workspace/useWorkspaceLayout";
 import { WorkspaceDialogs } from "@/features/workspace/WorkspaceDialogs";
 import { WorkspaceEditorPanel } from "@/features/workspace/WorkspaceEditorPanel";
@@ -114,7 +115,7 @@ function EditorWorkspace() {
     isOutputFullscreen,
     toggleBottomPanel,
     openBottomPanel,
-  } = useWorkspaceLayout(Boolean(project), algoId ? "algotrace" : "assistant");
+  } = useWorkspaceLayout(Boolean(project), algoId ? "algotrace" : "evidence");
 
   const {
     activeUsers,
@@ -238,6 +239,9 @@ function EditorWorkspace() {
     if (created) {
       setPermissionNotice("");
       emitWorkspaceFilesChange(created.files, created.activeFile);
+      window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+        detail: { type: "file.created", summary: "Created " + created.activeFile + ".", source: "explorer", fileName: created.activeFile },
+      }));
     }
   };
 
@@ -250,6 +254,9 @@ function EditorWorkspace() {
     if (deleted) {
       setPermissionNotice("");
       emitWorkspaceFilesChange(deleted.files, deleted.activeFile);
+      window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+        detail: { type: "file.deleted", summary: "Deleted " + activeFile + ".", source: "explorer", fileName: activeFile },
+      }));
     }
   };
 
@@ -273,6 +280,16 @@ function EditorWorkspace() {
     emitFilesChange: emitWorkspaceFilesChange,
     ready: Boolean(project),
   });
+  const evidenceOS = useEvidenceOS({
+    projectId: id || roomId,
+    files,
+    activeFile,
+    currentUser: user?.username || collaborationIdentity?.username || "Guest",
+    ready: Boolean(project),
+    setFiles,
+    setActiveFile,
+  });
+
   // Load project
   useEffect(() => {
     if (!id) return;
@@ -452,6 +469,7 @@ function EditorWorkspace() {
             presentationMode={presentationMode}
             visualizerMode={visualizerMode}
             narrationRequested={narrationRequested}
+            evidenceOS={evidenceOS}
           />
         </PanelGroup>
 

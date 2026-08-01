@@ -17,7 +17,7 @@
   ],
   "author": "Ayush Kumar",
   "license": "MIT",
-  "description": "The Express and Socket.IO backend for CodeVerse collaboration, execution, persistence, AI, and publishing.",
+  "description": "The CodeVerse EvidenceOS backend for collaboration, causal engineering evidence, review, assessment, execution, and publishing.",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.103.0",

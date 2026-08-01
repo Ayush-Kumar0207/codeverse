@@ -5,6 +5,7 @@ export type { SharedFile } from "./types/file";
 export type { SharedVersion } from "./types/version";
 export type { ChatMessage } from "./types/chat";
 export type { ExecutionRequest, ExecutionOutput, ExecutionError } from "./types/execution";
+export * from "./types/evidence";
 export type { LoginRequest, RegisterRequest, AuthResponse } from "./types/auth";
 export type { ApiSuccessResponse, ApiErrorResponse } from "./types/api";
 export { SOCKET_EVENTS } from "./constants/socket-events";

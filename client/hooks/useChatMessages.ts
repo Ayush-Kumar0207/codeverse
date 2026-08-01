@@ -146,6 +146,15 @@ export function useChatMessages(roomId: string, options: UseChatMessagesOptions 
         const shouldAskAI = options.aiMode || trimmed.startsWith("@ai ") || trimmed.startsWith("ask: ");
         if (shouldAskAI) {
           const prompt = options.aiMode ? trimmed.replace(/^(@ai |ask: )/, "") : trimmed.replace(/^(@ai |ask: )/, "");
+          window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+            detail: {
+              type: "ai.prompted",
+              summary: "Asked the AI assistant to analyze the workspace.",
+              source: "ai-assistant",
+              payload: { prompt: prompt.slice(0, 4000), channel },
+            },
+          }));
+
 
           if (looksLikeGreeting(prompt)) {
             const aiReply: ChatMessage = {
@@ -219,6 +228,16 @@ export function useChatMessages(roomId: string, options: UseChatMessagesOptions 
               prev.map((message) => (message.id === aiReplyId ? { ...message, message: finalReply } : message))
             );
             emit(SOCKET_EVENTS.CHAT_MESSAGE, { ...aiReply, message: finalReply });
+            window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+              detail: {
+                type: "ai.responded",
+                summary: "AI assistant returned an engineering recommendation.",
+                source: "ai-assistant",
+                actor: { name: "AI Assistant", kind: "ai" },
+                payload: { response: finalReply.slice(0, 4000), channel },
+              },
+            }));
+
           } catch (err) {
             console.error("AI suggestion error:", err);
             const errorMsg: ChatMessage = {

@@ -6,6 +6,7 @@ test("public demo workspace exposes its core editor surfaces", async ({ page }) 
   await expect(page.getByRole("button", { name: "Run" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Assistant" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Team" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Proof" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Trace" })).toBeVisible();
 });
 
