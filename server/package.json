@@ -19,6 +19,13 @@
   "license": "MIT",
   "description": "The CodeVerse EvidenceOS backend for collaboration, causal engineering evidence, review, assessment, execution, and publishing.",
   "dependencies": {
+    "@ast-grep/lang-c": "^0.0.6",
+    "@ast-grep/lang-cpp": "^0.0.6",
+    "@ast-grep/lang-go": "^0.0.6",
+    "@ast-grep/lang-java": "^0.0.7",
+    "@ast-grep/lang-python": "^0.0.6",
+    "@ast-grep/lang-rust": "^0.0.7",
+    "@ast-grep/napi": "^0.45.0",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.103.0",
     "axios": "^1.18.1",

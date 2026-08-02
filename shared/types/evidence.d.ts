@@ -179,6 +179,10 @@ export interface ReviewAgentResult {
   engine?: "tool" | "ai" | "hybrid";
   toolRuns?: Array<{ tool: string; status: "passed" | "failed"; durationMs: number; outputDigest: string; summary: string; isolation?: { engine: string; network?: string; filesystem?: string; capabilities?: string } }>;
   actions?: Array<{ findingId: string; fileName: string; action: string }>;
+  strategy?: "general-autonomous" | "deterministic-safe-repair";
+  model?: string;
+  provider?: string;
+  proposalError?: string;
 }
 
 export interface ReviewBoardRound {
@@ -240,7 +244,7 @@ export interface UnderstandingVerification {
   executionEvidence?: {
     emptyBoundary?: { result: string; execution?: Record<string, unknown> };
     nullBoundary?: { result: string; execution?: Record<string, unknown> };
-    compiler?: { engine: string; diagnostics: number };
+    compiler?: { engine: string; language?: string; diagnostics: number };
     modification?: { compiled: boolean; preservesValid: boolean; handlesInvalid: boolean; probes: Record<string, string> };
   };
   codeDigest: string;
@@ -275,7 +279,7 @@ export interface DigitalTwinEdge {
   source: string;
   target: string;
   relation: "imports" | "calls" | "tests" | "renders" | "configures" | "reads" | "writes" | "publishes" | "consumes" | "deploys" | "owns" | "traces";
-  evidence?: "compiler" | "html-parser" | "sql-parser" | "runtime-trace" | "otel-span" | "coverage-map";
+  evidence?: "compiler" | "tree-sitter-ast-grep" | "html-parser" | "sql-parser" | "runtime-trace" | "otel-span" | "coverage-map";
 }
 
 export interface EngineeringDigitalTwin {
@@ -293,7 +297,7 @@ export interface EngineeringDigitalTwin {
     confidence: number;
   };
   telemetry: { traces: number; requests: number; databaseMutations: number; deployments: number };
-  analysis?: { engine: string; compilerDiagnostics: number; runtimeCorrelations: number; coverageFiles: string[]; symbolFiles: number };
+  analysis?: { engine: string; compilerDiagnostics: number; runtimeCorrelations: number; coverageFiles: string[]; symbolFiles: number; languages?: string[]; languageEngines?: Record<string, { language: string; engine: string; nodes: number; diagnostics: number }> };
   generatedAt: string;
 }
 
@@ -327,7 +331,7 @@ export interface ArenaScenarioTemplateInput {
   starterFiles: Record<string, string>;
   injectedFaults?: ArenaScenario["injectedFaults"];
   rubric?: ArenaScenario["rubric"];
-  acceptanceTests: Array<{ id?: string; code: string; timeoutMs?: number }>;
+  acceptanceTests: Array<{ id?: string; code: string; timeoutMs?: number; weight?: number; trials?: number }>;
 }
 
 export interface ArenaParticipant {
@@ -359,7 +363,7 @@ export interface ArenaSession {
   rank?: number;
   weightedScore?: number;
   privacyMode?: "full" | "redacted";
-  acceptance?: { passed: number; total: number; score: number; verified: boolean; results: Array<{ id: string; passed: boolean; exitCode: number; outputDigest: string; durationMs: number; engine: string; image?: string | null }> };
+  acceptance?: { passed: number; total: number; score: number; verified: boolean; calibration?: { weighted: boolean; repeatedTrials: number; p95Measured: boolean }; results: Array<{ id: string; passed: boolean; passedTrials: number; trials: number; weight: number; exitCode: number; outputDigest: string; durationMs: number; p95DurationMs: number; engine: string; image?: string | null }> };
   signedReport?: { digest: string; signature: string; signatureAlgorithm?: "hmac-sha256"; signatureIssuer?: string; signatureKeyId?: string; generatedAt: string; consentRecorded: boolean; privacyMode: "full" | "redacted"; report: Record<string, unknown> };
 }
 

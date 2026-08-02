@@ -8,7 +8,12 @@ const MAX_FILES = 80;
 const MAX_FILE_BYTES = 200 * 1024;
 const MAX_OUTPUT_BYTES = 512 * 1024;
 const DEFAULT_TIMEOUT_MS = 15_000;
-const PROCESS_COMMANDS = new Set(["node", "python", "python3"]);
+const PROCESS_COMMANDS = new Set(["node", "python", "python3", "java", "go"]);
+const COMPILED_RUNTIMES = new Map([
+  ["c", { compiler: "gcc", args: (fileName, output) => [fileName, "-O0", "-o", output] }],
+  ["cpp", { compiler: "g++", args: (fileName, output) => [fileName, "-std=c++17", "-O0", "-o", output] }],
+  ["rust", { compiler: "rustc", args: (fileName, output) => [fileName, "-o", output] }],
+]);
 
 function digest(value) {
   return createHash("sha256").update(String(value)).digest("hex");
@@ -73,6 +78,11 @@ function runtimeCommand(command, files, language) {
   const extension = path.extname(fileName).toLowerCase();
   if (language === "python" || extension === ".py") return ["python", fileName];
   if ([".js", ".cjs", ".mjs"].includes(extension)) return ["node", fileName];
+  if (language === "java" || extension === ".java") return ["java", fileName];
+  if (language === "go" || extension === ".go") return ["go", "run", fileName];
+  if (language === "c" || extension === ".c") return ["codeverse-compile-run", "c", fileName];
+  if (["cpp", "c++"].includes(language) || [".cc", ".cpp", ".cxx"].includes(extension)) return ["codeverse-compile-run", "cpp", fileName];
+  if (language === "rust" || extension === ".rs") return ["codeverse-compile-run", "rust", fileName];
   throw new Error("The recorded run command has no supported deterministic runtime");
 }
 
@@ -130,6 +140,23 @@ async function executeWithProcess(directory, tokens, options) {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Production evidence execution requires the Docker sandbox");
   }
+  if (tokens[0] === "codeverse-compile-run") {
+    const runtime = COMPILED_RUNTIMES.get(tokens[1]);
+    if (!runtime) throw new Error("Compiled replay runtime is not allow-listed");
+    const output = path.join(directory, process.platform === "win32" ? ".evidence-program.exe" : ".evidence-program");
+    const compiled = await runFile(runtime.compiler, runtime.args(tokens[2], output), {
+      cwd: directory,
+      timeoutMs: options.timeoutMs,
+      env: safeEnvironment(options.environmentKeys, options.environment),
+    });
+    if (compiled.exitCode !== 0 || compiled.timedOut || compiled.launchError) return { ...compiled, engine: "isolated-process", image: null };
+    const executed = await runFile(output, [], {
+      cwd: directory,
+      timeoutMs: options.timeoutMs,
+      env: safeEnvironment(options.environmentKeys, options.environment),
+    });
+    return { ...executed, stdout: compiled.stdout + executed.stdout, stderr: compiled.stderr + executed.stderr, engine: "isolated-process", image: null };
+  }
   const executable = tokens[0] === "node" ? process.execPath : tokens[0];
   if (!PROCESS_COMMANDS.has(tokens[0])) throw new Error("Replay process runtime is not allow-listed");
   const result = await runFile(executable, tokens.slice(1), {
@@ -141,9 +168,18 @@ async function executeWithProcess(directory, tokens, options) {
 }
 
 function configuredImage(tokens, requested) {
-  const image = String(requested || (["python", "python3"].includes(tokens[0])
-    ? process.env.EVIDENCE_PYTHON_RUNNER_IMAGE
-    : process.env.EVIDENCE_NODE_RUNNER_IMAGE) || "").trim();
+  const runtime = tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
+  const variable = {
+    node: "EVIDENCE_NODE_RUNNER_IMAGE",
+    python: "EVIDENCE_PYTHON_RUNNER_IMAGE",
+    python3: "EVIDENCE_PYTHON_RUNNER_IMAGE",
+    java: "EVIDENCE_JAVA_RUNNER_IMAGE",
+    go: "EVIDENCE_GO_RUNNER_IMAGE",
+    c: "EVIDENCE_C_RUNNER_IMAGE",
+    cpp: "EVIDENCE_CPP_RUNNER_IMAGE",
+    rust: "EVIDENCE_RUST_RUNNER_IMAGE",
+  }[runtime];
+  const image = String(requested || process.env[variable] || "").trim();
   if (!image || !/^[a-z0-9][a-z0-9./:@_-]{2,240}$/i.test(image)) {
     throw new Error("A configured container image is required for Docker execution");
   }
@@ -154,6 +190,11 @@ function configuredImage(tokens, requested) {
     ...(process.env.EVIDENCE_ALLOWED_IMAGES || "").split(","),
     process.env.EVIDENCE_NODE_RUNNER_IMAGE,
     process.env.EVIDENCE_PYTHON_RUNNER_IMAGE,
+    process.env.EVIDENCE_JAVA_RUNNER_IMAGE,
+    process.env.EVIDENCE_GO_RUNNER_IMAGE,
+    process.env.EVIDENCE_C_RUNNER_IMAGE,
+    process.env.EVIDENCE_CPP_RUNNER_IMAGE,
+    process.env.EVIDENCE_RUST_RUNNER_IMAGE,
     process.env.ARENA_RUNNER_IMAGE,
     process.env.UNDERSTANDING_RUNNER_IMAGE,
   ].map((item) => String(item || "").trim()).filter(Boolean));
@@ -172,6 +213,27 @@ function dockerClientEnvironment() {
 
 async function dockerCommand(args, timeoutMs, cwd) {
   return runFile("docker", args, { cwd, timeoutMs, env: dockerClientEnvironment() });
+}
+
+function dockerRuntimeEnvironment(tokens) {
+  const runtime = tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
+  if (runtime === "go") return { GOCACHE: "/run/go-cache", GOTMPDIR: "/run" };
+  if (runtime === "python" || runtime === "python3") return { PYTHONDONTWRITEBYTECODE: "1" };
+  if (runtime === "java") return { JAVA_TOOL_OPTIONS: "-Djava.io.tmpdir=/run" };
+  return {};
+}
+
+function dockerRuntimeTokens(tokens) {
+  if (tokens[0] !== "codeverse-compile-run") return tokens;
+  const language = tokens[1];
+  const fileName = tokens[2];
+  const command = {
+    c: 'gcc "$1" -O0 -o /run/evidence-program && /run/evidence-program',
+    cpp: 'g++ "$1" -std=c++17 -O0 -o /run/evidence-program && /run/evidence-program',
+    rust: 'rustc "$1" -o /run/evidence-program && /run/evidence-program',
+  }[language];
+  if (!command) throw new Error("Compiled Docker runtime is not allow-listed");
+  return ["/bin/sh", "-c", command, "codeverse-compiler", fileName];
 }
 
 async function executeWithDocker(directory, tokens, options) {
@@ -208,8 +270,9 @@ async function executeWithDocker(directory, tokens, options) {
     const args = [
       "create", "--network", "none", "--read-only",
       "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
-      "--pids-limit", "64", "--memory", "256m", "--cpus", "1",
+      "--pids-limit", "128", "--memory", "512m", "--cpus", "1",
       "--user", "65534:65534", "--tmpfs", "/tmp:rw,noexec,nosuid,size=32m",
+      "--tmpfs", "/run:rw,exec,nosuid,size=256m,uid=65534,gid=65534,mode=0700",
       "--mount", "type=volume,source=" + volumeName + ",target=/workspace,readonly",
       "--workdir", "/workspace",
     ];
@@ -217,21 +280,27 @@ async function executeWithDocker(directory, tokens, options) {
       if (["PATH", "SystemRoot", "TEMP", "TMP"].includes(key)) continue;
       args.push("--env", key + "=" + value);
     }
-    args.push(image, ...tokens);
+    for (const [key, value] of Object.entries(dockerRuntimeEnvironment(tokens))) args.push("--env", key + "=" + value);
+    args.push(image, ...dockerRuntimeTokens(tokens));
     const created = await dockerCommand(args, Math.min(options.timeoutMs, 30_000), directory);
     executionContainer = created.stdout.trim();
     if (created.exitCode !== 0 || created.launchError || !/^[a-f0-9]{12,64}$/i.test(executionContainer)) {
       return { ...created, engine: "docker", image, launchError: created.launchError || created.stderr || "Docker could not create the evidence container" };
     }
     const started = await dockerCommand(["start", "--attach", executionContainer], options.timeoutMs, directory);
+    if (started.timedOut) {
+      await dockerCommand(["kill", executionContainer], 10_000, directory).catch(() => undefined);
+      return { ...started, exitCode: 124, engine: "docker", image, timedOut: true, launchError: "Evidence container exceeded its execution timeout" };
+    }
     const inspected = await dockerCommand(["inspect", "--format", "{{.State.ExitCode}}", executionContainer], 10_000, directory);
-    const exitCode = Number(inspected.stdout.trim());
+    const exitText = inspected.stdout.trim();
+    const exitCode = /^\d+$/.test(exitText) ? Number(exitText) : started.exitCode;
     return {
       ...started,
-      exitCode: Number.isFinite(exitCode) ? exitCode : started.exitCode,
+      exitCode,
       engine: "docker",
       image,
-      launchError: started.launchError || (inspected.exitCode !== 0 ? inspected.stderr || "Docker could not inspect evidence exit status" : ""),
+      launchError: started.launchError || (inspected.exitCode !== 0 || !/^\d+$/.test(exitText) ? inspected.stderr || "Docker could not inspect evidence exit status" : ""),
     };
   } finally {
     if (executionContainer) await dockerCommand(["rm", "--force", executionContainer], 10_000, directory).catch(() => undefined);

@@ -1,6 +1,8 @@
 const { Project, ScriptTarget, ModuleKind, SyntaxKind, ts } = require("ts-morph");
 const path = require("path");
 const { executeSealedWorkspace } = require("./evidence-runtime.service");
+const languageAdapters = require("./evidence-language-adapters.service");
+const languageHarness = require("./understanding-language-harness.service");
 
 function clamp(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -11,6 +13,23 @@ function stripCodeFence(value) {
   return (match ? match[1] : text).trim();
 }
 function sourceAnalysis(fileName, source) {
+  const languageAnalysis = languageAdapters.analyzeLanguageFile(fileName, source);
+  if (languageAnalysis) {
+    const baseName = path.basename(fileName, path.extname(fileName));
+    const primary = languageAnalysis.language === "java"
+      ? languageAnalysis.declarations.find((item) => item !== baseName && !/^[A-Z]/.test(item)) || languageAnalysis.declarations.at(-1)
+      : languageAnalysis.declarations[0];
+    return {
+      primary: primary || "",
+      declarations: languageAnalysis.declarations,
+      parameters: languageAnalysis.parameters,
+      calls: languageAnalysis.calls,
+      returns: languageAnalysis.returns,
+      diagnostics: languageAnalysis.diagnostics.map((item) => item.message),
+      language: languageAnalysis.language,
+      engine: languageAnalysis.engine,
+    };
+  }
   const project = new Project({
     useInMemoryFileSystem: true,
     compilerOptions: { allowJs: true, checkJs: true, noEmit: true, target: ScriptTarget.ES2022, module: ModuleKind.CommonJS, skipLibCheck: true },
@@ -44,6 +63,9 @@ function sourceAnalysis(fileName, source) {
       const text = item.getMessageText();
       return typeof text === "string" ? text : text.getMessageText();
     }),
+    language: "javascript-typescript",
+    engine: "ts-morph-compiler",
+
   };
 }
 function instrument(source, primary) {
@@ -63,6 +85,22 @@ function hiddenHarness(modulePath, fixture) {
 }
 async function probe(files, fileName, source, primary, fixture) {
   const extension = path.extname(fileName).toLowerCase();
+  const analysis = sourceAnalysis(fileName, source);
+  const prepared = languageHarness.prepareLanguageProbe(files, fileName, source, analysis, fixture);
+  if (prepared) {
+    const imageKey = prepared.language.toUpperCase().replace(/\+/g, "P");
+    const execution = await executeSealedWorkspace({
+      files: prepared.files,
+      command: "run " + prepared.runnerName,
+      language: prepared.language,
+      engine: process.env.UNDERSTANDING_EXECUTION_ENGINE,
+      containerImage: process.env["UNDERSTANDING_" + imageKey + "_RUNNER_IMAGE"] || process.env["EVIDENCE_" + imageKey + "_RUNNER_IMAGE"],
+      timeoutMs: ["go", "java", "rust"].includes(prepared.language) ? 30_000 : 15_000,
+    });
+    const marker = execution.output.split(/\r?\n/).find((line) => line.startsWith("EVIDENCE_RESULT:"));
+    if (!marker) return { supported: true, language: prepared.language, status: "harness-failed", execution: { exitCode: execution.exitCode, outputDigest: execution.outputDigest, engine: execution.engine } };
+    return { supported: true, language: prepared.language, ...JSON.parse(marker.slice("EVIDENCE_RESULT:".length)), execution: { exitCode: execution.exitCode, outputDigest: execution.outputDigest, engine: execution.engine } };
+  }
   if (![".js", ".jsx", ".cjs", ".mjs", ".ts", ".tsx", ".mts", ".cts"].includes(extension)) {
     return { supported: false, status: "unsupported" };
   }
@@ -122,7 +160,7 @@ async function evaluateExecutableUnderstanding(challenge, answers, signals, cont
   const executionEvidence = {
     emptyBoundary: { result: normalizedResult(emptyProbe), execution: emptyProbe.execution },
     nullBoundary: { result: normalizedResult(nullProbe), execution: nullProbe.execution },
-    compiler: { engine: "ts-morph", diagnostics: analysis.diagnostics.length },
+    compiler: { engine: analysis.engine, language: analysis.language, diagnostics: analysis.diagnostics.length },
   };
   for (const question of challenge.questions) {
     const raw = String(answers[question.id] || "");
@@ -215,4 +253,4 @@ async function evaluateExecutableUnderstanding(challenge, answers, signals, cont
     codeDigest: challenge.codeDigest,
   };
 }
-module.exports = { evaluateExecutableUnderstanding, sourceAnalysis };
+module.exports = { evaluateExecutableUnderstanding, probeLanguageBehavior: probe, sourceAnalysis };

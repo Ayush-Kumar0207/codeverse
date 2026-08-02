@@ -1,5 +1,6 @@
 const { Project, ScriptTarget, ModuleKind, SyntaxKind } = require("ts-morph");
 const path = require("path");
+const languageAdapters = require("./evidence-language-adapters.service");
 
 function clamp(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -64,6 +65,38 @@ function analyzeWorkspace(filesValue, events = []) {
       edges.push({ id, source, target, relation, evidence });
     }
   };
+  const languageAnalyses = new Map();
+  for (const [fileName, content] of Object.entries(files)) {
+    const analysis = languageAdapters.analyzeLanguageFile(fileName, content);
+    if (!analysis) continue;
+    languageAnalyses.set(fileName, analysis);
+    symbols.set(fileName, {
+      declarations: analysis.declarations,
+      calls: analysis.calls,
+      parameters: analysis.parameters,
+      returns: analysis.returns,
+    });
+    const sourceId = "file:" + fileName;
+    const signal = [...analysis.calls, ...analysis.markers].join(" ");
+    const fileNode = nodes.find((node) => node.id === sourceId);
+    if (fileNode && fileNode.kind === "module") {
+      if (/\b(?:assert|pytest|unittest|junit|testify|testing\.|#\[test\])\b/i.test(signal)) fileNode.kind = "test";
+      else if (/\b(?:route|router|handler|requestmapping|getmapping|postmapping|http\.|gin\.|fastapi|flask)\b/i.test(signal)) fileNode.kind = "api";
+      else if (/\b(?:query|execute|repository|entitymanager|sqlx|gorm|database)\b/i.test(signal)) fileNode.kind = "data";
+      else if (/\b(?:publish|subscribe|producer|consumer|enqueue|dequeue|channel)\b/i.test(signal)) fileNode.kind = "queue";
+      else if (analysis.calls.length || analysis.declarations.length) fileNode.kind = "service";
+    }
+    for (const request of analysis.imports) {
+      const target = languageAdapters.resolveLanguageImport(fileName, request, names, analysis.language);
+      if (target) {
+        imports.get(fileName).add(target);
+        addEdge(sourceId, "file:" + target, "imports", analysis.engine);
+      } else if (!request.startsWith(".") && !/^[<"']/.test(request)) {
+        addEdge(sourceId, addNode({ id: "provider:" + request, kind: "provider", label: request }), "calls", analysis.engine);
+      }
+    }
+  }
+
   for (const sourceFile of project.getSourceFiles()) {
     const name = sourceName(sourceFile);
     const sourceId = "file:" + name;
@@ -142,6 +175,17 @@ function analyzeWorkspace(filesValue, events = []) {
       }
     }
   }
+  const declarationOwners = new Map();
+  for (const [fileName, analysis] of languageAnalyses) for (const declaration of analysis.declarations || []) {
+    const key = analysis.language + ":" + declaration;
+    if (!declarationOwners.has(key)) declarationOwners.set(key, fileName);
+  }
+  for (const [fileName, analysis] of languageAnalyses) for (const call of analysis.calls) {
+    const calledName = call.split(/::|\.|->/).at(-1)?.replace(/[^A-Za-z0-9_$].*$/, "") || "";
+    const owner = declarationOwners.get(analysis.language + ":" + calledName);
+    if (owner && owner !== fileName) addEdge("file:" + fileName, "file:" + owner, "calls", analysis.engine);
+  }
+
   const coverage = new Map();
   let runtimeCorrelations = 0;
   for (const event of events) {
@@ -178,11 +222,13 @@ function analyzeWorkspace(filesValue, events = []) {
     for (const imported of imports.get(test) || []) addEdge("file:" + test, "file:" + imported, "tests");
     for (const covered of coverage.keys()) if (nodeIds.has("file:" + covered)) addEdge("file:" + test, "file:" + covered, "tests", "coverage-map");
   }
-  const diagnostics = project.getPreEmitDiagnostics().filter((item) => {
+  const compilerDiagnostics = project.getPreEmitDiagnostics().filter((item) => {
     const text = item.getMessageText();
     const message = typeof text === "string" ? text : text.getMessageText();
     return !/Cannot find (?:name|module)|implicitly has an 'any' type/.test(message);
   }).length;
+  const languageDiagnostics = [...languageAnalyses.values()].reduce((sum, item) => sum + item.diagnostics.length, 0);
+  const diagnostics = compilerDiagnostics + languageDiagnostics;
   return {
     files,
     nodes,
@@ -193,6 +239,7 @@ function analyzeWorkspace(filesValue, events = []) {
     diagnostics,
     runtimeCorrelations,
     engine: "ts-morph-compiler",
+    languageEngines: Object.fromEntries([...languageAnalyses].map(([fileName, analysis]) => [fileName, { language: analysis.language, engine: analysis.engine, nodes: analysis.nodeCount, diagnostics: analysis.diagnostics.length }])),
   };
 }
 function createDigitalTwin(payload, events = []) {
@@ -250,7 +297,9 @@ function createDigitalTwin(payload, events = []) {
     },
     telemetry,
     analysis: {
-      engine: analysis.engine,
+      engine: Object.keys(analysis.languageEngines).length ? "multi-language-compiler-ast" : analysis.engine,
+      languageEngines: analysis.languageEngines,
+      languages: [...new Set(Object.values(analysis.languageEngines).map((item) => item.language))],
       compilerDiagnostics: analysis.diagnostics,
       runtimeCorrelations: analysis.runtimeCorrelations,
       coverageFiles: [...analysis.coverage.keys()],

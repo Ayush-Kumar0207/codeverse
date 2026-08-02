@@ -399,6 +399,47 @@ function agent(id, name, responsibility, findings, passingSummary) {
   return { id, name, responsibility, status, summary: findings.length ? findings.length + " challenge" + (findings.length === 1 ? "" : "s") + " raised." : passingSummary, findings };
 }
 
+function parseBuilderPayload(value) {
+  const raw = String(value || "").trim().replace(/^\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60$/, "");
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) throw new Error("General Builder returned no JSON artifact");
+  return JSON.parse(raw.slice(start, end + 1));
+}
+async function generateGeneralBuilderRevision(context) {
+  if (process.env.EVIDENCE_BUILDER_AI !== "true") return null;
+  const response = await aiService.generateNeuralInsight({
+    provider: process.env.AI_PROVIDER,
+    task: "autonomous-builder",
+    fast: false,
+    maxTokens: 6000,
+    systemPrompt: "You are the CodeVerse autonomous Builder. Repair arbitrary correctness, concurrency, security, test, performance, and architecture challenges. Return only JSON with files (the complete workspace) and actions. Never omit unchanged files. Do not weaken or delete tests. The independent board will compile and re-analyze the result.",
+    prompt: JSON.stringify({
+      patchDigest: context.patchDigest,
+      requirement: context.requirement,
+      rollback: context.rollback,
+      evidence: context.evidence,
+      findings: context.findings,
+      files: context.files,
+      responseSchema: { files: { "path/to/file": "complete content" }, actions: [{ findingId: "id", fileName: "path", action: "repair performed" }] },
+    }),
+  });
+  const parsed = parseBuilderPayload(response.suggestion);
+  const files = exactFiles(parsed.files);
+  evidenceRuntime.validateFiles(files);
+  if (!Object.keys(files).length || advancedEvidence.workspaceDigest(files) === context.patchDigest) return null;
+  return {
+    files,
+    actions: Array.isArray(parsed.actions) ? parsed.actions.slice(0, 40).map((item) => ({
+      findingId: text(item?.findingId, 160) || "general-builder",
+      fileName: text(item?.fileName, 240) || "workspace",
+      action: text(item?.action, 1000) || "Applied a general challenge-driven repair.",
+    })) : [],
+    model: response.model,
+    provider: response.provider || "local",
+  };
+}
+
 async function enrichReviewWithIndependentAI(result, files, requirement, rollback) {
   const enabled = process.env.EVIDENCE_REVIEW_AI === "true" && Boolean(process.env.OPENAI_API_KEY || process.env.OLLAMA_URL);
   if (!enabled) return result;
@@ -470,7 +511,8 @@ async function runReview(projectId, payload) {
     files,
     text(payload.requirement, 1600),
     text(payload.rollback, 1600),
-    evidence
+    evidence,
+    { generateRevision: generateGeneralBuilderRevision }
   );
   const result = await enrichReviewWithIndependentAI(
     deterministicResult,

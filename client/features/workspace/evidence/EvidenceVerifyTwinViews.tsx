@@ -103,7 +103,7 @@ export function EvidenceVerifyView({
           </div>
           {latestVerification.executionEvidence && (
             <div className="mt-2 rounded border border-emerald-400/15 bg-[#080d16] p-2 text-[8px] leading-relaxed text-slate-500">
-              Compiler {latestVerification.executionEvidence.compiler?.engine || "unavailable"} · empty {latestVerification.executionEvidence.emptyBoundary?.result || "unavailable"} · null {latestVerification.executionEvidence.nullBoundary?.result || "unavailable"}
+              Compiler {latestVerification.executionEvidence.compiler?.engine || "unavailable"} · {latestVerification.executionEvidence.compiler?.language || "unknown language"} · empty {latestVerification.executionEvidence.emptyBoundary?.result || "unavailable"} · null {latestVerification.executionEvidence.nullBoundary?.result || "unavailable"}
             </div>
           )}
           <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestVerification.codeDigest}</div>
@@ -168,7 +168,7 @@ export function EvidenceTwinView({ twin }: { twin: EngineeringDigitalTwin }) {
           <div className="h-full bg-cyan-400" style={{ width: twin.impact.confidence + "%" }} />
         </div>
         <div className="mt-2 text-[8px] text-slate-500">
-          {twin.analysis?.engine || "compiler unavailable"} · {twin.analysis?.runtimeCorrelations || 0} runtime correlations · {twin.impact.securityBoundaries.length} security boundaries · {twin.impact.apiConsumers.length} API consumers · {twin.impact.migrationsRequired.length} migrations
+          {twin.analysis?.engine || "compiler unavailable"} · {twin.analysis?.languages?.join(", ") || "JS/TS"} · {twin.analysis?.runtimeCorrelations || 0} runtime correlations · {twin.impact.securityBoundaries.length} security boundaries · {twin.impact.apiConsumers.length} API consumers · {twin.impact.migrationsRequired.length} migrations
         </div>
       </section>
 

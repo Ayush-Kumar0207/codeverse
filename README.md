@@ -71,11 +71,11 @@ EvidenceOS turns the existing multiplayer IDE into a proof-carrying engineering 
 - **Semantic Evidence Graph** uses typed causal relations such as `implements`, `caused-fix`, `verified-by`, `reviewed-by`, `deployed-as`, `calls`, `writes-to`, `traced-by`, and `attested-by`.
 - **Deterministic Session Replay** reconstructs files, active file, cursor, terminal commands and output digests, debugger variables and breakpoints, network calls, database mutations, traces, branches, runtime versions, dependency versions, sealed environment values, and lockfile identity. The server—not the caller—re-executes the sealed command. Production uses an allow-listed, digest-pinned container with no network, a read-only filesystem, dropped capabilities, and CPU, memory, and process limits.
 - **Artifact-bound Proof Packages** hash the exact uploaded workspace and require independently digest-bound source, test, runtime, security, compatibility, performance, migration, deployment, rollback, and understanding attestations. Oversized workspaces are rejected for cloud proof instead of being silently truncated.
-- **Adversarial Review Board** executes seven isolated worker processes (digest-pinned containers in production) over the same patch digest. The three phases are challenge, builder revision, and analyzer re-execution/consensus; the final verdict is bound to the revised artifact, not the initial submission.
-- **Hands-on Understanding Verification** evaluates compiler-derived purpose and data flow, exact hidden boundary predictions, a complete replacement that must compile and preserve valid behavior, and hidden debugging probes, plus transfer and behavioral continuity signals. JavaScript, JSX, TypeScript, TSX, ESM, and CommonJS challenges execute in the evidence sandbox.
+- **Adversarial Review Board** executes seven isolated worker processes (digest-pinned containers in production) over the same patch digest. Its general autonomous Builder can return a complete challenge-driven workspace for arbitrary correctness, concurrency, security, test, performance, and architecture repairs; every proposal is validated, revised in isolation, and independently re-analyzed, with an auditable deterministic fallback when AI is disabled or unavailable.
+- **Hands-on Understanding Verification** evaluates compiler-derived purpose and data flow, exact hidden boundary predictions, a complete replacement that must compile and preserve valid behavior, and hidden debugging probes, plus transfer and behavioral continuity signals. JavaScript/TypeScript uses the compiler API; Python, Java, C, C++, Go, and Rust use language-native Tree-sitter ASTs and hidden executable harnesses in the same sealed runtime contract.
 - **Assessment Scorecard** reports correctness, process, debugging, test quality, comprehension, security awareness, AI dependence, and evidence integrity.
-- **Engineering Digital Twin** uses the TypeScript compiler AST, resolved module imports, SQL/HTML parsers, test coverage, network/database telemetry, and OpenTelemetry span identity to build APIs, data, queue, provider, test, migration, and deployment relationships and a four-hop blast-radius analysis.
-- **Engineering Arena** supplies eight incident classes, hidden fault injection, locked starter environments, consent and privacy modes, AI-use policies, solo runs, team lobbies, code joining, quick matchmaking, timers, evaluator templates with private executable acceptance suites, process-evidence rubrics, mandatory independent HMAC-signed reports, and leaderboards. Final correctness comes only from the server-run hidden suite.
+- **Engineering Digital Twin** uses compiler ASTs for JavaScript/TypeScript plus Tree-sitter ASTs for Python, Java, C, C++, Go, and Rust, resolved cross-file imports/calls, SQL/HTML parsers, test coverage, network/database telemetry, and OpenTelemetry span identity to build API, data, queue, provider, test, migration, and deployment relationships and a four-hop blast-radius analysis.
+- **Engineering Arena** supplies eight incident classes, hidden fault injection, locked starter environments, consent and privacy modes, AI-use policies, solo runs, team lobbies, code joining, quick matchmaking, timers, evaluator templates with private executable acceptance suites, process-evidence rubrics, mandatory independent HMAC-signed reports, and leaderboards. Each built-in scenario has multiple weighted hidden tests, adversarial boundaries, repeated concurrency/performance trials, p95 timing evidence, and partial-credit scoring; final correctness comes only from the server-run hidden suite.
 
 Every recorded event includes its predecessor hash and a SHA-256 integrity hash. Proof packages and Arena reports require separate signing keys, issuers, and key identities; missing or placeholder signing configuration fails closed. Browser-only operation is explicitly labeled an **unverified preview** and cannot verify a proof or grade an Arena submission. Cloud workspaces persist events, reviews, proof packages, verifications, arena sessions, and organization scenario templates in PostgreSQL/Supabase. Local server development falls back to the ignored `server/.data/evidence.json` and `server/.data/arenas.json` stores.
 
@@ -780,7 +780,8 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `JWT_SECRET` | Production | JWT signing secret and key material for the encrypted authentication cookie. |
 | `EVIDENCE_SIGNING_*`, `ARENA_SIGNING_*` | Evidence server | Independent keys, issuer names, and key IDs. Proof/report creation fails with `503` when either purpose is not validly configured. |
 | `EVIDENCE_*_ENGINE`, `ARENA_EXECUTION_ENGINE`, `UNDERSTANDING_EXECUTION_ENGINE` | Production | Must use `docker`; process workers are development/test only. |
-| `EVIDENCE_*_RUNNER_IMAGE`, `ARENA_RUNNER_IMAGE`, `UNDERSTANDING_RUNNER_IMAGE`, `EVIDENCE_ANALYZER_IMAGE` | Production | Allow-listed container images pinned by `@sha256:` digest. |
+| `EVIDENCE_{NODE,PYTHON,JAVA,GO,C,CPP,RUST}_RUNNER_IMAGE`, `ARENA_RUNNER_IMAGE`, `UNDERSTANDING_*_RUNNER_IMAGE`, `EVIDENCE_ANALYZER_IMAGE` | Production | Per-language allow-listed container images pinned by `@sha256:` digest. |
+| `EVIDENCE_BUILDER_AI` | Optional | Enables complete-workspace autonomous Builder proposals; invalid or unavailable proposals fall back to deterministic safe repair and remain visible in the review result. |
 | `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH` | Production | Dedicated rootless or TLS-protected executor endpoint; do not mount the host Docker socket into the application container. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Recommended | Enables persistent users, projects, versions, and settings snapshots. |
 | `GITHUB_*`, `GOOGLE_*` | Optional | Enables OAuth login buttons. |
@@ -950,10 +951,11 @@ The deployment service is built into the backend:
 
 ### CI/CD
 
-The `Continuous Integration` workflow runs five independent jobs for every push and pull request:
+The `Continuous Integration` workflow runs six independent jobs for every push and pull request:
 
 - Repository hygiene and credential-pattern checks.
-- Server module checks, dependency audit, and 17 backend/integration tests.
+- Server module checks, dependency audit, and the 30-test backend/integration inventory with required Python, Java, C, C++, Go, and Rust toolchains.
+- A dedicated digest-pinned production Docker sandbox proof for identity, filesystem, network, timeout, exit-code, and cleanup controls.
 - Client dependency audit, lint, strict TypeScript validation, and production build.
 - Vitest unit/component tests with enforced coverage thresholds plus Playwright Chromium E2E tests.
 - Application, visual-system, collaboration, algorithm, 3D-cinematic, and C++ catalog audits.
@@ -1081,6 +1083,7 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 
 - [x] Dockerfile and `docker-compose` for one-command local infrastructure
 - [x] Digest-pinned, network-disabled container isolation for EvidenceOS execution and analyzers
+- [x] Production Docker-path CI proving non-root identity, read-only workspaces, network denial, exit propagation, and volume cleanup
 - [ ] Persistent collaboration permissions and room state beyond process memory
 - [ ] Public status page and production API uptime badge
 - [x] Vitest component coverage plus Playwright editor, cinematic 3D, and two-browser collaboration tests

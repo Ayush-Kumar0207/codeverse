@@ -204,34 +204,30 @@ async function generateNeuralInsight(payload) {
 }
 
 function prepareGeneration(payload) {
-  const { prompt, context, systemPrompt, model, maxTokens, fast, provider, openAIModel } = payload;
+  const { prompt, context, systemPrompt, model, maxTokens, fast, provider, openAIModel, task } = payload;
 
   if (!prompt) {
     throw new HttpError(400, "Neural prompt is required.");
   }
 
   const selectedProvider = normalizeProvider(provider || process.env.AI_PROVIDER);
-  const localReply = fastLocalReply(prompt);
-  const compactPrompt = compactText(prompt, fast ? 900 : MAX_PROMPT_CHARS);
-  const compactContext = compactText(context || "No project context provided.", fast ? 520 : MAX_CONTEXT_CHARS);
-  const budget = Math.max(96, Math.min(Number(maxTokens || DEFAULT_NUM_PREDICT), fast ? 360 : 480));
+  const builderMode = task === "autonomous-builder";
+  const localReply = builderMode ? "" : fastLocalReply(prompt);
+  const compactPrompt = compactText(prompt, builderMode ? 120000 : fast ? 900 : MAX_PROMPT_CHARS);
+  const compactContext = compactText(context || "No project context provided.", builderMode ? 120000 : fast ? 520 : MAX_CONTEXT_CHARS);
+  const budget = Math.max(96, Math.min(Number(maxTokens || DEFAULT_NUM_PREDICT), builderMode ? 6000 : fast ? 360 : 480));
   const selectedOpenAIModel =
     openAIModel ||
     (selectedProvider === "openai" && model ? model : "") ||
     DEFAULT_OPENAI_MODEL;
 
+  const generationRules = builderMode
+    ? "- Return only the requested machine-readable JSON artifact.\n- Include complete contents for every file and no Markdown fences."
+    : "- Return clean Markdown only.\n- Use short sections with blank lines.\n- Do not repeat long code.\n- For code explanations, use exactly: **Quick Idea**, **Step-by-step**, **Result**.\n- Use at most 4 numbered steps.\n- Each numbered step must be one short sentence.\n- Do not use nested bullets.\n- Finish the **Result** section before stopping.\n- If code/context is shortened, explain the visible logic and ask for the missing part only when necessary.";
   const fullPrompt = `
 System: ${systemPrompt || "You are the CodeVerse AI pair programmer. Be clear, practical, and concise."}
 Rules:
-- Return clean Markdown only.
-- Use short sections with blank lines.
-- Do not repeat long code.
-- For code explanations, use exactly: **Quick Idea**, **Step-by-step**, **Result**.
-- Use at most 4 numbered steps.
-- Each numbered step must be one short sentence.
-- Do not use nested bullets.
-- Finish the **Result** section before stopping.
-- If code/context is shortened, explain the visible logic and ask for the missing part only when necessary.
+${generationRules}
 
 Context:
 ${compactContext}

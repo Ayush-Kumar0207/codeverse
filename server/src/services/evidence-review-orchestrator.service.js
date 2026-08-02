@@ -138,7 +138,7 @@ function verdictFor(agents) {
   if (agents.filter((item) => item.status === "warning").length > 2) return "changes-requested";
   return "approved";
 }
-async function runIsolatedReviewBoard(files, requirement, rollback, evidence = {}) {
+async function runIsolatedReviewBoard(files, requirement, rollback, evidence = {}, options = {}) {
   const initialPatchDigest = workspaceDigest(files);
   const initialBuilder = await executeWorker({ role: "builder", files, findings: [] });
   const firstAgents = await analyzeRound(files, requirement, rollback, evidence);
@@ -150,7 +150,22 @@ async function runIsolatedReviewBoard(files, requirement, rollback, evidence = {
     claim: issue.title + ": " + issue.recommendation,
     resolved: false,
   }));
-  const revision = await executeWorker({ role: "builder", files, findings: firstFindings });
+  let proposal = null;
+  let proposalError = "";
+  if (firstFindings.length && typeof options.generateRevision === "function") {
+    try {
+      proposal = await options.generateRevision({ files, requirement, rollback, evidence, findings: firstFindings, patchDigest: initialPatchDigest });
+    } catch (error) {
+      proposalError = String(error?.message || error);
+    }
+  }
+  const revision = await executeWorker({
+    role: "builder",
+    files,
+    findings: firstFindings,
+    proposedFiles: proposal?.files,
+    proposedActions: proposal?.actions,
+  });
   const revisedFiles = revision.revisedFiles;
   const revisedPatchDigest = workspaceDigest(revisedFiles);
   const finalAgents = await analyzeRound(revisedFiles, requirement, rollback, evidence);
@@ -172,11 +187,15 @@ async function runIsolatedReviewBoard(files, requirement, rollback, evidence = {
       tool: "builder:" + revision.isolation.engine,
       status: unresolvedCritical ? "failed" : "passed",
       durationMs: Math.max(1, initialBuilder.wallTimeMs + revision.wallTimeMs),
-      outputDigest: digest({ initialPatchDigest, revisedPatchDigest, actions: revision.actions, isolation: revision.isolation }),
+      outputDigest: digest({ initialPatchDigest, revisedPatchDigest, actions: revision.actions, isolation: revision.isolation, model: proposal?.model, provider: proposal?.provider }),
       summary: "Builder executed in isolation and produced artifact " + revisedPatchDigest.slice(0, 12) + ".",
       isolation: revision.isolation,
     }],
     actions: revision.actions,
+    strategy: proposal?.files ? "general-autonomous" : "deterministic-safe-repair",
+    model: proposal?.model,
+    provider: proposal?.provider,
+    proposalError: proposalError || undefined,
   };
   const agents = [builder, ...finalAgents];
   const blocked = agents.filter((item) => item.status === "blocked").length;

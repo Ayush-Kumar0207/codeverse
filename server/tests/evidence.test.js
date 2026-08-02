@@ -16,6 +16,9 @@ const advancedEvidence = require("../src/services/evidence-advanced.service");
 const evidenceSigning = require("../src/services/evidence-signing.service");
 const arenaAcceptance = require("../src/services/arena-acceptance.service");
 const evidenceRuntime = require("../src/services/evidence-runtime.service");
+const reviewOrchestrator = require("../src/services/evidence-review-orchestrator.service");
+const understandingExecution = require("../src/services/understanding-execution.service");
+const { spawnSync } = require("node:child_process");
 
 function projectId(label) {
   return label + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
@@ -236,6 +239,59 @@ test("adversarial review executes seven isolated roles through challenge, revisi
   assert.equal(review.isolation.independentProcesses, 7);
 });
 
+test("general autonomous Builder revisions are isolated and revalidated", async () => {
+  const original = {
+    "parser.js": "exports.parse = input => eval(input);",
+    "parser.test.js": "const parser = require('./parser'); test('parse', () => parser.parse('{\"ok\":true}'));",
+  };
+  const revised = {
+    "parser.js": "exports.parse = input => JSON.parse(input);",
+    "parser.test.js": original["parser.test.js"],
+  };
+  const result = await reviewOrchestrator.runIsolatedReviewBoard(
+    original,
+    "Parse JSON without executable input.",
+    "Restore the prior digest-addressed parser.",
+    { rootCause: "Dynamic evaluation crossed an executable trust boundary." },
+    { generateRevision: async () => ({ files: revised, actions: [{ findingId: "security-boundary", fileName: "parser.js", action: "Replaced dynamic evaluation with JSON parsing." }], model: "test-builder", provider: "deterministic-fixture" }) }
+  );
+  const builder = result.agents.find((agent) => agent.id === "builder");
+  assert.equal(result.verdict, "approved");
+  assert.equal(builder.strategy, "general-autonomous");
+  assert.equal(builder.model, "test-builder");
+  assert.equal(result.revisedFiles["parser.js"], revised["parser.js"]);
+  assert.ok(result.rounds[0].challenges.some((challenge) => /executable trust boundary/i.test(challenge.claim)));
+  assert.ok(result.rounds[1].challenges.every((challenge) => challenge.resolved));
+});
+
+test("understanding adapters parse six languages and execute every available compiler", async () => {
+  const cases = [
+    { command: "python", name: "score.py", source: "def score(values):\n    return sum(values or [])", fixture: [1, 2], expected: 3 },
+    { command: "java", name: "Score.java", source: "class Score { int score(int value) { return value + 1; } }", fixture: [1, 2], expected: 2 },
+    { command: "gcc", name: "score.c", source: "int score(int value) { return value + 2; }", fixture: [1, 2], expected: 3 },
+    { command: "g++", name: "score.cpp", source: "int score(int value) { return value + 3; }", fixture: [1, 2], expected: 4 },
+    { command: "go", name: "score.go", source: "package score\nfunc score(value int) int { return value + 4 }", fixture: [1, 2], expected: 5 },
+    { command: "rustc", name: "score.rs", source: "fn score(value:i32)->i32 { value + 5 }", fixture: [1, 2], expected: 6 },
+  ];
+  const parsedLanguages = [];
+  const executedLanguages = [];
+  for (const item of cases) {
+    const analysis = understandingExecution.sourceAnalysis(item.name, item.source);
+    parsedLanguages.push(analysis.language);
+    const available = spawnSync(item.command, ["--version"], { windowsHide: true }).status === 0;
+    if (!available) {
+      if (process.env.REQUIRE_ALL_LANGUAGE_ADAPTERS === "true") assert.fail(item.command + " is required for full language parity");
+      continue;
+    }
+    const result = await understandingExecution.probeLanguageBehavior({ [item.name]: item.source }, item.name, item.source, analysis.primary, item.fixture);
+    assert.equal(result.status, "returned", item.name);
+    assert.equal(result.value, item.expected, item.name);
+    assert.equal(result.execution.exitCode, 0, item.name);
+    executedLanguages.push(analysis.language);
+  }
+  assert.deepEqual(parsedLanguages.sort(), ["c", "cpp", "go", "java", "python", "rust"]);
+  assert.ok(executedLanguages.length >= 4);
+});
 test("hands-on verification and proof package bind every claim to the exact artifact", async () => {
   const id = projectId("proof");
   const code = "function summarizeScores(input) { if (!input.length) return []; return input.map(Number); } module.exports = { summarizeScores };";
@@ -342,6 +398,12 @@ test("digital twin combines static dependencies with runtime, data, queue, provi
       "src/scores.test.js": "const scores = require('./scores'); test('scores', () => scores([]));",
       "migrations/001_scores.sql": "CREATE TABLE scores(id int);",
       "k8s/deployment.yaml": "kind: Deployment",
+      "analytics/score.py": "def normalize(value): return abs(value)",
+      "analytics/Score.java": "class Score { int normalize(int value) { return Math.abs(value); } }",
+      "native/score.c": "int normalize_c(int value) { return value; }",
+      "native/score.cpp": "int normalize_cpp(int value) { return value; }",
+      "workers/score.go": "package workers\nfunc Normalize(value int) int { return value }",
+      "workers/score.rs": "fn normalize(value:i32)->i32 { value }",
     },
   });
   assert.ok(twin.nodes.some((node) => node.id === "api:/api/scores"));
@@ -355,9 +417,11 @@ test("digital twin combines static dependencies with runtime, data, queue, provi
   assert.equal(twin.telemetry.traces, 1);
   assert.equal(twin.telemetry.deployments, 1);
   assert.ok(twin.impact.confidence >= 60);
-  assert.equal(twin.analysis.engine, "ts-morph-compiler");
   assert.ok(twin.analysis.runtimeCorrelations >= 3);
   assert.ok(twin.edges.some((edge) => edge.evidence === "runtime-trace" || edge.evidence === "otel-span"));
+  assert.equal(twin.analysis.engine, "multi-language-compiler-ast");
+  assert.deepEqual(twin.analysis.languages.sort(), ["c", "cpp", "go", "java", "python", "rust"]);
+  assert.equal(Object.keys(twin.analysis.languageEngines).length, 6);
 });
 
 test("every built-in Arena fault fails its private executable acceptance suite", async () => {
@@ -424,7 +488,9 @@ test("engineering arena provides eight scenarios, consent, timing, policies, gra
   }, { username: "Baseline Candidate" });
   const failingGrade = await arenaService.submitSession(id, failingSession.id, { files: failingSession.workspace }, { events: [], integrity: { verified: true, checkedEvents: 0 } });
   assert.equal(failingGrade.acceptance.verified, false);
-  assert.equal(failingGrade.score.finalCorrectness, 0);
+  assert.ok(failingGrade.score.finalCorrectness > 0);
+  assert.ok(failingGrade.score.finalCorrectness < 100);
+  assert.equal(failingGrade.acceptance.calibration.weighted, true);
 
   const session = await arenaService.startSession(id, {
     scenarioId: "vulnerable-api",

@@ -394,7 +394,7 @@ export function EvidenceArenaView({
                 <span className="font-bold text-emerald-300">{session.weightedScore || 0}</span>
               </div>
               <div className="mt-1 text-[7px] text-slate-500">
-                Hidden acceptance {session.acceptance?.passed || 0}/{session.acceptance?.total || 0} · correctness {session.acceptance?.score || 0}% · {session.signedReport?.signatureIssuer || "unverified issuer"}
+                Hidden acceptance {session.acceptance?.passed || 0}/{session.acceptance?.total || 0} · {session.acceptance?.calibration?.repeatedTrials || 0} repeated trials · weighted correctness {session.acceptance?.score || 0}% · {session.signedReport?.signatureIssuer || "unverified issuer"}
               </div>
               <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{session.signedReport?.digest}</div>
               <button

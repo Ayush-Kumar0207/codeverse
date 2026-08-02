@@ -82,6 +82,10 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
               {latestReview.isolation?.independentProcesses || latestReview.agents.length} isolated workers
               {latestReview.initialPatchDigest && latestReview.initialPatchDigest !== latestReview.patchDigest ? " · revised artifact " + latestReview.initialPatchDigest.slice(0, 8) + " → " + latestReview.patchDigest.slice(0, 8) : " · artifact unchanged"}
             </div>
+            <div className="mt-1 text-[7px] text-violet-300/80">
+              Builder {latestReview.agents.find((agent) => agent.id === "builder")?.strategy || "deterministic-safe-repair"}
+              {latestReview.agents.find((agent) => agent.id === "builder")?.model ? " · " + latestReview.agents.find((agent) => agent.id === "builder")?.provider + "/" + latestReview.agents.find((agent) => agent.id === "builder")?.model : " · offline fallback"}
+            </div>
             {!!latestReview.builderActions?.length && (
               <div className="mt-2 rounded border border-emerald-400/15 bg-emerald-400/[0.04] p-2 text-[8px] leading-relaxed text-emerald-200/80">
                 {latestReview.builderActions.map((action) => action.action).join(" ")}

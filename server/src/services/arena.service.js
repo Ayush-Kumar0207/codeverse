@@ -244,6 +244,8 @@ async function createScenarioTemplate(payload, user = {}) {
     id: cleanText(item.id, 120) || "acceptance-" + (index + 1),
     code: cleanText(item.code, 70000),
     timeoutMs: Math.max(1000, Math.min(30000, Number(item.timeoutMs || 10000))),
+    weight: Math.max(1, Math.min(10, Number(item.weight || 1))),
+    trials: Math.max(1, Math.min(5, Number(item.trials || 1))),
   })).filter((item) => item.code) : [];
   if (!acceptanceTests.length) throw new HttpError(400, "Custom Arena scenarios require at least one hidden executable acceptance test");
   const totalWeight = requestedRubric.reduce((sum, item) => sum + item.weight, 0);

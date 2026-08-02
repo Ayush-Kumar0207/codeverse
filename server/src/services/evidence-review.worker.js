@@ -172,9 +172,18 @@ function replaceSecrets(content) {
     return name + operator + "process.env." + key;
   });
 }
-function reviseArtifact(files, findings) {
-  const revisedFiles = { ...files };
+function reviseArtifact(files, findings, proposedFiles, proposedActions) {
+  const hasProposal = proposedFiles && typeof proposedFiles === "object" && !Array.isArray(proposedFiles) && Object.keys(proposedFiles).length > 0
+    && Object.entries(proposedFiles).every(([name, content]) => typeof name === "string" && typeof content === "string");
+  const revisedFiles = hasProposal ? { ...proposedFiles } : { ...files };
   const actions = [];
+  if (hasProposal) {
+    actions.push(...(Array.isArray(proposedActions) ? proposedActions.slice(0, 40).map((item) => ({
+      findingId: String(item.findingId || "general-builder"),
+      fileName: String(item.fileName || "workspace"),
+      action: String(item.action || "Applied a general challenge-driven revision.").slice(0, 1000),
+    })) : [{ findingId: "general-builder", fileName: "workspace", action: "Applied a general autonomous Builder revision for the challenged artifact." }]));
+  }
   for (const issue of findings) {
     if (!issue.fileName || !Object.hasOwn(revisedFiles, issue.fileName)) continue;
     if (issue.title === "Credential-like literal") {
@@ -203,7 +212,7 @@ function analyzeRole(input) {
   if (input.role === "architecture") findings = analyzeArchitecture(files, input.requirement);
   if (input.role === "devils-advocate") findings = analyzeDevilsAdvocate(input.rollback, evidence);
   if (input.role === "builder") {
-    const revision = reviseArtifact(files, input.findings || []);
+    const revision = reviseArtifact(files, input.findings || [], input.proposedFiles, input.proposedActions);
     return { role: input.role, ...revision, durationMs: Date.now() - startedAt };
   }
   const status = findings.some((item) => item.severity === "critical") ? "blocked" : findings.length ? "warning" : "passed";
