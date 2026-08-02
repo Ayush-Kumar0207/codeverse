@@ -55,7 +55,7 @@ export function EvidenceArenaView({
   const [note, setNote] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [creatorOpen, setCreatorOpen] = useState(false);
-  const [template, setTemplate] = useState({ organizationId: "", title: "", briefing: "", fileName: "incident.js", source: "" });
+  const [template, setTemplate] = useState({ organizationId: "", title: "", briefing: "", fileName: "incident.js", source: "", acceptanceCode: "const assert = require('node:assert/strict');\nconst candidate = require('../incident.js');\nassert.equal(candidate.recovered(), true);" });
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -258,9 +258,19 @@ export function EvidenceArenaView({
               placeholder="Paste the locked starter source and injected fault..."
               className="min-h-24 border-slate-700 bg-[#080d16] font-mono text-[9px]"
             />
+            <div>
+              <div className="mb-1 text-[8px] font-bold uppercase tracking-wider text-violet-300">Hidden acceptance test</div>
+              <Textarea
+                aria-label="Template hidden acceptance test"
+                value={template.acceptanceCode}
+                onChange={(event) => setTemplate((value) => ({ ...value, acceptanceCode: event.target.value }))}
+                placeholder="Executable Node.js assertions. This source stays hidden from participants."
+                className="min-h-28 border-violet-400/20 bg-[#080d16] font-mono text-[9px]"
+              />
+            </div>
             <Button
               variant="outline"
-              disabled={syncing || !template.organizationId.trim() || !template.title.trim() || !template.briefing.trim() || !template.fileName.trim() || !template.source.trim()}
+              disabled={syncing || !template.organizationId.trim() || !template.title.trim() || !template.briefing.trim() || !template.fileName.trim() || !template.source.trim() || !template.acceptanceCode.trim()}
               onClick={async () => {
                 const fileName = template.fileName.trim();
                 const created = await onCreateTemplate({
@@ -273,6 +283,7 @@ export function EvidenceArenaView({
                   allowedAI: "limited",
                   starterFiles: { "INCIDENT.md": template.briefing.trim(), [fileName]: template.source },
                   injectedFaults: [{ id: "org-hidden-fault", description: "Organization-defined hidden fault", hidden: true, files: { [fileName]: template.source } }],
+                  acceptanceTests: [{ id: "org-hidden-acceptance", code: template.acceptanceCode.trim(), timeoutMs: 10_000 }],
                 });
                 setSelected(created.id);
                 setCreatorOpen(false);
@@ -381,6 +392,9 @@ export function EvidenceArenaView({
               <div className="flex items-center justify-between text-[9px]">
                 <span className="truncate">{scenarios.find((item) => item.id === session.scenarioId)?.title}</span>
                 <span className="font-bold text-emerald-300">{session.weightedScore || 0}</span>
+              </div>
+              <div className="mt-1 text-[7px] text-slate-500">
+                Hidden acceptance {session.acceptance?.passed || 0}/{session.acceptance?.total || 0} · correctness {session.acceptance?.score || 0}% · {session.signedReport?.signatureIssuer || "unverified issuer"}
               </div>
               <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{session.signedReport?.digest}</div>
               <button

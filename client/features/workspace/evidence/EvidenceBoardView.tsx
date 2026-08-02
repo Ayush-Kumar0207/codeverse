@@ -78,6 +78,15 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
               <span>Patch digest</span><span className="text-violet-300">{latestReview.rounds.length} rounds · {latestReview.consensus}% consensus</span>
             </div>
             <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestReview.patchDigest}</div>
+            <div className="mt-1 text-[7px] text-slate-500">
+              {latestReview.isolation?.independentProcesses || latestReview.agents.length} isolated workers
+              {latestReview.initialPatchDigest && latestReview.initialPatchDigest !== latestReview.patchDigest ? " · revised artifact " + latestReview.initialPatchDigest.slice(0, 8) + " → " + latestReview.patchDigest.slice(0, 8) : " · artifact unchanged"}
+            </div>
+            {!!latestReview.builderActions?.length && (
+              <div className="mt-2 rounded border border-emerald-400/15 bg-emerald-400/[0.04] p-2 text-[8px] leading-relaxed text-emerald-200/80">
+                {latestReview.builderActions.map((action) => action.action).join(" ")}
+              </div>
+            )}
             <div className="mt-2 flex flex-wrap gap-1">
               {latestReview.executedTools.map((tool) => (
                 <Badge key={tool} className="border-violet-400/15 bg-violet-400/[0.05] text-[6px] text-violet-300">{tool}</Badge>

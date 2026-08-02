@@ -29,13 +29,14 @@ import {
 } from "@/lib/evidence-local";
 import {
   createLocalArenaTemplate,
-  gradeLocalArena,
+  buildLocalArenaPreview,
   localArenaScenarios,
   localLeaderboard,
   startLocalArena,
 } from "@/lib/arena-local";
 import {
   beginArenaLobby,
+  executeReplayVerification,
   fetchArenaLeaderboard,
   fetchArenaScenarios,
   fetchEvidenceExport,
@@ -261,6 +262,7 @@ export function useEvidenceOS({
             snapshotComplete: capture.complete,
             dependencyVersions,
             environmentKeys: ["NEXT_PUBLIC_API_BASE_URL"],
+            environment: { NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "" },
           },
         },
       });
@@ -381,12 +383,13 @@ export function useEvidenceOS({
   const runReview = useCallback(async (requirement: string, rollback: string) => {
     setSyncing(true);
     const local = createLocalReview(projectId, files, requirement, rollback);
+    let completed = local;
     const capture = captureWorkspace(files);
     commit({ ...snapshotRef.current, reviews: [...snapshotRef.current.reviews, local] });
     try {
       if (!isDemo && !offline) {
         if (!capture.complete) {
-          setNotice("Review completed locally. Cloud review was skipped because the exact workspace exceeds the evidence upload limit.");
+          setNotice("Unverified review preview only; the exact workspace exceeds the server evidence limit.");
           return;
         }
         const review = await postReviewBoard(projectId, {
@@ -397,24 +400,20 @@ export function useEvidenceOS({
           rootCause: snapshotRef.current.packages.at(-1)?.rationale || requirement,
 
         });
+        completed = review;
         commit({
           ...snapshotRef.current,
           reviews: [...snapshotRef.current.reviews.filter((item) => item.id !== local.id), review],
         });
         commit(await fetchEvidenceSnapshot(projectId));
       } else {
-        await recordEvent({
-          type: "review.completed",
-          summary: "Adversarial review completed with verdict " + local.verdict + ".",
-          source: "review-board",
-          actor: { name: "AI review board", kind: "ai" },
-          payload: { reviewId: local.id, verdict: local.verdict, score: local.score },
-        });
+        setNotice("Unverified local review preview; isolated analysis requires the server.");
+        return;
       }
-      setNotice("Review board completed: " + local.verdict.replace("-", " ") + ".");
+      setNotice("Review board completed: " + completed.verdict.replace("-", " ") + ".");
     } catch {
       setOffline(true);
-      setNotice("Review completed locally; backend sync is unavailable.");
+      setNotice("Unverified local review preview; backend analysis is unavailable.");
     } finally {
       setSyncing(false);
     }
@@ -470,10 +469,8 @@ export function useEvidenceOS({
     if (isDemo || offline) {
       const item = snapshotRef.current.packages.find((candidate) => candidate.id === packageId);
       if (!item) return false;
-      const { signature: _signature, ...unsigned } = item;
-      const verified = item.signature === "local-sha256:" + localDigest(unsigned) && item.exactArtifactVerified;
-      setNotice(verified ? "Local proof signature and exact artifact verified." : "Local proof verification failed.");
-      return verified;
+      setNotice("Local evidence is an unverified preview; authenticated verification requires the server signing service.");
+      return false;
     }
     try {
       const verification = await verifyEvidencePackage(projectId, packageId);
@@ -535,26 +532,43 @@ export function useEvidenceOS({
         : local;
       commit({ ...snapshotRef.current, verifications: [...snapshotRef.current.verifications, verification] });
       if (!isDemo && !offline) commit(await fetchEvidenceSnapshot(projectId));
-      if (isDemo || offline) {
-        await recordEvent({
-          type: "understanding.verified",
-          summary: "Understanding verification scored " + verification.score + "%.",
-          source: "understanding-verifier",
-          fileName: activeFile,
-          payload: { verificationId: verification.id, score: verification.score, passed: verification.passed },
-        });
-      }
-      setNotice(verification.passed ? "Understanding verified." : "Understanding needs a stronger explanation.");
+      setNotice(isDemo || offline
+        ? "Unverified understanding preview; executable compiler and runtime probes require the server."
+        : verification.passed ? "Understanding verified." : "Understanding needs a stronger executable answer.");
       return verification;
     } catch {
       commit({ ...snapshotRef.current, verifications: [...snapshotRef.current.verifications, local] });
       setOffline(true);
-      setNotice("Understanding score saved locally.");
+      setNotice("Unverified understanding preview saved locally; executable server probes are unavailable.");
       return local;
     } finally {
       setSyncing(false);
     }
   }, [activeFile, challenge, commit, currentUser, files, isDemo, offline, projectId, recordEvent]);
+
+  const verifyReplay = useCallback(async (sessionId: string) => {
+    if (isDemo || offline) {
+      setNotice("Server-executed replay requires the synced EvidenceOS sandbox.");
+      return false;
+    }
+    setSyncing(true);
+    try {
+      const report = await executeReplayVerification(projectId, sessionId, {
+        newSessionId: activeSessionId.current,
+        actor: { name: currentUser || "Guest", kind: "human" },
+      });
+      commit(await fetchEvidenceSnapshot(projectId));
+      setNotice(report.verified
+        ? "Sealed workspace re-executed in " + report.actual.engine + " and matched every recorded digest."
+        : "Server replay executed but diverged from the sealed result.");
+      return report.verified;
+    } catch {
+      setNotice("Sealed replay execution is unavailable or its deterministic inputs are incomplete.");
+      return false;
+    } finally {
+      setSyncing(false);
+    }
+  }, [commit, currentUser, isDemo, offline, projectId]);
 
   const branchFromEvent = useCallback(async (event: EngineeringEvent) => {
     const eventFiles = event.payload.files;
@@ -768,7 +782,7 @@ export function useEvidenceOS({
   const submitArena = useCallback(async () => {
     if (!activeArena) return null;
     setSyncing(true);
-    const local = gradeLocalArena(activeArena, snapshotRef.current, activeArena.privacyMode || "full");
+    const local = buildLocalArenaPreview(activeArena, activeArena.privacyMode || "full");
     commit({
       ...snapshotRef.current,
       arenas: snapshotRef.current.arenas.map((item) => item.id === activeArena.id ? local.session : item),
@@ -776,7 +790,7 @@ export function useEvidenceOS({
     setActiveArena(null);
     try {
       const graded = !isDemo && !offline
-        ? await submitArenaSession(projectId, activeArena.id)
+        ? await submitArenaSession(projectId, activeArena.id, { files })
         : local.session;
       commit({
         ...snapshotRef.current,
@@ -786,30 +800,27 @@ export function useEvidenceOS({
       else {
         await recordEvent({
           type: "arena.completed",
-          summary: "Arena scenario completed with signed evidence report.",
+          summary: "Arena scenario saved as an unverified local preview.",
           source: "engineering-arena",
           payload: { arenaSessionId: graded.id, reportDigest: graded.signedReport?.digest },
         });
       }
       setArenaLeaderboard(localLeaderboard(snapshotRef.current.arenas));
-      setNotice("Arena submitted and signed assessment report generated.");
+      setNotice(!isDemo && !offline ? "Arena submitted, acceptance-tested, and independently signed." : "Arena saved as an unverified local preview.");
       return graded;
     } catch {
       setOffline(true);
-      setNotice("Arena graded locally with a signed local report.");
+      setNotice("Arena saved locally as an unverified preview; authenticated grading requires the server sandbox.");
       return local.session;
     } finally {
       setSyncing(false);
     }
-  }, [activeArena, commit, isDemo, offline, projectId, recordEvent]);
+  }, [activeArena, commit, files, isDemo, offline, projectId, recordEvent]);
 
   const verifyArenaReport = useCallback(async (sessionId: string) => {
     if (isDemo || offline) {
-      const session = snapshotRef.current.arenas.find((item) => item.id === sessionId);
-      const report = session?.signedReport;
-      const verified = Boolean(report?.report && report.digest === localDigest(report.report) && report.signature === "local-sha256:" + localDigest(report.report));
-      setNotice(verified ? "Local signed assessment report verified." : "Assessment report verification failed.");
-      return verified;
+      setNotice("Local Arena submissions are unverified previews; authenticated grading requires the server sandbox.");
+      return false;
     }
     try {
       const verification = await verifyArenaSignedReport(projectId, sessionId);
@@ -882,6 +893,7 @@ export function useEvidenceOS({
     generateChallenge,
     submitUnderstanding,
     branchFromEvent,
+    verifyReplay,
     createArenaTemplate,
     startArena,
     joinArena,

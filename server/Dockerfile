@@ -6,7 +6,7 @@ RUN npm ci --omit=dev
 FROM node:22-alpine AS runtime
 WORKDIR /workspace/server
 ENV NODE_ENV=production
-RUN addgroup -S codeverse && adduser -S codeverse -G codeverse
+RUN apk add --no-cache docker-cli && addgroup -S codeverse && adduser -S codeverse -G codeverse
 COPY --from=dependencies /workspace/server/node_modules ./node_modules
 COPY server/ ./
 COPY shared/ ../shared/

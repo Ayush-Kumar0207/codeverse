@@ -123,6 +123,26 @@ export async function postDigitalTwin(
 }
 
 
+
+export async function executeReplayVerification(projectId: string, sessionId: string, payload: { newSessionId?: string; actor?: { name: string; kind: "human" } } = {}) {
+  const { data } = await apiClient.post<{ report: {
+    sessionId: string;
+    replayDigest: string;
+    serverExecuted: boolean;
+    verified: boolean;
+    manifestVerified: boolean;
+    commandVerified: boolean;
+    exitCodeVerified: boolean;
+    outputVerified: boolean;
+    actual: { sourceDigest: string; command: string; exitCode: number; outputDigest: string; engine: string; image?: string | null; durationMs: number; sandbox: Record<string, unknown> };
+    verifiedAt: string;
+  } }>(
+    "/api/evidence/" + encodeURIComponent(projectId) + "/replays/" + encodeURIComponent(sessionId) + "/verify",
+    payload
+  );
+  return data.report;
+}
+
 export async function fetchEvidenceExport(projectId: string, privacy: "full" | "redacted") {
   const { data } = await apiClient.get<{ report: Record<string, unknown>; digest: string }>(
     "/api/evidence/" + encodeURIComponent(projectId) + "/export",
@@ -200,7 +220,7 @@ export async function postArenaAction(
 export async function submitArenaSession(
   projectId: string,
   sessionId: string,
-  payload: { reviewerNotes?: string[] } = {}
+  payload: { files: Record<string, string>; reviewerNotes?: string[] }
 ) {
   const { data } = await apiClient.post<{ session: ArenaSession }>(
     "/api/evidence/" + encodeURIComponent(projectId) + "/arena/sessions/" + encodeURIComponent(sessionId) + "/submit",

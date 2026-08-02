@@ -69,15 +69,15 @@
 EvidenceOS turns the existing multiplayer IDE into a proof-carrying engineering environment. Its features share one tamper-evident project ledger instead of storing disconnected UI state:
 
 - **Semantic Evidence Graph** uses typed causal relations such as `implements`, `caused-fix`, `verified-by`, `reviewed-by`, `deployed-as`, `calls`, `writes-to`, `traced-by`, and `attested-by`.
-- **Deterministic Session Replay** reconstructs files, active file, cursor, terminal commands and output digests, debugger variables and breakpoints, network calls, database mutations, traces, branches, runtime versions, dependency versions, and lockfile identity. Replay verification compares a re-execution with the sealed manifest and reports every divergence.
+- **Deterministic Session Replay** reconstructs files, active file, cursor, terminal commands and output digests, debugger variables and breakpoints, network calls, database mutations, traces, branches, runtime versions, dependency versions, sealed environment values, and lockfile identity. The server—not the caller—re-executes the sealed command. Production uses an allow-listed, digest-pinned container with no network, a read-only filesystem, dropped capabilities, and CPU, memory, and process limits.
 - **Artifact-bound Proof Packages** hash the exact uploaded workspace and require independently digest-bound source, test, runtime, security, compatibility, performance, migration, deployment, rollback, and understanding attestations. Oversized workspaces are rejected for cloud proof instead of being silently truncated.
-- **Adversarial Review Board** executes seven isolated deterministic analyzers over the same patch digest for challenge and consensus rounds. Optional provider-backed independent critiques can be enabled without replacing the authoritative tool results.
-- **Hands-on Understanding Verification** evaluates purpose, boundary prediction, a minimal code modification, debugging, data-flow drawing, and transfer to a new case, with time, revision, paste, and focus-change signals.
+- **Adversarial Review Board** executes seven isolated worker processes (digest-pinned containers in production) over the same patch digest. The three phases are challenge, builder revision, and analyzer re-execution/consensus; the final verdict is bound to the revised artifact, not the initial submission.
+- **Hands-on Understanding Verification** evaluates compiler-derived purpose and data flow, exact hidden boundary predictions, a complete replacement that must compile and preserve valid behavior, and hidden debugging probes, plus transfer and behavioral continuity signals. JavaScript, JSX, TypeScript, TSX, ESM, and CommonJS challenges execute in the evidence sandbox.
 - **Assessment Scorecard** reports correctness, process, debugging, test quality, comprehension, security awareness, AI dependence, and evidence integrity.
-- **Engineering Digital Twin** combines static imports, HTML assets, APIs, database tables, queues, providers, tests, migrations, and deployments with runtime traces, requests, database mutations, and deployment telemetry for three-hop blast-radius analysis.
-- **Engineering Arena** supplies eight incident classes, hidden fault injection, locked starter environments, consent and privacy modes, AI-use policies, solo runs, team lobbies, code joining, quick matchmaking, timers, evaluator templates and rubrics, evidence-weighted grading, HMAC-capable signed reports, and leaderboards.
+- **Engineering Digital Twin** uses the TypeScript compiler AST, resolved module imports, SQL/HTML parsers, test coverage, network/database telemetry, and OpenTelemetry span identity to build APIs, data, queue, provider, test, migration, and deployment relationships and a four-hop blast-radius analysis.
+- **Engineering Arena** supplies eight incident classes, hidden fault injection, locked starter environments, consent and privacy modes, AI-use policies, solo runs, team lobbies, code joining, quick matchmaking, timers, evaluator templates with private executable acceptance suites, process-evidence rubrics, mandatory independent HMAC-signed reports, and leaderboards. Final correctness comes only from the server-run hidden suite.
 
-Every recorded event includes its predecessor hash and a SHA-256 integrity hash; the browser fallback also uses SHA-256. Cloud workspaces persist events, reviews, proof packages, verifications, arena sessions, and organization scenario templates in PostgreSQL/Supabase. Local development falls back to the ignored `server/.data/evidence.json` and `server/.data/arenas.json` stores, and the demo remains fully interactive in browser storage.
+Every recorded event includes its predecessor hash and a SHA-256 integrity hash. Proof packages and Arena reports require separate signing keys, issuers, and key identities; missing or placeholder signing configuration fails closed. Browser-only operation is explicitly labeled an **unverified preview** and cannot verify a proof or grade an Arena submission. Cloud workspaces persist events, reviews, proof packages, verifications, arena sessions, and organization scenario templates in PostgreSQL/Supabase. Local server development falls back to the ignored `server/.data/evidence.json` and `server/.data/arenas.json` stores.
 
 ### EvidenceOS API
 
@@ -88,7 +88,7 @@ Every recorded event includes its predecessor hash and a SHA-256 integrity hash;
 | `POST` | `/api/evidence/:projectId/packages` | Create and sign an exact-artifact proof package |
 | `GET` | `/api/evidence/:projectId/packages/:packageId/verify` | Recompute package signature and attestation coverage |
 | `GET` | `/api/evidence/:projectId/export?privacy=redacted` | Export a digest-addressed full or redacted evidence report |
-| `POST` | `/api/evidence/:projectId/reviews` | Run the seven-agent, two-round adversarial board |
+| `POST` | `/api/evidence/:projectId/reviews` | Run seven isolated roles through challenge, revision, and consensus |
 | `POST` | `/api/evidence/:projectId/challenges` | Generate a digest-bound hands-on understanding challenge |
 | `POST` | `/api/evidence/:projectId/verifications` | Score and persist behavioral understanding evidence |
 | `POST` | `/api/evidence/:projectId/twin` | Build the static-plus-runtime digital twin and impact prediction |
@@ -659,6 +659,16 @@ npm run dev                    # → http://localhost:3000
 
 Open **http://localhost:3000** — you're in the IDE.
 
+### Run with Docker Compose
+
+```bash
+cp server/.env.example server/.env
+# Replace the four signing placeholders, then:
+docker compose up --build
+```
+
+The local Compose profile uses development-only worker processes and never mounts the host Docker socket. Production deployments set `NODE_ENV=production`, point `DOCKER_HOST` at a dedicated rootless or TLS-protected executor, and replace every runner/analyzer tag with an allow-listed `name@sha256:<digest>` reference. Sealed files are copied into an ephemeral labeled Docker volume, mounted read-only into the execution container, and destroyed after inspection; requests fail closed when any production control is missing.
+
 The backend starts on `:5000`, the static deployment bridge on `:5001`. If Supabase is not configured, development auth, projects, and code versions fall back to JSON files in `server/.data/`.
 
 ### Verify the Setup
@@ -704,7 +714,11 @@ API_BASE_URL=http://localhost:5000
 SESSION_SECRET=replace-with-a-long-random-session-secret
 JWT_SECRET=replace-with-a-long-random-jwt-secret
 EVIDENCE_SIGNING_KEY=replace-with-an-independent-proof-signing-key
+EVIDENCE_SIGNING_ISSUER=your-evaluator-organization
+EVIDENCE_SIGNING_KEY_ID=evidence-production-v1
 ARENA_SIGNING_KEY=replace-with-an-independent-arena-report-key
+ARENA_SIGNING_ISSUER=your-arena-organization
+ARENA_SIGNING_KEY_ID=arena-production-v1
 
 # ─── Supabase Persistence ────────────────────────────────────────────
 SUPABASE_URL=
@@ -764,7 +778,10 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `NEXT_PUBLIC_API_BASE_URL` | Production | Public backend URL used by the Next.js client. |
 | `SESSION_SECRET` | Production | HMAC secret used to protect OAuth state parameters. |
 | `JWT_SECRET` | Production | JWT signing secret and key material for the encrypted authentication cookie. |
-| `EVIDENCE_SIGNING_KEY`, `ARENA_SIGNING_KEY` | Production | Independent HMAC keys for proof packages and arena assessment reports. Without them exports retain SHA-256 integrity but are not organization-authenticated. |
+| `EVIDENCE_SIGNING_*`, `ARENA_SIGNING_*` | Evidence server | Independent keys, issuer names, and key IDs. Proof/report creation fails with `503` when either purpose is not validly configured. |
+| `EVIDENCE_*_ENGINE`, `ARENA_EXECUTION_ENGINE`, `UNDERSTANDING_EXECUTION_ENGINE` | Production | Must use `docker`; process workers are development/test only. |
+| `EVIDENCE_*_RUNNER_IMAGE`, `ARENA_RUNNER_IMAGE`, `UNDERSTANDING_RUNNER_IMAGE`, `EVIDENCE_ANALYZER_IMAGE` | Production | Allow-listed container images pinned by `@sha256:` digest. |
+| `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH` | Production | Dedicated rootless or TLS-protected executor endpoint; do not mount the host Docker socket into the application container. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Recommended | Enables persistent users, projects, versions, and settings snapshots. |
 | `GITHUB_*`, `GOOGLE_*` | Optional | Enables OAuth login buttons. |
 | `EXECUTION_STRATEGY` | No | Defaults to `remote` for Piston. `local` is accepted only with the development opt-in below. |
@@ -1062,8 +1079,8 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 
 ### 🔮 Coming Next
 
-- [ ] Dockerfile and `docker-compose` for one-command local infrastructure
-- [ ] Hardened execution through container isolation for public deployments
+- [x] Dockerfile and `docker-compose` for one-command local infrastructure
+- [x] Digest-pinned, network-disabled container isolation for EvidenceOS execution and analyzers
 - [ ] Persistent collaboration permissions and room state beyond process memory
 - [ ] Public status page and production API uptime badge
 - [x] Vitest component coverage plus Playwright editor, cinematic 3D, and two-browser collaboration tests

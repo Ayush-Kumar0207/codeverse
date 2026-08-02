@@ -50,9 +50,9 @@ describe("EvidenceOS", () => {
     expect(snapshot.integrity.verified).toBe(true);
     const tampered = deriveEvidenceSnapshot({ ...snapshot, events: [{ ...snapshot.events[0], summary: "tampered" }, ...snapshot.events.slice(1)] });
     expect(tampered.integrity.verified).toBe(false);
-    expect(snapshot.packages[0].status).toBe("ready");
+    expect(snapshot.packages[0].status).toBe("needs-evidence");
     expect(review.agents).toHaveLength(7);
-    expect(verification.passed).toBe(true);
+    expect(verification.passed).toBe(false);
     expect(twin.impact.affectedFiles).toContain("index.html");
   });
 
@@ -62,6 +62,7 @@ describe("EvidenceOS", () => {
     const twin = createLocalTwin(files, "script.js");
     const challenge = createLocalChallenge("demo-sandbox", "script.js", files["script.js"]);
     const onBranchFromEvent = vi.fn().mockResolvedValue(true);
+    const onVerifyReplay = vi.fn().mockResolvedValue(true);
     const onCreateArenaTemplate = vi.fn().mockResolvedValue({ ...localArenaScenarios[0], id: "custom" });
     const onJoinArena = vi.fn().mockResolvedValue(true);
     const onMatchmakeArena = vi.fn().mockResolvedValue(true);
@@ -86,6 +87,7 @@ describe("EvidenceOS", () => {
         onGenerateChallenge={vi.fn().mockResolvedValue(challenge)}
         onSubmitUnderstanding={vi.fn().mockResolvedValue(undefined)}
         onBranchFromEvent={onBranchFromEvent}
+        onVerifyReplay={onVerifyReplay}
         onCreateArenaTemplate={onCreateArenaTemplate}
         onStartArena={vi.fn().mockResolvedValue(true)}
         onBeginArena={vi.fn().mockResolvedValue(true)}
@@ -104,6 +106,11 @@ describe("EvidenceOS", () => {
 
     await user.click(screen.getByRole("tab", { name: /replay/i }));
     expect(screen.getByText("Session replay")).toBeInTheDocument();
+    const replayButton = screen.queryByRole("button", { name: /re-execute sealed session/i });
+    if (replayButton && !replayButton.hasAttribute("disabled")) {
+      await user.click(replayButton);
+      expect(onVerifyReplay).toHaveBeenCalledOnce();
+    }
     const branchButton = screen.getByRole("button", { name: /branch from this moment/i });
     if (!branchButton.hasAttribute("disabled")) {
       await user.click(branchButton);

@@ -166,6 +166,9 @@ export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing
             </div>
             <div className="mt-1 truncate font-mono text-[7px] text-cyan-300">{latestPackage.changeDigest}</div>
             <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestPackage.signature}</div>
+            {latestPackage.signatureIssuer && (
+              <div className="mt-1 text-[7px] text-slate-500">Issuer {latestPackage.signatureIssuer} · key {latestPackage.signatureKeyId} · {latestPackage.signatureAlgorithm}</div>
+            )}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             {latestPackage.attestations.map((item) => (

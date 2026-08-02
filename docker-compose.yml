@@ -8,9 +8,13 @@ services:
     env_file:
       - ./server/.env
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 5000
       CLIENT_URL: http://localhost:3000
+      EVIDENCE_REPLAY_ENGINE: process
+      EVIDENCE_ANALYZER_ENGINE: process
+      ARENA_EXECUTION_ENGINE: process
+      UNDERSTANDING_EXECUTION_ENGINE: process
     ports:
       - "5000:5000"
       - "5001:5001"

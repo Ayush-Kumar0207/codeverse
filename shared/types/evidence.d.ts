@@ -85,6 +85,7 @@ export interface ReplayEnvironmentManifest {
   snapshotComplete: boolean;
   dependencyVersions: Record<string, string>;
   environmentKeys: string[];
+  environment: Record<string, string>;
   capturedAt: string;
 }
 
@@ -95,7 +96,7 @@ export interface ReplayFrame {
   files: Record<string, string>;
   activeFile?: string;
   cursor?: { fileName: string; lineNumber: number; column: number };
-  terminal?: { command: string; exitCode?: number; outputDigest?: string };
+  terminal?: { command: string; language?: string; exitCode?: number; outputDigest?: string };
   debugger?: { breakpoints: Array<{ fileName: string; line: number }>; variables: Record<string, unknown> };
   network?: Array<{ method: string; url: string; status?: number; durationMs?: number }>;
   database?: Array<{ operation: string; target: string; mutationDigest?: string }>;
@@ -150,6 +151,9 @@ export interface ChangeEvidencePackage {
   manifestDigest: string;
   attestations: EvidenceAttestation[];
   signature: string;
+  signatureAlgorithm?: "hmac-sha256";
+  signatureIssuer?: string;
+  signatureKeyId?: string;
   exactArtifactVerified: boolean;
 }
 
@@ -173,14 +177,15 @@ export interface ReviewAgentResult {
   summary: string;
   findings: ReviewFinding[];
   engine?: "tool" | "ai" | "hybrid";
-  toolRuns?: Array<{ tool: string; status: "passed" | "failed"; durationMs: number; outputDigest: string; summary: string }>;
+  toolRuns?: Array<{ tool: string; status: "passed" | "failed"; durationMs: number; outputDigest: string; summary: string; isolation?: { engine: string; network?: string; filesystem?: string; capabilities?: string } }>;
+  actions?: Array<{ findingId: string; fileName: string; action: string }>;
 }
 
 export interface ReviewBoardRound {
   round: number;
   patchDigest: string;
   phase: "build" | "challenge" | "revision" | "consensus";
-  challenges: Array<{ from: ReviewAgentResult["id"]; to: ReviewAgentResult["id"]; claim: string; resolved: boolean }>;
+  challenges: Array<{ id?: string; from: ReviewAgentResult["id"]; to: ReviewAgentResult["id"]; claim: string; resolved: boolean }>;
   builderResponse: string;
   verdict: "approved" | "changes-requested" | "blocked";
 }
@@ -193,10 +198,14 @@ export interface ReviewBoardRun {
   score: number;
   agents: ReviewAgentResult[];
   createdAt: string;
+  initialPatchDigest?: string;
   patchDigest: string;
+  revisedFiles?: Record<string, string>;
+  builderActions?: Array<{ findingId: string; fileName: string; action: string }>;
   rounds: ReviewBoardRound[];
   consensus: number;
   executedTools: string[];
+  isolation?: { requiredInProduction: string; roleCount: number; independentProcesses: number };
 }
 
 export interface UnderstandingQuestion {
@@ -228,6 +237,12 @@ export interface UnderstandingVerification {
   createdAt: string;
   dimensions: { explanation: number; prediction: number; modification: number; debugging: number; dataFlow: number };
   behavioralSignals: { answerSimilarity: number; revisionCount: number; elapsedMs: number; continuity: number; pasteCount: number; externalFocusChanges: number };
+  executionEvidence?: {
+    emptyBoundary?: { result: string; execution?: Record<string, unknown> };
+    nullBoundary?: { result: string; execution?: Record<string, unknown> };
+    compiler?: { engine: string; diagnostics: number };
+    modification?: { compiled: boolean; preservesValid: boolean; handlesInvalid: boolean; probes: Record<string, string> };
+  };
   codeDigest: string;
 }
 
@@ -260,6 +275,7 @@ export interface DigitalTwinEdge {
   source: string;
   target: string;
   relation: "imports" | "calls" | "tests" | "renders" | "configures" | "reads" | "writes" | "publishes" | "consumes" | "deploys" | "owns" | "traces";
+  evidence?: "compiler" | "html-parser" | "sql-parser" | "runtime-trace" | "otel-span" | "coverage-map";
 }
 
 export interface EngineeringDigitalTwin {
@@ -277,6 +293,7 @@ export interface EngineeringDigitalTwin {
     confidence: number;
   };
   telemetry: { traces: number; requests: number; databaseMutations: number; deployments: number };
+  analysis?: { engine: string; compilerDiagnostics: number; runtimeCorrelations: number; coverageFiles: string[]; symbolFiles: number };
   generatedAt: string;
 }
 
@@ -293,6 +310,7 @@ export interface ArenaScenario {
   injectedFaults: Array<{ id: string; description: string; hidden: boolean; files: Record<string, string> }>;
   rubric: Array<{ id: string; label: string; weight: number; evidenceTypes: EngineeringEventType[] }>;
   starterFiles: Record<string, string>;
+  acceptanceTestCount?: number;
   organizationId?: string;
   createdBy?: string;
   createdAt?: string;
@@ -309,6 +327,7 @@ export interface ArenaScenarioTemplateInput {
   starterFiles: Record<string, string>;
   injectedFaults?: ArenaScenario["injectedFaults"];
   rubric?: ArenaScenario["rubric"];
+  acceptanceTests: Array<{ id?: string; code: string; timeoutMs?: number }>;
 }
 
 export interface ArenaParticipant {
@@ -331,7 +350,7 @@ export interface ArenaSession {
   environmentLocked?: boolean;
   workspace?: Record<string, string>;
   allowedAI?: ArenaScenario["allowedAI"];
-  policyViolations?: Array<{ id: string; type: string; occurredAt: string }>;
+  policyViolations?: Array<{ id: string; type: string; count?: number; occurredAt: string }>;
   reviewerNotes?: string[];
   consent?: { recorded: boolean; recordedAt: string; privacyMode: "full" | "redacted" };
   actions: Array<{ id: string; type: EngineeringEventType; summary: string; occurredAt: string; evidenceEventId?: string }>;
@@ -340,7 +359,8 @@ export interface ArenaSession {
   rank?: number;
   weightedScore?: number;
   privacyMode?: "full" | "redacted";
-  signedReport?: { digest: string; signature: string; generatedAt: string; consentRecorded: boolean; privacyMode: "full" | "redacted"; report: Record<string, unknown> };
+  acceptance?: { passed: number; total: number; score: number; verified: boolean; results: Array<{ id: string; passed: boolean; exitCode: number; outputDigest: string; durationMs: number; engine: string; image?: string | null }> };
+  signedReport?: { digest: string; signature: string; signatureAlgorithm?: "hmac-sha256"; signatureIssuer?: string; signatureKeyId?: string; generatedAt: string; consentRecorded: boolean; privacyMode: "full" | "redacted"; report: Record<string, unknown> };
 }
 
 export interface ArenaLeaderboardEntry {

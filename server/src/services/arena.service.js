@@ -1,10 +1,12 @@
 const fs = require("fs/promises");
 const fsSync = require("fs");
 const path = require("path");
-const { createHmac, randomUUID } = require("crypto");
+const { randomUUID } = require("crypto");
 const HttpError = require("../utils/httpError");
 const { supabase } = require("../config/db");
 const { digest } = require("./evidence-advanced.service");
+const signing = require("./evidence-signing.service");
+const { evaluateArenaSubmission } = require("./arena-acceptance.service");
 
 const DATA_FILE = path.join(__dirname, "../../.data/arenas.json");
 let writeQueue = Promise.resolve();
@@ -72,6 +74,7 @@ function toRow(session) {
     score: session.score || null,
     weighted_score: session.weightedScore ?? null,
     signed_report: session.signedReport || null,
+    acceptance: session.acceptance || null,
     consent: session.consent || {},
     started_at: session.startedAt || null,
     deadline_at: session.deadlineAt || null,
@@ -98,6 +101,7 @@ function fromRow(row) {
     score: row.score || undefined,
     weightedScore: row.weighted_score ?? undefined,
     signedReport: row.signed_report || undefined,
+    acceptance: row.acceptance || undefined,
     consent: row.consent || {},
     startedAt: row.started_at || undefined,
     deadlineAt: row.deadline_at || undefined,
@@ -128,6 +132,7 @@ async function syncScenario(scenario) {
       injected_faults: scenario.injectedFaults,
       rubric: scenario.rubric,
       starter_files: scenario.starterFiles,
+      acceptance_tests: scenario.acceptanceTests || [],
       created_by: scenario.createdBy,
       created_at: scenario.createdAt,
     }], { onConflict: "id" });
@@ -149,6 +154,7 @@ function scenarioFromRow(row) {
     injectedFaults: row.injected_faults || [],
     rubric: row.rubric || baseRubric,
     starterFiles: row.starter_files || {},
+    acceptanceTests: row.acceptance_tests || [],
     createdBy: row.created_by,
     createdAt: row.created_at,
   };
@@ -200,8 +206,10 @@ async function writeStore(store) {
   return writeQueue;
 }
 function publicScenario(scenario, includeHidden = false) {
+  const { acceptanceTests, ...visible } = scenario;
   return {
-    ...scenario,
+    ...visible,
+    acceptanceTestCount: Array.isArray(acceptanceTests) ? acceptanceTests.length : 1,
     injectedFaults: scenario.injectedFaults.map((fault) => includeHidden ? fault : {
       id: fault.id,
       hidden: fault.hidden,
@@ -232,6 +240,12 @@ async function createScenarioTemplate(payload, user = {}) {
     weight: Number(item.weight || 0),
     evidenceTypes: Array.isArray(item.evidenceTypes) ? item.evidenceTypes.slice(0, 20).map((type) => cleanText(type, 80)).filter(Boolean) : [],
   }));
+  const acceptanceTests = Array.isArray(payload.acceptanceTests) ? payload.acceptanceTests.slice(0, 12).map((item, index) => ({
+    id: cleanText(item.id, 120) || "acceptance-" + (index + 1),
+    code: cleanText(item.code, 70000),
+    timeoutMs: Math.max(1000, Math.min(30000, Number(item.timeoutMs || 10000))),
+  })).filter((item) => item.code) : [];
+  if (!acceptanceTests.length) throw new HttpError(400, "Custom Arena scenarios require at least one hidden executable acceptance test");
   const totalWeight = requestedRubric.reduce((sum, item) => sum + item.weight, 0);
   if (!requestedRubric.length || requestedRubric.some((item) => !Number.isFinite(item.weight) || item.weight <= 0 || !item.evidenceTypes.length) || Math.abs(totalWeight - 100) > 0.001) {
     throw new HttpError(400, "Arena rubric needs positive weights totaling 100 and at least one evidence type per criterion");
@@ -252,6 +266,7 @@ async function createScenarioTemplate(payload, user = {}) {
     })) : [],
     rubric: requestedRubric,
     starterFiles,
+    acceptanceTests,
     organizationId,
     createdBy: cleanText(user.username || user.email, 120) || "Evaluator",
     createdAt: new Date().toISOString(),
@@ -425,15 +440,13 @@ function rubricScore(rubric, actions, evidenceEvents) {
   const covered = rubric.evidenceTypes.filter((type) => types.has(type)).length;
   return clamp((covered / Math.max(1, rubric.evidenceTypes.length)) * 100);
 }
-function finalScorecard(rubricScores, actions, evidenceEvents, integrity, policyViolations) {
+function finalScorecard(rubricScores, actions, evidenceEvents, integrity, policyViolations, acceptance) {
   const combined = [...actions, ...evidenceEvents];
-  const successes = combined.filter((item) => ["test.passed", "runtime.succeeded"].includes(item.type)).length;
-  const failures = combined.filter((item) => ["test.failed", "runtime.failed"].includes(item.type)).length;
   const ai = combined.filter((item) => item.type === "ai.prompted").length;
   const changes = combined.filter((item) => item.type === "code.changed").length;
   const penalty = policyViolations.length * 15;
   return {
-    finalCorrectness: clamp((successes / Math.max(1, successes + failures)) * 100 - penalty),
+    finalCorrectness: clamp(Number(acceptance?.score || 0)),
     problemSolvingProcess: clamp((rubricScores.diagnosis || 0) * 0.7 + (rubricScores.communication || 0) * 0.3 - penalty),
     debuggingAbility: clamp((rubricScores.diagnosis || 0) * 0.55 + (rubricScores.recovery || 0) * 0.45),
     testQuality: rubricScores.testing || 0,
@@ -444,20 +457,31 @@ function finalScorecard(rubricScores, actions, evidenceEvents, integrity, policy
   };
 }
 function signReport(report) {
-  const candidate = process.env.ARENA_SIGNING_KEY || process.env.EVIDENCE_SIGNING_KEY || "";
-  const key = candidate.length >= 32 && !/(replace|change|example|placeholder|secret)/i.test(candidate) ? candidate : "";
-  const body = digest(report);
-  return key ? "hmac-sha256:" + createHmac("sha256", key).update(body).digest("hex") : "sha256:" + body;
+  return signing.sign(report, "arena");
 }
 async function submitSession(projectId, sessionId, payload, evidenceSnapshot) {
   await hydrateScenarios();
   const sourceSession = (await listSessions(projectId)).find((item) => item.id === sessionId);
   if (!sourceSession) throw new HttpError(404, "Arena session not found");
   const scenario = scenarioById(sourceSession.scenarioId);
+  try {
+    signing.purposeConfig("arena");
+  } catch (error) {
+    throw new HttpError(503, "Arena report signing is not configured: " + error.message);
+  }
   return mutateSession(sessionId, async (session) => {
     if (session.projectId !== projectId) throw new HttpError(404, "Arena session not found");
     if (!["running", "expired"].includes(session.status)) throw new HttpError(409, "Arena session cannot be submitted");
     const evidenceEvents = Array.isArray(evidenceSnapshot?.events) ? evidenceSnapshot.events.filter((item) => Date.parse(item.occurredAt) >= Date.parse(session.startedAt)) : [];
+    const submittedFiles = arenaFiles(payload.files || {});
+    if (!Object.keys(submittedFiles).length) throw new HttpError(400, "The candidate workspace is required for hidden acceptance testing");
+    if (Object.keys(submittedFiles).some((name) => name.replace(/\\/g, "/").startsWith(".evidence/"))) throw new HttpError(400, "The reserved hidden-test namespace cannot be submitted");
+    let acceptance;
+    try {
+      acceptance = await evaluateArenaSubmission(scenario, submittedFiles);
+    } catch (error) {
+      throw new HttpError(503, "Hidden Arena acceptance execution failed: " + error.message);
+    }
     const aiPrompts = evidenceEvents.filter((item) => item.type === "ai.prompted");
     const disclosedAI = evidenceEvents.some((item) => item.type === "chat.message" && /\b(ai|assistant|model)\b.*\b(used|disclos|help)/i.test(String(item.payload?.message || item.summary || "")));
     if (session.allowedAI === "none" && aiPrompts.length && !session.policyViolations.some((item) => item.type === "disallowed-ai")) {
@@ -470,8 +494,9 @@ async function submitSession(projectId, sessionId, payload, evidenceSnapshot) {
       session.policyViolations.push({ id: randomUUID(), type: "ai-use-undisclosed", count: aiPrompts.length, occurredAt: aiPrompts[0].occurredAt });
     }
     const rubricScores = Object.fromEntries(scenario.rubric.map((rubric) => [rubric.id, rubricScore(rubric, session.actions, evidenceEvents)]));
+    if (Object.hasOwn(rubricScores, "correctness")) rubricScores.correctness = acceptance.score;
     const weightedScore = clamp(scenario.rubric.reduce((sum, rubric) => sum + rubricScores[rubric.id] * rubric.weight / 100, 0) - session.policyViolations.length * 12);
-    const score = finalScorecard(rubricScores, session.actions, evidenceEvents, evidenceSnapshot?.integrity, session.policyViolations);
+    const score = finalScorecard(rubricScores, session.actions, evidenceEvents, evidenceSnapshot?.integrity, session.policyViolations, acceptance);
     const submittedAt = new Date().toISOString();
     const reportBody = {
       sessionId: session.id,
@@ -486,6 +511,8 @@ async function submitSession(projectId, sessionId, payload, evidenceSnapshot) {
       integrity: evidenceSnapshot?.integrity || { verified: true, checkedEvents: 0 },
       evidenceDigest: digest(evidenceEvents),
       policyViolations: session.policyViolations,
+      acceptance,
+      submittedWorkspaceDigest: digest(submittedFiles),
       reviewerNotes: Array.isArray(payload.reviewerNotes) ? payload.reviewerNotes.map((item) => cleanText(item, 1000)).filter(Boolean) : [],
       consentRecorded: session.consent.recorded,
       privacyMode: session.consent.privacyMode,
@@ -496,9 +523,15 @@ async function submitSession(projectId, sessionId, payload, evidenceSnapshot) {
     session.weightedScore = weightedScore;
     session.rubricScores = rubricScores;
     session.reviewerNotes = reportBody.reviewerNotes;
+    session.workspace = submittedFiles;
+    session.acceptance = acceptance;
+    const attestation = signReport(reportBody);
     session.signedReport = {
       digest: digest(reportBody),
-      signature: signReport(reportBody),
+      signature: attestation.signature,
+      signatureAlgorithm: attestation.algorithm,
+      signatureIssuer: attestation.issuer,
+      signatureKeyId: attestation.keyId,
       generatedAt: submittedAt,
       consentRecorded: session.consent.recorded,
       privacyMode: session.consent.privacyMode,
@@ -512,7 +545,11 @@ async function verifySignedReport(projectId, sessionId) {
   const session = sessions.find((item) => item.id === sessionId);
   if (!session?.signedReport?.report) throw new HttpError(404, "Signed arena report not found");
   const digestVerified = digest(session.signedReport.report) === session.signedReport.digest;
-  const signatureVerified = signReport(session.signedReport.report) === session.signedReport.signature;
+  const signatureVerified = signing.verify(session.signedReport.report, session.signedReport.signature, {
+    algorithm: session.signedReport.signatureAlgorithm,
+    issuer: session.signedReport.signatureIssuer,
+    keyId: session.signedReport.signatureKeyId,
+  }, "arena");
   return {
     sessionId,
     reportDigest: session.signedReport.digest,

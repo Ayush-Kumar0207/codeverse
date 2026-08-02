@@ -40,6 +40,7 @@ interface EvidenceOSPanelProps {
   onGenerateChallenge: () => Promise<UnderstandingChallenge>;
   onSubmitUnderstanding: (answers: Record<string, string>) => Promise<unknown>;
   onBranchFromEvent: (event: EngineeringEvent) => Promise<boolean>;
+  onVerifyReplay: (sessionId: string) => Promise<boolean>;
   onCreateArenaTemplate: (input: ArenaScenarioTemplateInput) => Promise<ArenaScenario>;
   onStartArena: (scenarioId: string, privacyMode: "full" | "redacted", teamLobby?: boolean) => Promise<boolean>;
   onBeginArena: () => Promise<boolean>;
@@ -79,6 +80,7 @@ export function EvidenceOSPanel({
   onGenerateChallenge,
   onSubmitUnderstanding,
   onBranchFromEvent,
+  onVerifyReplay,
   onCreateArenaTemplate,
   onStartArena,
   onBeginArena,
@@ -129,7 +131,7 @@ export function EvidenceOSPanel({
               "h-5 rounded border px-1.5 text-[8px] uppercase tracking-widest",
               offline ? "border-amber-400/25 bg-amber-400/10 text-amber-200" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
             )}>
-              {offline ? "Local proof" : "Synced proof"}
+              {offline ? "Local preview" : "Synced proof"}
             </Badge>
           </div>
         </div>
@@ -163,7 +165,7 @@ export function EvidenceOSPanel({
             <EvidenceProofView snapshot={snapshot} coverage={coverage} focusedLocation={focusedLocation} syncing={syncing} onCreatePackage={onCreatePackage} onVerifyPackage={onVerifyPackage} />
           </TabsContent>
           <TabsContent value="replay" className="m-0">
-            <EvidenceReplayView events={snapshot.events} sessions={snapshot.replay} syncing={syncing} onBranchFromEvent={onBranchFromEvent} />
+            <EvidenceReplayView events={snapshot.events} sessions={snapshot.replay} syncing={syncing} onBranchFromEvent={onBranchFromEvent} onVerifyReplay={onVerifyReplay} />
           </TabsContent>
           <TabsContent value="board" className="m-0">
             <EvidenceBoardView latestPackage={snapshot.packages.at(-1)} latestReview={snapshot.reviews.at(-1)} syncing={syncing} onRunReview={onRunReview} />

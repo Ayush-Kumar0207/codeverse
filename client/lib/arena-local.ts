@@ -1,4 +1,4 @@
-import type { ArenaLeaderboardEntry, ArenaScenario, ArenaScenarioTemplateInput, ArenaSession, EngineeringEvent, EvidenceOSSnapshot } from "@shared/types/evidence";
+import type { ArenaLeaderboardEntry, ArenaScenario, ArenaScenarioTemplateInput, ArenaSession } from "@shared/types/evidence";
 import { localDigest } from "./evidence-local";
 
 const rubric: ArenaScenario["rubric"] = [
@@ -101,56 +101,30 @@ export function startLocalArena(projectId: string, scenarioId: string, candidate
   };
 }
 
-function clamp(value: number) {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-
-export function gradeLocalArena(session: ArenaSession, snapshot: EvidenceOSSnapshot, privacyMode: "full" | "redacted" = "full") {
-  const selected = localArenaScenarios.find((item) => item.id === session.scenarioId) || localArenaScenarios[0];
-  const events = snapshot.events.filter((event) => !session.startedAt || Date.parse(event.occurredAt) >= Date.parse(session.startedAt));
-  const types = new Set<EngineeringEvent["type"]>([...events.map((event) => event.type), ...session.actions.map((action) => action.type)]);
-  const policyViolations = [...(session.policyViolations || [])];
-  const aiPrompts = events.filter((event) => event.type === "ai.prompted");
-  const disclosedAI = events.some((event) => event.type === "chat.message" && /\b(ai|assistant|model)\b.*\b(used|disclos|help)/i.test(String(event.payload.message || event.summary)));
-  if (selected.allowedAI === "none" && aiPrompts.length) policyViolations.push({ id: id(), type: "disallowed-ai", occurredAt: aiPrompts[0].occurredAt });
-  if (selected.allowedAI === "limited" && aiPrompts.length > 3) policyViolations.push({ id: id(), type: "ai-limit-exceeded", occurredAt: aiPrompts[3].occurredAt });
-  if (selected.allowedAI === "full-with-disclosure" && aiPrompts.length && !disclosedAI) policyViolations.push({ id: id(), type: "ai-use-undisclosed", occurredAt: aiPrompts[0].occurredAt });
-  const rubricScores = Object.fromEntries(selected.rubric.map((item) => [
-    item.id,
-    clamp(item.evidenceTypes.filter((type) => types.has(type)).length / Math.max(1, item.evidenceTypes.length) * 100),
-  ]));
-  const weightedScore = clamp(selected.rubric.reduce((sum, item) => sum + Number(rubricScores[item.id]) * item.weight / 100, 0) - policyViolations.length * 12);
-  const score = {
-    finalCorrectness: Number(rubricScores.correctness || 0),
-    problemSolvingProcess: clamp(Number(rubricScores.diagnosis || 0) * 0.7 + Number(rubricScores.communication || 0) * 0.3),
-    debuggingAbility: clamp(Number(rubricScores.diagnosis || 0) * 0.55 + Number(rubricScores.recovery || 0) * 0.45),
-    testQuality: Number(rubricScores.testing || 0),
-    codeComprehension: Number(rubricScores.communication || 0),
-    securityAwareness: Number(rubricScores.security || 0),
-    evidenceIntegrity: snapshot.integrity.verified ? 100 : 0,
-    aiDependence: events.filter((event) => event.type === "ai.prompted").length ? "Moderate" as const : "Low" as const,
-  };
+export function buildLocalArenaPreview(session: ArenaSession, privacyMode: "full" | "redacted" = "full") {
   const submittedAt = new Date().toISOString();
-  const report = { sessionId: session.id, scenarioId: selected.id, weightedScore, rubricScores, score, evidenceDigest: localDigest(events), policyViolations, submittedAt };
-  const graded: ArenaSession = {
-    ...session,
-    status: "graded",
+  const report = {
+    sessionId: session.id,
+    scenarioId: session.scenarioId,
+    status: "unverified-local-preview",
     submittedAt,
-    score,
-    rubricScores,
-    weightedScore,
+  };
+  const submitted: ArenaSession = {
+    ...session,
+    status: "submitted",
+    submittedAt,
     privacyMode,
-    policyViolations,
+    acceptance: { passed: 0, total: 0, score: 0, verified: false, results: [] },
     signedReport: {
       digest: localDigest(report),
-      signature: "local-sha256:" + localDigest(report),
+      signature: "unverified-local:" + localDigest(report),
       generatedAt: submittedAt,
       consentRecorded: true,
       privacyMode,
       report,
     },
   };
-  return { session: graded, weightedScore };
+  return { session: submitted, weightedScore: 0 };
 }
 
 export function localLeaderboard(sessions: ArenaSession[]): ArenaLeaderboardEntry[] {

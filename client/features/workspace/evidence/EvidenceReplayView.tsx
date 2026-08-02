@@ -13,9 +13,10 @@ interface EvidenceReplayViewProps {
   sessions: EngineeringReplaySession[];
   syncing: boolean;
   onBranchFromEvent: (event: EngineeringEvent) => Promise<boolean>;
+  onVerifyReplay: (sessionId: string) => Promise<boolean>;
 }
 
-export function EvidenceReplayView({ events, sessions, syncing, onBranchFromEvent }: EvidenceReplayViewProps) {
+export function EvidenceReplayView({ events, sessions, syncing, onBranchFromEvent, onVerifyReplay }: EvidenceReplayViewProps) {
   const replayEvents = useMemo(() => [...events].sort((left, right) => left.sequence - right.sequence), [events]);
   const [index, setIndex] = useState(Math.max(0, replayEvents.length - 1));
   const [compareIndex, setCompareIndex] = useState(0);
@@ -105,6 +106,14 @@ export function EvidenceReplayView({ events, sessions, syncing, onBranchFromEven
               Missing: {replaySession.missingInputs.join(", ")}
             </div>
           )}
+          <Button
+            disabled={syncing || !replaySession.deterministic}
+            onClick={() => void onVerifyReplay(replaySession.sessionId)}
+            variant="outline"
+            className="mt-3 h-8 w-full border-emerald-400/20 bg-emerald-400/[0.04] text-[9px] font-bold uppercase tracking-wider text-emerald-200 hover:bg-emerald-400/10"
+          >
+            <Play className="mr-1.5 h-3.5 w-3.5" /> Re-execute sealed session
+          </Button>
           {selectedFrame?.cursor && (
             <div className="mt-2 text-[8px] text-cyan-200">
               Cursor {selectedFrame.cursor.fileName}:{selectedFrame.cursor.lineNumber}:{selectedFrame.cursor.column}

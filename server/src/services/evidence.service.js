@@ -1,12 +1,14 @@
 const fs = require("fs/promises");
 const path = require("path");
-const posixPath = require("path").posix;
 const { createHash, randomUUID } = require("crypto");
 const { supabase } = require("../config/db");
 const HttpError = require("../utils/httpError");
 const advancedEvidence = require("./evidence-advanced.service");
 const arenaService = require("./arena.service");
 const aiService = require("./ai.service");
+const evidenceRuntime = require("./evidence-runtime.service");
+const reviewOrchestrator = require("./evidence-review-orchestrator.service");
+const understandingExecution = require("./understanding-execution.service");
 
 const DATA_FILE = path.join(__dirname, "../../.data/evidence.json");
 const COLLECTIONS = {
@@ -135,6 +137,8 @@ function toRow(collection, item) {
       created_at: item.createdAt, change_digest: item.changeDigest,
       base_digest: item.baseDigest || null, manifest_digest: item.manifestDigest,
       attestations: item.attestations || [], signature: item.signature,
+      signature_algorithm: item.signatureAlgorithm, signature_issuer: item.signatureIssuer,
+      signature_key_id: item.signatureKeyId,
       exact_artifact_verified: Boolean(item.exactArtifactVerified),
     };
   }
@@ -143,8 +147,11 @@ function toRow(collection, item) {
       id: item.id, project_id: item.projectId, requirement: item.requirement,
       verdict: item.verdict, score: item.score, agents: item.agents,
       created_at: item.createdAt, patch_digest: item.patchDigest,
+      initial_patch_digest: item.initialPatchDigest || item.patchDigest,
+      revised_files: item.revisedFiles || {},
+      builder_actions: item.builderActions || [],
       rounds: item.rounds || [], consensus: item.consensus || 0,
-      executed_tools: item.executedTools || [],
+      executed_tools: item.executedTools || [], isolation: item.isolation || {},
     };
   }
   return {
@@ -152,7 +159,7 @@ function toRow(collection, item) {
     file_name: item.fileName, score: item.score, passed: item.passed,
     feedback: item.feedback, created_at: item.createdAt,
     dimensions: item.dimensions || {}, behavioral_signals: item.behavioralSignals || {},
-    code_digest: item.codeDigest || "",
+    execution_evidence: item.executionEvidence || {}, code_digest: item.codeDigest || "",
   };
 }
 
@@ -176,6 +183,9 @@ function fromRow(collection, row) {
       createdAt: row.created_at, changeDigest: row.change_digest || "",
       baseDigest: row.base_digest || undefined, manifestDigest: row.manifest_digest || "",
       attestations: row.attestations || [], signature: row.signature || "",
+      signatureAlgorithm: row.signature_algorithm || "",
+      signatureIssuer: row.signature_issuer || "",
+      signatureKeyId: row.signature_key_id || "",
       exactArtifactVerified: Boolean(row.exact_artifact_verified),
     };
   }
@@ -183,9 +193,11 @@ function fromRow(collection, row) {
     return {
       id: row.id, projectId: row.project_id, requirement: row.requirement,
       verdict: row.verdict, score: Number(row.score), agents: row.agents || [],
-      createdAt: row.created_at, patchDigest: row.patch_digest || "",
+      createdAt: row.created_at, initialPatchDigest: row.initial_patch_digest || row.patch_digest || "",
+      patchDigest: row.patch_digest || "", revisedFiles: row.revised_files || {},
+      builderActions: row.builder_actions || [],
       rounds: row.rounds || [], consensus: Number(row.consensus || 0),
-      executedTools: row.executed_tools || [],
+      executedTools: row.executed_tools || [], isolation: row.isolation || {},
     };
   }
   return {
@@ -194,6 +206,7 @@ function fromRow(collection, row) {
     feedback: row.feedback || [], createdAt: row.created_at,
     dimensions: row.dimensions || { explanation: 0, prediction: 0, modification: 0, debugging: 0, dataFlow: 0 },
     behavioralSignals: row.behavioral_signals || { answerSimilarity: 0, revisionCount: 0, elapsedMs: 0, continuity: 0, pasteCount: 0, externalFocusChanges: 0 },
+    executionEvidence: row.execution_evidence || {},
     codeDigest: row.code_digest || "",
   };
 }
@@ -327,6 +340,12 @@ async function createPackage(projectId, payload, recorder = {}) {
   const points = checks.reduce((sum, item) => sum + (item.status === "passed" ? 1 : item.status === "warning" ? 0.35 : 0), 0);
   const score = clamp((points / checks.length) * 100);
   const exactArtifactVerified = ["source", "test", "runtime", "security"].every((kind) => attestations.find((item) => item.kind === kind)?.status === "verified");
+  let signingIdentity;
+  try {
+    signingIdentity = advancedEvidence.evidenceSigningIdentity();
+  } catch (error) {
+    throw new HttpError(503, error.message);
+  }
   const item = {
     id: randomUUID(),
     projectId,
@@ -345,6 +364,9 @@ async function createPackage(projectId, payload, recorder = {}) {
     manifestDigest,
     attestations,
     signature: "",
+    signatureAlgorithm: signingIdentity.algorithm,
+    signatureIssuer: signingIdentity.issuer,
+    signatureKeyId: signingIdentity.keyId,
     exactArtifactVerified,
   };
   item.signature = advancedEvidence.signEvidencePackage(item);
@@ -444,7 +466,7 @@ async function runReview(projectId, payload) {
     performanceDeltaPct: payload.performanceDeltaPct,
     performanceBudgetPct: payload.performanceBudgetPct,
   };
-  const deterministicResult = advancedEvidence.analyzeReviewBoard(
+  const deterministicResult = await reviewOrchestrator.runIsolatedReviewBoard(
     files,
     text(payload.requirement, 1600),
     text(payload.rollback, 1600),
@@ -464,10 +486,14 @@ async function runReview(projectId, payload) {
     score: result.score,
     agents: result.agents,
     createdAt: new Date().toISOString(),
+    initialPatchDigest: result.initialPatchDigest,
     patchDigest: result.patchDigest,
+    revisedFiles: result.revisedFiles,
+    builderActions: result.builderActions,
     rounds: result.rounds,
     consensus: result.consensus,
     executedTools: result.executedTools,
+    isolation: result.isolation,
   };
   await persist("reviews", review);
   await recordEvent(projectId, {
@@ -499,11 +525,17 @@ async function verifyUnderstanding(projectId, payload) {
   const challenge = createChallenge(projectId, payload);
   if (payload.challengeId && payload.challengeId !== challenge.id) throw new HttpError(409, "The file changed; generate a fresh understanding challenge");
   if (payload.expiresAt && Date.parse(payload.expiresAt) < Date.now()) throw new HttpError(409, "The understanding challenge expired");
-  const evaluation = advancedEvidence.evaluateHandsOnChallenge(
-    challenge,
-    safeObject(payload.answers),
-    safeObject(payload.signals)
-  );
+  let evaluation;
+  try {
+    evaluation = await understandingExecution.evaluateExecutableUnderstanding(
+      challenge,
+      safeObject(payload.answers),
+      safeObject(payload.signals),
+      { code: text(payload.code, 70000), files: exactFiles(payload.files) }
+    );
+  } catch (error) {
+    throw new HttpError(503, "Executable understanding assessment failed: " + error.message);
+  }
   const verification = {
     id: randomUUID(),
     projectId,
@@ -515,6 +547,7 @@ async function verifyUnderstanding(projectId, payload) {
     createdAt: new Date().toISOString(),
     dimensions: evaluation.dimensions,
     behavioralSignals: evaluation.behavioralSignals,
+    executionEvidence: evaluation.executionEvidence,
     codeDigest: evaluation.codeDigest,
   };
   await persist("verifications", verification);
@@ -532,49 +565,31 @@ async function verifyUnderstanding(projectId, payload) {
       codeDigest: verification.codeDigest,
       dimensions: verification.dimensions,
       behavioralSignals: verification.behavioralSignals,
+      executionEvidence: verification.executionEvidence,
     },
   });
   return verification;
 }
-function classifyFile(fileName) {
-  if (/test|spec/i.test(fileName)) return "test";
-  if (/\.env|config|\.json$|\.ya?ml$/i.test(fileName)) return "config";
-  if (/route|controller|api/i.test(fileName)) return "api";
-  if (/service|server|socket/i.test(fileName)) return "service";
-  if (/schema|migration|model|store|db/i.test(fileName)) return "data";
-  if (/\.tsx?$|\.jsx?$|\.html$|\.css$/i.test(fileName)) return "frontend";
-  return "module";
-}
-
-function resolveDependency(fileName, request, names) {
-  if (!request.startsWith(".")) return names.find((name) => name === request || name.startsWith(request + "."));
-  const base = posixPath.normalize(posixPath.join(posixPath.dirname(fileName.replace(/\\/g, "/")), request));
-  return names.find((name) => {
-    const normalized = name.replace(/\\/g, "/");
-    return normalized === base || normalized.replace(/\.[^.\/]+$/, "") === base || normalized.startsWith(base + "/index.");
-  });
-}
-
 function createDigitalTwin(payload) {
   return advancedEvidence.createAdvancedTwin(payload, Array.isArray(payload.events) ? payload.events : []);
 }
 function createGraph(packages, events, reviews) {
   return advancedEvidence.createCausalGraph(packages, events, reviews);
 }
-function scorecard(events, reviews, verifications, integrity) {
+function scorecard(events, reviews, verifications, integrity, arenas = []) {
   const successes = events.filter((event) => ["runtime.succeeded", "test.passed"].includes(event.type)).length;
   const failures = events.filter((event) => ["runtime.failed", "test.failed"].includes(event.type)).length;
-  const executionTotal = successes + failures;
   const testRuns = events.filter((event) => event.type.startsWith("test.")).length;
   const codeChanges = events.filter((event) => event.type === "code.changed").length;
   const aiPrompts = events.filter((event) => event.type === "ai.prompted").length;
   const processKinds = new Set(events.map((event) => event.type.split(".")[0])).size;
   const latestVerification = verifications.at(-1);
+  const latestAcceptance = [...arenas].reverse().find((session) => session.acceptance?.verified)?.acceptance;
   const latestSecurity = reviews.at(-1)?.agents?.find((agent) => agent.id === "security");
   const debuggingRecovery = failures === 0 ? (successes ? 82 : 0) : successes > 0 ? 90 : 25;
   const aiRatio = aiPrompts / Math.max(1, codeChanges + aiPrompts);
   return {
-    finalCorrectness: executionTotal ? clamp((successes / executionTotal) * 100) : 0,
+    finalCorrectness: latestAcceptance?.score || 0,
     problemSolvingProcess: clamp(processKinds * 12 + Math.min(events.length, 20)),
     debuggingAbility: debuggingRecovery,
     testQuality: clamp(testRuns * 24 + (events.some((event) => event.type === "test.passed") ? 20 : 0)),
@@ -659,19 +674,38 @@ async function exportEvidence(projectId, privacyMode = "full") {
   return { report, digest: advancedEvidence.digest(report) };
 }
 
-async function verifyReplay(projectId, sessionId, payload, recorder = {}) {
+async function verifyReplay(projectId, sessionId, payload = {}, recorder = {}) {
   const events = await listCollection("events", projectId);
   const replay = advancedEvidence.buildReplaySessions(events).find((item) => item.sessionId === sessionId);
   if (!replay) throw new HttpError(404, "Replay session not found");
-  const files = exactFiles(payload.files);
-  const sourceDigest = advancedEvidence.workspaceDigest(files);
+  if (!replay.deterministic) throw new HttpError(409, "Replay cannot execute until every deterministic input is sealed");
   const expectedFrame = [...replay.frames].reverse().find((frame) => frame.terminal);
-  const actualOutputDigest = typeof payload.output === "string" ? advancedEvidence.digest(payload.output) : text(payload.outputDigest, 160);
-  const manifestVerified = replay.manifest.sourceDigest === sourceDigest;
-  const commandVerified = !expectedFrame?.terminal?.command || expectedFrame.terminal.command === text(payload.command, 1000);
-  const exitCodeVerified = expectedFrame?.terminal?.exitCode === undefined || Number(payload.exitCode) === expectedFrame.terminal.exitCode;
-  const outputVerified = !expectedFrame?.terminal?.outputDigest || actualOutputDigest === expectedFrame.terminal.outputDigest;
-  const verified = replay.deterministic && manifestVerified && commandVerified && exitCodeVerified && outputVerified;
+  if (!expectedFrame?.terminal?.command) throw new HttpError(409, "Replay has no sealed execution command");
+  const files = exactFiles(expectedFrame.files);
+  const sourceDigest = advancedEvidence.workspaceDigest(files);
+  if (payload.files && Object.keys(exactFiles(payload.files)).length && advancedEvidence.workspaceDigest(exactFiles(payload.files)) !== sourceDigest) {
+    throw new HttpError(409, "Replay verification only executes the sealed source snapshot");
+  }
+  let execution;
+  try {
+    execution = await evidenceRuntime.executeSealedWorkspace({
+      files,
+      command: expectedFrame.terminal.command,
+      language: expectedFrame.terminal.language,
+      containerImage: replay.manifest.containerImage,
+      environmentKeys: replay.manifest.environmentKeys,
+      environment: replay.manifest.environment,
+    });
+  } catch (error) {
+    throw new HttpError(503, "Sealed replay execution failed to launch: " + error.message);
+  }
+  const actualOutputDigest = advancedEvidence.digest(execution.output);
+  const manifestVerified = replay.manifest.sourceDigest === sourceDigest && replay.manifest.snapshotComplete;
+  const expectedCommand = evidenceRuntime.runtimeCommand(expectedFrame.terminal.command, files, expectedFrame.terminal.language).join(" ");
+  const commandVerified = execution.command === expectedCommand;
+  const exitCodeVerified = expectedFrame.terminal.exitCode === undefined || execution.exitCode === expectedFrame.terminal.exitCode;
+  const outputVerified = !expectedFrame.terminal.outputDigest || actualOutputDigest === expectedFrame.terminal.outputDigest;
+  const verified = manifestVerified && commandVerified && exitCodeVerified && outputVerified && !execution.timedOut && !execution.launchError;
   const report = {
     sessionId,
     replayDigest: replay.replayDigest,
@@ -679,20 +713,30 @@ async function verifyReplay(projectId, sessionId, payload, recorder = {}) {
     commandVerified,
     exitCodeVerified,
     outputVerified,
-    deterministicInputsComplete: replay.deterministic,
+    deterministicInputsComplete: true,
+    serverExecuted: true,
     verified,
-    expected: expectedFrame?.terminal || null,
-    actual: { sourceDigest, command: text(payload.command, 1000), exitCode: Number(payload.exitCode), outputDigest: actualOutputDigest },
+    expected: expectedFrame.terminal,
+    actual: {
+      sourceDigest,
+      command: execution.command,
+      exitCode: execution.exitCode,
+      outputDigest: actualOutputDigest,
+      engine: execution.engine,
+      image: execution.image,
+      durationMs: execution.durationMs,
+      sandbox: execution.sandbox,
+    },
     verifiedAt: new Date().toISOString(),
   };
   await recordEvent(projectId, {
     type: "replay.executed",
     sessionId: text(payload.newSessionId, 160) || sessionId,
     actor: payload.actor,
-    summary: verified ? "Deterministic replay matched the sealed execution." : "Replay diverged from the sealed execution.",
+    summary: verified ? "Server-executed sealed replay matched the recorded execution." : "Server-executed replay diverged from the sealed execution.",
     source: "replay-engine",
-    payload: { ...report, subjectDigest: sourceDigest, sourceEventId: expectedFrame?.eventId },
-    causedBy: expectedFrame?.eventId,
+    payload: { ...report, subjectDigest: sourceDigest, files, sourceEventId: expectedFrame.eventId },
+    causedBy: expectedFrame.eventId,
   }, recorder);
   return report;
 }
@@ -708,7 +752,7 @@ async function getSnapshot(projectId) {
   return {
     projectId, events, packages, reviews, verifications,
     graph: createGraph(packages, events, reviews),
-    scorecard: scorecard(events, reviews, verifications, integrity),
+    scorecard: scorecard(events, reviews, verifications, integrity, arenas),
     integrity,
     replay: advancedEvidence.buildReplaySessions(events),
     arenas,

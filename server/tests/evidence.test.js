@@ -1,13 +1,77 @@
+process.env.EVIDENCE_SIGNING_KEY = "evidence-test-key-4d6b9c0f225c48dba74a";
+process.env.EVIDENCE_SIGNING_ISSUER = "codeverse-test-evaluator";
+process.env.EVIDENCE_SIGNING_KEY_ID = "evidence-test-v1";
+process.env.ARENA_SIGNING_KEY = "arena-test-key-42b47f081ce34e5eb345";
+process.env.ARENA_SIGNING_ISSUER = "codeverse-test-arena";
+process.env.ARENA_SIGNING_KEY_ID = "arena-test-v1";
+process.env.EVIDENCE_REPLAY_ENGINE = "process";
+process.env.EVIDENCE_ANALYZER_ENGINE = "process";
+process.env.ARENA_EXECUTION_ENGINE = "process";
+process.env.UNDERSTANDING_EXECUTION_ENGINE = "process";
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const evidenceService = require("../src/services/evidence.service");
 const arenaService = require("../src/services/arena.service");
 const advancedEvidence = require("../src/services/evidence-advanced.service");
+const evidenceSigning = require("../src/services/evidence-signing.service");
+const arenaAcceptance = require("../src/services/arena-acceptance.service");
+const evidenceRuntime = require("../src/services/evidence-runtime.service");
 
 function projectId(label) {
   return label + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 }
 
+test("proof and Arena signing use independent identities and fail closed", () => {
+  const payload = { artifact: "sha256:fixture" };
+  const evidenceAttestation = evidenceSigning.sign(payload, "evidence");
+  const arenaAttestation = evidenceSigning.sign(payload, "arena");
+  assert.match(evidenceAttestation.signature, /^hmac-sha256:evidence-test-v1:/);
+  assert.match(arenaAttestation.signature, /^hmac-sha256:arena-test-v1:/);
+  assert.notEqual(evidenceAttestation.signature, arenaAttestation.signature);
+  assert.equal(evidenceSigning.verify(payload, evidenceAttestation.signature, evidenceAttestation, "evidence"), true);
+  assert.equal(evidenceSigning.verify(payload, evidenceAttestation.signature, evidenceAttestation, "arena"), false);
+
+  const arenaKey = process.env.ARENA_SIGNING_KEY;
+  process.env.ARENA_SIGNING_KEY = process.env.EVIDENCE_SIGNING_KEY;
+  assert.throws(() => evidenceSigning.sign(payload, "arena"), /independent/i);
+  process.env.ARENA_SIGNING_KEY = arenaKey;
+
+  const issuer = process.env.EVIDENCE_SIGNING_ISSUER;
+  delete process.env.EVIDENCE_SIGNING_ISSUER;
+  assert.throws(() => evidenceSigning.sign(payload, "evidence"), /issuer/i);
+  process.env.EVIDENCE_SIGNING_ISSUER = issuer;
+
+  const evidenceKey = process.env.EVIDENCE_SIGNING_KEY;
+  process.env.EVIDENCE_SIGNING_KEY = "a".repeat(64);
+  assert.throws(() => evidenceSigning.sign(payload, "evidence"), /high-entropy/i);
+  process.env.EVIDENCE_SIGNING_KEY = evidenceKey;
+});
+
+test("production execution and compatibility attestations fail closed", async () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalOverride = process.env.EVIDENCE_ALLOW_PROCESS_SANDBOX;
+  process.env.NODE_ENV = "production";
+  process.env.EVIDENCE_ALLOW_PROCESS_SANDBOX = "true";
+  try {
+    await assert.rejects(evidenceRuntime.executeSealedWorkspace({
+      files: { "index.js": "console.log('must not run on the host')" },
+      command: "node index.js",
+      language: "javascript",
+      engine: "process",
+    }), /requires the Docker sandbox/);
+  } finally {
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalOverride === undefined) delete process.env.EVIDENCE_ALLOW_PROCESS_SANDBOX;
+    else process.env.EVIDENCE_ALLOW_PROCESS_SANDBOX = originalOverride;
+  }
+
+  const files = { "api-route.js": "module.exports = request => ({ ok: Boolean(request) });" };
+  const compatibility = advancedEvidence.buildProofAttestations(files, [], [], [], { apiCompatibility: "passed" })
+    .find((item) => item.kind === "compatibility");
+  assert.equal(compatibility.status, "unavailable");
+  assert.equal(compatibility.eventId, undefined);
+});
 test("engineering events form a verifiable causal hash chain", async () => {
   const id = projectId("chain");
   const first = await evidenceService.recordEvent(id, {
@@ -73,7 +137,7 @@ test("replay captures complete state and verifies deterministic re-execution", a
   const id = projectId("replay");
   const sessionId = "session-replay";
   const files = { "app.js": "console.log('ok');" };
-  const outputDigest = "sealed-output-digest";
+  const outputDigest = advancedEvidence.digest("ok\n");
   await evidenceService.recordEvent(id, {
     type: "session.environment",
     sessionId,
@@ -86,10 +150,10 @@ test("replay captures complete state and verifies deterministic re-execution", a
         runtime: "node 22.18.0",
         platform: "linux",
         architecture: "x64",
-        containerImage: "codeverse/runner@sha256:abc",
         lockfileHash: "lock-sha256",
         dependencyVersions: { node: "22.18.0" },
         environmentKeys: ["NODE_ENV"],
+        environment: { NODE_ENV: "test" },
       },
     },
   });
@@ -114,7 +178,7 @@ test("replay captures complete state and verifies deterministic re-execution", a
     summary: "Executed app.js.",
     source: "runner",
     fileName: "app.js",
-    payload: { files, command: "run app.js", exitCode: 0, outputDigest },
+    payload: { files, command: "run app.js", language: "javascript", exitCode: 0, outputDigest },
   });
 
   const snapshot = await evidenceService.getSnapshot(id);
@@ -128,16 +192,20 @@ test("replay captures complete state and verifies deterministic re-execution", a
 
   const report = await evidenceService.verifyReplay(id, sessionId, {
     files,
-    command: "run app.js",
-    exitCode: 0,
-    outputDigest,
+    command: "forged command is ignored",
+    exitCode: 99,
+    outputDigest: "caller-supplied-output-is-ignored",
     actor: { name: "Ada", kind: "human" },
     newSessionId: "replay-verification",
   });
   assert.equal(report.verified, true);
+  assert.equal(report.serverExecuted, true);
+  assert.equal(report.actual.engine, "isolated-process");
+  assert.equal(report.actual.outputDigest, outputDigest);
+  assert.equal(report.commandVerified, true);
 });
 
-test("adversarial review executes seven independent tools over two rounds", async () => {
+test("adversarial review executes seven isolated roles through challenge, revision, and consensus", async () => {
   const id = projectId("review");
   const review = await evidenceService.runReview(id, {
     requirement: "Authenticate API requests without embedding credentials.",
@@ -146,26 +214,31 @@ test("adversarial review executes seven independent tools over two rounds", asyn
     sessionId: "session-review",
     files: {
       "auth.js": "const apiKey = 'definitely-exposed-key';\nexport function auth() { return apiKey; }",
-      "auth.test.js": "test('auth', () => true);",
+      "auth.test.js": "const auth = require('./auth'); test('auth', () => auth.auth());",
     },
   });
 
   assert.equal(review.agents.length, 7);
-  assert.equal(review.rounds.length, 2);
+  assert.equal(review.rounds.length, 3);
   assert.equal(review.executedTools.length, 7);
-  assert.equal(review.verdict, "blocked");
-  assert.equal(review.agents.find((agent) => agent.id === "security").status, "blocked");
-  assert.match(review.agents.find((agent) => agent.id === "security").findings[0].title, /credential/i);
+  assert.equal(review.verdict, "approved");
+  assert.equal(review.agents.find((agent) => agent.id === "security").status, "passed");
+  assert.ok(review.builderActions.some((action) => /environment boundary/i.test(action.action)));
+  assert.ok(review.rounds[0].challenges.some((challenge) => /credential/i.test(challenge.claim)));
+  assert.ok(review.rounds[1].challenges.every((challenge) => challenge.resolved));
   assert.ok(review.agents.every((agent) => agent.toolRuns.length === 1));
-  assert.equal(review.patchDigest, advancedEvidence.workspaceDigest({
+  assert.equal(review.initialPatchDigest, advancedEvidence.workspaceDigest({
     "auth.js": "const apiKey = 'definitely-exposed-key';\nexport function auth() { return apiKey; }",
-    "auth.test.js": "test('auth', () => true);",
+    "auth.test.js": "const auth = require('./auth'); test('auth', () => auth.auth());",
   }));
+  assert.notEqual(review.patchDigest, review.initialPatchDigest);
+  assert.doesNotMatch(review.revisedFiles["auth.js"], /definitely-exposed-key/);
+  assert.equal(review.isolation.independentProcesses, 7);
 });
 
 test("hands-on verification and proof package bind every claim to the exact artifact", async () => {
   const id = projectId("proof");
-  const code = "function summarizeScores(input) { if (!input.length) return []; return input.map(Number); }";
+  const code = "function summarizeScores(input) { if (!input.length) return []; return input.map(Number); } module.exports = { summarizeScores };";
   const files = {
     "scores.js": code,
     "scores.test.js": "const { summarizeScores } = require('./scores'); test('empty input', () => summarizeScores([]));",
@@ -200,13 +273,13 @@ test("hands-on verification and proof package bind every claim to the exact arti
     const answer = question.focus === "purpose"
       ? "summarizescores transforms validated input because each value becomes a numeric output."
       : question.focus === "prediction"
-        ? "When input is empty, the first branch returns an empty result because no mapping executes."
+        ? "When input is empty, the first branch returns [] because no mapping executes."
         : question.focus === "modification"
-          ? "if (!Array.isArray(input)) throw new Error('validate input'); return summarizeScores(input);"
+          ? "function summarizeScores(input) { if (!Array.isArray(input)) throw new Error('validate input'); if (!input.length) return []; return input.map(Number); } module.exports = { summarizeScores };"
           : question.focus === "debugging"
-            ? "The first unsafe operation receives null input, so length access fails and the trace stops there."
+            ? "The first operation is a TypeError trace when null input reaches the unsafe length access."
             : question.focus === "dataflow"
-              ? "untrusted input -> validate trust boundary -> trusted state -> persistence output"
+              ? "input -> input.map -> return"
               : "For a batch, preserve the invariant for each input before producing each output.";
     return [question.id, answer];
   }));
@@ -222,8 +295,10 @@ test("hands-on verification and proof package bind every claim to the exact arti
     actor: { name: "Lin", kind: "human" },
   });
   assert.equal(verification.passed, true);
-  assert.ok(verification.dimensions.modification >= 60);
-  assert.ok(verification.dimensions.debugging >= 60);
+  assert.ok(verification.dimensions.modification >= 80);
+  assert.ok(verification.dimensions.debugging >= 70);
+  assert.equal(verification.executionEvidence.modification.compiled, true);
+  assert.equal(verification.executionEvidence.modification.preservesValid, true);
 
   const evidencePackage = await evidenceService.createPackage(id, {
     title: "Make score summaries total",
@@ -241,6 +316,8 @@ test("hands-on verification and proof package bind every claim to the exact arti
   assert.equal(evidencePackage.status, "ready");
   assert.equal(evidencePackage.score, 100);
   assert.equal(evidencePackage.attestations.every((item) => item.status === "verified"), true);
+  assert.match(evidencePackage.signature, /^hmac-sha256:evidence-test-v1:/);
+  assert.equal(evidencePackage.signatureIssuer, "codeverse-test-evaluator");
   assert.equal(evidenceService.verifyEvidencePackage(evidencePackage), true);
   const packageVerification = await evidenceService.verifyPackage(id, evidencePackage.id);
   assert.equal(packageVerification.verified, true);
@@ -250,10 +327,10 @@ test("hands-on verification and proof package bind every claim to the exact arti
 
 test("digital twin combines static dependencies with runtime, data, queue, provider, and deployment telemetry", () => {
   const events = [
-    { type: "trace.observed" },
-    { type: "network.request" },
-    { type: "database.change" },
-    { type: "deployment.succeeded" },
+    { id: "trace-event", type: "trace.observed", fileName: "src/app.js", payload: { traceId: "trace-1", callerFile: "src/app.js", calleeFile: "src/scores.js" } },
+    { id: "network-event", type: "network.request", fileName: "src/app.js", payload: { url: "/api/scores" } },
+    { id: "database-event", type: "database.change", fileName: "src/scores.js", payload: { target: "scores", operation: "read" } },
+    { id: "deployment-event", type: "deployment.succeeded", payload: {} },
   ];
   const twin = evidenceService.createDigitalTwin({
     activeFile: "src/scores.js",
@@ -278,8 +355,20 @@ test("digital twin combines static dependencies with runtime, data, queue, provi
   assert.equal(twin.telemetry.traces, 1);
   assert.equal(twin.telemetry.deployments, 1);
   assert.ok(twin.impact.confidence >= 60);
+  assert.equal(twin.analysis.engine, "ts-morph-compiler");
+  assert.ok(twin.analysis.runtimeCorrelations >= 3);
+  assert.ok(twin.edges.some((edge) => edge.evidence === "runtime-trace" || edge.evidence === "otel-span"));
 });
 
+test("every built-in Arena fault fails its private executable acceptance suite", async () => {
+  const scenarios = await arenaService.listScenarios({ includeHidden: true });
+  const builtIns = scenarios.filter((scenario) => !scenario.organizationId);
+  assert.ok(builtIns.length >= 8);
+  for (const scenario of builtIns) {
+    const baseline = await arenaAcceptance.evaluateArenaSubmission(scenario, scenario.starterFiles);
+    assert.equal(baseline.verified, false, scenario.id + " starter fault must fail hidden acceptance");
+  }
+});
 test("engineering arena provides eight scenarios, consent, timing, policies, grading, reports, and leaderboard", async () => {
   const id = projectId("arena");
   const scenarios = await arenaService.listScenarios();
@@ -296,6 +385,7 @@ test("engineering arena provides eight scenarios, consent, timing, policies, gra
     allowedAI: "limited",
     starterFiles: { "worker.js": "throw new Error('billing unavailable');" },
     injectedFaults: [{ id: "billing-fault", description: "Worker aborts before retry.", hidden: true, files: { "worker.js": "throw new Error('billing unavailable');" } }],
+    acceptanceTests: [{ id: "worker-recovers", code: "const assert = require('node:assert/strict'); const worker = require('../worker.js'); assert.equal(worker.recovered(), true);" }],
   }, { username: "Evaluator One" });
   assert.equal(custom.organizationId, "acme-evaluation");
   assert.ok((await arenaService.listScenarios({ includeHidden: true })).some((scenario) => scenario.id === custom.id));
@@ -327,6 +417,15 @@ test("engineering arena provides eight scenarios, consent, timing, policies, gra
     arenaService.startSession(id, { scenarioId: "vulnerable-api", consentRecorded: false }, {}),
     /consent/i
   );
+  const failingSession = await arenaService.startSession(id, {
+    scenarioId: "vulnerable-api",
+    consentRecorded: true,
+    privacyMode: "full",
+  }, { username: "Baseline Candidate" });
+  const failingGrade = await arenaService.submitSession(id, failingSession.id, { files: failingSession.workspace }, { events: [], integrity: { verified: true, checkedEvents: 0 } });
+  assert.equal(failingGrade.acceptance.verified, false);
+  assert.equal(failingGrade.score.finalCorrectness, 0);
+
   const session = await arenaService.startSession(id, {
     scenarioId: "vulnerable-api",
     consentRecorded: true,
@@ -351,12 +450,19 @@ test("engineering arena provides eight scenarios, consent, timing, policies, gra
     ],
     integrity: { verified: true, checkedEvents: 8 },
   };
-  const graded = await arenaService.submitSession(id, session.id, { reviewerNotes: ["Candidate contained the trust boundary."] }, evidenceSnapshot);
+  const graded = await arenaService.submitSession(id, session.id, {
+    files: { "route.js": "exports.load = (db, request) => db.query('SELECT * FROM users WHERE id = $1', [request.query.id]);" },
+    reviewerNotes: ["Candidate contained the trust boundary."],
+  }, evidenceSnapshot);
   assert.equal(graded.status, "graded");
   assert.ok(graded.weightedScore > 0);
+  assert.equal(graded.acceptance.verified, true);
+  assert.equal(graded.acceptance.score, 100);
+  assert.equal(graded.score.finalCorrectness, 100);
   assert.equal(graded.signedReport.consentRecorded, true);
   assert.equal(graded.signedReport.privacyMode, "redacted");
-  assert.match(graded.signedReport.signature, /^(sha256|hmac-sha256):/);
+  assert.match(graded.signedReport.signature, /^hmac-sha256:arena-test-v1:/);
+  assert.equal(graded.signedReport.signatureIssuer, "codeverse-test-arena");
   const reportVerification = await arenaService.verifySignedReport(id, graded.id);
   assert.equal(reportVerification.verified, true);
   assert.equal(reportVerification.digestVerified, true);

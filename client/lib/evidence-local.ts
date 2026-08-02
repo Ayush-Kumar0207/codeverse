@@ -159,7 +159,7 @@ function graphFor(snapshot: EvidenceOSSnapshot) {
   const requirements = snapshot.packages.filter((item) => item.requirement).map((item) => {
     const id = "requirement:" + item.id;
     addNode({ id, kind: "requirement", label: item.requirement, status: item.status === "ready" ? "passed" : "warning" });
-    return { id, files: item.files };
+    return { id, digest: item.changeDigest };
   });
   const eventNodes = new Map<string, string>();
   snapshot.events
@@ -185,39 +185,55 @@ function graphFor(snapshot: EvidenceOSSnapshot) {
         eventId: event.id,
       });
     });
-  let lastChange: string | undefined;
-  let lastFailure: string | undefined;
-  let lastRuntime: string | undefined;
+  const eventDigest = (event: EngineeringEvent) => {
+    const payload = event.payload || {};
+    if (typeof payload.subjectDigest === "string") return payload.subjectDigest;
+    if (typeof payload.sourceDigest === "string") return payload.sourceDigest;
+    if (typeof payload.changeDigest === "string") return payload.changeDigest;
+    if (payload.files && typeof payload.files === "object" && !Array.isArray(payload.files)) {
+      const files = Object.fromEntries(Object.entries(payload.files).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
+      if (Object.keys(files).length) return localWorkspaceDigest(files);
+    }
+    return "";
+  };
+  const changeTypes = new Set<EngineeringEvent["type"]>(["code.changed", "file.created", "file.deleted", "branch.created"]);
+  const changesByDigest = new Map<string, EngineeringEvent[]>();
+  snapshot.events.forEach((event) => {
+    if (!changeTypes.has(event.type)) return;
+    const value = eventDigest(event);
+    if (value) changesByDigest.set(value, [...(changesByDigest.get(value) || []), event]);
+  });
   for (const event of snapshot.events) {
     const current = eventNodes.get(event.id);
-    if (event.causedBy) addEdge(eventNodes.get(event.causedBy), current, "derived-from");
-    if (/^(code\.changed|file\.created|file\.deleted|branch\.created)$/.test(event.type)) {
-      addEdge(lastFailure, current, "caused-fix");
-      requirements.filter((item) => !item.files.length || !event.fileName || item.files.includes(event.fileName)).slice(-2)
-        .forEach((item) => addEdge(item.id, current, "implements"));
-      lastChange = current;
-      lastFailure = undefined;
-    } else if (/^(test|runtime)\.failed$/.test(event.type)) {
-      addEdge(lastChange, current, "verified-by");
-      lastFailure = current;
-      lastRuntime = current;
-    } else if (/^(test\.passed|runtime\.succeeded)$/.test(event.type)) {
-      addEdge(lastChange, current, "verified-by");
-      lastRuntime = current;
-    } else if (event.type === "review.completed" || event.type === "security.finding") {
-      addEdge(lastChange, current, "reviewed-by");
-    } else if (event.type.startsWith("deployment.")) {
-      addEdge(lastChange, current, "deployed-as");
-    } else if (event.type === "network.request") {
-      addEdge(lastChange, current, "calls");
-      addEdge(lastRuntime, current, "traced-by");
-    } else if (event.type === "database.change") {
-      addEdge(lastChange, current, event.payload.operation === "read" ? "reads-from" : "writes-to");
-    } else if (event.type === "artifact.attested" || event.type === "proof.verified") {
-      addEdge(lastChange, current, "attested-by");
+    if (!current) continue;
+    const payload = event.payload || {};
+    if (event.causedBy) {
+      addEdge(eventNodes.get(event.causedBy), current, "derived-from");
+      const cause = snapshot.events.find((candidate) => candidate.id === event.causedBy);
+      if (changeTypes.has(event.type) && /^(test|runtime)\.failed$/.test(cause?.type || "")) addEdge(eventNodes.get(event.causedBy), current, "caused-fix");
     }
-  }
-  return { nodes, edges };
+    for (const resolved of Array.isArray(payload.resolvesEventIds) ? payload.resolvesEventIds : []) addEdge(eventNodes.get(String(resolved)), current, "caused-fix");
+    const traceId = typeof payload.traceId === "string" ? payload.traceId : "";
+    if (traceId) {
+      const traceNode = "trace:" + traceId;
+      addNode({ id: traceNode, kind: "runtime", label: "Trace " + traceId, status: "neutral" });
+      addEdge(current, traceNode, "traced-by");
+    }
+    const digest = eventDigest(event);
+    if (changeTypes.has(event.type)) {
+      requirements.filter((item) => item.digest === digest)
+        .forEach((item) => addEdge(item.id, current, "implements"));
+      continue;
+    }
+    const changes = changesByDigest.get(digest) || [];
+    const relation: EvidenceGraphEdge["relation"] | undefined = /^(test\.|runtime\.|command\.)/.test(event.type) ? "verified-by"
+      : event.type === "review.completed" || event.type === "security.finding" ? "reviewed-by"
+        : event.type.startsWith("deployment.") ? "deployed-as"
+          : event.type === "network.request" ? "calls"
+            : event.type === "database.change" ? payload.operation === "read" ? "reads-from" : "writes-to"
+              : event.type === "artifact.attested" || event.type === "proof.verified" ? "attested-by" : undefined;
+    if (relation) changes.forEach((change) => addEdge(eventNodes.get(change.id), current, relation));
+  }  return { nodes, edges };
 }
 
 function replayFor(events: EngineeringEvent[]): EvidenceOSSnapshot["replay"] {
@@ -275,6 +291,7 @@ function replayFor(events: EngineeringEvent[]): EvidenceOSSnapshot["replay"] {
       });
       const terminal = event.type === "command.executed" ? {
         command: String(payload.command || payload.language || ""),
+        ...(typeof payload.language === "string" ? { language: payload.language } : {}),
         ...(Number.isFinite(Number(payload.exitCode)) ? { exitCode: Number(payload.exitCode) } : {}),
         ...(typeof payload.outputDigest === "string" ? { outputDigest: payload.outputDigest } : {}),
       } : undefined;
@@ -308,11 +325,13 @@ function replayFor(events: EngineeringEvent[]): EvidenceOSSnapshot["replay"] {
       snapshotComplete: value.snapshotComplete !== false && capturedSourceDigest === declaredSourceDigest,
       dependencyVersions: typeof value.dependencyVersions === "object" && value.dependencyVersions ? value.dependencyVersions as Record<string, string> : {},
       environmentKeys: Array.isArray(value.environmentKeys) ? value.environmentKeys.map(String).sort() : [],
+      environment: value.environment && typeof value.environment === "object" ? Object.fromEntries(Object.entries(value.environment).map(([key, item]) => [String(key), String(item)])) : {},
       capturedAt: environment?.occurredAt || sessionEvents[0]?.occurredAt || new Date(0).toISOString(),
     };
     if (manifest.runtime === "unknown") missing.add("runtime version");
     if (!manifest.lockfileHash) missing.add("lockfile digest");
     if (!manifest.snapshotComplete) missing.add("complete workspace snapshot");
+    if (manifest.environmentKeys.some((key) => !Object.hasOwn(manifest.environment, key))) missing.add("sealed environment values");
     return {
       sessionId,
       manifest,
@@ -329,7 +348,6 @@ function scorecardFor(snapshot: EvidenceOSSnapshot): ArenaScorecard {
   const events = snapshot.events;
   const successes = events.filter((event) => ["runtime.succeeded", "test.passed"].includes(event.type)).length;
   const failures = events.filter((event) => ["runtime.failed", "test.failed"].includes(event.type)).length;
-  const executions = successes + failures;
   const tests = events.filter((event) => event.type.startsWith("test.")).length;
   const changes = events.filter((event) => event.type === "code.changed").length;
   const prompts = events.filter((event) => event.type === "ai.prompted").length;
@@ -337,13 +355,14 @@ function scorecardFor(snapshot: EvidenceOSSnapshot): ArenaScorecard {
   const verification = snapshot.verifications.at(-1);
   const security = snapshot.reviews.at(-1)?.agents.find((agent) => agent.id === "security");
   const aiRatio = prompts / Math.max(1, prompts + changes);
+  const acceptance = [...snapshot.arenas].reverse().find((session) => session.acceptance?.verified)?.acceptance;
   return {
-    finalCorrectness: executions ? clamp((successes / executions) * 100) : 0,
+    finalCorrectness: acceptance?.score || 0,
     problemSolvingProcess: clamp(kinds * 12 + Math.min(20, events.length)),
     debuggingAbility: failures ? (successes ? 90 : 25) : successes ? 82 : 0,
     testQuality: clamp(tests * 24 + (events.some((event) => event.type === "test.passed") ? 20 : 0)),
-    codeComprehension: verification?.score || 0,
-    securityAwareness: security ? (security.status === "passed" ? 92 : security.status === "warning" ? 66 : 30) : 0,
+    codeComprehension: verification?.executionEvidence ? verification.score : 0,
+    securityAwareness: snapshot.reviews.at(-1)?.isolation?.independentProcesses ? (security?.status === "passed" ? 92 : security?.status === "warning" ? 66 : 30) : 0,
     evidenceIntegrity: snapshot.integrity.verified ? 100 : 0,
     aiDependence: aiRatio > 0.55 ? "High" : aiRatio > 0.2 ? "Moderate" : "Low",
   };
@@ -446,8 +465,8 @@ function localAgent(
     findings: [],
     engine: "tool",
     toolRuns: [{
-      tool: id + "-local-analyzer",
-      status: status === "blocked" ? "failed" : "passed",
+      tool: id + "-unverified-preview",
+      status: status === "passed" ? "passed" : "failed",
       durationMs: 1,
       outputDigest: localDigest({ id, status, summary }),
       summary,
@@ -461,48 +480,43 @@ export function createLocalReview(
   requirement: string,
   rollback: string
 ): ReviewBoardRun {
-  const names = Object.keys(files);
-  const content = Object.values(files).join("\n");
-  const hasTests = names.some((name) => /test|spec/i.test(name));
-  const secret = /(api[_-]?key|secret|password|token)\s*[:=]\s*["'][^"'\n]{8,}["']/i.test(content);
-  const performanceRisk = /for\s*\([^)]*\)[\s\S]{0,220}for\s*\(/m.test(content);
-  const agents: ReviewAgentResult[] = [
-    localAgent("builder", "Builder", "Explains the intended implementation path.", "passed", names.length + " files indexed for review."),
-    localAgent("reviewer", "Correctness Reviewer", "Searches for correctness failures.", /TODO|FIXME|catch\s*\([^)]*\)\s*{\s*}/.test(content) ? "warning" : "passed", "Correctness parser and defect-pattern analyzer completed."),
-    localAgent("security", "Security Agent", "Searches for exploit paths.", secret ? "blocked" : "passed", secret ? "Credential-like literal requires removal." : "No high-signal security hazards detected."),
-    localAgent("test", "Test Agent", "Demands failure-oriented tests.", hasTests ? "passed" : "warning", hasTests ? "A test surface is present." : "Add a regression test to the proof package."),
-    localAgent("performance", "Performance Agent", "Checks likely regressions.", performanceRisk ? "warning" : "passed", performanceRisk ? "Confirm the nested iteration input bound." : "No high-signal performance regression detected."),
-    localAgent("architecture", "Architecture Agent", "Checks boundaries and coupling.", requirement ? "passed" : "warning", requirement ? "The change is linked to a requirement." : "Link the change to a requirement."),
-    localAgent("devils-advocate", "Devil's Advocate", "Challenges reversibility and assumptions.", rollback ? "passed" : "warning", rollback ? "A rollback path is documented." : "Document a rollback path."),
-  ];
-  const blocked = agents.filter((agent) => agent.status === "blocked").length;
-  const warnings = agents.filter((agent) => agent.status === "warning").length;
+  void rollback;
   const patchDigest = localWorkspaceDigest(files);
-  const verdict = blocked ? "blocked" : warnings > 2 ? "changes-requested" : "approved";
-  const challenges = agents.filter((agent) => agent.status !== "passed").map((agent) => ({
+  const roles: Array<[ReviewAgentResult["id"], string, string]> = [
+    ["builder", "Builder", "Produces challenge-driven revisions in the server sandbox."],
+    ["reviewer", "Correctness Reviewer", "Runs compiler-backed correctness analysis."],
+    ["security", "Security Agent", "Runs isolated security-boundary analysis."],
+    ["test", "Test Agent", "Compiler-links regression tests to changed source."],
+    ["performance", "Performance Agent", "Enforces artifact-bound performance budgets."],
+    ["architecture", "Architecture Agent", "Builds compiler-resolved module dependencies."],
+    ["devils-advocate", "Devil's Advocate", "Challenges causal and rollback claims."],
+  ];
+  const summary = "Unverified local preview; the isolated server review board has not executed.";
+  const agents = roles.map(([id, name, responsibility]) => localAgent(id, name, responsibility, "warning", summary));
+  const challenges = agents.map((agent) => ({
     from: agent.id,
     to: "builder" as const,
-    claim: agent.summary,
+    claim: "Run the isolated server role before treating this artifact as reviewed.",
     resolved: false,
   }));
   return {
-    id: makeId("review"),
+    id: makeId("review-preview"),
     projectId,
     requirement,
-    verdict,
-    score: clamp(100 - blocked * 22 - warnings * 7),
+    verdict: "changes-requested",
+    score: 0,
     agents,
     createdAt: new Date().toISOString(),
+    initialPatchDigest: patchDigest,
     patchDigest,
-    rounds: [
-      { round: 1, patchDigest, phase: "challenge", challenges, builderResponse: "Local builder submitted a digest-addressed patch.", verdict },
-      { round: 2, patchDigest, phase: "consensus", challenges, builderResponse: challenges.length ? "Revision required." : "All challenges resolved.", verdict },
-    ],
-    consensus: clamp((agents.filter((agent) => agent.status === "passed").length / agents.length) * 100),
+    revisedFiles: files,
+    builderActions: [],
+    rounds: [{ round: 1, patchDigest, phase: "challenge", challenges, builderResponse: "Server synchronization is required for revision and consensus.", verdict: "changes-requested" }],
+    consensus: 0,
     executedTools: agents.flatMap((agent) => agent.toolRuns?.map((run) => run.tool) || []),
+    isolation: { requiredInProduction: "docker", roleCount: 7, independentProcesses: 0 },
   };
 }
-
 export function createLocalPackage(
   projectId: string,
   files: Record<string, string>,
@@ -526,13 +540,13 @@ export function createLocalPackage(
     source: Boolean(matching(["code.changed", "snapshot.created", "artifact.attested"])),
     test: Boolean(matching(["test.passed"])),
     runtime: Boolean(matching(["runtime.succeeded"])),
-    security: snapshot.reviews.some((review) => review.patchDigest === changeDigest && review.verdict === "approved"),
+    security: false,
     compatibility: !hasApi || Boolean(compatibility),
     performance: Boolean(matching(["performance.measurement"])),
     migration: !hasMigration || Boolean(matching(["database.change"])),
     deployment: Boolean(matching(["deployment.succeeded"])),
     rollback: Boolean(matching(["replay.executed", "branch.created"])),
-    understanding: snapshot.verifications.some((verification) => verification.codeDigest === changeDigest && verification.passed),
+    understanding: false,
   };
   const now = new Date().toISOString();
   const makeAttestation = (
@@ -583,7 +597,7 @@ export function createLocalPackage(
     files: Object.keys(files),
     checks,
     score,
-    status: checks.every((item) => item.status === "passed") && exactArtifactVerified ? "ready" as const : "needs-evidence" as const,
+    status: "needs-evidence" as const,
     createdAt: now,
     createdBy: actor,
     changeDigest,
@@ -591,7 +605,7 @@ export function createLocalPackage(
     attestations,
     exactArtifactVerified,
   };
-  return { ...unsigned, signature: "local-sha256:" + localDigest(unsigned) };
+  return { ...unsigned, signature: "unverified-local:" + localDigest(unsigned) };
 }
 function codeConcepts(code: string) {
   const identifiers = [...code.matchAll(/\b(?:function|class|const|let|var|def)\s+([A-Za-z_$][\w$]*)/g)]
@@ -641,7 +655,7 @@ export function verifyLocalUnderstanding(
         ? (/(?:->|→)/.test(answer) && answer.split(/(?:->|→)/).length >= 3 ? 35 : 0)
         : /\b(because|when|therefore|then|first|next)\b/.test(answer) ? 25 : 0;
     const score = clamp(conceptScore + structureScore + (/\b(input|output|error|null|empty|state|branch|validate|return)\b/.test(answer) ? 20 : 0));
-    return { questionId: question.id, score, detail: score >= 70 ? "Behavioral task is concrete and falsifiable." : "Complete the executable or predictive task." };
+    return { questionId: question.id, score, detail: "Unverified local preview; executable compiler and runtime probes require the server." };
   });
   const focusScore = (focus: UnderstandingChallenge["questions"][number]["focus"][]) => {
     const selected = challenge.questions.map((question, index) => ({ question, score: feedback[index].score })).filter((item) => focus.includes(item.question.focus));
@@ -668,7 +682,7 @@ export function verifyLocalUnderstanding(
     challengeId: challenge.id,
     fileName: challenge.fileName,
     score,
-    passed: score >= 70 && dimensions.modification >= 60 && dimensions.debugging >= 60,
+    passed: false,
     feedback,
     createdAt: new Date().toISOString(),
     dimensions,
@@ -683,123 +697,73 @@ export function verifyLocalUnderstanding(
     codeDigest: challenge.codeDigest,
   };
 }
-function classifyFile(fileName: string, content: string): EngineeringDigitalTwin["nodes"][number]["kind"] {
-  if (/test|spec/i.test(fileName)) return "test";
-  if (/migration/i.test(fileName)) return "migration";
-  if (/docker|kubernetes|k8s|helm|vercel|deploy/i.test(fileName)) return "deployment";
-  if (/queue|worker|consumer|kafka|rabbit|bull/i.test(fileName + content)) return "queue";
-  if (/provider|stripe|sendgrid|twilio|s3|openai|gemini/i.test(fileName + content)) return "provider";
-  if (/config|\.json$|\.ya?ml$/i.test(fileName)) return "config";
-  if (/route|controller|api/i.test(fileName)) return "api";
-  if (/service|server|socket/i.test(fileName)) return "service";
-  if (/schema|model|store|db/i.test(fileName)) return "data";
-  if (/\.tsx?$|\.jsx?$|\.html$|\.css$/i.test(fileName)) return "frontend";
-  return "module";
-}
-
 export function createLocalTwin(
   files: Record<string, string>,
   activeFile: string,
   events: EngineeringEvent[] = []
 ): EngineeringDigitalTwin {
   const names = Object.keys(files);
-  const nodes: EngineeringDigitalTwin["nodes"] = names.map((fileName) => ({
-    id: "file:" + fileName,
-    kind: classifyFile(fileName, files[fileName]),
-    label: fileName,
-    fileName,
-  }));
+  const nodes: EngineeringDigitalTwin["nodes"] = names.map((fileName) => {
+    const extension = fileName.split(".").at(-1)?.toLowerCase();
+    return {
+      id: "file:" + fileName,
+      kind: ["html", "css", "scss", "svg"].includes(extension || "") ? "frontend" : "module",
+      label: fileName,
+      fileName,
+    };
+  });
   const edges: EngineeringDigitalTwin["edges"] = [];
-  const nodeIds = new Set(nodes.map((node) => node.id));
-  const addNode = (node: EngineeringDigitalTwin["nodes"][number]) => {
-    if (!nodeIds.has(node.id)) {
-      nodeIds.add(node.id);
-      nodes.push(node);
+  for (const fileName of names) {
+    if (fileName.split(".").at(-1)?.toLowerCase() !== "html") continue;
+    for (const match of files[fileName].matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
+      let request = match[1].split(/[?#]/)[0];
+      while (request.startsWith("./")) request = request.slice(2);
+      const target = names.find((name) => name === request || name.endsWith("/" + request));
+      if (!target) continue;
+      edges.push({
+        id: ["file:" + fileName, "renders", "file:" + target].join(":"),
+        source: "file:" + fileName,
+        target: "file:" + target,
+        relation: "renders",
+        evidence: "html-parser",
+      });
     }
-    return node.id;
-  };
-  const addEdge = (source: string, target: string, relation: EngineeringDigitalTwin["edges"][number]["relation"]) => {
-    const id = [source, relation, target].join(":");
-    if (!edges.some((edge) => edge.id === id)) edges.push({ id, source, target, relation });
-  };
-  names.forEach((fileName) => {
-    const content = files[fileName];
-    for (const match of content.matchAll(/(?:from\s+|require\s*\(\s*|import\s*\(\s*)["']([^"']+)["']/g)) {
-      const request = match[1];
-      const stem = request.replace(/^.*[/\\]/, "");
-      const target = names.find((candidate) => candidate !== fileName && (
-        candidate.replace(/\.[^.]+$/, "").endsWith(request) || candidate.replace(/^.*[/\\]/, "").startsWith(stem)
-      ));
-      if (target) addEdge("file:" + fileName, "file:" + target, "imports");
-      else if (!request.startsWith(".")) addEdge("file:" + fileName, addNode({ id: "provider:" + request, kind: "provider", label: request }), "calls");
-    }
-    for (const match of content.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
-      const request = match[1].split(/[?#]/)[0].replace(/^\.\//, "");
-      const target = names.find((name) => name !== fileName && (name === request || name.endsWith("/" + request) || name.replace(/^.*[/\\]/, "") === request.replace(/^.*[/\\]/, "")));
-      if (target) addEdge("file:" + fileName, "file:" + target, "renders");
-    }    for (const match of content.matchAll(/(?:fetch|axios\.(?:get|post|put|patch|delete))\s*\(\s*["']([^"']+)["']/g)) {
-      addEdge("file:" + fileName, addNode({ id: "api:" + match[1], kind: "api", label: match[1] }), "calls");
-    }
-    for (const match of content.matchAll(/\b(?:from|into|update|join|table)\s+["']?([a-z_][\w.]*)/gi)) {
-      addEdge("file:" + fileName, addNode({ id: "data:" + match[1], kind: "data", label: match[1] }), /\b(?:into|update)\b/i.test(match[0]) ? "writes" : "reads");
-    }
-    for (const match of content.matchAll(/\b(?:publish|emit|sendToQueue)\s*\(\s*["']([^"']+)["']/g)) {
-      addEdge("file:" + fileName, addNode({ id: "queue:" + match[1], kind: "queue", label: match[1] }), "publishes");
-    }
-  });
-  names.filter((name) => /test|spec/i.test(name)).forEach((test) => {
-    const stem = test.replace(/^.*[/\\]/, "").replace(/\.(test|spec).*$/, "");
-    const target = names.find((name) => name !== test && name.replace(/^.*[/\\]/, "").startsWith(stem));
-    if (target) addEdge("file:" + test, "file:" + target, "tests");
-  });
+  }
   const activeId = "file:" + activeFile;
   const affected = new Set<string>();
-  let frontier = [activeId];
-  for (let depth = 0; depth < 3; depth += 1) {
-    const next: string[] = [];
-    frontier.forEach((current) => edges.forEach((edge) => {
-      const neighbor = edge.source === current ? edge.target : edge.target === current ? edge.source : "";
-      if (neighbor && !affected.has(neighbor)) {
-        affected.add(neighbor);
-        next.push(neighbor);
-      }
-    }));
-    frontier = next;
+  for (const edge of edges) {
+    if (edge.source === activeId) affected.add(edge.target);
+    if (edge.target === activeId) affected.add(edge.source);
   }
-  affected.delete(activeId);
   const affectedFiles = [...affected].filter((id) => id.startsWith("file:")).map((id) => id.slice(5));
-  const testsToRun = nodes.filter((node) => node.kind === "test" && affected.has(node.id)).map((node) => node.fileName).filter((value): value is string => Boolean(value));
-  const securityBoundaries = nodes.filter((node) => node.kind === "provider" || /auth|token|permission|secret/i.test(node.label)).map((node) => node.label);
-  const migrationsRequired = /schema|model|migration|database/i.test(activeFile + (files[activeFile] || "")) ? names.filter((name) => /migration|schema/i.test(name)) : [];
-  const apiConsumers = edges.filter((edge) => edge.target === activeId && edge.relation === "calls").map((edge) => edge.source.replace(/^file:/, ""));
   const telemetry = {
     traces: events.filter((event) => event.type === "trace.observed").length,
     requests: events.filter((event) => event.type === "network.request").length,
     databaseMutations: events.filter((event) => event.type === "database.change").length,
     deployments: events.filter((event) => event.type.startsWith("deployment.")).length,
   };
-  const risks = [
-    ...(/route|api|controller/i.test(activeFile) ? ["API compatibility boundary"] : []),
-    ...(migrationsRequired.length ? ["Data migration and rollback"] : []),
-    ...(securityBoundaries.length ? ["Security boundary crossed"] : []),
-    ...(!testsToRun.length ? ["No runtime-linked test"] : []),
-  ];
-  const radius = affectedFiles.length + risks.length + apiConsumers.length;
   return {
     nodes,
     edges,
     impact: {
       activeFile,
       affectedFiles,
-      testsToRun,
-      risks,
-      blastRadius: radius >= 8 ? "high" : radius >= 4 ? "medium" : "low",
-      securityBoundaries,
-      migrationsRequired,
-      apiConsumers,
-      confidence: clamp(55 + Math.min(25, edges.length * 2) + Object.values(telemetry).filter((value) => value > 0).length * 5),
+      testsToRun: [],
+      risks: ["Authoritative compiler, coverage, and runtime impact analysis requires server synchronization."],
+      blastRadius: "low",
+      securityBoundaries: [],
+      migrationsRequired: [],
+      apiConsumers: [],
+      confidence: 20,
     },
     telemetry,
+    analysis: {
+      engine: "unverified-local-preview",
+      compilerDiagnostics: 0,
+      runtimeCorrelations: 0,
+      coverageFiles: [],
+      symbolFiles: 0,
+    },
     generatedAt: new Date().toISOString(),
   };
 }
@@ -815,7 +779,7 @@ export function createDemoEvidenceSnapshot(
   const boundPayload = { files, activeFile: "script.js", sourceDigest, subjectDigest: sourceDigest };
   const inputs: EvidenceEventInput[] = [
     { type: "session.started", summary: "Assessment session started in a reproducible workspace.", source: "session", occurredAt: new Date(now - 12 * 60_000).toISOString() },
-    { type: "session.environment", summary: "Exact demo runtime and workspace manifest captured.", source: "session-recorder", payload: { files, activeFile: "script.js", manifest: { runtime: "CodeVerse demo browser", platform: "web", architecture: "browser-sandbox", lockfileHash: localDigest("demo-lockfile"), sourceDigest, snapshotComplete: true, dependencyVersions: {}, environmentKeys: [] } }, occurredAt: new Date(now - 11 * 60_000).toISOString() },
+    { type: "session.environment", summary: "Exact demo runtime and workspace manifest captured.", source: "session-recorder", payload: { files, activeFile: "script.js", manifest: { runtime: "CodeVerse demo browser", platform: "web", architecture: "browser-sandbox", lockfileHash: localDigest("demo-lockfile"), sourceDigest, snapshotComplete: true, dependencyVersions: {}, environmentKeys: [], environment: {} } }, occurredAt: new Date(now - 11 * 60_000).toISOString() },
     { type: "decision.recorded", summary: "Keep score parsing separate from summary calculation.", source: "decision-log", occurredAt: new Date(now - 10 * 60_000).toISOString() },
     { type: "runtime.failed", summary: "Empty input produced an invalid maximum.", source: "runner", fileName: "script.js", payload: boundPayload, occurredAt: new Date(now - 9 * 60_000).toISOString() },
     { type: "ai.prompted", summary: "Asked AI to identify the failing edge case.", source: "ai-assistant", actor: { name: currentUser, kind: "human" }, occurredAt: new Date(now - 8 * 60_000).toISOString() },
@@ -831,9 +795,7 @@ export function createDemoEvidenceSnapshot(
     snapshot = appendLocalEvidenceEvent(snapshot, sessionId, currentUser, input).snapshot;
   });
   const review = createLocalReview(projectId, files, "Summarize a list of scores safely.", "Restore the previous script.js snapshot.");
-  review.agents = review.agents.map((agent) => agent.id === "test" ? { ...agent, status: "passed", summary: "Recorded regression execution covers the empty-input failure." } : agent);
-  review.verdict = "approved";
-  review.score = 93;
+
   const challenge = createLocalChallenge(projectId, "script.js", files["script.js"] || "", sourceDigest);
   const verification: UnderstandingVerification = {
     id: "demo-verification",
@@ -841,8 +803,8 @@ export function createDemoEvidenceSnapshot(
     challengeId: challenge.id,
     fileName: "script.js",
     score: 86,
-    passed: true,
-    feedback: challenge.questions.map((question) => ({ questionId: question.id, score: 86, detail: "Behavioral task is concrete and falsifiable." })),
+    passed: false,
+    feedback: challenge.questions.map((question) => ({ questionId: question.id, score: 0, detail: "Unverified local preview; executable server probes have not run." })),
     createdAt: new Date(now - 30_000).toISOString(),
     dimensions: { explanation: 88, prediction: 84, modification: 86, debugging: 87, dataFlow: 85 },
     behavioralSignals: { answerSimilarity: 12, revisionCount: 3, elapsedMs: 274000, continuity: 94, pasteCount: 0, externalFocusChanges: 0 },

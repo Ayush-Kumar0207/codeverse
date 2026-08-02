@@ -208,3 +208,24 @@ CREATE TABLE IF NOT EXISTS public.arena_scenario_templates (
 
 CREATE INDEX IF NOT EXISTS arena_scenario_templates_organization_idx
     ON public.arena_scenario_templates(organization_id, created_at DESC);
+
+-- EvidenceOS execution-grade verification and authenticated issuance.
+ALTER TABLE public.evidence_packages
+  ADD COLUMN IF NOT EXISTS signature_algorithm TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS signature_issuer TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS signature_key_id TEXT NOT NULL DEFAULT '';
+
+ALTER TABLE public.evidence_reviews
+  ADD COLUMN IF NOT EXISTS initial_patch_digest TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS revised_files JSONB NOT NULL DEFAULT '{}'::JSONB,
+  ADD COLUMN IF NOT EXISTS builder_actions JSONB NOT NULL DEFAULT '[]'::JSONB,
+  ADD COLUMN IF NOT EXISTS isolation JSONB NOT NULL DEFAULT '{}'::JSONB;
+
+ALTER TABLE public.understanding_verifications
+  ADD COLUMN IF NOT EXISTS execution_evidence JSONB NOT NULL DEFAULT '{}'::JSONB;
+
+ALTER TABLE public.arena_sessions
+  ADD COLUMN IF NOT EXISTS acceptance JSONB;
+
+ALTER TABLE public.arena_scenario_templates
+  ADD COLUMN IF NOT EXISTS acceptance_tests JSONB NOT NULL DEFAULT '[]'::JSONB;

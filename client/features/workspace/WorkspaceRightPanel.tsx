@@ -205,6 +205,7 @@ export function WorkspaceRightPanel({
                     onGenerateChallenge={evidenceOS.generateChallenge}
                     onSubmitUnderstanding={evidenceOS.submitUnderstanding}
                     onBranchFromEvent={evidenceOS.branchFromEvent}
+                    onVerifyReplay={evidenceOS.verifyReplay}
                     onCreateArenaTemplate={evidenceOS.createArenaTemplate}
                     onStartArena={evidenceOS.startArena}
                     onBeginArena={evidenceOS.beginArena}
