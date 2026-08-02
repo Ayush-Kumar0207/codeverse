@@ -31,10 +31,10 @@ function pythonHarness(fileName, primary, fixture, parameterCount) {
     "    print('EVIDENCE_RESULT:' + json.dumps({'status':'threw','name':type(error).__name__,'message':str(error)}, sort_keys=True))",
   ].join("\n");
 }
-function javaHarness(className, primary, fixture) {
+function javaHarness(className, primary, fixture, packageName) {
   const scalar = fixtureScalar(fixture);
   const list = Array.isArray(fixture) ? fixture.map((item) => Number(item) || 0) : [];
-  return `import java.lang.reflect.*;
+  return `${packageName ? "package " + packageName + ";\n" : ""}import java.lang.reflect.*;
 import java.util.*;
 public class EvidenceProbe {
   static Object argument(Class<?> type) {
@@ -120,8 +120,9 @@ function prepareLanguageProbe(files, fileName, source, analysis, fixture) {
   if (language === "java") {
     const className = safeIdentifier((analysis.declarations || []).find((item) => /^[A-Z]/.test(item)) || path.basename(fileName, path.extname(fileName)));
     if (!className) return null;
+    const packageName = /^\s*package\s+([\w.]+)\s*;/m.exec(source)?.[1] || "";
     const runnerName = "EvidenceProbe.java";
-    return { files: { ...candidateFiles, [runnerName]: javaHarness(className, primary, fixture) }, runnerName, language };
+    return { files: { ...candidateFiles, [runnerName]: javaHarness(className, primary, fixture, packageName) }, runnerName, language };
   }
   if (language === "c") {
     const runnerName = ".evidence/probe.c";
@@ -136,7 +137,7 @@ function prepareLanguageProbe(files, fileName, source, analysis, fixture) {
     return { files: { ...candidateFiles, [runnerName]: goHarness(source, primary, fixture, analysis.parameters.length) }, runnerName, language };
   }
   if (language === "rust") {
-    const runnerName = ".evidence_probe.rs";
+    const runnerName = "evidence_probe.rs";
     return { files: { ...candidateFiles, [runnerName]: rustHarness(source, primary, fixture, analysis.parameters.length) }, runnerName, language };
   }
   return null;

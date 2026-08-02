@@ -50,6 +50,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
+          cache: false
       - name: Verify native evidence toolchains
         run: python --version && java --version && gcc --version && g++ --version && go version && rustc --version
       - run: npm ci

@@ -78,7 +78,12 @@ function runtimeCommand(command, files, language) {
   const extension = path.extname(fileName).toLowerCase();
   if (language === "python" || extension === ".py") return ["python", fileName];
   if ([".js", ".cjs", ".mjs"].includes(extension)) return ["node", fileName];
-  if (language === "java" || extension === ".java") return ["java", fileName];
+  if (language === "java" || extension === ".java") {
+    const packageName = /^\s*package\s+([\w.]+)\s*;/m.exec(files[fileName])?.[1];
+    const className = path.basename(fileName, extension);
+    const sources = [fileName, ...Object.keys(files).filter((name) => name !== fileName && path.extname(name).toLowerCase() === ".java")];
+    return ["codeverse-java-run", packageName ? packageName + "." + className : className, ...sources];
+  }
   if (language === "go" || extension === ".go") return ["go", "run", fileName];
   if (language === "c" || extension === ".c") return ["codeverse-compile-run", "c", fileName];
   if (["cpp", "c++"].includes(language) || [".cc", ".cpp", ".cxx"].includes(extension)) return ["codeverse-compile-run", "cpp", fileName];
@@ -140,6 +145,22 @@ async function executeWithProcess(directory, tokens, options) {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Production evidence execution requires the Docker sandbox");
   }
+  if (tokens[0] === "codeverse-java-run") {
+    const outputDirectory = path.join(directory, ".evidence-java");
+    await fs.mkdir(outputDirectory, { recursive: true });
+    const compiled = await runFile("javac", ["-d", outputDirectory, ...tokens.slice(2)], {
+      cwd: directory,
+      timeoutMs: options.timeoutMs,
+      env: safeEnvironment(options.environmentKeys, options.environment),
+    });
+    if (compiled.exitCode !== 0 || compiled.timedOut || compiled.launchError) return { ...compiled, engine: "isolated-process", image: null };
+    const executed = await runFile("java", ["-cp", outputDirectory, tokens[1]], {
+      cwd: directory,
+      timeoutMs: options.timeoutMs,
+      env: safeEnvironment(options.environmentKeys, options.environment),
+    });
+    return { ...executed, stdout: compiled.stdout + executed.stdout, stderr: compiled.stderr + executed.stderr, engine: "isolated-process", image: null };
+  }
   if (tokens[0] === "codeverse-compile-run") {
     const runtime = COMPILED_RUNTIMES.get(tokens[1]);
     if (!runtime) throw new Error("Compiled replay runtime is not allow-listed");
@@ -168,7 +189,7 @@ async function executeWithProcess(directory, tokens, options) {
 }
 
 function configuredImage(tokens, requested) {
-  const runtime = tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
+  const runtime = tokens[0] === "codeverse-java-run" ? "java" : tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
   const variable = {
     node: "EVIDENCE_NODE_RUNNER_IMAGE",
     python: "EVIDENCE_PYTHON_RUNNER_IMAGE",
@@ -216,7 +237,7 @@ async function dockerCommand(args, timeoutMs, cwd) {
 }
 
 function dockerRuntimeEnvironment(tokens) {
-  const runtime = tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
+  const runtime = tokens[0] === "codeverse-java-run" ? "java" : tokens[0] === "codeverse-compile-run" ? tokens[1] : tokens[0];
   if (runtime === "go") return { GOCACHE: "/run/go-cache", GOTMPDIR: "/run" };
   if (runtime === "python" || runtime === "python3") return { PYTHONDONTWRITEBYTECODE: "1" };
   if (runtime === "java") return { JAVA_TOOL_OPTIONS: "-Djava.io.tmpdir=/run" };
@@ -224,6 +245,10 @@ function dockerRuntimeEnvironment(tokens) {
 }
 
 function dockerRuntimeTokens(tokens) {
+  if (tokens[0] === "codeverse-java-run") {
+    const command = 'mkdir -p /run/classes && main="$1" && shift && javac -d /run/classes "$@" && java -cp /run/classes "$main"';
+    return ["/bin/sh", "-c", command, "codeverse-java", ...tokens.slice(1)];
+  }
   if (tokens[0] !== "codeverse-compile-run") return tokens;
   const language = tokens[1];
   const fileName = tokens[2];
