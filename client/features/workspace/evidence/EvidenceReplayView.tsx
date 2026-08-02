@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, CircleDashed, GitBranch, Play, TestTube2 } from "lucide-react";
-import type { EngineeringEvent } from "@shared/types/evidence";
+import { ChevronLeft, ChevronRight, CircleDashed, GitBranch, Play, RotateCcw, TestTube2 } from "lucide-react";
+import type { EngineeringEvent, EngineeringReplaySession } from "@shared/types/evidence";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,14 +10,24 @@ import { eventAccent } from "./EvidencePrimitives";
 
 interface EvidenceReplayViewProps {
   events: EngineeringEvent[];
+  sessions: EngineeringReplaySession[];
   syncing: boolean;
   onBranchFromEvent: (event: EngineeringEvent) => Promise<boolean>;
 }
 
-export function EvidenceReplayView({ events, syncing, onBranchFromEvent }: EvidenceReplayViewProps) {
+export function EvidenceReplayView({ events, sessions, syncing, onBranchFromEvent }: EvidenceReplayViewProps) {
   const replayEvents = useMemo(() => [...events].sort((left, right) => left.sequence - right.sequence), [events]);
   const [index, setIndex] = useState(Math.max(0, replayEvents.length - 1));
+  const [compareIndex, setCompareIndex] = useState(0);
   const selected = replayEvents[index];
+  const comparison = replayEvents[compareIndex];
+  const replaySession = sessions.find((session) => session.sessionId === selected?.sessionId) || sessions.at(-1);
+  const selectedFrame = replaySession?.frames.find((frame) => frame.eventId === selected?.id);
+  const comparisonFrame = replaySession?.frames.find((frame) => frame.eventId === comparison?.id);
+  const changedFiles = selectedFrame && comparisonFrame
+    ? [...new Set([...Object.keys(selectedFrame.files), ...Object.keys(comparisonFrame.files)])]
+        .filter((name) => selectedFrame.files[name] !== comparisonFrame.files[name])
+    : [];
 
   useEffect(() => setIndex(Math.max(0, replayEvents.length - 1)), [replayEvents.length]);
 
@@ -62,6 +72,66 @@ export function EvidenceReplayView({ events, syncing, onBranchFromEvent }: Evide
           </button>
         </div>
       </section>
+
+      {replaySession && (
+        <section className={cn(
+          "rounded-lg border p-3",
+          replaySession.deterministic ? "border-emerald-400/20 bg-emerald-400/[0.04]" : "border-amber-400/20 bg-amber-400/[0.04]"
+        )}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500">Reproducibility manifest</div>
+              <div className="mt-1 text-[10px] text-slate-300">{replaySession.manifest.runtime}</div>
+            </div>
+            <Badge className={cn(
+              "border text-[7px] uppercase",
+              replaySession.deterministic ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200" : "border-amber-400/25 bg-amber-400/10 text-amber-200"
+            )}>
+              {replaySession.deterministic ? "Deterministic" : "Inputs missing"}
+            </Badge>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[8px]">
+            <div className="rounded border border-slate-800 bg-[#080d16] p-2">
+              <span className="text-slate-600">Lockfile</span>
+              <div className="mt-1 truncate font-mono text-slate-300">{replaySession.manifest.lockfileHash || "not captured"}</div>
+            </div>
+            <div className="rounded border border-slate-800 bg-[#080d16] p-2">
+              <span className="text-slate-600">Replay digest</span>
+              <div className="mt-1 truncate font-mono text-slate-300">{replaySession.replayDigest}</div>
+            </div>
+          </div>
+          {!replaySession.deterministic && (
+            <div className="mt-2 text-[8px] leading-relaxed text-amber-200/70">
+              Missing: {replaySession.missingInputs.join(", ")}
+            </div>
+          )}
+          {selectedFrame?.cursor && (
+            <div className="mt-2 text-[8px] text-cyan-200">
+              Cursor {selectedFrame.cursor.fileName}:{selectedFrame.cursor.lineNumber}:{selectedFrame.cursor.column}
+            </div>
+          )}
+        </section>
+      )}
+
+      {replayEvents.length > 1 && (
+        <section className="rounded-lg border border-slate-800 bg-[#0b121e] p-3">
+          <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <RotateCcw className="h-3.5 w-3.5" /> Compare alternate moments
+          </div>
+          <input
+            aria-label="Comparison evidence event"
+            type="range"
+            min={0}
+            max={Math.max(0, replayEvents.length - 1)}
+            value={Math.min(compareIndex, replayEvents.length - 1)}
+            onChange={(event) => setCompareIndex(Number(event.target.value))}
+            className="mt-3 w-full accent-indigo-400"
+          />
+          <div className="mt-2 text-[8px] text-slate-500">
+            #{comparison?.sequence || 0} → #{selected?.sequence || 0}: {changedFiles.length} file{changedFiles.length === 1 ? "" : "s"} differ
+          </div>
+        </section>
+      )}
 
       {selected && (
         <section className="rounded-lg border border-slate-800 bg-[#0b121e] p-3">

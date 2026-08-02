@@ -142,6 +142,29 @@ export function useChatMessages(roomId: string, options: UseChatMessagesOptions 
 
         setMessages((prev) => [...prev, userMsg]);
         emit(SOCKET_EVENTS.CHAT_MESSAGE, userMsg);
+        window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+          detail: {
+            type: "chat.message",
+            summary: "Recorded collaborative " + channel + " message.",
+            source: "workspace-chat",
+            actor: { name: userMsg.user, kind: "human" },
+            payload: {
+              channel,
+              message: trimmed.slice(0, 4000),
+              architecturalDecision: /^(decision|adr|architecture):/i.test(trimmed),
+            },
+          },
+        }));
+        if (/^(decision|adr|architecture):/i.test(trimmed)) {
+          window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+            detail: {
+              type: "decision.recorded",
+              summary: trimmed.replace(/^(decision|adr|architecture):\s*/i, "").slice(0, 500),
+              source: "workspace-chat",
+              payload: { channel, messageId: userMsg.id },
+            },
+          }));
+        }
 
         const shouldAskAI = options.aiMode || trimmed.startsWith("@ai ") || trimmed.startsWith("ask: ");
         if (shouldAskAI) {

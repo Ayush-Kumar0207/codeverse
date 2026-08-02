@@ -68,15 +68,16 @@
 
 EvidenceOS turns the existing multiplayer IDE into a proof-carrying engineering environment. Its features share one tamper-evident project ledger instead of storing disconnected UI state:
 
-- **Engineering Evidence Graph** links requirements, decisions, changes, tests, runtime results, security review, understanding, and deployment.
-- **Session Replay** records replayable workspace snapshots between commits and can branch the active workspace from any captured code state.
-- **Proof Packages** score requirement coverage, tests, execution, security, review, comprehension, and rollback readiness.
-- **Adversarial Review Board** runs Builder, Correctness, Security, Test, Performance, Architecture, and Devil's Advocate roles over the same change.
-- **Understanding Verification** generates code-specific questions and scores explanations of purpose, invariants, failures, and trust boundaries.
+- **Semantic Evidence Graph** uses typed causal relations such as `implements`, `caused-fix`, `verified-by`, `reviewed-by`, `deployed-as`, `calls`, `writes-to`, `traced-by`, and `attested-by`.
+- **Deterministic Session Replay** reconstructs files, active file, cursor, terminal commands and output digests, debugger variables and breakpoints, network calls, database mutations, traces, branches, runtime versions, dependency versions, and lockfile identity. Replay verification compares a re-execution with the sealed manifest and reports every divergence.
+- **Artifact-bound Proof Packages** hash the exact uploaded workspace and require independently digest-bound source, test, runtime, security, compatibility, performance, migration, deployment, rollback, and understanding attestations. Oversized workspaces are rejected for cloud proof instead of being silently truncated.
+- **Adversarial Review Board** executes seven isolated deterministic analyzers over the same patch digest for challenge and consensus rounds. Optional provider-backed independent critiques can be enabled without replacing the authoritative tool results.
+- **Hands-on Understanding Verification** evaluates purpose, boundary prediction, a minimal code modification, debugging, data-flow drawing, and transfer to a new case, with time, revision, paste, and focus-change signals.
 - **Assessment Scorecard** reports correctness, process, debugging, test quality, comprehension, security awareness, AI dependence, and evidence integrity.
-- **Engineering Digital Twin** derives file, service, API, data, test, and configuration relationships and predicts blast radius.
+- **Engineering Digital Twin** combines static imports, HTML assets, APIs, database tables, queues, providers, tests, migrations, and deployments with runtime traces, requests, database mutations, and deployment telemetry for three-hop blast-radius analysis.
+- **Engineering Arena** supplies eight incident classes, hidden fault injection, locked starter environments, consent and privacy modes, AI-use policies, solo runs, team lobbies, code joining, quick matchmaking, timers, evaluator templates and rubrics, evidence-weighted grading, HMAC-capable signed reports, and leaderboards.
 
-Every recorded event includes its predecessor hash and a SHA-256 integrity hash. Cloud workspaces persist events, reviews, proof packages, and verification results in PostgreSQL/Supabase; local development falls back to the ignored `server/.data/evidence.json` store, and the demo remains fully interactive in browser storage.
+Every recorded event includes its predecessor hash and a SHA-256 integrity hash; the browser fallback also uses SHA-256. Cloud workspaces persist events, reviews, proof packages, verifications, arena sessions, and organization scenario templates in PostgreSQL/Supabase. Local development falls back to the ignored `server/.data/evidence.json` and `server/.data/arenas.json` stores, and the demo remains fully interactive in browser storage.
 
 ### EvidenceOS API
 
@@ -84,11 +85,23 @@ Every recorded event includes its predecessor hash and a SHA-256 integrity hash.
 | --- | --- | --- |
 | `GET` | `/api/evidence/:projectId` | Reconstruct the evidence graph and assessment scorecard |
 | `POST` | `/api/evidence/:projectId/events` | Append a sealed engineering event |
-| `POST` | `/api/evidence/:projectId/packages` | Create and score a proof package |
-| `POST` | `/api/evidence/:projectId/reviews` | Run the seven-agent adversarial board |
-| `POST` | `/api/evidence/:projectId/challenges` | Generate an understanding challenge |
-| `POST` | `/api/evidence/:projectId/verifications` | Score and persist developer explanations |
-| `POST` | `/api/evidence/:projectId/twin` | Build the engineering digital twin and impact prediction |
+| `POST` | `/api/evidence/:projectId/packages` | Create and sign an exact-artifact proof package |
+| `GET` | `/api/evidence/:projectId/packages/:packageId/verify` | Recompute package signature and attestation coverage |
+| `GET` | `/api/evidence/:projectId/export?privacy=redacted` | Export a digest-addressed full or redacted evidence report |
+| `POST` | `/api/evidence/:projectId/reviews` | Run the seven-agent, two-round adversarial board |
+| `POST` | `/api/evidence/:projectId/challenges` | Generate a digest-bound hands-on understanding challenge |
+| `POST` | `/api/evidence/:projectId/verifications` | Score and persist behavioral understanding evidence |
+| `POST` | `/api/evidence/:projectId/twin` | Build the static-plus-runtime digital twin and impact prediction |
+| `POST` | `/api/evidence/:projectId/replays/:sessionId/verify` | Verify a deterministic replay execution |
+| `GET/POST` | `/api/evidence/arena/scenarios` | List built-ins or create an evaluator scenario template |
+| `GET` | `/api/evidence/arena/leaderboard` | Return evidence-integrity-aware arena rankings |
+| `GET/POST` | `/api/evidence/:projectId/arena/sessions` | List or start timed/lobby assessment sessions |
+| `POST` | `/api/evidence/:projectId/arena/lobbies/join` | Join a shared team lobby by code |
+| `POST` | `/api/evidence/:projectId/arena/matchmake` | Join a compatible team or create a waiting lobby |
+| `POST` | `/api/evidence/:projectId/arena/sessions/:sessionId/begin` | Start a lobby timer and evidence window |
+| `POST` | `/api/evidence/:projectId/arena/sessions/:sessionId/actions` | Record a policy-checked assessment action |
+| `POST` | `/api/evidence/:projectId/arena/sessions/:sessionId/submit` | Grade evidence and issue a signed assessment report |
+| `GET` | `/api/evidence/:projectId/arena/sessions/:sessionId/report/verify` | Recompute the report digest and signature |
 
 ---
 
@@ -690,6 +703,8 @@ API_BASE_URL=http://localhost:5000
 # ─── Security ─────────────────────────────────────────────────────────
 SESSION_SECRET=replace-with-a-long-random-session-secret
 JWT_SECRET=replace-with-a-long-random-jwt-secret
+EVIDENCE_SIGNING_KEY=replace-with-an-independent-proof-signing-key
+ARENA_SIGNING_KEY=replace-with-an-independent-arena-report-key
 
 # ─── Supabase Persistence ────────────────────────────────────────────
 SUPABASE_URL=
@@ -722,6 +737,7 @@ AI_MAX_CONTEXT_CHARS=1800
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=
+EVIDENCE_REVIEW_AI=false
 
 # ─── Maintenance ──────────────────────────────────────────────────────
 GEMINI_API_KEY=                       # Only for server/scripts/auto_overhaul_gemini.js
@@ -748,6 +764,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `NEXT_PUBLIC_API_BASE_URL` | Production | Public backend URL used by the Next.js client. |
 | `SESSION_SECRET` | Production | HMAC secret used to protect OAuth state parameters. |
 | `JWT_SECRET` | Production | JWT signing secret and key material for the encrypted authentication cookie. |
+| `EVIDENCE_SIGNING_KEY`, `ARENA_SIGNING_KEY` | Production | Independent HMAC keys for proof packages and arena assessment reports. Without them exports retain SHA-256 integrity but are not organization-authenticated. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Recommended | Enables persistent users, projects, versions, and settings snapshots. |
 | `GITHUB_*`, `GOOGLE_*` | Optional | Enables OAuth login buttons. |
 | `EXECUTION_STRATEGY` | No | Defaults to `remote` for Piston. `local` is accepted only with the development opt-in below. |
@@ -756,6 +773,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `AI_PROVIDER` | Optional | `ollama`, `openai`, or `auto`. Defaults to local-first behavior. |
 | `OLLAMA_*`, `AI_MAX_*` | Optional | Local AI assistant model, generation budget, context caps, and keep-alive settings. |
 | `OPENAI_*` | Optional | OpenAI-compatible chat completion provider settings. |
+| `EVIDENCE_REVIEW_AI` | Optional | Set `true` to add independent provider-backed review critiques; deterministic analyzers remain authoritative. |
 | `GEMINI_API_KEY` | Optional | Only used by `server/scripts/auto_overhaul_gemini.js` for automated maintenance. |
 
 </details>

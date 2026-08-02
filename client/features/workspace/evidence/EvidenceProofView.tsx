@@ -16,6 +16,7 @@ interface EvidenceProofViewProps {
   focusedLocation: { fileName: string; lineNumber: number; column: number } | null;
   syncing: boolean;
   onCreatePackage: (input: { title: string; requirement: string; rationale: string; rollback: string }) => Promise<void>;
+  onVerifyPackage: (packageId: string) => Promise<boolean>;
 }
 
 const scoreLabels: Array<[keyof EvidenceOSSnapshot["scorecard"], string]> = [
@@ -27,7 +28,7 @@ const scoreLabels: Array<[keyof EvidenceOSSnapshot["scorecard"], string]> = [
   ["securityAwareness", "Security"],
 ];
 
-export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing, onCreatePackage }: EvidenceProofViewProps) {
+export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing, onCreatePackage, onVerifyPackage }: EvidenceProofViewProps) {
   const latestPackage = snapshot.packages.at(-1);
   const focusedChange = focusedLocation
     ? [...snapshot.events].reverse().find((event) => event.fileName === focusedLocation.fileName && event.type === "code.changed")
@@ -104,7 +105,19 @@ export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing
           </div>
           <ScanSearch className="h-4 w-4 text-cyan-300" />
         </div>
-        <div className="max-h-48 overflow-y-auto p-3">
+        <div className="max-h-56 overflow-y-auto p-3">
+          {snapshot.graph.edges.slice(-8).map((edge) => (
+            <div key={edge.id} className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center gap-1 text-[7px]">
+              <span className="truncate rounded border border-slate-800 bg-[#080d16] px-1.5 py-1 text-slate-500">
+                {snapshot.graph.nodes.find((node) => node.id === edge.source)?.label || edge.source}
+              </span>
+              <Badge className="border-cyan-400/15 bg-cyan-400/[0.05] px-1 text-[6px] uppercase text-cyan-300">{edge.relation}</Badge>
+              <span className="truncate rounded border border-slate-800 bg-[#080d16] px-1.5 py-1 text-slate-500">
+                {snapshot.graph.nodes.find((node) => node.id === edge.target)?.label || edge.target}
+              </span>
+            </div>
+          ))}
+          <div className="mt-3 border-t border-slate-800 pt-3">
           {snapshot.graph.nodes.slice(-8).map((node, index, nodes) => (
             <div key={node.id} className="relative flex gap-2 pb-3 last:pb-0">
               {index < nodes.length - 1 && <div className="absolute bottom-0 left-[7px] top-4 w-px bg-slate-700" />}
@@ -119,6 +132,7 @@ export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing
             </div>
           ))}
           {!snapshot.graph.nodes.length && <div className="py-5 text-center text-[10px] text-slate-500">Record a change to begin the evidence graph.</div>}
+          </div>
         </div>
       </section>
 
@@ -143,14 +157,42 @@ export function EvidenceProofView({ snapshot, coverage, focusedLocation, syncing
               </div>
             ))}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 h-8 w-full border-slate-700 bg-transparent text-[9px] uppercase tracking-wider"
-            onClick={() => setPackageMode(true)}
-          >
-            Create new proof package
-          </Button>
+          <div className="mt-3 rounded border border-slate-800 bg-[#080d16] p-2">
+            <div className="flex items-center justify-between text-[8px]">
+              <span className="uppercase tracking-wider text-slate-600">Exact artifact</span>
+              <span className={latestPackage.exactArtifactVerified ? "text-emerald-300" : "text-amber-300"}>
+                {latestPackage.exactArtifactVerified ? "verified" : "not fully bound"}
+              </span>
+            </div>
+            <div className="mt-1 truncate font-mono text-[7px] text-cyan-300">{latestPackage.changeDigest}</div>
+            <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestPackage.signature}</div>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            {latestPackage.attestations.map((item) => (
+              <div key={item.id} title={item.detail} className="flex items-center gap-1.5 rounded border border-slate-800 bg-[#080d16] px-2 py-1.5 text-[8px]">
+                <EvidenceStatusIcon status={item.status === "verified" ? "passed" : item.status === "failed" ? "missing" : "warning"} />
+                <span className="truncate capitalize text-slate-400">{item.kind}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 border-emerald-400/25 bg-emerald-400/[0.05] text-[8px] uppercase tracking-wider text-emerald-200"
+              onClick={() => void onVerifyPackage(latestPackage.id)}
+            >
+              Verify proof
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 border-slate-700 bg-transparent text-[8px] uppercase tracking-wider"
+              onClick={() => setPackageMode(true)}
+            >
+              New package
+            </Button>
+          </div>
         </section>
       ) : (
         <section className="space-y-2 rounded-lg border border-cyan-400/15 bg-cyan-400/[0.03] p-3">

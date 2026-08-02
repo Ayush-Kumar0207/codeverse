@@ -190,6 +190,9 @@ export function WorkspaceRightPanel({
                     snapshot={evidenceOS.snapshot}
                     twin={evidenceOS.twin}
                     challenge={evidenceOS.challenge}
+                    arenaScenarios={evidenceOS.arenaScenarios}
+                    arenaLeaderboard={evidenceOS.arenaLeaderboard}
+                    activeArena={evidenceOS.activeArena}
                     loading={evidenceOS.loading}
                     syncing={evidenceOS.syncing}
                     offline={evidenceOS.offline}
@@ -197,10 +200,20 @@ export function WorkspaceRightPanel({
                     coverage={evidenceOS.evidenceCoverage}
                     focusedLocation={evidenceOS.focusedLocation}
                     onCreatePackage={evidenceOS.createPackage}
+                    onVerifyPackage={evidenceOS.verifyPackage}
                     onRunReview={evidenceOS.runReview}
                     onGenerateChallenge={evidenceOS.generateChallenge}
                     onSubmitUnderstanding={evidenceOS.submitUnderstanding}
                     onBranchFromEvent={evidenceOS.branchFromEvent}
+                    onCreateArenaTemplate={evidenceOS.createArenaTemplate}
+                    onStartArena={evidenceOS.startArena}
+                    onBeginArena={evidenceOS.beginArena}
+                    onJoinArena={evidenceOS.joinArena}
+                    onMatchmakeArena={evidenceOS.matchmakeArena}
+                    onRecordArenaNote={evidenceOS.recordArenaNote}
+                    onSubmitArena={evidenceOS.submitArena}
+                    onVerifyArenaReport={evidenceOS.verifyArenaReport}
+                    onExportEvidence={evidenceOS.exportEvidence}
                   />
                 </TabsContent>
                 <TabsContent value="algotrace" className="m-0 h-full min-h-0">

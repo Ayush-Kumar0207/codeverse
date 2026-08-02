@@ -73,6 +73,23 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
               </div>
             </div>
           </section>
+          <section className="rounded-lg border border-slate-800 bg-[#0b121e] p-3">
+            <div className="flex items-center justify-between text-[8px] uppercase tracking-wider text-slate-500">
+              <span>Patch digest</span><span className="text-violet-300">{latestReview.rounds.length} rounds · {latestReview.consensus}% consensus</span>
+            </div>
+            <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestReview.patchDigest}</div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {latestReview.executedTools.map((tool) => (
+                <Badge key={tool} className="border-violet-400/15 bg-violet-400/[0.05] text-[6px] text-violet-300">{tool}</Badge>
+              ))}
+            </div>
+            {latestReview.rounds.map((round) => (
+              <div key={round.round} className="mt-2 rounded border border-slate-800 bg-[#080d16] p-2">
+                <div className="text-[7px] font-bold uppercase tracking-wider text-slate-500">Round {round.round} · {round.phase}</div>
+                <div className="mt-1 text-[8px] leading-relaxed text-slate-400">{round.builderResponse}</div>
+              </div>
+            ))}
+          </section>
           <section className="space-y-2">
             {latestReview.agents.map((agent) => (
               <article key={agent.id} className="rounded-md border border-slate-800 bg-[#0b121e] p-2.5">
@@ -82,6 +99,12 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
                   <Badge className="ml-auto rounded border-slate-700 bg-slate-900 text-[7px] uppercase text-slate-500">{agent.status}</Badge>
                 </div>
                 <p className="mt-1.5 text-[9px] leading-relaxed text-slate-500">{agent.summary}</p>
+                {agent.toolRuns?.map((run) => (
+                  <div key={run.outputDigest} className="mt-1.5 flex items-center justify-between rounded border border-slate-800 bg-[#080d16] px-2 py-1 text-[7px]">
+                    <span className="text-violet-300">{run.tool}</span>
+                    <span className={run.status === "passed" ? "text-emerald-300" : "text-rose-300"}>{run.status} · {run.durationMs}ms</span>
+                  </div>
+                ))}
                 {agent.findings.slice(0, 2).map((finding) => (
                   <div key={finding.id} className="mt-2 rounded border border-amber-400/15 bg-amber-400/[0.04] p-2">
                     <div className="text-[9px] font-semibold text-amber-200">{finding.title}</div>

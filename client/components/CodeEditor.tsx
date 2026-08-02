@@ -176,6 +176,7 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
 
       editor.onKeyDown((event) => {
         playKeySound(event.browserEvent.key);
+      });
       editor.onDidChangeCursorPosition((event) => {
         window.dispatchEvent(new CustomEvent("codeverse:evidence-focus", {
           detail: {
@@ -185,6 +186,21 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
           },
         }));
       });
+      editor.onDidPaste((event) => {
+        window.dispatchEvent(new CustomEvent("codeverse:evidence", {
+          detail: {
+            type: "clipboard.pasted",
+            summary: "Pasted content into " + activeFileRef.current + ".",
+            source: "editor",
+            fileName: activeFileRef.current,
+            payload: {
+              startLine: event.range.startLineNumber,
+              endLine: event.range.endLineNumber,
+              lineCount: event.range.endLineNumber - event.range.startLineNumber + 1,
+              contentCaptured: false,
+            },
+          },
+        }));
       });
     };
 

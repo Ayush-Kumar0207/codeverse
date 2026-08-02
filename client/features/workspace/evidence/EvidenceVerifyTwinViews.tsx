@@ -90,6 +90,18 @@ export function EvidenceVerifyView({
               {latestVerification.score}
             </div>
           </div>
+          <div className="mt-3 grid grid-cols-2 gap-1.5">
+            {Object.entries(latestVerification.dimensions).map(([label, value]) => (
+              <div key={label} className="rounded border border-slate-800 bg-[#080d16] p-2">
+                <div className="text-[7px] uppercase tracking-wider text-slate-600">{label}</div>
+                <div className="mt-1 text-[10px] font-bold text-slate-300">{value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 text-[8px] leading-relaxed text-slate-500">
+            Behavioral continuity {latestVerification.behavioralSignals.continuity}% · {latestVerification.behavioralSignals.revisionCount} revisions · {latestVerification.behavioralSignals.pasteCount} paste events · {latestVerification.behavioralSignals.externalFocusChanges} focus changes · {Math.round(latestVerification.behavioralSignals.elapsedMs / 1000)}s elapsed
+          </div>
+          <div className="mt-1 truncate font-mono text-[7px] text-slate-600">{latestVerification.codeDigest}</div>
         </section>
       )}
     </div>
@@ -130,6 +142,28 @@ export function EvidenceTwinView({ twin }: { twin: EngineeringDigitalTwin }) {
         <div className="rounded-md border border-slate-800 bg-[#0b121e] p-2.5">
           <div className="text-lg font-black">{twin.edges.length}</div>
           <div className="text-[8px] uppercase tracking-wider text-slate-600">relationships</div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-4 gap-1.5">
+        {Object.entries(twin.telemetry).map(([label, value]) => (
+          <div key={label} className="rounded border border-slate-800 bg-[#0b121e] p-2 text-center">
+            <div className="text-xs font-black text-cyan-200">{value}</div>
+            <div className="mt-0.5 truncate text-[6px] uppercase text-slate-600">{label}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="rounded-lg border border-slate-800 bg-[#0b121e] p-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Twin confidence</h4>
+          <span className="text-[10px] font-bold text-cyan-300">{twin.impact.confidence}%</span>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded bg-slate-800">
+          <div className="h-full bg-cyan-400" style={{ width: twin.impact.confidence + "%" }} />
+        </div>
+        <div className="mt-2 text-[8px] text-slate-500">
+          {twin.impact.securityBoundaries.length} security boundaries · {twin.impact.apiConsumers.length} API consumers · {twin.impact.migrationsRequired.length} migrations
         </div>
       </section>
 

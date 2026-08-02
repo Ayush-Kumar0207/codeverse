@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { BrainCircuit, Bot, Check, History, Network, PackageCheck, RefreshCw, ShieldCheck } from "lucide-react";
+import { BrainCircuit, Bot, Check, History, Network, PackageCheck, RefreshCw, ShieldCheck, Trophy, Download } from "lucide-react";
 import type {
+  ArenaLeaderboardEntry,
+  ArenaScenario,
+  ArenaScenarioTemplateInput,
+  ArenaSession,
   EngineeringDigitalTwin,
   EngineeringEvent,
   EvidenceOSSnapshot,
@@ -15,11 +19,15 @@ import { EvidenceProofView } from "./evidence/EvidenceProofView";
 import { EvidenceReplayView } from "./evidence/EvidenceReplayView";
 import { EvidenceBoardView } from "./evidence/EvidenceBoardView";
 import { EvidenceTwinView, EvidenceVerifyView } from "./evidence/EvidenceVerifyTwinViews";
+import { EvidenceArenaView } from "./evidence/EvidenceArenaView";
 
 interface EvidenceOSPanelProps {
   snapshot: EvidenceOSSnapshot;
   twin: EngineeringDigitalTwin;
   challenge: UnderstandingChallenge | null;
+  arenaScenarios: ArenaScenario[];
+  arenaLeaderboard: ArenaLeaderboardEntry[];
+  activeArena: ArenaSession | null;
   loading: boolean;
   syncing: boolean;
   offline: boolean;
@@ -27,10 +35,20 @@ interface EvidenceOSPanelProps {
   coverage: number;
   focusedLocation: { fileName: string; lineNumber: number; column: number } | null;
   onCreatePackage: (input: { title: string; requirement: string; rationale: string; rollback: string }) => Promise<void>;
+  onVerifyPackage: (packageId: string) => Promise<boolean>;
   onRunReview: (requirement: string, rollback: string) => Promise<void>;
   onGenerateChallenge: () => Promise<UnderstandingChallenge>;
   onSubmitUnderstanding: (answers: Record<string, string>) => Promise<unknown>;
   onBranchFromEvent: (event: EngineeringEvent) => Promise<boolean>;
+  onCreateArenaTemplate: (input: ArenaScenarioTemplateInput) => Promise<ArenaScenario>;
+  onStartArena: (scenarioId: string, privacyMode: "full" | "redacted", teamLobby?: boolean) => Promise<boolean>;
+  onBeginArena: () => Promise<boolean>;
+  onJoinArena: (lobbyCode: string) => Promise<boolean>;
+  onMatchmakeArena: (scenarioId: string, privacyMode: "full" | "redacted") => Promise<boolean>;
+  onRecordArenaNote: (summary: string) => Promise<void>;
+  onSubmitArena: () => Promise<unknown>;
+  onVerifyArenaReport: (sessionId: string) => Promise<boolean>;
+  onExportEvidence: (privacy?: "full" | "redacted") => Promise<void>;
 }
 
 const sectionTabs = [
@@ -39,12 +57,16 @@ const sectionTabs = [
   { value: "board", label: "Board", icon: Bot },
   { value: "verify", label: "Verify", icon: BrainCircuit },
   { value: "twin", label: "Twin", icon: Network },
+  { value: "arena", label: "Arena", icon: Trophy },
 ];
 
 export function EvidenceOSPanel({
   snapshot,
   twin,
   challenge,
+  arenaScenarios,
+  arenaLeaderboard,
+  activeArena,
   loading,
   syncing,
   offline,
@@ -52,10 +74,20 @@ export function EvidenceOSPanel({
   coverage,
   focusedLocation,
   onCreatePackage,
+  onVerifyPackage,
   onRunReview,
   onGenerateChallenge,
   onSubmitUnderstanding,
   onBranchFromEvent,
+  onCreateArenaTemplate,
+  onStartArena,
+  onBeginArena,
+  onJoinArena,
+  onMatchmakeArena,
+  onRecordArenaNote,
+  onSubmitArena,
+  onVerifyArenaReport,
+  onExportEvidence,
 }: EvidenceOSPanelProps) {
   const [section, setSection] = useState("proof");
 
@@ -83,12 +115,23 @@ export function EvidenceOSPanel({
               <div className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Trustworthy engineering</div>
             </div>
           </div>
-          <Badge className={cn(
-            "h-5 rounded border px-1.5 text-[8px] uppercase tracking-widest",
-            offline ? "border-amber-400/25 bg-amber-400/10 text-amber-200" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
-          )}>
-            {offline ? "Local proof" : "Synced proof"}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              title="Export redacted evidence report"
+              aria-label="Export evidence report"
+              onClick={() => void onExportEvidence("redacted")}
+              className="rounded border border-slate-700 bg-slate-900 p-1 text-slate-400 hover:text-cyan-200"
+            >
+              <Download className="h-3 w-3" />
+            </button>
+            <Badge className={cn(
+              "h-5 rounded border px-1.5 text-[8px] uppercase tracking-widest",
+              offline ? "border-amber-400/25 bg-amber-400/10 text-amber-200" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+            )}>
+              {offline ? "Local proof" : "Synced proof"}
+            </Badge>
+          </div>
         </div>
         <div className="mt-2 flex items-center gap-2 text-[9px] text-slate-500">
           <span className={cn("flex items-center gap-1", snapshot.integrity.verified ? "text-emerald-300" : "text-rose-300")}>
@@ -117,10 +160,10 @@ export function EvidenceOSPanel({
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <TabsContent value="proof" className="m-0">
-            <EvidenceProofView snapshot={snapshot} coverage={coverage} focusedLocation={focusedLocation} syncing={syncing} onCreatePackage={onCreatePackage} />
+            <EvidenceProofView snapshot={snapshot} coverage={coverage} focusedLocation={focusedLocation} syncing={syncing} onCreatePackage={onCreatePackage} onVerifyPackage={onVerifyPackage} />
           </TabsContent>
           <TabsContent value="replay" className="m-0">
-            <EvidenceReplayView events={snapshot.events} syncing={syncing} onBranchFromEvent={onBranchFromEvent} />
+            <EvidenceReplayView events={snapshot.events} sessions={snapshot.replay} syncing={syncing} onBranchFromEvent={onBranchFromEvent} />
           </TabsContent>
           <TabsContent value="board" className="m-0">
             <EvidenceBoardView latestPackage={snapshot.packages.at(-1)} latestReview={snapshot.reviews.at(-1)} syncing={syncing} onRunReview={onRunReview} />
@@ -130,6 +173,23 @@ export function EvidenceOSPanel({
           </TabsContent>
           <TabsContent value="twin" className="m-0">
             <EvidenceTwinView twin={twin} />
+          </TabsContent>
+          <TabsContent value="arena" className="m-0">
+            <EvidenceArenaView
+              scenarios={arenaScenarios}
+              sessions={snapshot.arenas}
+              leaderboard={arenaLeaderboard}
+              activeArena={activeArena}
+              syncing={syncing}
+              onCreateTemplate={onCreateArenaTemplate}
+              onStart={onStartArena}
+              onBegin={onBeginArena}
+              onJoin={onJoinArena}
+              onMatchmake={onMatchmakeArena}
+              onRecordNote={onRecordArenaNote}
+              onSubmit={onSubmitArena}
+              onVerifyReport={onVerifyArenaReport}
+            />
           </TabsContent>
         </div>
       </Tabs>

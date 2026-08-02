@@ -4,6 +4,9 @@ const posixPath = require("path").posix;
 const { createHash, randomUUID } = require("crypto");
 const { supabase } = require("../config/db");
 const HttpError = require("../utils/httpError");
+const advancedEvidence = require("./evidence-advanced.service");
+const arenaService = require("./arena.service");
+const aiService = require("./ai.service");
 
 const DATA_FILE = path.join(__dirname, "../../.data/evidence.json");
 const COLLECTIONS = {
@@ -20,7 +23,9 @@ const EVENT_TYPES = new Set([
   "performance.measurement", "snapshot.created",
   "branch.created", "decision.recorded", "review.completed",
   "understanding.verified", "deployment.attempted", "deployment.succeeded",
-  "deployment.failed",
+  "deployment.failed", "session.environment", "cursor.moved", "clipboard.pasted", "chat.message",
+  "artifact.attested", "proof.verified", "replay.executed",
+  "arena.started", "arena.action", "arena.completed",
 ]);
 let writeQueue = Promise.resolve();
 const eventQueues = new Map();
@@ -70,6 +75,17 @@ function cleanFiles(value) {
   return Object.fromEntries(entries);
 }
 
+function exactFiles(value) {
+  const candidate = safeObject(value);
+  const entries = Object.entries(candidate);
+  if (entries.length > 80 || entries.some(([name, content]) =>
+    typeof name !== "string" || !name || name.length > 240 || typeof content !== "string" || content.length > 70000
+  )) {
+    throw new HttpError(413, "Exact artifact exceeds EvidenceOS file count, name, or per-file limits");
+  }
+  return Object.fromEntries(entries);
+}
+
 async function readLocalStore() {
   try {
     const raw = await fs.readFile(DATA_FILE, "utf8");
@@ -116,20 +132,27 @@ function toRow(collection, item) {
       requirement: item.requirement, rationale: item.rationale,
       rollback: item.rollback, files: item.files, checks: item.checks,
       score: item.score, status: item.status, created_by: item.createdBy,
-      created_at: item.createdAt,
+      created_at: item.createdAt, change_digest: item.changeDigest,
+      base_digest: item.baseDigest || null, manifest_digest: item.manifestDigest,
+      attestations: item.attestations || [], signature: item.signature,
+      exact_artifact_verified: Boolean(item.exactArtifactVerified),
     };
   }
   if (collection === "reviews") {
     return {
       id: item.id, project_id: item.projectId, requirement: item.requirement,
       verdict: item.verdict, score: item.score, agents: item.agents,
-      created_at: item.createdAt,
+      created_at: item.createdAt, patch_digest: item.patchDigest,
+      rounds: item.rounds || [], consensus: item.consensus || 0,
+      executed_tools: item.executedTools || [],
     };
   }
   return {
     id: item.id, project_id: item.projectId, challenge_id: item.challengeId,
     file_name: item.fileName, score: item.score, passed: item.passed,
     feedback: item.feedback, created_at: item.createdAt,
+    dimensions: item.dimensions || {}, behavioral_signals: item.behavioralSignals || {},
+    code_digest: item.codeDigest || "",
   };
 }
 
@@ -150,20 +173,28 @@ function fromRow(collection, row) {
       requirement: row.requirement, rationale: row.rationale,
       rollback: row.rollback, files: row.files || [], checks: row.checks || [],
       score: Number(row.score), status: row.status, createdBy: row.created_by,
-      createdAt: row.created_at,
+      createdAt: row.created_at, changeDigest: row.change_digest || "",
+      baseDigest: row.base_digest || undefined, manifestDigest: row.manifest_digest || "",
+      attestations: row.attestations || [], signature: row.signature || "",
+      exactArtifactVerified: Boolean(row.exact_artifact_verified),
     };
   }
   if (collection === "reviews") {
     return {
       id: row.id, projectId: row.project_id, requirement: row.requirement,
       verdict: row.verdict, score: Number(row.score), agents: row.agents || [],
-      createdAt: row.created_at,
+      createdAt: row.created_at, patchDigest: row.patch_digest || "",
+      rounds: row.rounds || [], consensus: Number(row.consensus || 0),
+      executedTools: row.executed_tools || [],
     };
   }
   return {
     id: row.id, projectId: row.project_id, challengeId: row.challenge_id,
     fileName: row.file_name, score: Number(row.score), passed: Boolean(row.passed),
     feedback: row.feedback || [], createdAt: row.created_at,
+    dimensions: row.dimensions || { explanation: 0, prediction: 0, modification: 0, debugging: 0, dataFlow: 0 },
+    behavioralSignals: row.behavioral_signals || { answerSimilarity: 0, revisionCount: 0, elapsedMs: 0, continuity: 0, pasteCount: 0, externalFocusChanges: 0 },
+    codeDigest: row.code_digest || "",
   };
 }
 
@@ -268,41 +299,66 @@ function check(id, label, status, detail) {
 }
 
 async function createPackage(projectId, payload, recorder = {}) {
-  const files = cleanFiles(payload.files);
-  const events = await listCollection("events", projectId);
-  const reviews = await listCollection("reviews", projectId);
-  const verifications = await listCollection("verifications", projectId);
-  const fileNames = Object.keys(files);
-  const hasTests = fileNames.some((name) => /(^|[/_.-])(test|spec)s?([/_.-]|$)/i.test(name));
-  const lastReview = reviews.at(-1);
-  const lastVerification = verifications.at(-1);
-  const hasSuccessfulRun = events.some((event) => ["runtime.succeeded", "test.passed"].includes(event.type));
-  const content = Object.values(files).join("\n");
-  const secretLeak = /(api[_-]?key|secret|password|token)\s*[:=]\s*["'][^"'\n]{8,}["']/i.test(content);
+  const files = exactFiles(payload.files);
+  if (!Object.keys(files).length) throw new HttpError(400, "Files are required for a proof package");
+  const [events, reviews, verifications] = await Promise.all([
+    listCollection("events", projectId),
+    listCollection("reviews", projectId),
+    listCollection("verifications", projectId),
+  ]);
   const requirement = text(payload.requirement, 1600);
+  const rationale = text(payload.rationale, 2400);
   const rollback = text(payload.rollback, 1600);
+  const changeDigest = advancedEvidence.workspaceDigest(files);
+  const replay = advancedEvidence.buildReplaySessions(events);
+  const manifestDigest = advancedEvidence.digest(replay.at(-1)?.manifest || { sourceDigest: changeDigest });
+  const attestations = advancedEvidence.buildProofAttestations(files, events, reviews, verifications, payload);
   const checks = [
-    check("requirement", "Requirement linked", requirement ? "passed" : "missing", requirement || "Link the change to an explicit requirement."),
-    check("tests", "Tests added", hasTests ? "passed" : "missing", hasTests ? "Test files are part of the change." : "No test file is included."),
-    check("runtime", "Execution verified", hasSuccessfulRun ? "passed" : "warning", hasSuccessfulRun ? "A successful run is recorded in the ledger." : "Run the affected path and attach the result."),
-    check("security", "Secret leakage scan", secretLeak ? "missing" : "passed", secretLeak ? "A credential-like literal needs review." : "No credential-like literals detected."),
-    check("review", "Adversarial review", lastReview?.verdict === "approved" ? "passed" : lastReview ? "warning" : "missing", lastReview ? "Latest review verdict: " + lastReview.verdict + "." : "Run the engineering review board."),
-    check("performance", "Performance impact", lastReview?.agents?.find((agent) => agent.id === "performance")?.status === "passed" ? "passed" : "warning", "Performance agent result is attached when available."),
-    check("understanding", "Developer explanation", lastVerification?.passed ? "passed" : "missing", lastVerification?.passed ? "Understanding verification passed." : "Complete an understanding check."),
-    check("rollback", "Rollback strategy", rollback ? "passed" : "missing", rollback || "Document how to safely reverse the change."),
+    check("requirement", "Requirement linked", requirement ? "passed" : "missing", requirement || "Link an explicit, falsifiable requirement."),
+    check("rationale", "Root cause and rationale", rationale ? "passed" : "missing", rationale || "State the root cause and why the patch changes that path."),
+    check("rollback-document", "Rollback documented", rollback ? "passed" : "missing", rollback || "Document a safe reversal."),
+    ...attestations.map((item) => check(
+      "attestation-" + item.kind,
+      item.kind.charAt(0).toUpperCase() + item.kind.slice(1) + " attested",
+      item.status === "verified" ? "passed" : item.status === "failed" ? "missing" : "warning",
+      item.detail
+    )),
   ];
-  const points = checks.reduce((sum, item) => sum + (item.status === "passed" ? 1 : item.status === "warning" ? 0.5 : 0), 0);
+  const points = checks.reduce((sum, item) => sum + (item.status === "passed" ? 1 : item.status === "warning" ? 0.35 : 0), 0);
   const score = clamp((points / checks.length) * 100);
+  const exactArtifactVerified = ["source", "test", "runtime", "security"].every((kind) => attestations.find((item) => item.kind === kind)?.status === "verified");
   const item = {
-    id: randomUUID(), projectId, title: text(payload.title, 240) || "Workspace change",
-    requirement, rationale: text(payload.rationale, 2400), rollback,
-    files: fileNames, checks, score, status: score >= 75 && !checks.some((item) => item.status === "missing") ? "ready" : "needs-evidence",
-    createdAt: new Date().toISOString(), createdBy: cleanActor(payload.createdBy, text(recorder.username, 120) || "CodeVerse user"),
+    id: randomUUID(),
+    projectId,
+    title: text(payload.title, 240) || "Workspace change",
+    requirement,
+    rationale,
+    rollback,
+    files: Object.keys(files),
+    checks,
+    score,
+    status: checks.every((candidate) => candidate.status === "passed") && exactArtifactVerified ? "ready" : "needs-evidence",
+    createdAt: new Date().toISOString(),
+    createdBy: cleanActor(payload.createdBy, text(recorder.username, 120) || "CodeVerse user"),
+    changeDigest,
+    ...(text(payload.baseDigest, 160) ? { baseDigest: text(payload.baseDigest, 160) } : {}),
+    manifestDigest,
+    attestations,
+    signature: "",
+    exactArtifactVerified,
   };
+  item.signature = advancedEvidence.signEvidencePackage(item);
   await persist("packages", item);
+  await recordEvent(projectId, {
+    type: "proof.verified",
+    sessionId: text(payload.sessionId, 160),
+    actor: { name: item.createdBy.name, kind: "human" },
+    summary: "Sealed proof package " + item.title + " at " + score + "%.",
+    source: "proof-engine",
+    payload: { packageId: item.id, subjectDigest: changeDigest, signature: item.signature, exactArtifactVerified, status: item.status },
+  }, recorder);
   return item;
 }
-
 function finding(severity, title, detail, recommendation, fileName, line) {
   return { id: randomUUID(), severity, title, detail, recommendation, ...(fileName ? { fileName } : {}), ...(line ? { line } : {}) };
 }
@@ -321,127 +377,165 @@ function agent(id, name, responsibility, findings, passingSummary) {
   return { id, name, responsibility, status, summary: findings.length ? findings.length + " challenge" + (findings.length === 1 ? "" : "s") + " raised." : passingSummary, findings };
 }
 
+async function enrichReviewWithIndependentAI(result, files, requirement, rollback) {
+  const enabled = process.env.EVIDENCE_REVIEW_AI === "true" && Boolean(process.env.OPENAI_API_KEY || process.env.OLLAMA_URL);
+  if (!enabled) return result;
+  const exactArtifact = JSON.stringify(Object.entries(files).sort(([left], [right]) => left.localeCompare(right))).slice(0, 90000);
+  const agents = await Promise.all(result.agents.map(async (agentResult) => {
+    try {
+      const response = await aiService.generateNeuralInsight({
+        provider: process.env.AI_PROVIDER,
+        fast: false,
+        maxTokens: 320,
+        systemPrompt: "You are the independent " + agentResult.name + " on an adversarial engineering board. Do not trust other agents. Inspect only the exact digest-addressed artifact. Return one falsifiable claim, the evidence that supports it, and a concrete acceptance test.",
+        prompt: [
+          "Patch digest: " + result.patchDigest,
+          "Requirement: " + requirement,
+          "Rollback: " + rollback,
+          "Tool findings: " + JSON.stringify(agentResult.findings),
+          "Exact artifact: " + exactArtifact,
+        ].join("\n"),
+      });
+      return {
+        ...agentResult,
+        engine: "hybrid",
+        summary: agentResult.summary + " Independent AI challenge: " + response.suggestion.slice(0, 900),
+        toolRuns: [
+          ...(agentResult.toolRuns || []),
+          {
+            tool: "independent-ai:" + (response.provider || "local") + ":" + response.model,
+            status: "passed",
+            durationMs: 1,
+            outputDigest: advancedEvidence.digest(response.suggestion),
+            summary: "Independent model critique is sealed to the patch digest.",
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        ...agentResult,
+        toolRuns: [
+          ...(agentResult.toolRuns || []),
+          {
+            tool: "independent-ai",
+            status: "failed",
+            durationMs: 1,
+            outputDigest: advancedEvidence.digest(String(error?.message || error)),
+            summary: "AI provider was unavailable; deterministic tools remain authoritative.",
+          },
+        ],
+      };
+    }
+  }));
+  return {
+    ...result,
+    agents,
+    executedTools: agents.flatMap((agentResult) => agentResult.toolRuns.map((run) => run.tool)),
+  };
+}
+
 async function runReview(projectId, payload) {
-  const files = cleanFiles(payload.files);
+  const files = exactFiles(payload.files);
   if (!Object.keys(files).length) throw new HttpError(400, "Files are required for review");
-  const names = Object.keys(files);
-  const allCode = Object.values(files).join("\n");
-  const reviewerFindings = [];
-  const todo = firstMatch(files, /\b(TODO|FIXME|HACK)\b/i);
-  if (todo) reviewerFindings.push(finding("warning", "Unresolved implementation marker", "The patch still contains TODO, FIXME, or HACK markers.", "Resolve the marker or explain it in the evidence package.", todo.fileName, todo.line));
-  const emptyCatch = firstMatch(files, /catch\s*(?:\([^)]*\))?\s*{\s*}/m);
-  if (emptyCatch) reviewerFindings.push(finding("warning", "Silent failure path", "An empty catch block can hide the root cause.", "Record or handle the failure explicitly.", emptyCatch.fileName, emptyCatch.line));
-
-  const securityFindings = [];
-  const secret = firstMatch(files, /(api[_-]?key|secret|password|token)\s*[:=]\s*["'][^"'\n]{8,}["']/i);
-  if (secret) securityFindings.push(finding("critical", "Credential-like literal", "A secret-like value appears to be hard coded.", "Move the value to a protected runtime secret and rotate any exposed credential.", secret.fileName, secret.line));
-  const injection = firstMatch(files, /\b(eval|new\s+Function)\s*\(/);
-  if (injection) securityFindings.push(finding("critical", "Dynamic code execution", "Dynamic evaluation creates an injection boundary.", "Replace it with an explicit parser or allow-listed dispatch.", injection.fileName, injection.line));
-  const rawHtml = firstMatch(files, /dangerouslySetInnerHTML|\.innerHTML\s*=/);
-  if (rawHtml) securityFindings.push(finding("warning", "Raw HTML boundary", "Untrusted HTML could reach the document.", "Sanitize input and document the trust boundary.", rawHtml.fileName, rawHtml.line));
-
-  const testFindings = [];
-  const hasTest = names.some((name) => /(^|[/_.-])(test|spec)s?([/_.-]|$)/i.test(name));
-  if (!hasTest) testFindings.push(finding("warning", "No failure-oriented tests", "The reviewed workspace contains no recognizable test file.", "Add a failing regression test and a passing proof for the change."));
-
-  const performanceFindings = [];
-  const nestedLoop = firstMatch(files, /for\s*\([^)]*\)[\s\S]{0,240}for\s*\(/m);
-  if (nestedLoop) performanceFindings.push(finding("warning", "Potential quadratic path", "Nested iteration was detected in a short execution path.", "Confirm input bounds or add a performance threshold.", nestedLoop.fileName, nestedLoop.line));
-  const syncIo = firstMatch(files, /\b(readFileSync|writeFileSync|execSync)\s*\(/);
-  if (syncIo) performanceFindings.push(finding("warning", "Blocking I/O", "Synchronous I/O can stall a shared server process.", "Use an asynchronous operation on request paths.", syncIo.fileName, syncIo.line));
-
-  const architectureFindings = [];
-  for (const [fileName, content] of Object.entries(files)) {
-    const lines = content.split("\n").length;
-    if (lines > 700) architectureFindings.push(finding("warning", "Large module boundary", fileName + " contains " + lines + " lines.", "Split responsibilities at an explicit interface.", fileName));
-  }
-  if (!text(payload.requirement, 1600)) architectureFindings.push(finding("warning", "Unlinked requirement", "The change has no stated requirement.", "State the user or system outcome this patch must satisfy."));
-
-  const devilFindings = [];
-  if (!text(payload.rollback, 1600)) devilFindings.push(finding("warning", "No rollback path", "The change cannot yet be reversed from its evidence.", "Document a safe rollback or feature-flag strategy."));
-  if (allCode.length > 120000) devilFindings.push(finding("warning", "Review scope is too broad", "The submitted surface is too large for a focused proof package.", "Split the work into independently verifiable changes."));
-
-  const agents = [
-    agent("builder", "Builder", "Explains the implementation and its intended execution path.", [], names.length + " files indexed and ready for challenge."),
-    agent("reviewer", "Correctness Reviewer", "Searches for correctness and maintainability failures.", reviewerFindings, "No obvious correctness traps detected."),
-    agent("security", "Security Agent", "Searches for exploit paths and trust-boundary violations.", securityFindings, "No high-signal security hazards detected."),
-    agent("test", "Test Agent", "Demands failure-oriented regression evidence.", testFindings, "A test surface is present."),
-    agent("performance", "Performance Agent", "Detects blocking work and likely regressions.", performanceFindings, "No high-signal performance regression detected."),
-    agent("architecture", "Architecture Agent", "Checks boundaries, scope, and coupling.", architectureFindings, "Module boundaries fit the reviewed scope."),
-    agent("devils-advocate", "Devil's Advocate", "Challenges assumptions, reversibility, and review scope.", devilFindings, "The approach is bounded and reversible."),
-  ];
-  const blocked = agents.filter((item) => item.status === "blocked").length;
-  const warnings = agents.filter((item) => item.status === "warning").length;
-  const score = clamp(100 - blocked * 22 - warnings * 7);
+  const evidence = {
+    ...safeObject(payload.evidence),
+    rootCause: text(payload.rootCause || payload.rationale, 2000),
+    testDigest: text(payload.testDigest, 160),
+    performanceDeltaPct: payload.performanceDeltaPct,
+    performanceBudgetPct: payload.performanceBudgetPct,
+  };
+  const deterministicResult = advancedEvidence.analyzeReviewBoard(
+    files,
+    text(payload.requirement, 1600),
+    text(payload.rollback, 1600),
+    evidence
+  );
+  const result = await enrichReviewWithIndependentAI(
+    deterministicResult,
+    files,
+    text(payload.requirement, 1600),
+    text(payload.rollback, 1600)
+  );
   const review = {
-    id: randomUUID(), projectId, requirement: text(payload.requirement, 1600),
-    verdict: blocked ? "blocked" : warnings > 2 ? "changes-requested" : "approved",
-    score, agents, createdAt: new Date().toISOString(),
+    id: randomUUID(),
+    projectId,
+    requirement: text(payload.requirement, 1600),
+    verdict: result.verdict,
+    score: result.score,
+    agents: result.agents,
+    createdAt: new Date().toISOString(),
+    patchDigest: result.patchDigest,
+    rounds: result.rounds,
+    consensus: result.consensus,
+    executedTools: result.executedTools,
   };
   await persist("reviews", review);
   await recordEvent(projectId, {
-    type: "review.completed", sessionId: text(payload.sessionId, 160),
-    actor: { name: "AI review board", kind: "ai" },
-    summary: "Adversarial review completed with verdict " + review.verdict + ".",
-    source: "review-board", payload: { reviewId: review.id, verdict: review.verdict, score },
+    type: "review.completed",
+    sessionId: text(payload.sessionId, 160),
+    actor: { name: "Autonomous review board", kind: "ai" },
+    summary: "Multi-round review completed with verdict " + review.verdict + ".",
+    source: "review-board",
+    payload: {
+      reviewId: review.id,
+      verdict: review.verdict,
+      score: review.score,
+      patchDigest: review.patchDigest,
+      rounds: review.rounds.length,
+      executedTools: review.executedTools,
+    },
   });
   return review;
 }
-
-function codeConcepts(code) {
-  const identifiers = [...code.matchAll(/\b(?:function|class|const|let|var|def)\s+([A-Za-z_$][\w$]*)/g)].map((match) => match[1]);
-  const words = identifiers.slice(0, 4).map((item) => item.toLowerCase());
-  return words.length ? words : ["input", "output", "state"];
-}
-
 function createChallenge(projectId, payload) {
   const fileName = text(payload.fileName, 240) || "active file";
   const code = text(payload.code, 70000);
-  const concepts = codeConcepts(code);
-  const hasCondition = /\b(if|switch|guard|assert)\b/.test(code);
-  const hasAsync = /\b(async|await|promise|fetch)\b/i.test(code);
-  const seed = digest({ projectId, fileName, code }).slice(0, 16);
-  return {
-    id: "challenge-" + seed, projectId, fileName,
-    questions: [
-      { id: seed + "-purpose", focus: "purpose", prompt: "Explain the responsibility of " + fileName + " and the data it transforms.", expectedConcepts: [concepts[0], "input", "output"] },
-      { id: seed + "-invariant", focus: "invariant", prompt: hasCondition ? "Which invariant does the main condition or guard protect?" : "Name one invariant this implementation must preserve.", expectedConcepts: [concepts[1] || concepts[0], "valid", "state"] },
-      { id: seed + "-failure", focus: "failure", prompt: hasAsync ? "What happens when the asynchronous dependency fails?" : "Describe the most important failure or edge case.", expectedConcepts: ["error", "empty", "fail"] },
-      { id: seed + "-security", focus: "security", prompt: "Identify one trust boundary or security concern in this file.", expectedConcepts: ["input", "validate", "trust", "sanitize", "permission"] },
-    ],
-  };
+  const files = exactFiles(payload.files);
+  const subjectDigest = Object.keys(files).length ? advancedEvidence.workspaceDigest(files) : undefined;
+  return advancedEvidence.createHandsOnChallenge(projectId, fileName, code, subjectDigest);
 }
 
 async function verifyUnderstanding(projectId, payload) {
   const challenge = createChallenge(projectId, payload);
   if (payload.challengeId && payload.challengeId !== challenge.id) throw new HttpError(409, "The file changed; generate a fresh understanding challenge");
-  const answers = safeObject(payload.answers);
-  const feedback = challenge.questions.map((question) => {
-    const answer = text(answers[question.id], 2400).toLowerCase();
-    const conceptHits = question.expectedConcepts.filter((concept) => answer.includes(concept.toLowerCase())).length;
-    const lengthPoints = answer.length >= 90 ? 45 : answer.length >= 45 ? 32 : answer.length >= 20 ? 18 : 0;
-    const conceptPoints = Math.min(55, conceptHits * 22);
-    const score = clamp(lengthPoints + conceptPoints);
-    return {
-      questionId: question.id, score,
-      detail: score >= 70 ? "Explanation connects behavior to a concrete engineering concept." : "Add a concrete execution path, invariant, or failure consequence.",
-    };
-  });
-  const score = clamp(feedback.reduce((sum, item) => sum + item.score, 0) / feedback.length);
+  if (payload.expiresAt && Date.parse(payload.expiresAt) < Date.now()) throw new HttpError(409, "The understanding challenge expired");
+  const evaluation = advancedEvidence.evaluateHandsOnChallenge(
+    challenge,
+    safeObject(payload.answers),
+    safeObject(payload.signals)
+  );
   const verification = {
-    id: randomUUID(), projectId, challengeId: challenge.id, fileName: challenge.fileName,
-    score, passed: score >= 70, feedback, createdAt: new Date().toISOString(),
+    id: randomUUID(),
+    projectId,
+    challengeId: challenge.id,
+    fileName: challenge.fileName,
+    score: evaluation.score,
+    passed: evaluation.passed,
+    feedback: evaluation.feedback,
+    createdAt: new Date().toISOString(),
+    dimensions: evaluation.dimensions,
+    behavioralSignals: evaluation.behavioralSignals,
+    codeDigest: evaluation.codeDigest,
   };
   await persist("verifications", verification);
   await recordEvent(projectId, {
-    type: "understanding.verified", sessionId: text(payload.sessionId, 160),
-    actor: payload.actor, summary: "Understanding verification scored " + score + "%.",
-    source: "understanding-verifier", fileName: challenge.fileName,
-    payload: { verificationId: verification.id, score, passed: verification.passed },
+    type: "understanding.verified",
+    sessionId: text(payload.sessionId, 160),
+    actor: payload.actor,
+    summary: "Hands-on understanding verification scored " + evaluation.score + "%.",
+    source: "understanding-verifier",
+    fileName: challenge.fileName,
+    payload: {
+      verificationId: verification.id,
+      score: verification.score,
+      passed: verification.passed,
+      codeDigest: verification.codeDigest,
+      dimensions: verification.dimensions,
+      behavioralSignals: verification.behavioralSignals,
+    },
   });
   return verification;
 }
-
 function classifyFile(fileName) {
   if (/test|spec/i.test(fileName)) return "test";
   if (/\.env|config|\.json$|\.ya?ml$/i.test(fileName)) return "config";
@@ -462,94 +556,11 @@ function resolveDependency(fileName, request, names) {
 }
 
 function createDigitalTwin(payload) {
-  const files = cleanFiles(payload.files);
-  const names = Object.keys(files);
-  const nodes = names.map((fileName) => ({ id: "file:" + fileName, kind: classifyFile(fileName), label: fileName, fileName }));
-  const edges = [];
-  const addEdge = (source, target, relation) => {
-    const id = source + ":" + relation + ":" + target;
-    if (!edges.some((edge) => edge.id === id)) edges.push({ id, source, target, relation });
-  };
-  for (const [fileName, content] of Object.entries(files)) {
-    const importPattern = /(?:from\s+|require\s*\(\s*|import\s*\(\s*)["']([^"']+)["']/g;
-    for (const match of content.matchAll(importPattern)) {
-      const target = resolveDependency(fileName, match[1], names);
-      if (target) addEdge("file:" + fileName, "file:" + target, "imports");
-    }
-    const assetPattern = /(?:src|href)=["']\.\/?([^"'?#]+)["']/g;
-    for (const match of content.matchAll(assetPattern)) {
-      const target = resolveDependency(fileName, "./" + match[1], names);
-      if (target) addEdge("file:" + fileName, "file:" + target, "renders");
-    }
-    const apiPattern = /(?:fetch|axios\.(?:get|post|put|delete))\s*\(\s*["']([^"']+)["']/g;
-    for (const match of content.matchAll(apiPattern)) {
-      const endpointId = "api:" + match[1];
-      if (!nodes.some((node) => node.id === endpointId)) nodes.push({ id: endpointId, kind: "api", label: match[1] });
-      addEdge("file:" + fileName, endpointId, "calls");
-    }
-  }
-  for (const name of names.filter((candidate) => /test|spec/i.test(candidate))) {
-    const stem = posixPath.basename(name).replace(/\.(test|spec)|\.[^.]+$/g, "");
-    const target = names.find((candidate) => candidate !== name && posixPath.basename(candidate).startsWith(stem));
-    if (target) addEdge("file:" + name, "file:" + target, "tests");
-  }
-  const activeFile = text(payload.activeFile, 240);
-  const activeId = "file:" + activeFile;
-  const neighborIds = new Set();
-  for (const edge of edges) {
-    if (edge.source === activeId) neighborIds.add(edge.target);
-    if (edge.target === activeId) neighborIds.add(edge.source);
-  }
-  const affectedFiles = [...neighborIds].filter((id) => id.startsWith("file:")).map((id) => id.slice(5));
-  const stem = posixPath.basename(activeFile).replace(/\.[^.]+$/, "");
-  const testsToRun = names.filter((name) => /test|spec/i.test(name) && (name.includes(stem) || affectedFiles.some((affected) => name.includes(posixPath.basename(affected).replace(/\.[^.]+$/, "")))));
-  const activeContent = files[activeFile] || "";
-  const risks = [];
-  if (/route|api|controller/i.test(activeFile)) risks.push("API compatibility boundary");
-  if (/schema|migration|db/i.test(activeFile)) risks.push("Data migration and rollback");
-  if (/auth|token|permission|secret/i.test(activeFile + activeContent)) risks.push("Security boundary");
-  if (!testsToRun.length) risks.push("No directly linked test");
-  const radius = affectedFiles.length + risks.length;
-  return {
-    nodes, edges,
-    impact: {
-      activeFile, affectedFiles, testsToRun, risks,
-      blastRadius: radius >= 6 ? "high" : radius >= 3 ? "medium" : "low",
-    },
-  };
+  return advancedEvidence.createAdvancedTwin(payload, Array.isArray(payload.events) ? payload.events : []);
 }
-
 function createGraph(packages, events, reviews) {
-  const nodes = [];
-  const edges = [];
-  for (const item of packages.slice(-4)) {
-    if (!item.requirement) continue;
-    nodes.push({ id: "requirement:" + item.id, kind: "requirement", label: item.requirement.slice(0, 80), status: item.score >= 75 ? "passed" : "warning" });
-  }
-  const relevant = events.filter((event) => !["session.started", "ai.responded", "ai.prompted"].includes(event.type)).slice(-18);
-  const kindFor = (type) => type.startsWith("code") || type.startsWith("file") || type.startsWith("branch") ? "change"
-    : type.startsWith("test") ? "test"
-      : ["runtime", "command", "debugger", "trace", "network", "database", "performance"].some((prefix) => type.startsWith(prefix)) ? "runtime"
-        : type.startsWith("deployment") ? "deployment"
-          : type.startsWith("security") ? "security"
-            : type.startsWith("review") ? "review"
-            : "decision";
-  const statusFor = (type) => type.endsWith("failed") ? "failed" : type.endsWith("passed") || type.endsWith("succeeded") ? "passed" : "neutral";
-  for (const event of relevant) {
-    nodes.push({ id: "event:" + event.id, kind: kindFor(event.type), label: event.summary, status: statusFor(event.type), eventId: event.id });
-  }
-  for (const review of reviews.slice(-3)) {
-    for (const result of review.agents.filter((item) => item.id === "security")) {
-      nodes.push({ id: "security:" + review.id, kind: "security", label: result.summary, status: result.status === "passed" ? "passed" : result.status === "blocked" ? "failed" : "warning" });
-    }
-  }
-  const ordered = nodes;
-  for (let index = 1; index < ordered.length; index += 1) {
-    edges.push({ id: "graph:" + index, source: ordered[index - 1].id, target: ordered[index].id, relation: "supports" });
-  }
-  return { nodes, edges };
+  return advancedEvidence.createCausalGraph(packages, events, reviews);
 }
-
 function scorecard(events, reviews, verifications, integrity) {
   const successes = events.filter((event) => ["runtime.succeeded", "test.passed"].includes(event.type)).length;
   const failures = events.filter((event) => ["runtime.failed", "test.failed"].includes(event.type)).length;
@@ -574,10 +585,123 @@ function scorecard(events, reviews, verifications, integrity) {
   };
 }
 
+async function verifyPackage(projectId, packageId) {
+  const [packages, events, reviews, verifications] = await Promise.all([
+    listCollection("packages", projectId),
+    listCollection("events", projectId),
+    listCollection("reviews", projectId),
+    listCollection("verifications", projectId),
+  ]);
+  const item = packages.find((candidate) => candidate.id === packageId);
+  if (!item) throw new HttpError(404, "Evidence package not found");
+  const attestationResults = item.attestations.map((attestation) => {
+    if (attestation.status !== "verified" || attestation.subjectDigest !== item.changeDigest) return { kind: attestation.kind, verified: false };
+    if (attestation.kind === "security") {
+      const review = reviews.find((candidate) => candidate.id === attestation.eventId);
+      return { kind: attestation.kind, verified: Boolean(review && review.patchDigest === item.changeDigest && review.verdict === "approved") };
+    }
+    if (attestation.kind === "understanding") {
+      const verification = verifications.find((candidate) => candidate.id === attestation.eventId);
+      return { kind: attestation.kind, verified: Boolean(verification && verification.codeDigest === item.changeDigest && verification.passed) };
+    }
+    if (!attestation.eventId) {
+      const nonApplicable = attestation.kind === "compatibility"
+        ? !item.files.some((name) => /route|controller|api/i.test(name))
+        : attestation.kind === "migration"
+          ? !item.files.some((name) => /migration|schema\.sql/i.test(name))
+          : false;
+      return { kind: attestation.kind, verified: nonApplicable };
+    }
+    const event = events.find((candidate) => candidate.id === attestation.eventId);
+    const files = event?.payload?.files;
+    return {
+      kind: attestation.kind,
+      verified: Boolean(event && files && typeof files === "object" && advancedEvidence.workspaceDigest(files) === item.changeDigest),
+    };
+  });
+  const signatureVerified = advancedEvidence.verifyEvidencePackage(item);
+  const attestationCoverage = clamp((attestationResults.filter((result) => result.verified).length / Math.max(1, attestationResults.length)) * 100);
+  const exactArtifactVerified = ["source", "test", "runtime", "security"].every((kind) => attestationResults.find((result) => result.kind === kind)?.verified);
+  return {
+    packageId,
+    changeDigest: item.changeDigest,
+    signature: item.signature,
+    signatureVerified,
+    exactArtifactVerified,
+    attestationCoverage,
+    invalidAttestations: attestationResults.filter((result) => !result.verified).map((result) => result.kind),
+    verified: signatureVerified && exactArtifactVerified && attestationCoverage === 100,
+    verifiedAt: new Date().toISOString(),
+  };
+}
+
+async function exportEvidence(projectId, privacyMode = "full") {
+  const snapshot = await getSnapshot(projectId);
+  const redacted = privacyMode === "redacted";
+  const events = snapshot.events.map((event) => redacted && ["chat.message", "ai.prompted", "ai.responded"].includes(event.type)
+    ? { ...event, payload: { redacted: true }, summary: event.type + " recorded (content redacted)" }
+    : event);
+  const report = {
+    schema: "codeverse-evidence-export/v2",
+    projectId,
+    generatedAt: new Date().toISOString(),
+    privacyMode: redacted ? "redacted" : "full",
+    integrity: snapshot.integrity,
+    events,
+    packages: snapshot.packages,
+    reviews: snapshot.reviews,
+    verifications: snapshot.verifications,
+    replay: snapshot.replay.map((session) => ({ ...session, frames: redacted ? session.frames.map((frame) => ({ ...frame, files: {} })) : session.frames })),
+    arenas: snapshot.arenas,
+    graph: snapshot.graph,
+    scorecard: snapshot.scorecard,
+  };
+  return { report, digest: advancedEvidence.digest(report) };
+}
+
+async function verifyReplay(projectId, sessionId, payload, recorder = {}) {
+  const events = await listCollection("events", projectId);
+  const replay = advancedEvidence.buildReplaySessions(events).find((item) => item.sessionId === sessionId);
+  if (!replay) throw new HttpError(404, "Replay session not found");
+  const files = exactFiles(payload.files);
+  const sourceDigest = advancedEvidence.workspaceDigest(files);
+  const expectedFrame = [...replay.frames].reverse().find((frame) => frame.terminal);
+  const actualOutputDigest = typeof payload.output === "string" ? advancedEvidence.digest(payload.output) : text(payload.outputDigest, 160);
+  const manifestVerified = replay.manifest.sourceDigest === sourceDigest;
+  const commandVerified = !expectedFrame?.terminal?.command || expectedFrame.terminal.command === text(payload.command, 1000);
+  const exitCodeVerified = expectedFrame?.terminal?.exitCode === undefined || Number(payload.exitCode) === expectedFrame.terminal.exitCode;
+  const outputVerified = !expectedFrame?.terminal?.outputDigest || actualOutputDigest === expectedFrame.terminal.outputDigest;
+  const verified = replay.deterministic && manifestVerified && commandVerified && exitCodeVerified && outputVerified;
+  const report = {
+    sessionId,
+    replayDigest: replay.replayDigest,
+    manifestVerified,
+    commandVerified,
+    exitCodeVerified,
+    outputVerified,
+    deterministicInputsComplete: replay.deterministic,
+    verified,
+    expected: expectedFrame?.terminal || null,
+    actual: { sourceDigest, command: text(payload.command, 1000), exitCode: Number(payload.exitCode), outputDigest: actualOutputDigest },
+    verifiedAt: new Date().toISOString(),
+  };
+  await recordEvent(projectId, {
+    type: "replay.executed",
+    sessionId: text(payload.newSessionId, 160) || sessionId,
+    actor: payload.actor,
+    summary: verified ? "Deterministic replay matched the sealed execution." : "Replay diverged from the sealed execution.",
+    source: "replay-engine",
+    payload: { ...report, subjectDigest: sourceDigest, sourceEventId: expectedFrame?.eventId },
+    causedBy: expectedFrame?.eventId,
+  }, recorder);
+  return report;
+}
+
 async function getSnapshot(projectId) {
-  const [events, packages, reviews, verifications] = await Promise.all([
+  const [events, packages, reviews, verifications, arenas] = await Promise.all([
     listCollection("events", projectId), listCollection("packages", projectId),
     listCollection("reviews", projectId), listCollection("verifications", projectId),
+    arenaService.listSessions(projectId),
   ]);
   events.sort((a, b) => a.sequence - b.sequence);
   const integrity = verifyIntegrity(events);
@@ -586,6 +710,8 @@ async function getSnapshot(projectId) {
     graph: createGraph(packages, events, reviews),
     scorecard: scorecard(events, reviews, verifications, integrity),
     integrity,
+    replay: advancedEvidence.buildReplaySessions(events),
+    arenas,
   };
 }
 
@@ -597,6 +723,11 @@ module.exports = {
   recordEvent,
   runReview,
   verifyIntegrity,
+  verifyPackage,
+  exportEvidence,
+  verifyReplay,
   verifyUnderstanding,
+  verifyEvidencePackage: advancedEvidence.verifyEvidencePackage,
+  workspaceDigest: advancedEvidence.workspaceDigest,
 };
 
