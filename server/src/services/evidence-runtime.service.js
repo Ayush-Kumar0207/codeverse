@@ -141,23 +141,35 @@ function safeEnvironment(keys, supplied = {}) {
   };
 }
 
+async function processRuntimeEnvironment(tokens, directory, options) {
+  const environment = safeEnvironment(options.environmentKeys, options.environment);
+  if (tokens[0] === "go") {
+    const cacheDirectory = path.join(directory, ".evidence-go-cache");
+    await fs.mkdir(cacheDirectory, { recursive: true });
+    environment.GOCACHE = cacheDirectory;
+    environment.GOTMPDIR = directory;
+  }
+  return environment;
+}
+
 async function executeWithProcess(directory, tokens, options) {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Production evidence execution requires the Docker sandbox");
   }
+  const environment = await processRuntimeEnvironment(tokens, directory, options);
   if (tokens[0] === "codeverse-java-run") {
     const outputDirectory = path.join(directory, ".evidence-java");
     await fs.mkdir(outputDirectory, { recursive: true });
     const compiled = await runFile("javac", ["-d", outputDirectory, ...tokens.slice(2)], {
       cwd: directory,
       timeoutMs: options.timeoutMs,
-      env: safeEnvironment(options.environmentKeys, options.environment),
+      env: environment,
     });
     if (compiled.exitCode !== 0 || compiled.timedOut || compiled.launchError) return { ...compiled, engine: "isolated-process", image: null };
     const executed = await runFile("java", ["-cp", outputDirectory, tokens[1]], {
       cwd: directory,
       timeoutMs: options.timeoutMs,
-      env: safeEnvironment(options.environmentKeys, options.environment),
+      env: environment,
     });
     return { ...executed, stdout: compiled.stdout + executed.stdout, stderr: compiled.stderr + executed.stderr, engine: "isolated-process", image: null };
   }
@@ -168,13 +180,13 @@ async function executeWithProcess(directory, tokens, options) {
     const compiled = await runFile(runtime.compiler, runtime.args(tokens[2], output), {
       cwd: directory,
       timeoutMs: options.timeoutMs,
-      env: safeEnvironment(options.environmentKeys, options.environment),
+      env: environment,
     });
     if (compiled.exitCode !== 0 || compiled.timedOut || compiled.launchError) return { ...compiled, engine: "isolated-process", image: null };
     const executed = await runFile(output, [], {
       cwd: directory,
       timeoutMs: options.timeoutMs,
-      env: safeEnvironment(options.environmentKeys, options.environment),
+      env: environment,
     });
     return { ...executed, stdout: compiled.stdout + executed.stdout, stderr: compiled.stderr + executed.stderr, engine: "isolated-process", image: null };
   }
@@ -183,7 +195,7 @@ async function executeWithProcess(directory, tokens, options) {
   const result = await runFile(executable, tokens.slice(1), {
     cwd: directory,
     timeoutMs: options.timeoutMs,
-    env: safeEnvironment(options.environmentKeys, options.environment),
+    env: environment,
   });
   return { ...result, engine: "isolated-process", image: null };
 }
