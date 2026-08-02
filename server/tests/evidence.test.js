@@ -278,7 +278,8 @@ test("understanding adapters parse six languages and execute every available com
   for (const item of cases) {
     const analysis = understandingExecution.sourceAnalysis(item.name, item.source);
     parsedLanguages.push(analysis.language);
-    const available = spawnSync(item.command, ["--version"], { windowsHide: true }).status === 0;
+    const versionArgs = item.command === "go" ? ["version"] : ["--version"];
+    const available = spawnSync(item.command, versionArgs, { windowsHide: true }).status === 0;
     if (!available) {
       if (process.env.REQUIRE_ALL_LANGUAGE_ADAPTERS === "true") assert.fail(item.command + " is required for full language parity");
       continue;
