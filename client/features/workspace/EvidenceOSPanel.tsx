@@ -52,7 +52,7 @@ interface EvidenceOSPanelProps {
 }
 
 const sectionTabs = [
-  { value: "proof", label: "Proof", icon: PackageCheck },
+  { value: "proof", label: "Attestation", icon: PackageCheck },
   { value: "replay", label: "Replay", icon: History },
   { value: "board", label: "Board", icon: Bot },
   { value: "verify", label: "Verify", icon: BrainCircuit },
