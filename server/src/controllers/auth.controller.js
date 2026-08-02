@@ -262,6 +262,7 @@ function redirectOAuthSuccess(req, res, provider, result, clientBaseUrl) {
   setAuthCookie(res, result.token);
   const url = new URL("/oauth-success", clientBaseUrl || getClientBaseUrl(req));
   url.searchParams.set("provider", provider);
+  url.searchParams.set("token", result.token);
   res.redirect(url.toString());
 }
 

@@ -12,6 +12,8 @@ const apiClient = axios.create({
   },
 });
 
+import { getOAuthToken } from "./token-store";
+
 type EvidenceRequestConfig = InternalAxiosRequestConfig & { evidenceStartedAt?: number };
 
 function evidenceUrl(config: { url?: string }) {
@@ -21,6 +23,17 @@ function evidenceUrl(config: { url?: string }) {
 
 apiClient.interceptors.request.use((config) => {
   (config as EvidenceRequestConfig).evidenceStartedAt = performance.now();
+
+  // If no Authorization header is already set, use the persisted OAuth token.
+  // This is the fallback for cross-domain scenarios where third-party cookies
+  // are blocked by the browser (e.g. OAuth redirect flow).
+  if (!config.headers.Authorization) {
+    const token = getOAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
   return config;
 });
 

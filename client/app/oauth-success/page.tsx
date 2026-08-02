@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { fetchProfile } from "@/services/auth";
+import { setOAuthToken } from "@/services/token-store";
 
 type OAuthStatus = {
   provider: string;
@@ -13,8 +14,16 @@ export default function OAuthSuccessPage() {
   const [status, setStatus] = useState<OAuthStatus>({ provider: "OAuth", error: "" });
 
   useEffect(() => {
-    const provider = new URLSearchParams(window.location.search).get("provider") || "OAuth";
+    const params = new URLSearchParams(window.location.search);
+    const provider = params.get("provider") || "OAuth";
+    const token = params.get("token") || "";
     setStatus({ provider, error: "" });
+
+    // Persist the OAuth token so the API client can send it as a Bearer
+    // header, working around third-party cookie restrictions.
+    if (token) {
+      setOAuthToken(token);
+    }
 
     fetchProfile()
       .then(() => window.location.replace("/dashboard"))

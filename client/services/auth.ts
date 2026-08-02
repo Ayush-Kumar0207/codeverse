@@ -2,6 +2,7 @@ import apiClient from "./api";
 import axios from "axios";
 import type { AuthResponse } from "@shared/types/auth";
 import type { SharedUser } from "@shared/types/user";
+import { clearOAuthToken } from "./token-store";
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (axios.isAxiosError(error)) {
@@ -50,4 +51,6 @@ export async function logoutRequest(): Promise<void> {
   } catch {
     // Local state is cleared regardless; an expired server session is already logged out.
   }
+  clearOAuthToken();
 }
+
