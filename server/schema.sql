@@ -139,3 +139,72 @@ CREATE INDEX IF NOT EXISTS evidence_reviews_project_created_idx
     ON public.evidence_reviews(project_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS understanding_verifications_project_created_idx
     ON public.understanding_verifications(project_id, created_at DESC);
+
+-- EvidenceOS completeness: artifact-bound proofs, multi-round reviews, behavioral
+-- verification, reproducible replay manifests, and full engineering-arena state.
+ALTER TABLE public.evidence_packages
+  ADD COLUMN IF NOT EXISTS change_digest TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS base_digest TEXT,
+  ADD COLUMN IF NOT EXISTS manifest_digest TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS attestations JSONB NOT NULL DEFAULT '[]'::JSONB,
+  ADD COLUMN IF NOT EXISTS signature TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS exact_artifact_verified BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE public.evidence_reviews
+  ADD COLUMN IF NOT EXISTS patch_digest TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS rounds JSONB NOT NULL DEFAULT '[]'::JSONB,
+  ADD COLUMN IF NOT EXISTS consensus INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS executed_tools JSONB NOT NULL DEFAULT '[]'::JSONB;
+
+ALTER TABLE public.understanding_verifications
+  ADD COLUMN IF NOT EXISTS dimensions JSONB NOT NULL DEFAULT '{}'::JSONB,
+  ADD COLUMN IF NOT EXISTS behavioral_signals JSONB NOT NULL DEFAULT '{}'::JSONB,
+  ADD COLUMN IF NOT EXISTS code_digest TEXT NOT NULL DEFAULT '';
+
+CREATE TABLE IF NOT EXISTS public.arena_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id TEXT NOT NULL,
+    scenario_id TEXT NOT NULL,
+    organization_id TEXT,
+    status TEXT NOT NULL DEFAULT 'lobby',
+    participants JSONB NOT NULL DEFAULT '[]'::JSONB,
+    actions JSONB NOT NULL DEFAULT '[]'::JSONB,
+    workspace JSONB NOT NULL DEFAULT '{}'::JSONB,
+    policy JSONB NOT NULL DEFAULT '{}'::JSONB,
+    rubric_scores JSONB NOT NULL DEFAULT '{}'::JSONB,
+    score JSONB,
+    weighted_score INTEGER,
+    signed_report JSONB,
+    consent JSONB NOT NULL DEFAULT '{}'::JSONB,
+    started_at TIMESTAMPTZ,
+    deadline_at TIMESTAMPTZ,
+    submitted_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS arena_sessions_project_created_idx
+    ON public.arena_sessions(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS arena_sessions_scenario_score_idx
+    ON public.arena_sessions(scenario_id, weighted_score DESC);
+CREATE INDEX IF NOT EXISTS evidence_packages_change_digest_idx
+    ON public.evidence_packages(change_digest);
+CREATE INDEX IF NOT EXISTS evidence_reviews_patch_digest_idx
+    ON public.evidence_reviews(patch_digest);
+CREATE TABLE IF NOT EXISTS public.arena_scenario_templates (
+    id TEXT PRIMARY KEY,
+    organization_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    difficulty TEXT NOT NULL,
+    briefing TEXT NOT NULL,
+    time_limit_minutes INTEGER NOT NULL CHECK (time_limit_minutes BETWEEN 10 AND 240),
+    allowed_ai TEXT NOT NULL,
+    injected_faults JSONB NOT NULL DEFAULT '[]'::JSONB,
+    rubric JSONB NOT NULL DEFAULT '[]'::JSONB,
+    starter_files JSONB NOT NULL DEFAULT '{}'::JSONB,
+    created_by TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS arena_scenario_templates_organization_idx
+    ON public.arena_scenario_templates(organization_id, created_at DESC);

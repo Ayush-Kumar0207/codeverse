@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useState } from "react";
 import type { Socket } from "socket.io-client";
 import { useCodeExecution } from "@/hooks/useCodeExecution";
+import { localDigest, localWorkspaceDigest } from "@/lib/evidence-local";
 import type { ExecutionOutputType } from "@/hooks/useCodeExecution";
 import { getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { executeCode } from "@/services/execution";
@@ -62,16 +63,19 @@ export function useWorkspaceExecution({
     const executableFile = activeFile === "tracer.js" && files["solution.js"] ? "solution.js" : activeFile;
     const executableCode = files[executableFile] || fallbackCode;
     const language = getLanguageFromFilename(executableFile);
+    const sourceDigest = localWorkspaceDigest(files);
+    const executionStartedAt = Date.now();
+    const traceId = localDigest({ roomId, executableFile, sourceDigest, startedAt: executionStartedAt }).slice(0, 32);
 
     setLoading(true);
     openBottomPanel();
     setActiveBottomTab(["html", "css", "markdown"].includes(language) ? "output" : "terminal");
     socket?.emit(SOCKET_EVENTS.EXECUTION_START, { user: username, roomId, language });
     emitEvidence(
-      "command.executed",
-      "Executed " + executableFile + " in the shared runner.",
+      "trace.observed",
+      "Started deterministic execution trace for " + executableFile + ".",
       executableFile,
-      { language, bytes: executableCode.length }
+      { traceId, service: "shared-runner", language, bytes: executableCode.length, sourceDigest }
     );
 
 
@@ -86,21 +90,60 @@ export function useWorkspaceExecution({
       setOutput(response.output || "No output");
       setOutputType((response.type as ExecutionOutputType) || "terminal");
       setActiveBottomTab(response.type === "visual" ? "output" : "terminal");
+      const executionOutput = response.output || "";
+      const outputDigest = localDigest(executionOutput);
+      emitEvidence(
+        "command.executed",
+        "Executed " + executableFile + " with exit code 0.",
+        executableFile,
+        {
+          command: "run " + executableFile,
+          language,
+          exitCode: 0,
+          outputDigest,
+          traceId,
+          sourceDigest,
+          subjectDigest: sourceDigest,
+          files,
+        }
+      );
       const evidenceType: EngineeringEventType = /(?:test|spec)/i.test(executableFile) ? "test.passed" : "runtime.succeeded";
       emitEvidence(
         evidenceType,
         executableFile + " completed successfully.",
         executableFile,
-        { language, output: (response.output || "").slice(0, 4000), stats: response.stats || {} }
+        { language, output: executionOutput.slice(0, 4000), outputDigest, traceId, sourceDigest, subjectDigest: sourceDigest, files, stats: response.stats || {} }
+      );
+      emitEvidence(
+        "performance.measurement",
+        "Measured end-to-end execution latency for " + executableFile + ".",
+        executableFile,
+        { durationMs: Math.max(0, Date.now() - executionStartedAt), traceId, sourceDigest, subjectDigest: sourceDigest, files, stats: response.stats || {} }
       );
     } catch (error) {
       const errorMessage = formatExecutionError(error);
       setOutput(errorMessage);
+      const outputDigest = localDigest(errorMessage);
+      emitEvidence(
+        "command.executed",
+        "Executed " + executableFile + " with exit code 1.",
+        executableFile,
+        {
+          command: "run " + executableFile,
+          language,
+          exitCode: 1,
+          outputDigest,
+          traceId,
+          sourceDigest,
+          subjectDigest: sourceDigest,
+          files,
+        }
+      );
       emitEvidence(
         /(?:test|spec)/i.test(executableFile) ? "test.failed" : "runtime.failed",
         executableFile + " failed during execution.",
         executableFile,
-        { language, error: errorMessage.slice(0, 4000) }
+        { language, error: errorMessage.slice(0, 4000), outputDigest, traceId, sourceDigest, subjectDigest: sourceDigest, files }
       );
       setOutputType("terminal");
       setActiveBottomTab("terminal");
