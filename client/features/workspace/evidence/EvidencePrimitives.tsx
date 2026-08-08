@@ -1,5 +1,13 @@
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import type { ReviewBoardRun } from "@shared/types/evidence";
 import { cn } from "@/lib/utils";
+
+export function isReviewPreview(review?: Pick<ReviewBoardRun, "id" | "executionStatus" | "agents">) {
+  if (!review) return false;
+  return review.executionStatus === "preview"
+    || review.id.startsWith("review-preview")
+    || review.agents.some((agent) => agent.toolRuns?.some((run) => run.tool.endsWith("-unverified-preview")));
+}
 
 export function EvidenceStatusIcon({ status }: { status: string }) {
   if (status === "passed" || status === "approved" || status === "ready") {

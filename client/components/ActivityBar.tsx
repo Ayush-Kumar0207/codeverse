@@ -49,7 +49,12 @@ export function ActivityBar() {
     { icon: Search, label: "Search / Commands", id: "search", href: "#" },
     { icon: Files, label: "Dashboard", id: "dashboard", href: "/dashboard" },
     { icon: BookOpen, label: "Learn algorithms", id: "encyclopedia", href: "/encyclopedia" },
-    { icon: MessageSquare, label: "Demo workspace", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
+    {
+      icon: MessageSquare,
+      label: "Editor",
+      id: "editor",
+      href: pathname?.startsWith("/editor/") ? pathname : "/dashboard",
+    },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
 
@@ -97,7 +102,7 @@ export function ActivityBar() {
                 aria-label={item.label}
                 className={cn(
                   "relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-white/[0.05]",
-                  pathname === item.href || (item.id === "editor" && pathname?.startsWith("/editor"))
+                  (item.id !== "editor" && pathname === item.href) || (item.id === "editor" && pathname?.startsWith("/editor"))
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}

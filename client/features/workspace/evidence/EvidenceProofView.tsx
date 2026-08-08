@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { EvidenceScoreBar, EvidenceStatusIcon } from "./EvidencePrimitives";
+import { EvidenceScoreBar, EvidenceStatusIcon, isReviewPreview } from "./EvidencePrimitives";
 
 interface EvidenceProofViewProps {
   snapshot: EvidenceOSSnapshot;
@@ -45,7 +45,7 @@ export function EvidenceProofView({
   onVerifyPackage,
 }: EvidenceProofViewProps) {
   const latestPackage = snapshot.packages.at(-1);
-  const latestReview = snapshot.reviews.at(-1);
+  const latestReview = [...snapshot.reviews].reverse().find((review) => !isReviewPreview(review));
   const focusedChange = focusedLocation
     ? [...snapshot.events].reverse().find((event) => event.fileName === focusedLocation.fileName && event.type === "code.changed")
     : undefined;

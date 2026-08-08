@@ -5,13 +5,16 @@ import {
   Activity,
   AlertCircle,
   Check,
+  CheckCircle2,
   Clock,
   Cloud,
+  CloudUpload,
   Code,
   Cpu,
   Database,
   Gauge,
   Keyboard,
+  LoaderCircle,
   Monitor,
   Palette,
   RotateCcw,
@@ -113,6 +116,9 @@ export default function SettingsHub() {
     toggleStressMode,
     flushMemory,
     syncStatus,
+    syncPhase,
+    syncError,
+    lastSyncAt,
     snapshots,
     performSync,
     rollback,
@@ -120,6 +126,25 @@ export default function SettingsHub() {
   } = useSettings();
 
   const activeMeta = tabMeta[activeTab];
+  const syncTitle = syncStatus === "syncing"
+    ? syncPhase === "verifying" ? "Verifying snapshot history" : "Uploading settings"
+    : syncStatus === "error"
+      ? "Sync needs attention"
+      : isSynced
+        ? "Cloud snapshot verified"
+        : "Local changes are waiting";
+  const syncDescription = syncStatus === "syncing"
+    ? syncPhase === "verifying"
+      ? "The cloud accepted the snapshot. CodeVerse is refreshing your saved history now."
+      : "Your current settings are moving from this device to the authenticated cloud API."
+    : syncStatus === "error"
+      ? syncError || "The cloud could not confirm this snapshot."
+      : isSynced
+        ? "This device matches the latest persisted cloud snapshot."
+        : "Sync now to make these settings available from your other sessions.";
+  const lastSyncLabel = lastSyncAt
+    ? new Date(lastSyncAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+    : "No successful cloud sync yet";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -445,23 +470,95 @@ export default function SettingsHub() {
                             <Cloud className="h-5 w-5" />
                           </div>
                           <div>
-                            <div className="text-sm font-semibold text-foreground">Network Topology</div>
+                            <div className="text-sm font-semibold text-foreground">Settings sync</div>
                             <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                              {syncStatus === "syncing" ? "Synchronizing" : isSynced ? "Synced" : "Local changes"}
+                              This device → Cloud API → Snapshot history
                             </div>
                           </div>
                         </div>
                         <Button
                           onClick={() => performSync(true)}
                           disabled={syncStatus === "syncing" || !token}
-                          title={token ? "Synchronize settings with the cloud" : "Sign in to enable cloud sync"}
-                          className="h-10 rounded-xl bg-primary px-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                          title={token ? "Save and verify a cloud settings snapshot" : "Sign in to enable cloud sync"}
+                          className="h-10 min-w-36 rounded-xl bg-primary px-5 text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {syncStatus === "syncing" ? "Syncing" : token ? "Sync Now" : "Sign In to Sync"}
+                          {syncStatus === "syncing" ? (
+                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                          ) : isSynced ? (
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                          ) : (
+                            <CloudUpload className="mr-2 h-4 w-4" />
+                          )}
+                          {syncStatus === "syncing"
+                            ? syncPhase === "verifying" ? "Verifying" : "Uploading"
+                            : !token
+                              ? "Sign In to Sync"
+                              : syncStatus === "error"
+                                ? "Retry Sync"
+                                : isSynced
+                                  ? "Sync Again"
+                                  : "Sync Now"}
                         </Button>
                       </div>
 
-                      <NetworkTopology status={syncStatus} isSynced={isSynced} />
+                      <NetworkTopology status={syncStatus} phase={syncPhase} isSynced={isSynced} />
+
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className={cn(
+                          "overflow-hidden rounded-xl border p-4",
+                          syncStatus === "error"
+                            ? "border-rose-400/20 bg-rose-400/[0.05]"
+                            : isSynced
+                              ? "border-emerald-400/20 bg-emerald-400/[0.045]"
+                              : "border-border bg-muted/20"
+                        )}
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div className={cn(
+                              "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
+                              syncStatus === "error"
+                                ? "border-rose-400/20 bg-rose-400/10 text-rose-300"
+                                : isSynced
+                                  ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+                                  : "border-cyan-400/20 bg-cyan-400/10 text-cyan-300"
+                            )}>
+                              {syncStatus === "syncing" ? (
+                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                              ) : syncStatus === "error" ? (
+                                <AlertCircle className="h-4 w-4" />
+                              ) : isSynced ? (
+                                <CheckCircle2 className="h-4 w-4" />
+                              ) : (
+                                <CloudUpload className="h-4 w-4" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-foreground">{syncTitle}</div>
+                              <p className="mt-1 text-xs leading-5 text-muted-foreground">{syncDescription}</p>
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-xs text-muted-foreground">{lastSyncLabel}</div>
+                        </div>
+                        {syncStatus === "syncing" && (
+                          <div className="mt-4">
+                            <div className="mb-2 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                              <span>{syncPhase === "verifying" ? "Step 2 of 2 · Verify history" : "Step 1 of 2 · Upload snapshot"}</span>
+                              <span>{syncPhase === "verifying" ? "85%" : "45%"}</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                              <motion.div
+                                className="h-full rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                                initial={false}
+                                animate={{ width: syncPhase === "verifying" ? "85%" : "45%" }}
+                                transition={{ duration: 0.35, ease: "easeOut" }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <SettingsPanel title="Config History" icon={Clock}>
                         <div className="grid max-h-[28rem] gap-3 overflow-y-auto pr-1">
@@ -501,7 +598,7 @@ export default function SettingsHub() {
                       <SettingsPanel title="Security Posture" icon={Shield} className="lg:col-span-3">
                         <div className="grid gap-3 md:grid-cols-3">
                           <PostureItem label="Route guard" value="Active" />
-                          <PostureItem label="Token storage" value="Browser local" />
+                          <PostureItem label="Session storage" value="HTTP-only cookie" />
                           <PostureItem label="Rollback safety" value={`${snapshots.length} snapshots`} />
                         </div>
                       </SettingsPanel>
@@ -566,6 +663,7 @@ function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced"
       <span
         className={cn(
           "h-2 w-2 rounded-full",
+          status === "syncing" && "animate-pulse",
           status === "error" && "bg-destructive",
           status === "syncing" && "bg-amber-300",
           status !== "error" && status !== "syncing" && isSynced && "bg-emerald-300",

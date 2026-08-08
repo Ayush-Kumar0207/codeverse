@@ -464,13 +464,7 @@ function localAgent(
     summary,
     findings: [],
     engine: "tool",
-    toolRuns: [{
-      tool: id + "-unverified-preview",
-      status: status === "passed" ? "passed" : "failed",
-      durationMs: 1,
-      outputDigest: localDigest({ id, status, summary }),
-      summary,
-    }],
+    toolRuns: [],
   };
 }
 
@@ -491,7 +485,7 @@ export function createLocalReview(
     ["architecture", "Architecture Agent", "Builds compiler-resolved module dependencies."],
     ["devils-advocate", "Devil's Advocate", "Challenges causal and rollback claims."],
   ];
-  const summary = "Unverified local preview; the isolated server review board has not executed.";
+  const summary = "This review role is ready, but the server-backed check has not run yet.";
   const agents = roles.map(([id, name, responsibility]) => localAgent(id, name, responsibility, "warning", summary));
   const challenges = agents.map((agent) => ({
     from: agent.id,
@@ -501,6 +495,7 @@ export function createLocalReview(
   }));
   return {
     id: makeId("review-preview"),
+    executionStatus: "preview",
     projectId,
     requirement,
     verdict: "changes-requested",

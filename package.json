@@ -10,7 +10,7 @@
     "url": "https://github.com/Ayush-Kumar0207/codeverse.git"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "npm": ">=10"
   },
   "scripts": {

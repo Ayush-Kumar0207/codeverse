@@ -20,7 +20,7 @@ const AlgoTraceCanvas = dynamic(() => import("@/components/algotrace/AlgoTraceCa
   ),
 });const ChatBox = dynamic(() => import("@/components/ChatBox"), {
   ssr: false,
-  loading: () => <RightToolLoading label="Opening AI assistant" />,
+  loading: () => <RightToolLoading label="Opening Assistant" />,
 });
 const WorkspaceTeamPanel = dynamic(
   () => import("./WorkspaceTeamPanel").then((module) => module.WorkspaceTeamPanel),
@@ -123,7 +123,7 @@ export function WorkspaceRightPanel({
                     value="assistant"
                     className="h-7 gap-1.5 rounded-lg px-2 text-[11px] font-medium text-slate-500 data-[state=active]:bg-white/[0.08] data-[state=active]:text-white xl:px-3"
                   >
-                    <Bot className="h-3.5 w-3.5" /> AI
+                    <Bot className="h-3.5 w-3.5" /> Assistant
                   </TabsTrigger>
                   <TabsTrigger
                     value="team"
@@ -213,9 +213,7 @@ export function WorkspaceRightPanel({
                       setRightCollapsed(false);
                       setFullscreenPanel("assistant");
                     }}
-                    onReturnOverview={() => {
-                      if (!isCompactLayout) setFullscreenPanel(null);
-                    }}
+
                     snapshot={evidenceOS.snapshot}
                     twin={evidenceOS.twin}
                     challenge={evidenceOS.challenge}

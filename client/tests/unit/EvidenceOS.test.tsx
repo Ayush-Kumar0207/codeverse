@@ -52,6 +52,8 @@ describe("EvidenceOS", () => {
     expect(tampered.integrity.verified).toBe(false);
     expect(snapshot.packages[0].status).toBe("needs-evidence");
     expect(review.agents).toHaveLength(7);
+    expect(review.executionStatus).toBe("preview");
+    expect(review.agents.every((agent) => agent.toolRuns?.length === 0)).toBe(true);
     expect(verification.passed).toBe(false);
     expect(twin.impact.affectedFiles).toContain("index.html");
   });
@@ -126,6 +128,8 @@ describe("EvidenceOS", () => {
     expect(await screen.findByText(/get a second opinion/i)).toBeInTheDocument();
     await user.click(screen.getByText(/reviewer and tool details/i));
     expect(screen.getAllByText("Security Agent").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Not run")).toHaveLength(7);
+    expect(screen.queryByText(/failed · 1ms/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /back to proof center/i }));
     await user.click(screen.getByRole("button", { name: /check understanding/i }));

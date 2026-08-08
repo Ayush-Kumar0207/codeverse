@@ -196,6 +196,7 @@ export interface ReviewBoardRound {
 
 export interface ReviewBoardRun {
   id: string;
+  executionStatus?: "preview" | "completed";
   projectId: string;
   requirement: string;
   verdict: "approved" | "changes-requested" | "blocked";

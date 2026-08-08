@@ -31,6 +31,7 @@ import type {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isReviewPreview } from "./evidence/EvidencePrimitives";
 function EvidenceFeatureLoading() {
   return (
     <div className="grid min-h-[280px] place-items-center rounded-2xl border border-white/[0.07] bg-white/[0.02] p-8">
@@ -85,7 +86,6 @@ interface EvidenceOSPanelProps {
   focusedLocation: { fileName: string; lineNumber: number; column: number } | null;
   expanded?: boolean;
   onRequestExpanded?: () => void;
-  onReturnOverview?: () => void;
   onCreatePackage: (input: { title: string; requirement: string; rationale: string; rollback: string }) => Promise<void>;
   onVerifyPackage: (packageId: string) => Promise<boolean>;
   onRunReview: (requirement: string, rollback: string) => Promise<void>;
@@ -177,7 +177,6 @@ export function EvidenceOSPanel({
   focusedLocation,
   expanded = false,
   onRequestExpanded,
-  onReturnOverview,
   onCreatePackage,
   onVerifyPackage,
   onRunReview,
@@ -198,6 +197,7 @@ export function EvidenceOSPanel({
   const [section, setSection] = useState<EvidenceSection | null>(null);
   const latestPackage = snapshot.packages.at(-1);
   const latestReview = snapshot.reviews.at(-1);
+  const completedReviewCount = snapshot.reviews.filter((review) => !isReviewPreview(review)).length;
   const activeMeta = sectionMeta.find((item) => item.value === section);
   const readiness = coverage >= 85 ? "Ready to share" : coverage >= 60 ? "Nearly ready" : "Needs attention";
 
@@ -208,7 +208,6 @@ export function EvidenceOSPanel({
 
   const returnToOverview = () => {
     setSection(null);
-    onReturnOverview?.();
   };
 
   if (loading) {
@@ -344,7 +343,7 @@ export function EvidenceOSPanel({
                 {[
                   [snapshot.events.length, "Recorded events"],
                   [snapshot.integrity.checkedEvents, "Sealed events"],
-                  [snapshot.reviews.length, "Completed reviews"],
+                  [completedReviewCount, "Completed reviews"],
                 ].map(([value, label]) => (
                   <div key={label}>
                     <div className="text-lg font-semibold text-white">{value}</div>

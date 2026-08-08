@@ -518,7 +518,7 @@ function EditorWorkspace() {
            </Button>
         )}
 
-        {/* Floating Toggle for AI if collapsed */}
+        {/* Floating toggle for the Assistant when the right panel is collapsed */}
         {!fullscreenPanel && (
            <Button
             className={cn(

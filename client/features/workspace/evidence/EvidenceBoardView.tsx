@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bot, CheckCircle2, ChevronDown, RefreshCw, SearchCheck, Sparkles, Users } from "lucide-react";
+import { Bot, CheckCircle2, ChevronDown, CircleDashed, RefreshCw, SearchCheck, Sparkles, Users } from "lucide-react";
 import type { ChangeEvidencePackage, ReviewBoardRun } from "@shared/types/evidence";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { EvidenceStatusIcon } from "./EvidencePrimitives";
+import { EvidenceStatusIcon, isReviewPreview } from "./EvidencePrimitives";
 
 interface EvidenceBoardViewProps {
   latestPackage?: ChangeEvidencePackage;
@@ -29,6 +29,8 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
   const keyFindings = latestReview?.agents.flatMap((agent) =>
     agent.findings.map((finding) => ({ ...finding, agent: agent.name }))
   ).slice(0, 6) || [];
+  const isPreview = isReviewPreview(latestReview);
+  const executedTools = latestReview?.executedTools.filter((tool) => !tool.endsWith("-unverified-preview")) || [];
 
   return (
     <div className="space-y-4 p-2 lg:p-0">
@@ -91,16 +93,21 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
             <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
               <div>
                 <div className="flex items-center gap-2 text-xs text-violet-200">
-                  <CheckCircle2 className="h-4 w-4" /> Review complete
+                  {isPreview ? <CircleDashed className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                  {isPreview ? "Review ready to run" : "Review complete"}
                 </div>
-                <h3 className="mt-2 text-2xl font-semibold capitalize text-white">{latestReview.verdict.replace("-", " ")}</h3>
+                <h3 className="mt-2 text-2xl font-semibold capitalize text-white">
+                  {isPreview ? "Server review not run" : latestReview.verdict.replace("-", " ")}
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-slate-400">
-                  {latestReview.consensus}% of reviewers agree after {latestReview.rounds.length} review round{latestReview.rounds.length === 1 ? "" : "s"}.
+                  {isPreview
+                    ? "This preview shows which specialists will review the change. Connect the review service to run their checks and produce a verdict."
+                    : `${latestReview.consensus}% of reviewers agree after ${latestReview.rounds.length} review round${latestReview.rounds.length === 1 ? "" : "s"}.`}
                 </p>
               </div>
               <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-violet-400/20 bg-violet-400/10">
-                <div className="text-3xl font-semibold text-violet-200">{latestReview.score}</div>
-                <div className="text-[10px] text-slate-500">confidence</div>
+                <div className="text-3xl font-semibold text-violet-200">{isPreview ? "—" : latestReview.score}</div>
+                <div className="text-[10px] text-slate-500">{isPreview ? "not scored" : "confidence"}</div>
               </div>
             </div>
           </section>
@@ -125,6 +132,10 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
                   </article>
                 ))}
               </div>
+            ) : isPreview ? (
+              <div className="mt-5 rounded-xl border border-slate-400/10 bg-white/[0.02] p-4 text-sm text-slate-400">
+                No findings yet — the server-backed review still needs to run.
+              </div>
             ) : (
               <div className="mt-5 rounded-xl border border-emerald-400/10 bg-emerald-400/[0.025] p-4 text-sm text-emerald-200">
                 No blocking findings were raised.
@@ -138,30 +149,42 @@ export function EvidenceBoardView({ latestPackage, latestReview, syncing, onRunR
                 <Users className="h-4 w-4 text-violet-200" />
                 <div>
                   <div className="text-sm font-medium text-white">Reviewer and tool details</div>
-                  <div className="mt-1 text-xs text-slate-500">{latestReview.agents.length} independent reviewers · {latestReview.executedTools.length} tools</div>
+                  <div className="mt-1 text-xs text-slate-500">{latestReview.agents.length} review roles · {executedTools.length} tools run</div>
                 </div>
               </div>
               <ChevronDown className="h-4 w-4 text-slate-500 transition group-open:rotate-180" />
             </summary>
             <div className="space-y-3 border-t border-white/[0.07] p-5">
-              <div className="flex flex-wrap gap-2">
-                {latestReview.executedTools.map((tool) => (
-                  <Badge key={tool} className="border-violet-400/15 bg-violet-400/[0.06] text-[10px] text-violet-200">{tool}</Badge>
-                ))}
-              </div>
+              {!isPreview && executedTools.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {executedTools.map((tool) => (
+                    <Badge key={tool} className="border-violet-400/15 bg-violet-400/[0.06] text-[10px] text-violet-200">{tool}</Badge>
+                  ))}
+                </div>
+              )}
               <div className="grid gap-3 lg:grid-cols-2">
                 {latestReview.agents.map((agent) => (
                   <article key={agent.id} className="rounded-xl border border-white/[0.07] bg-black/15 p-4">
                     <div className="flex items-center gap-2">
-                      <EvidenceStatusIcon status={agent.status} />
+                      {isPreview ? <CircleDashed className="h-3.5 w-3.5 text-slate-500" /> : <EvidenceStatusIcon status={agent.status} />}
                       <h4 className="text-sm font-medium text-white">{agent.name}</h4>
                       <Badge className={cn(
                         "ml-auto rounded-lg border text-[9px]",
-                        agent.status === "passed" ? "border-emerald-400/15 bg-emerald-400/10 text-emerald-200" : "border-amber-400/15 bg-amber-400/10 text-amber-200"
-                      )}>{agent.status}</Badge>
+                        isPreview
+                          ? "border-slate-400/15 bg-white/[0.04] text-slate-400"
+                          : agent.status === "passed"
+                            ? "border-emerald-400/15 bg-emerald-400/10 text-emerald-200"
+                            : "border-amber-400/15 bg-amber-400/10 text-amber-200"
+                      )}>{isPreview ? "Not run" : agent.status}</Badge>
                     </div>
-                    <p className="mt-2 text-xs leading-5 text-slate-500">{agent.summary}</p>
-                    {agent.toolRuns?.map((run) => (
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      {isPreview ? "Waiting for the server review to run this specialist check." : agent.summary}
+                    </p>
+                    {isPreview ? (
+                      <div className="mt-2 rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-[10px] text-slate-600">
+                        No tool result yet
+                      </div>
+                    ) : agent.toolRuns?.map((run) => (
                       <div key={run.outputDigest} className="mt-2 flex items-center justify-between rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-[10px]">
                         <span className="text-violet-200">{run.tool}</span>
                         <span className={run.status === "passed" ? "text-emerald-300" : "text-rose-300"}>{run.status} · {run.durationMs}ms</span>

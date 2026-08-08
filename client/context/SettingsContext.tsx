@@ -140,6 +140,9 @@ interface SettingsContextType {
     stressMode: boolean;
   };
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
+  syncPhase: 'idle' | 'uploading' | 'verifying' | 'complete' | 'failed';
+  syncError: string | null;
+  lastSyncAt: number | null;
   snapshots: Snapshot[];
   currentHash: string;
   lastPushedHash: string | null;
@@ -194,6 +197,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     stressMode: false
   });
   const [syncStatus, setSyncStatus] = useState<SettingsContextType['syncStatus']>('idle');
+  const [syncPhase, setSyncPhase] = useState<SettingsContextType['syncPhase']>('idle');
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [lastPushedHash, setLastPushedHash] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
@@ -201,6 +207,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const currentHash = useMemo(() => btoa(JSON.stringify(settings)), [settings]);
   const settingsRef = useRef(settings);
   const currentHashRef = useRef(currentHash);
+  const syncInFlightRef = useRef(false);
   const isSynced = useMemo(() => {
     if (!lastPushedHash) return false;
     return currentHash === lastPushedHash;
@@ -223,8 +230,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const saved = localStorage.getItem("codeverse-settings");
     const savedHash = localStorage.getItem("codeverse-last-pushed-hash");
-    
+    const savedSyncAt = Number(localStorage.getItem("codeverse-last-sync-at"));
+
     if (savedHash) setLastPushedHash(savedHash);
+    if (Number.isFinite(savedSyncAt) && savedSyncAt > 0) setLastSyncAt(savedSyncAt);
 
     if (saved) {
       try {
@@ -304,35 +313,59 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [settings, currentHash, logEvent]);
 
   const performSync = useCallback(async (manual = false) => {
-    if (!token) return;
-    
+    if (!token || syncInFlightRef.current) return;
+
+    syncInFlightRef.current = true;
     setSyncStatus('syncing');
-    if (manual) logEvent("Manual Sync initiated: Committing to cloud hub...", "sync");
-    
+    setSyncPhase('uploading');
+    setSyncError(null);
+    if (manual) logEvent("Manual sync started: sending current settings to the cloud.", "sync");
+
     try {
       const response = await apiClient.post("/api/settings/sync", { config: settings });
+      if (response.status !== 201) throw new Error("The cloud did not confirm the settings snapshot.");
 
-      if (response.status === 201) {
-        setSyncStatus('synced');
-        setLastPushedHash(currentHash);
-        localStorage.setItem("codeverse-last-pushed-hash", currentHash);
-        logEvent("Sync Protocol: Cloud Hub push verified (201).", "sync");
-        
-        // Refresh history after sync
+      const savedSnapshot = response.data?.data as CloudSettingsSnapshot | undefined;
+      const completedAt = savedSnapshot?.created_at ? new Date(savedSnapshot.created_at).getTime() : Date.now();
+      setSyncPhase('verifying');
+      setLastPushedHash(currentHash);
+      setLastSyncAt(completedAt);
+      localStorage.setItem("codeverse-last-pushed-hash", currentHash);
+      localStorage.setItem("codeverse-last-sync-at", String(completedAt));
+      logEvent("Cloud sync complete: snapshot persisted and verified.", "sync");
+
+      if (savedSnapshot?.id) {
+        const nextSnapshot: Snapshot = {
+          id: savedSnapshot.id,
+          timestamp: completedAt,
+          config: savedSnapshot.config,
+          hash: `CFG-${savedSnapshot.id.substring(0, 6).toUpperCase()}`,
+        };
+        setSnapshots((previous) => [nextSnapshot, ...previous.filter((item) => item.id !== nextSnapshot.id)].slice(0, 20));
+      }
+
+      try {
         const { data } = await apiClient.get("/api/settings/history");
         if (data.history) {
-          const cloudSnapshots = data.history.map((s: CloudSettingsSnapshot) => ({
-            id: s.id,
-            timestamp: new Date(s.created_at).getTime(),
-            config: s.config,
-            hash: `CFG-${s.id.substring(0, 6).toUpperCase()}`
+          const cloudSnapshots = data.history.map((snapshot: CloudSettingsSnapshot) => ({
+            id: snapshot.id,
+            timestamp: new Date(snapshot.created_at).getTime(),
+            config: snapshot.config,
+            hash: `CFG-${snapshot.id.substring(0, 6).toUpperCase()}`,
           }));
           setSnapshots(cloudSnapshots);
         }
+      } catch {
+        logEvent("Cloud snapshot saved; history refresh will retry later.", "sync");
       }
+
+      setSyncStatus('synced');
+      setSyncPhase('complete');
     } catch (err: unknown) {
       if (isUnauthorizedError(err)) {
         setSyncStatus('idle');
+        setSyncPhase('idle');
+        setSyncError("Your session expired. Sign in again to resume cloud sync.");
         setLastPushedHash(null);
         localStorage.removeItem("codeverse-last-pushed-hash");
         logEvent("Session expired: Cloud sync paused. Please sign in again.", "critical");
@@ -340,15 +373,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
+      const errorMsg = getErrorMessage(err, "Cloud settings could not be saved.");
       setSyncStatus('error');
-      const errorMsg = getErrorMessage(err, "Cloud Hub push failed.");
-      logEvent(`Network Error: ${errorMsg}`, "critical");
+      setSyncPhase('failed');
+      setSyncError(errorMsg);
+      logEvent(`Cloud sync failed: ${errorMsg}`, "critical");
     } finally {
-      if (manual) setTimeout(() => setSyncStatus('idle'), 2000);
-      else setSyncStatus('idle');
+      syncInFlightRef.current = false;
     }
   }, [token, settings, currentHash, logEvent, logout]);
-
   const rollback = useCallback((targetConfig: SettingsConfig, hash: string) => {
     setSettingsState(targetConfig);
     setJsonState(JSON.stringify(targetConfig, null, 2));
@@ -391,16 +424,26 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const cloudHash = btoa(JSON.stringify(cloudConfig));
           const localIsFresh = JSON.stringify(settingsRef.current) === JSON.stringify(DEFAULT_SETTINGS);
 
+          const cloudTimestamp = new Date(latestData.snapshot.created_at).getTime();
+          if (Number.isFinite(cloudTimestamp)) {
+            setLastSyncAt(cloudTimestamp);
+            localStorage.setItem("codeverse-last-sync-at", String(cloudTimestamp));
+          }
+
           if (localIsFresh) {
             setSettingsState(cloudConfig);
             setJsonState(JSON.stringify(cloudConfig, null, 2));
             setLastPushedHash(cloudHash);
+            setSyncStatus('synced');
+            setSyncPhase('complete');
             localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
             logEvent("Cloud settings applied.", "sys");
           } else if (cloudHash !== currentHashRef.current) {
             logEvent("Cloud settings differ from this device. Review before replacing local preferences.", "critical");
           } else {
             setLastPushedHash(cloudHash);
+            setSyncStatus('synced');
+            setSyncPhase('complete');
             localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
             logEvent("Cloud settings verified.", "sync");
           }
@@ -416,6 +459,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
 
         const errorMsg = getErrorMessage(err, "Cloud settings are temporarily unavailable.");
+        setSyncStatus('error');
+        setSyncPhase('failed');
+        setSyncError(errorMsg);
         logEvent(`Cloud sync: ${errorMsg}`, "critical");
       } finally {
         if (active) setCloudReady(true);
@@ -437,6 +483,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
   }, [isSettingsRoute, token, logEvent, logout]);
+
+  useEffect(() => {
+    if (!isSynced && syncStatus === 'synced') {
+      setSyncStatus('idle');
+      setSyncPhase('idle');
+    }
+  }, [isSynced, syncStatus]);
 
   // Debounced Auto-Snapshot & Auto-Push (Optimistic)
   useEffect(() => {
@@ -582,7 +635,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <SettingsContext.Provider value={{ 
       settings, setSettings, updateSetting, jsonConfig, setJsonConfig, apm, 
       diagnostics, logEvent, toggleStressMode, flushMemory,
-      syncStatus, snapshots, performSync, rollback,
+      syncStatus, syncPhase, syncError, lastSyncAt, snapshots, performSync, rollback,
       currentHash, lastPushedHash, isSynced
     }}>
       {children}

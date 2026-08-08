@@ -454,7 +454,7 @@ export function useEvidenceOS({
     try {
       if (!isDemo && !offline) {
         if (!capture.complete) {
-          setNotice("Unverified review preview only; the exact workspace exceeds the server evidence limit.");
+          setNotice("Review preview ready. This workspace is too large for server analysis; narrow the included files and try again.");
           return;
         }
         const review = await postReviewBoard(projectId, {
@@ -472,13 +472,13 @@ export function useEvidenceOS({
         });
         commit(await fetchEvidenceSnapshot(projectId));
       } else {
-        setNotice("Unverified local review preview; isolated analysis requires the server.");
+        setNotice("Review preview ready. Connect to the review service to run these checks.");
         return;
       }
       setNotice("Review board completed: " + completed.verdict.replace("-", " ") + ".");
     } catch {
       setOffline(true);
-      setNotice("Unverified local review preview; backend analysis is unavailable.");
+      setNotice("Review preview ready. The review service is unavailable; try again when it reconnects.");
     } finally {
       setSyncing(false);
     }

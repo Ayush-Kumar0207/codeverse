@@ -198,6 +198,10 @@ export default function AboutPage() {
   const { user } = useAuth();
   const primaryHref = user ? "/dashboard" : "/login";
   const primaryLabel = user ? "Dashboard" : "Sign In";
+  const githubProfileHref = user?.githubId
+    ? `https://github.com/${encodeURIComponent(user.username)}`
+    : "/api/auth/github";
+  const hasLinkedGitHub = Boolean(user?.githubId);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#060910] text-slate-100">
@@ -373,12 +377,13 @@ export default function AboutPage() {
                 and a cleaner developer workflow.
               </p>
               <Link
-                href="https://github.com/ayush-coder"
-                target="_blank"
-                rel="noreferrer"
+                href={githubProfileHref}
+                target={hasLinkedGitHub ? "_blank" : undefined}
+                rel={hasLinkedGitHub ? "noreferrer" : undefined}
+                aria-label={hasLinkedGitHub ? `Open ${user?.username}'s GitHub profile` : "Connect your GitHub account"}
                 className="inline-flex h-10 items-center justify-center rounded border border-white/10 px-4 text-sm font-semibold text-slate-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/10 hover:text-white"
               >
-                GitHub Profile
+                {hasLinkedGitHub ? "My GitHub Profile" : "Connect GitHub"}
               </Link>
             </div>
           </div>
