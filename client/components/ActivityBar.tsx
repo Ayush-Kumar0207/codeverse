@@ -48,13 +48,13 @@ export function ActivityBar() {
   const navItems = [
     { icon: Search, label: "Search / Commands", id: "search", href: "#" },
     { icon: Files, label: "Dashboard", id: "dashboard", href: "/dashboard" },
-    { icon: BookOpen, label: "Algorithm Encyclopedia", id: "encyclopedia", href: "/encyclopedia" },
-    { icon: MessageSquare, label: "Editor", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
+    { icon: BookOpen, label: "Learn algorithms", id: "encyclopedia", href: "/encyclopedia" },
+    { icon: MessageSquare, label: "Demo workspace", id: "editor", href: "/editor/demo-sandbox?mode=demo" },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
 
   return (
-    <div className="w-12 flex flex-col items-center py-4 bg-[hsl(var(--activity-bar-background))] border-r border-[hsl(var(--sidebar-border))] h-full z-50">
+    <div className="z-50 flex h-full w-14 flex-col items-center border-r border-white/[0.07] bg-[hsl(var(--activity-bar-background))]/95 py-3 backdrop-blur-xl">
       <div className="mb-8">
         <TooltipProvider delay={0}>
           <Tooltip>
@@ -67,9 +67,9 @@ export function ActivityBar() {
                 router.push("/");
               }}
               aria-label="Go to Landing Page"
-              className="text-primary hover:scale-110 transition-transform flex items-center justify-center h-10 w-10 rounded-md"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary transition hover:border-primary/30 hover:bg-primary/15"
             >
-              <Command className="w-8 h-8" />
+              <Command className="h-5 w-5" />
             </TooltipTrigger>
             <TooltipContent side="right">
               <p className="font-bold">Go to Landing Page</p>
@@ -96,13 +96,13 @@ export function ActivityBar() {
                 }}
                 aria-label={item.label}
                 className={cn(
-                  "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-muted/50",
+                  "relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-white/[0.05]",
                   pathname === item.href || (item.id === "editor" && pathname?.startsWith("/editor"))
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
               >
-                <item.icon className="w-6 h-6" />
+                <item.icon className="h-5 w-5" />
               </TooltipTrigger>
               <TooltipContent side="right">
                 <p>{item.label}</p>
@@ -124,14 +124,14 @@ export function ActivityBar() {
                 router.push("/settings");
               }}
               className={cn(
-                "h-10 w-10 flex items-center justify-center rounded-md transition-colors hover:bg-muted/50",
+                "relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-white/[0.05]",
                 pathname === "/settings" ? "text-primary bg-muted/50" : "text-muted-foreground"
               )}
             >
               <Settings className="w-6 h-6" />
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>System Settings</p>
+              <p>Settings</p>
             </TooltipContent>
           </Tooltip>
 
@@ -179,7 +179,7 @@ export function ActivityBar() {
                )}
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Neural Identity</p>
+              <p>Profile</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -198,7 +198,7 @@ export function PresenceHeader({
   connected = false,
 }: PresenceHeaderProps) {
   return (
-    <header className="z-40 flex h-12 items-center justify-between border-b border-border bg-card/95 px-4 text-foreground backdrop-blur-md">
+    <header className="z-40 flex h-14 items-center justify-between border-b border-white/[0.07] bg-card/90 px-3 text-foreground backdrop-blur-xl sm:px-4">
       <div className="flex items-center space-x-3">
         {showBackButton && (
           <Link
@@ -260,7 +260,7 @@ export function PresenceHeader({
         
         <button 
           onClick={onDeploy}
-          className="flex items-center space-x-2 rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow-lg shadow-black/20 transition-colors hover:bg-primary/90"
+          className="flex h-9 items-center space-x-2 rounded-xl bg-primary px-3.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-black/20 transition-colors hover:bg-primary/90"
         >
           <Github className="w-3 h-3" />
           <span>Deploy</span>

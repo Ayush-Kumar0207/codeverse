@@ -11,11 +11,13 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const isEditorRoute = pathname?.startsWith("/editor/");
+  const isDemoEditorRoute = pathname === "/editor/demo-sandbox";
   const isIndependentScrollRoute = isEditorRoute || pathname === "/encyclopedia";
   const canPaintBeforeAuth =
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/demo" ||
+    isDemoEditorRoute ||
     pathname === "/privacy" ||
     pathname === "/terms" ||
     pathname === "/source" ||
@@ -26,7 +28,20 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
     pathname === "/signup" ||
     pathname === "/encyclopedia";
   
-  if (loading && !canPaintBeforeAuth) return null;
+  if (loading && !canPaintBeforeAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#070b12] px-6 text-slate-100" role="status" aria-live="polite">
+        <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/30">
+          <div className="mb-4 h-2 w-28 animate-pulse rounded-full bg-indigo-400/40" />
+          <div className="space-y-3">
+            <div className="h-4 w-4/5 animate-pulse rounded-full bg-white/10" />
+            <div className="h-3 w-3/5 animate-pulse rounded-full bg-white/[0.07]" />
+          </div>
+          <p className="mt-5 text-xs font-medium text-slate-400">Restoring your secure workspace…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

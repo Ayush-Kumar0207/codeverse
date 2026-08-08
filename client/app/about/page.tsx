@@ -213,7 +213,7 @@ export default function AboutPage() {
             <span className="flex h-9 w-9 items-center justify-center rounded bg-indigo-500 shadow-lg shadow-indigo-950/40">
               <Command className="h-5 w-5" />
             </span>
-            <span className="text-lg font-black">CodeVerse</span>
+            <span className="text-lg font-semibold">CodeVerse</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-slate-400 lg:flex">

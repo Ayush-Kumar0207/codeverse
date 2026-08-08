@@ -104,9 +104,14 @@ type FileMutationResult = {
   activeFile: string;
 };
 
-export function useEditorState() {
-  const [files, setFiles] = useState<Record<string, string>>({});
-  const [activeFile, setActiveFile] = useState("");
+type InitialEditorState = {
+  files: Record<string, string>;
+  activeFile: string;
+};
+
+export function useEditorState(initialState?: InitialEditorState | null) {
+  const [files, setFiles] = useState<Record<string, string>>(() => initialState?.files || {});
+  const [activeFile, setActiveFile] = useState(() => initialState?.activeFile || "");
   const [newFileName, setNewFileName] = useState("");
   const [showNewFileModal, setShowNewFileModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

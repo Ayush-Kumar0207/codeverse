@@ -134,36 +134,36 @@ This starter project is deployed directly from the landing page CTA.`,
 };
 
 const navLinks = [
-  { label: "EvidenceOS", href: "#features" },
-  { label: "Assessment", href: "#technology" },
-  { label: "Collaboration", href: "#collaboration" },
+  { label: "Proof Center", href: "#features" },
+  { label: "How it works", href: "#technology" },
+  { label: "Teams", href: "#collaboration" },
 ];
 
 const featureRows = [
   {
-    title: "Evidence Graph",
-    desc: "Requirements, code changes, tests, runtime behavior, review, and deployment stay causally connected.",
+    title: "Every change, connected",
+    desc: "See the requirement, code, tests, review, and release as one clear story.",
     icon: ShieldCheck,
     accent: "text-teal-300",
     bg: "bg-teal-300/10",
   },
   {
-    title: "Session Replay",
-    desc: "Replay the work between commits, inspect the moment a failure appeared, and branch from recorded state.",
+    title: "Return to any moment",
+    desc: "Step through the work, find when a problem appeared, and continue from a safe point.",
     icon: History,
     accent: "text-amber-300",
     bg: "bg-amber-300/10",
   },
   {
-    title: "Review Board",
-    desc: "Seven adversarial AI roles challenge correctness, security, tests, performance, and architecture.",
+    title: "Get a second opinion",
+    desc: "Independent AI reviewers check correctness, safety, tests, performance, and structure.",
     icon: Sparkles,
     accent: "text-rose-300",
     bg: "bg-rose-300/10",
   },
   {
-    title: "Verified Understanding",
-    desc: "Prove the developer can explain invariants, failure paths, and trust boundaries behind AI-assisted code.",
+    title: "Make understanding visible",
+    desc: "Use a short guided check to confirm the person behind the code can explain it.",
     icon: Users,
     accent: "text-cyan-300",
     bg: "bg-cyan-300/10",
@@ -190,7 +190,7 @@ function ProductStage() {
   ];
 
   return (
-    <div className="pointer-events-none absolute inset-x-4 top-8 z-0 mx-auto h-[min(58vh,520px)] max-w-6xl overflow-hidden rounded-lg border border-white/10 bg-[#071013]/80 opacity-60 shadow-[0_30px_120px_rgba(0,0,0,0.5)]">
+    <div className="pointer-events-none absolute inset-x-4 top-8 z-0 mx-auto h-[min(58vh,520px)] max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-[#071013]/80 opacity-60 shadow-[0_30px_120px_rgba(0,0,0,0.5)]">
       <div className="flex h-10 items-center gap-3 border-b border-white/10 bg-black/35 px-4">
         <div className="flex gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
@@ -371,14 +371,14 @@ export default function HomePage() {
       type="button"
       onClick={handleSignedInStart}
       disabled={authLoading}
-      className="inline-flex h-10 items-center justify-center rounded-md bg-teal-300 px-4 text-sm font-bold text-black shadow-lg shadow-teal-300/20 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-70 sm:px-5"
+      className="inline-flex h-10 items-center justify-center rounded-xl bg-teal-300 px-4 text-sm font-bold text-black shadow-lg shadow-teal-300/20 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-70 sm:px-5"
     >
       New Project
     </button>
   ) : (
     <Link
       href="/signup"
-      className="inline-flex h-10 items-center justify-center rounded-md bg-teal-300 px-4 text-sm font-bold text-black shadow-lg shadow-teal-300/20 transition hover:bg-teal-200 sm:px-5"
+      className="inline-flex h-10 items-center justify-center rounded-xl bg-teal-300 px-4 text-sm font-bold text-black shadow-lg shadow-teal-300/20 transition hover:bg-teal-200 sm:px-5"
     >
       Get Started
     </Link>
@@ -389,7 +389,7 @@ export default function HomePage() {
       size="lg"
       onClick={handleSignedInStart}
       disabled={authLoading}
-      className="h-12 rounded-md bg-teal-300 px-7 font-bold text-black shadow-xl shadow-teal-300/20 hover:bg-teal-200 disabled:opacity-70"
+      className="h-12 rounded-xl bg-teal-300 px-7 font-bold text-black shadow-xl shadow-teal-300/20 hover:bg-teal-200 disabled:opacity-70"
     >
       Open EvidenceOS
       <ArrowRight className="ml-2 h-4 w-4" />
@@ -397,9 +397,9 @@ export default function HomePage() {
   ) : (
     <Link
       href="/signup"
-      className="inline-flex h-12 items-center justify-center rounded-md bg-teal-300 px-7 text-sm font-bold text-black shadow-xl shadow-teal-300/20 transition hover:bg-teal-200"
+      className="inline-flex h-12 items-center justify-center rounded-xl bg-teal-300 px-7 text-sm font-bold text-black shadow-xl shadow-teal-300/20 transition hover:bg-teal-200"
     >
-      Try EvidenceOS
+      Explore workspace
       <ArrowRight className="ml-2 h-4 w-4" />
     </Link>
   );
@@ -410,12 +410,12 @@ export default function HomePage() {
         <Atmosphere />
 
         <header className="sticky top-0 z-50 px-4 py-4">
-          <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-lg border border-white/10 bg-[#06090d]/82 px-4 py-3 shadow-2xl shadow-black/25 backdrop-blur-xl md:px-6">
+          <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#06090d]/82 px-4 py-3 shadow-2xl shadow-black/25 backdrop-blur-xl md:px-6">
             <Link href="/" className="flex shrink-0 items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-teal-300 text-black shadow-lg shadow-teal-300/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-300 text-black shadow-lg shadow-teal-300/20">
                 <Command className="h-6 w-6" />
               </div>
-              <span className="text-xl font-black tracking-tight">CodeVerse</span>
+              <span className="text-xl font-semibold tracking-tight">CodeVerse</span>
             </Link>
 
             <div className="hidden items-center gap-8 md:flex">
@@ -423,7 +423,7 @@ export default function HomePage() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400 transition hover:text-teal-200"
+                  className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition hover:text-teal-200"
                 >
                   {link.label}
                 </Link>
@@ -433,7 +433,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href={user ? "/dashboard" : "/login"}
-                className="inline-flex h-10 items-center justify-center rounded-md px-3 text-sm font-semibold text-white transition hover:bg-white/5 sm:px-4"
+                className="inline-flex h-10 items-center justify-center rounded-xl px-3 text-sm font-semibold text-white transition hover:bg-white/5 sm:px-4"
               >
                 {user ? "Dashboard" : "Sign In"}
               </Link>
@@ -453,11 +453,11 @@ export default function HomePage() {
               transition={{ duration: 0.75 }}
               className="relative z-10 mx-auto max-w-4xl text-center"
             >
-              <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-teal-100">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-xl border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-teal-100">
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                Verifiable collaborative engineering
+                Professional collaboration, clear by design
               </div>
-              <h1 className="text-5xl font-black leading-none tracking-tight text-white drop-shadow-[0_18px_44px_rgba(0,0,0,0.9)] sm:text-7xl md:text-8xl">
+              <h1 className="text-5xl font-semibold leading-none tracking-tight text-white drop-shadow-[0_18px_44px_rgba(0,0,0,0.9)] sm:text-7xl md:text-8xl">
                 CodeVerse
               </h1>
               <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-200 md:text-xl">
@@ -471,7 +471,7 @@ export default function HomePage() {
                   size="lg"
                   onClick={handleLandingDeploy}
                   disabled={deploying}
-                  className="h-12 rounded-md bg-amber-300 px-7 font-bold text-black shadow-xl shadow-amber-300/15 hover:bg-amber-200 disabled:opacity-70"
+                  className="h-12 rounded-xl bg-amber-300 px-7 font-bold text-black shadow-xl shadow-amber-300/15 hover:bg-amber-200 disabled:opacity-70"
                 >
                   <Rocket className="mr-2 h-4 w-4" />
                   {deploying ? "Deploying" : "Deploy Sample"}
@@ -481,7 +481,7 @@ export default function HomePage() {
               {deploymentStatus && (
                 <div
                   aria-live="polite"
-                  className="mx-auto mt-4 max-w-xl rounded-md border border-amber-300/20 bg-black/45 px-4 py-3 text-sm text-amber-100"
+                  className="mx-auto mt-4 max-w-xl rounded-xl border border-amber-300/20 bg-black/45 px-4 py-3 text-sm text-amber-100"
                 >
                   {deploymentStatus}
                   {deploymentUrl && (
@@ -503,9 +503,9 @@ export default function HomePage() {
           <section id="technology" className="scroll-mt-28 border-y border-white/10 bg-[#081113] px-4 py-20">
             <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
               <div>
-                <div className="mb-4 text-xs font-black uppercase tracking-[0.32em] text-amber-300">Technology</div>
-                <h2 className="text-4xl font-black tracking-tight text-white md:text-5xl">
-                  Built around the editor, not around a landing page.
+                <div className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-amber-300">Technology</div>
+                <h2 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+                  A focused workspace that reveals depth only when you need it.
                 </h2>
                 <p className="mt-5 max-w-xl text-base leading-8 text-slate-400">
                   Public visitors see the same core idea your team uses after sign-in: files, terminal output,
@@ -520,7 +520,7 @@ export default function HomePage() {
                   { icon: Clock3, label: "Recover", text: "Workspace snapshots move backward and forward." },
                   { icon: Globe2, label: "Publish", text: "Deploy routes are generated from real workspace files." },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-lg border border-white/10 bg-black/30 p-5">
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
                     <item.icon className="mb-4 h-5 w-5 text-teal-300" />
                     <h3 className="text-lg font-bold">{item.label}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-500">{item.text}</p>
@@ -534,9 +534,9 @@ export default function HomePage() {
             <div className="mx-auto max-w-7xl">
               <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
-                  <div className="mb-4 text-xs font-black uppercase tracking-[0.32em] text-teal-300">Features</div>
-                  <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">
-                    Proof-carrying changes, not another generic coding agent.
+                  <div className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-teal-300">Features</div>
+                  <h2 className="max-w-2xl text-4xl font-semibold tracking-tight md:text-5xl">
+                    Powerful engineering tools that stay easy to use.
                   </h2>
                 </div>
                 <Link
@@ -555,9 +555,9 @@ export default function HomePage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-80px" }}
                     transition={{ delay: index * 0.06 }}
-                    className="rounded-lg border border-white/10 bg-[#081113]/80 p-6 shadow-xl shadow-black/20"
+                    className="rounded-2xl border border-white/10 bg-[#081113]/80 p-6 shadow-xl shadow-black/20"
                   >
-                    <div className={cn("mb-5 flex h-10 w-10 items-center justify-center rounded-md", feature.bg)}>
+                    <div className={cn("mb-5 flex h-10 w-10 items-center justify-center rounded-xl", feature.bg)}>
                       <feature.icon className={cn("h-5 w-5", feature.accent)} />
                     </div>
                     <h3 className="text-lg font-bold text-white">{feature.title}</h3>
@@ -571,8 +571,8 @@ export default function HomePage() {
           <section id="collaboration" className="scroll-mt-28 bg-[#0b0f10] px-4 py-20">
             <div className="mx-auto max-w-7xl">
               <div className="mb-8 max-w-2xl">
-                <div className="mb-4 text-xs font-black uppercase tracking-[0.32em] text-rose-300">Collaboration</div>
-                <h2 className="text-4xl font-black tracking-tight md:text-5xl">Multiplayer work. One verifiable truth.</h2>
+                <div className="mb-4 text-xs font-semibold uppercase tracking-[0.32em] text-rose-300">Collaboration</div>
+                <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">Multiplayer work. One verifiable truth.</h2>
                 <p className="mt-5 text-base leading-8 text-slate-400">
                   Code, AI prompts, tests, runtime failures, decisions, reviews, and deployments become one causal history.
                   Teams keep live collaboration while evaluators gain evidence of both correctness and understanding.
@@ -601,7 +601,7 @@ export default function HomePage() {
                   },
                 ].map(({ title, detail, icon: ItemIcon, color }) => {
                   return (
-                    <div key={title} className="rounded-lg border border-white/10 bg-black/30 p-5">
+                    <div key={title} className="rounded-2xl border border-white/10 bg-black/30 p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="text-sm font-bold text-white">{title}</div>
@@ -621,7 +621,7 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-3">
               <Command className="h-6 w-6 text-teal-300" />
-              <span className="text-lg font-black uppercase tracking-tight">CodeVerse</span>
+              <span className="text-lg font-semibold uppercase tracking-tight">CodeVerse</span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
               <Link href="/privacy" className="hover:text-teal-200">Privacy</Link>

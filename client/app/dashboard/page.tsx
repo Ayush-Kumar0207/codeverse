@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchProfile } from "@/services/auth";
+import { useAuth } from "@/context/AuthContext";
 import { deleteProject, fetchProjectsByOwner } from "@/services/projects";
-import type { SharedUser } from "@shared/types/user";
 import type { SharedProject } from "@shared/types/project";
 import NewProjectModal from "@/components/NewProjectModal";
 import { AnimatePresence } from "framer-motion";
@@ -65,7 +64,7 @@ const getProjectKey = (project: SharedProject, index: number) =>
   project._id || `${slugify(project.title)}-${project.language}-${index}`;
 
 export default function Dashboard() {
-  const [user, setUser] = useState<SharedUser | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<SharedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewProject, setShowNewProject] = useState(false);
@@ -78,30 +77,35 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const initDashboard = async () => {
-      try {
-        const profileData = await fetchProfile();
-        if (!profileData.user) throw new Error("Invalid session");
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      router.replace("/login");
+      return;
+    }
 
-        setUser(profileData.user);
-        try {
-          const projectData = await fetchProjectsByOwner(profileData.user.username);
-          setProjects(projectData.projects || []);
-          setProjectServiceAvailable(true);
-        } catch {
-          setProjects([]);
-          setProjectServiceAvailable(false);
-          setActionMessage("Project service unavailable; showing an empty workspace");
-        }
-      } catch {
-        router.push("/login");
-      } finally {
-        setLoading(false);
-      }
+    let active = true;
+    setLoading(true);
+    fetchProjectsByOwner(user.username)
+      .then((projectData) => {
+        if (!active) return;
+        setProjects(projectData.projects || []);
+        setProjectServiceAvailable(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setProjects([]);
+        setProjectServiceAvailable(false);
+        setActionMessage("Project service unavailable; showing an empty workspace");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
     };
-
-    initDashboard();
-  }, [router]);
+  }, [authLoading, router, user]);
 
   useEffect(() => {
     if (projects.length === 0) {
@@ -328,7 +332,7 @@ export default function Dashboard() {
   if (loading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#070b12] text-slate-100">
-        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 shadow-2xl shadow-black/30">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-2xl shadow-black/30">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
           <p className="text-sm font-medium text-slate-300">Loading workspace</p>
         </div>
@@ -342,7 +346,7 @@ export default function Dashboard() {
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <span className="rounded-md border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-200">
+              <span className="rounded-xl border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-200">
                 Workspace Dashboard
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300">
@@ -361,14 +365,14 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => router.push("/editor/demo-sandbox?mode=demo")}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06]"
             >
               <Code className="h-4 w-4" />
               Open Sandbox
             </button>
             <button
               onClick={() => setShowNewProject(true)}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 transition hover:bg-indigo-400"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 transition hover:bg-indigo-400"
             >
               <Plus className="h-4 w-4" />
               New Project
@@ -380,7 +384,7 @@ export default function Dashboard() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-lg border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15"
+              className="rounded-2xl border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -390,7 +394,7 @@ export default function Dashboard() {
                   <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
                   <p className="mt-1 text-sm text-slate-400">{stat.helper}</p>
                 </div>
-                <div className={cn("rounded-lg border border-white/10 bg-white/[0.03] p-2.5", stat.tone)}>
+                <div className={cn("rounded-2xl border border-white/10 bg-white/[0.03] p-2.5", stat.tone)}>
                   <stat.icon className="h-5 w-5" />
                 </div>
               </div>
@@ -399,7 +403,7 @@ export default function Dashboard() {
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="rounded-lg border border-white/10 bg-[#0b111c] shadow-xl shadow-black/15">
+          <div className="rounded-2xl border border-white/10 bg-[#0b111c] shadow-xl shadow-black/15">
             <div className="flex flex-col gap-4 border-b border-white/10 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-base font-semibold text-white">Project Browser</h2>
@@ -411,7 +415,7 @@ export default function Dashboard() {
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search projects"
-                  className="h-10 w-full rounded-lg border border-white/10 bg-[#070b12] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
+                  className="h-10 w-full rounded-2xl border border-white/10 bg-[#070b12] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
             </div>
@@ -421,11 +425,11 @@ export default function Dashboard() {
                 {filteredProjects.map((project) => (
                   <article
                     key={project._id || `${project.title}-${project.language}`}
-                    className="group rounded-lg border border-white/10 bg-[#0f1725] p-4 transition hover:border-indigo-400/35 hover:bg-[#121c2d]"
+                    className="group rounded-2xl border border-white/10 bg-[#0f1725] p-4 transition hover:border-indigo-400/35 hover:bg-[#121c2d]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-start gap-3">
-                        <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-200">
+                        <div className="rounded-2xl border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-200">
                           <FolderOpen className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
@@ -440,7 +444,7 @@ export default function Dashboard() {
                           event.stopPropagation();
                           handleDeleteProject(project);
                         }}
-                        className="rounded-md p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-300"
+                        className="rounded-xl p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-300"
                         aria-label={`Delete ${project.title}`}
                         title={`Delete ${project.title}`}
                       >
@@ -454,7 +458,7 @@ export default function Dashboard() {
                       </span>
                       <button
                         onClick={() => router.push(`/editor/${project._id || "demo"}`)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-indigo-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-indigo-100"
                       >
                         Open
                         <ArrowUpRight className="h-3.5 w-3.5" />
@@ -465,7 +469,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="flex min-h-[360px] flex-col items-center justify-center p-8 text-center">
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-slate-300">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-slate-300">
                   <FolderOpen className="h-8 w-8" />
                 </div>
                 <h3 className="mt-5 text-base font-semibold text-white">
@@ -479,7 +483,7 @@ export default function Dashboard() {
                 {!query && (
                   <button
                     onClick={() => setShowNewProject(true)}
-                    className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                    className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                   >
                     <Plus className="h-4 w-4" />
                     Create Project
@@ -490,7 +494,7 @@ export default function Dashboard() {
           </div>
 
           <aside className="flex flex-col gap-6">
-            <section className="rounded-lg border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
+            <section className="rounded-2xl border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-semibold text-white">Activity</h2>
@@ -514,9 +518,9 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
+            <section className="rounded-2xl border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-2 text-emerald-300">
+                <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-2 text-emerald-300">
                   <CheckCircle2 className="h-4 w-4" />
                 </div>
                 <div>
@@ -525,11 +529,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                   <p className="text-slate-500">Session</p>
                   <p className="mt-1 font-semibold text-emerald-300">Authenticated</p>
                 </div>
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                   <p className="text-slate-500">Projects</p>
                   <p
                     className={cn(
@@ -545,7 +549,7 @@ export default function Dashboard() {
 
             <section
               className={cn(
-                "rounded-lg border p-5 shadow-xl shadow-black/15",
+                "rounded-2xl border p-5 shadow-xl shadow-black/15",
                 githubConnected
                   ? "border-teal-300/25 bg-teal-300/[0.06]"
                   : "border-indigo-400/20 bg-indigo-400/[0.06]"
@@ -554,7 +558,7 @@ export default function Dashboard() {
               <div className="flex items-start gap-3">
                 <div
                   className={cn(
-                    "rounded-lg border p-2",
+                    "rounded-2xl border p-2",
                     githubConnected
                       ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
                       : "border-indigo-300/20 bg-indigo-300/10 text-indigo-200"
@@ -567,7 +571,7 @@ export default function Dashboard() {
                     <h2 className="text-base font-semibold text-white">Connect Repository</h2>
                     <span
                       className={cn(
-                        "rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em]",
+                        "rounded-xl border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em]",
                         githubConnected
                           ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
                           : "border-amber-300/25 bg-amber-300/10 text-amber-200"
@@ -586,7 +590,7 @@ export default function Dashboard() {
 
               {githubConnected ? (
                 <>
-                  <div className="mt-5 rounded-lg border border-white/10 bg-[#071018]/70 p-3">
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-[#071018]/70 p-3">
                     <label
                       htmlFor="repo-project"
                       className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500"
@@ -601,7 +605,7 @@ export default function Dashboard() {
                           setSelectedRepoProjectKey(event.target.value);
                           setRepoPrepared(false);
                         }}
-                        className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-[#0b111c] px-3 text-sm font-semibold text-slate-100 outline-none transition focus:border-teal-300/50 focus:ring-2 focus:ring-teal-300/15"
+                        className="mt-2 h-10 w-full rounded-2xl border border-white/10 bg-[#0b111c] px-3 text-sm font-semibold text-slate-100 outline-none transition focus:border-teal-300/50 focus:ring-2 focus:ring-teal-300/15"
                       >
                         {projects.map((project, index) => (
                           <option key={getProjectKey(project, index)} value={getProjectKey(project, index)}>
@@ -612,7 +616,7 @@ export default function Dashboard() {
                     ) : (
                       <button
                         onClick={() => setShowNewProject(true)}
-                        className="mt-2 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-slate-100 transition hover:border-teal-300/35 hover:bg-white/[0.07]"
+                        className="mt-2 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-slate-100 transition hover:border-teal-300/35 hover:bg-white/[0.07]"
                       >
                         <Plus className="h-4 w-4" />
                         Create Project
@@ -628,11 +632,11 @@ export default function Dashboard() {
                     {repoReadiness.map((item) => (
                       <div
                         key={item.label}
-                        className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                        className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"
                       >
                         <div
                           className={cn(
-                            "mt-0.5 rounded-md border p-1.5",
+                            "mt-0.5 rounded-xl border p-1.5",
                             item.ready
                               ? "border-teal-300/25 bg-teal-300/10 text-teal-200"
                               : "border-slate-500/25 bg-slate-500/10 text-slate-400"
@@ -648,7 +652,7 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  <div className="mt-4 rounded-lg border border-white/10 bg-[#071018]">
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-[#071018]">
                     <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
                       <div className="flex min-w-0 items-center gap-2">
                         <GitBranch className="h-4 w-4 text-teal-200" />
@@ -658,7 +662,7 @@ export default function Dashboard() {
                       </div>
                       <button
                         onClick={() => copyRepoText("push commands", repoSetupCommand)}
-                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
                       >
                         <Copy className="h-3.5 w-3.5" />
                         {copiedRepoItem === "push commands" ? "Copied" : "Copy"}
@@ -676,7 +680,7 @@ export default function Dashboard() {
                     {repoFiles.map((file) => (
                       <div
                         key={file.name}
-                        className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] p-3"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
@@ -688,7 +692,7 @@ export default function Dashboard() {
                           </div>
                           <button
                             onClick={() => copyRepoText(file.name, file.body)}
-                            className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
+                            className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-white/10 px-2 text-xs font-semibold text-slate-200 transition hover:border-teal-300/35 hover:text-white"
                           >
                             <Copy className="h-3.5 w-3.5" />
                             {copiedRepoItem === file.name ? "Copied" : "Copy"}
@@ -699,9 +703,9 @@ export default function Dashboard() {
                   </div>
 
                   {repoPrepared && (
-                    <div className="mt-4 rounded-lg border border-teal-300/25 bg-teal-300/10 p-3">
+                    <div className="mt-4 rounded-2xl border border-teal-300/25 bg-teal-300/10 p-3">
                       <div className="flex items-start gap-3">
-                        <div className="rounded-md bg-teal-300/15 p-1.5 text-teal-200">
+                        <div className="rounded-xl bg-teal-300/15 p-1.5 text-teal-200">
                           <PackageCheck className="h-4 w-4" />
                         </div>
                         <div>
@@ -717,14 +721,14 @@ export default function Dashboard() {
                   <div className="mt-5 grid grid-cols-1 gap-2">
                     <button
                       onClick={prepareRepository}
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-teal-300 px-4 text-sm font-bold text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-200"
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-teal-300 px-4 text-sm font-bold text-slate-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-200"
                     >
                       <ShieldCheck className="h-4 w-4" />
                       {repoPrepared ? "Refresh Repository Plan" : "Prepare Repository"}
                     </button>
                     <button
                       onClick={openSelectedRepoProject}
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.07]"
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/[0.07]"
                     >
                       <ArrowUpRight className="h-4 w-4" />
                       Open Selected Project
@@ -747,7 +751,7 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={connectGithub}
-                    className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-indigo-100"
+                    className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-indigo-100"
                   >
                     <Github className="h-4 w-4" />
                     Authorize GitHub

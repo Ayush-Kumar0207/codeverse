@@ -15,7 +15,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 export async function fetchProfile(): Promise<{ user: SharedUser }> {
   try {
-    const { data } = await apiClient.get("/api/auth/profile");
+    const { data } = await apiClient.get("/api/auth/profile", { timeout: 8000 });
     return data;
   } catch (error) {
     throw new Error(getApiErrorMessage(error, "Failed to load profile"));

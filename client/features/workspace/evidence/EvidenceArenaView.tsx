@@ -174,7 +174,7 @@ export function EvidenceArenaView({
         <div className="flex items-center gap-2">
           <Trophy className="h-4 w-4 text-rose-300" />
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-200">Engineering arena</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-200">Practice an engineering scenario</h3>
             <p className="mt-0.5 text-[9px] text-slate-500">Timed incidents, hidden faults, teams, rubrics, signed reports</p>
           </div>
         </div>
@@ -214,7 +214,7 @@ export function EvidenceArenaView({
           className="flex w-full items-center justify-between text-left"
         >
           <span>
-            <span className="block text-[9px] font-bold uppercase tracking-wider text-violet-300">Evaluator scenario builder</span>
+            <span className="block text-[9px] font-bold uppercase tracking-wider text-violet-300">Create a practice scenario</span>
             <span className="mt-0.5 block text-[8px] text-slate-500">Organization-specific fault, policy, timer, workspace, and rubric template</span>
           </span>
           <Settings2 className="h-4 w-4 text-violet-300" />

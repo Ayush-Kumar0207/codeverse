@@ -2,7 +2,12 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from "react";
 import apiClient from "@/services/api";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+type IdleCapableWindow = Omit<Window, "requestIdleCallback" | "cancelIdleCallback"> & {
+  requestIdleCallback?: Window["requestIdleCallback"];
+  cancelIdleCallback?: Window["cancelIdleCallback"];
+};
 
 export type ThemeType = "midnight" | "hacker" | "solarized" | "amoled";
 export type ScaleType = number;
@@ -176,6 +181,8 @@ const isUnauthorizedError = (err: unknown) => {
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, logout } = useAuth();
+  const pathname = usePathname();
+  const isSettingsRoute = pathname === "/settings";
   const [settings, setSettingsState] = useState<SettingsConfig>(DEFAULT_SETTINGS);
   const [jsonConfig, setJsonState] = useState<string>(JSON.stringify(DEFAULT_SETTINGS, null, 2));
   const [apm, setApm] = useState(0);
@@ -189,6 +196,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [syncStatus, setSyncStatus] = useState<SettingsContextType['syncStatus']>('idle');
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [lastPushedHash, setLastPushedHash] = useState<string | null>(null);
+  const [cloudReady, setCloudReady] = useState(false);
 
   const currentHash = useMemo(() => btoa(JSON.stringify(settings)), [settings]);
   const settingsRef = useRef(settings);
@@ -200,11 +208,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const keystrokesRef = useRef<number[]>([]);
   const lastApmRef = useRef(0);
+  const apmRef = useRef(0);
 
   useEffect(() => {
     settingsRef.current = settings;
     currentHashRef.current = currentHash;
   }, [settings, currentHash]);
+
+  useEffect(() => {
+    apmRef.current = apm;
+  }, [apm]);
 
   // Load from localStorage
   useEffect(() => {
@@ -343,16 +356,25 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     logEvent(`Rollback: Reverted to ${hash}`, 'critical');
   }, [logEvent]);
 
-  // Retroactive Sync (On Login)
+  // Load cloud settings after the current page becomes interactive. Settings itself
+  // opts into an immediate refresh, while the rest of the app uses idle time.
   useEffect(() => {
-    const initSync = async () => {
-      if (!token) return;
-      
-      try {
-        const { data: latestData } = await apiClient.get("/api/settings/latest");
+    if (!token) {
+      setCloudReady(false);
+      return;
+    }
 
-        // Load History too
-        const { data: historyData } = await apiClient.get("/api/settings/history");
+    let active = true;
+    let timeoutId: number | undefined;
+    let idleId: number | undefined;
+
+    const initSync = async () => {
+      try {
+        const [{ data: latestData }, { data: historyData }] = await Promise.all([
+          apiClient.get("/api/settings/latest"),
+          apiClient.get("/api/settings/history"),
+        ]);
+        if (!active) return;
 
         if (historyData.history) {
           const cloudSnapshots = historyData.history.map((s: CloudSettingsSnapshot) => ({
@@ -370,49 +392,62 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const localIsFresh = JSON.stringify(settingsRef.current) === JSON.stringify(DEFAULT_SETTINGS);
 
           if (localIsFresh) {
-            // Case A: Auto-apply
             setSettingsState(cloudConfig);
             setJsonState(JSON.stringify(cloudConfig, null, 2));
             setLastPushedHash(cloudHash);
             localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
-            logEvent("Retro-Sync: Cloud config applied (Case A).", "sys");
+            logEvent("Cloud settings applied.", "sys");
           } else if (cloudHash !== currentHashRef.current) {
-            // Case B: Conflict
-            logEvent("Retro-Sync: Conflict detected. Local state modified (Case B).", "critical");
+            logEvent("Cloud settings differ from this device. Review before replacing local preferences.", "critical");
           } else {
-            // Perfectly in sync
             setLastPushedHash(cloudHash);
             localStorage.setItem("codeverse-last-pushed-hash", cloudHash);
-            logEvent("Retro-Sync: Cloud hub identity verified.", "sync");
+            logEvent("Cloud settings verified.", "sync");
           }
         }
       } catch (err: unknown) {
+        if (!active) return;
         if (isUnauthorizedError(err)) {
           setLastPushedHash(null);
           localStorage.removeItem("codeverse-last-pushed-hash");
-          logEvent("Retro-Sync paused: Session expired. Please sign in again.", "critical");
+          logEvent("Cloud sync paused because the session expired.", "critical");
           logout();
           return;
         }
 
-        const errorMsg = getErrorMessage(err, "Cloud identity verification failed.");
-        logEvent(`Retro-Sync Error: ${errorMsg}`, "critical");
+        const errorMsg = getErrorMessage(err, "Cloud settings are temporarily unavailable.");
+        logEvent(`Cloud sync: ${errorMsg}`, "critical");
+      } finally {
+        if (active) setCloudReady(true);
       }
     };
 
-    initSync();
-  }, [token, logEvent, logout]); // Trigger on login
+    const idleWindow = window as IdleCapableWindow;
+    if (isSettingsRoute) {
+      void initSync();
+    } else if (idleWindow.requestIdleCallback) {
+      idleId = idleWindow.requestIdleCallback(() => void initSync(), { timeout: 5000 });
+    } else {
+      timeoutId = idleWindow.setTimeout(() => void initSync(), 3000);
+    }
+
+    return () => {
+      active = false;
+      if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [isSettingsRoute, token, logEvent, logout]);
 
   // Debounced Auto-Snapshot & Auto-Push (Optimistic)
   useEffect(() => {
     const timer = setTimeout(() => {
       saveSnapshot();
-      if (token && !isSynced) {
+      if (token && cloudReady && !isSynced) {
         performSync();
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [settings, token, isSynced, saveSnapshot, performSync]);
+  }, [cloudReady, settings, token, isSynced, saveSnapshot, performSync]);
 
   const setJsonConfig = useCallback((json: string) => {
     setJsonState(json);
@@ -496,9 +531,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   }, [settings, apm]);
 
-  // Heartbeat Engine
+  // Live diagnostics are intentionally scoped to Settings. Polling every route
+  // made ordinary navigation compete with telemetry and flooded the evidence log.
   useEffect(() => {
-    const heartbeat = setInterval(async () => {
+    if (!isSettingsRoute) return;
+
+    let active = true;
+    const measureHealth = async () => {
+      if (document.hidden) return;
       const started = performance.now();
       const browserPerformance = window.performance as PerformanceWithMemory;
       const browserMemory = browserPerformance.memory?.usedJSHeapSize
@@ -506,7 +546,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         : 0;
 
       try {
-        const { data } = await apiClient.get("/api/health");
+        const { data } = await apiClient.get("/api/health", { timeout: 8000 });
+        if (!active) return;
         const latency = Math.max(1, Math.round(performance.now() - started));
         const serverMemory = data?.memory?.heapUsedMb || 0;
         const memory = browserMemory ? browserMemory + serverMemory : serverMemory;
@@ -516,20 +557,26 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...prev,
           latency,
           memory: Math.round(memory + (prev.stressMode ? 800 : 0)),
-          load: Math.min(100, Math.round((apm / 4) + loadFromServer * 10 + (prev.stressMode ? 40 : 0)))
+          load: Math.min(100, Math.round((apmRef.current / 4) + loadFromServer * 10 + (prev.stressMode ? 40 : 0)))
         }));
       } catch {
+        if (!active) return;
         setDiagnostics(prev => ({
           ...prev,
           latency: 0,
           memory: Math.round((browserMemory || prev.memory || 0) + (prev.stressMode ? 800 : 0)),
-          load: Math.min(100, Math.round((apm / 4) + (prev.stressMode ? 40 : 0)))
+          load: Math.min(100, Math.round((apmRef.current / 4) + (prev.stressMode ? 40 : 0)))
         }));
       }
-    }, 2000);
+    };
 
-    return () => clearInterval(heartbeat);
-  }, [apm]);
+    void measureHealth();
+    const heartbeat = window.setInterval(() => void measureHealth(), 15000);
+    return () => {
+      active = false;
+      window.clearInterval(heartbeat);
+    };
+  }, [isSettingsRoute]);
 
   return (
     <SettingsContext.Provider value={{ 

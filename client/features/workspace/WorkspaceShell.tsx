@@ -39,11 +39,8 @@ import {
 import { cn } from "@/lib/utils";
 import { PresenceHeader } from "@/components/ActivityBar";
 
-// Icons
-import {
-  ChevronRight,
-  ChevronLeft,
-} from "lucide-react";
+import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
+
 
 export default function WorkspaceShell() {
   return (
@@ -71,10 +68,14 @@ function EditorWorkspace() {
 
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const roomId = id || "room1";
+  const initialDemoWorkspace = useMemo(
+    () => id === "demo-sandbox" && !algoId ? createDemoWorkspace() : null,
+    [algoId, id]
+  );
   const { user } = useAuth();
   const { socket } = useSocket(roomId);
 
-  const [project, setProject] = useState<SharedProject | null>(null);
+  const [project, setProject] = useState<SharedProject | null>(() => initialDemoWorkspace?.project || null);
   const [refreshCount, setRefreshCount] = useState(0);
   const {
     files,
@@ -92,7 +93,7 @@ function EditorWorkspace() {
     deleteActiveFile,
     language,
     code,
-  } = useEditorState();
+  } = useEditorState(initialDemoWorkspace);
 
   const {
     leftPanelRef,
@@ -290,29 +291,54 @@ function EditorWorkspace() {
     setActiveFile,
   });
 
-  // Load project
+  // Load project. The lightweight ScoreLens seed is synchronous; the much larger
+  // algorithm catalog is downloaded only for algorithm-learning links.
   useEffect(() => {
     if (!id) return;
+    let active = true;
+
+    const applyWorkspace = (workspace: ReturnType<typeof createDemoWorkspace>) => {
+      if (!active) return;
+      setProject(workspace.project);
+      setFiles(workspace.files);
+      setActiveFile(workspace.activeFile);
+    };
 
     if (id === "demo-sandbox") {
-      const preferredLanguage = typeof window !== "undefined"
-        ? window.localStorage.getItem("algo-trace-preferred-lang")
-        : null;
-      const demoWorkspace = createDemoWorkspace({ algoId, visualizerMode, preferredLanguage });
+      if (!algoId) {
+        applyWorkspace(createDemoWorkspace());
+        return () => {
+          active = false;
+        };
+      }
 
-      setProject(demoWorkspace.project);
-      setFiles(demoWorkspace.files);
-      setActiveFile(demoWorkspace.activeFile);
-      return;
+      const preferredLanguage = window.localStorage.getItem("algo-trace-preferred-lang");
+      void import("./algorithm-demo-workspace")
+        .then(({ createAlgorithmWorkspace }) =>
+          createAlgorithmWorkspace({ algoId, visualizerMode, preferredLanguage }) || createDemoWorkspace()
+        )
+        .catch((error) => {
+          console.warn("Failed to prepare algorithm workspace", error);
+          return createDemoWorkspace();
+        })
+        .then(applyWorkspace);
+      return () => {
+        active = false;
+      };
     }
+
     fetchProjectById(id)
       .then((res) => {
+        if (!active) return;
         setProject(res.project);
         initializeProjectFiles(res.project);
       })
       .catch((err) => {
-        console.warn("Failed to load project", err);
+        if (active) console.warn("Failed to load project", err);
       });
+    return () => {
+      active = false;
+    };
   }, [id, algoId, visualizerMode, initializeProjectFiles, setActiveFile, setFiles]);
 
   if (!project) {
@@ -324,7 +350,7 @@ function EditorWorkspace() {
           className="flex flex-col items-center gap-4"
         >
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-muted-foreground">Initializing Midnight Shell...</p>
+          <p className="text-muted-foreground">{algoId ? "Preparing algorithm workspace…" : "Opening workspace…"}</p>
         </motion.div>
       </div>
     );
@@ -477,7 +503,7 @@ function EditorWorkspace() {
         {!fullscreenPanel && (
            <Button
             className={cn(
-              "absolute left-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-l-none bg-indigo-500 p-0 text-white hover:bg-indigo-400",
+              "absolute left-2 top-1/2 h-10 w-auto -translate-y-1/2 rounded-xl border border-white/10 bg-[#111827]/95 px-2.5 text-slate-200 shadow-xl shadow-black/30 backdrop-blur hover:bg-[#182235]",
               !leftCollapsed && "lg:hidden"
             )}
             onClick={() => {
@@ -488,7 +514,7 @@ function EditorWorkspace() {
             aria-label="Expand explorer"
             title="Expand explorer"
            >
-            <ChevronRight className="w-3 h-3" />
+            <PanelLeftOpen className="h-4 w-4" /><span className="ml-1.5 hidden text-[11px] font-medium xl:inline">Files</span>
            </Button>
         )}
 
@@ -496,7 +522,7 @@ function EditorWorkspace() {
         {!fullscreenPanel && (
            <Button
             className={cn(
-              "absolute right-0 top-1/2 h-8 w-5 -translate-y-1/2 rounded-r-none bg-indigo-500 p-0 text-white hover:bg-indigo-400",
+              "absolute right-2 top-1/2 h-10 w-auto -translate-y-1/2 rounded-xl border border-white/10 bg-[#111827]/95 px-2.5 text-slate-200 shadow-xl shadow-black/30 backdrop-blur hover:bg-[#182235]",
               !rightCollapsed && "lg:hidden"
             )}
             onClick={() => {
@@ -504,10 +530,10 @@ function EditorWorkspace() {
               setRightCollapsed(false);
               if (window.matchMedia("(max-width: 1023px)").matches) setFullscreenPanel("assistant");
             }}
-            aria-label="Expand assistant"
-            title="Expand assistant"
+            aria-label="Open workspace tools"
+            title="Open workspace tools"
            >
-            <ChevronLeft className="w-3 h-3" />
+            <PanelRightOpen className="h-4 w-4" /><span className="ml-1.5 hidden text-[11px] font-medium xl:inline">Tools</span>
            </Button>
         )}
 

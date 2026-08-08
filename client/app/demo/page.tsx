@@ -224,30 +224,30 @@ export default function DemoPage() {
       <div className="relative z-10">
         <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-8">
           <Link href="/" className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-teal-300 text-black">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-300 text-black">
               <Command className="h-6 w-6" />
             </span>
-            <span className="text-xl font-black">CodeVerse Demo</span>
+            <span className="text-xl font-semibold">CodeVerse Demo</span>
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 px-3 text-sm font-bold text-slate-200 transition hover:bg-white/10 sm:px-4"
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-white/10 px-3 text-sm font-bold text-slate-200 transition hover:bg-white/10 sm:px-4"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Landing
             </Link>
             <Link
               href="/signup"
-              className="hidden h-10 items-center justify-center rounded-md border border-teal-300/30 bg-teal-300/10 px-4 text-sm font-bold text-teal-100 transition hover:bg-teal-300/15 sm:inline-flex"
+              className="hidden h-10 items-center justify-center rounded-xl border border-teal-300/30 bg-teal-300/10 px-4 text-sm font-bold text-teal-100 transition hover:bg-teal-300/15 sm:inline-flex"
             >
               Choose Setup
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
             <Link
               href="/signup"
-              className="hidden h-10 items-center justify-center rounded-md bg-teal-300 px-4 text-sm font-bold text-black transition hover:bg-teal-200 sm:inline-flex"
+              className="hidden h-10 items-center justify-center rounded-xl bg-teal-300 px-4 text-sm font-bold text-black transition hover:bg-teal-200 sm:inline-flex"
             >
               Get Started
             </Link>
@@ -257,11 +257,11 @@ export default function DemoPage() {
         <section className="mx-auto max-w-7xl px-4 pb-10 pt-2 md:px-8">
           <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-teal-100">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-xl border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-teal-100">
                 <CheckCircle2 className="h-3.5 w-3.5 text-amber-300" />
                 Public working demo
               </div>
-              <h1 className="max-w-4xl text-4xl font-black tracking-tight text-white md:text-6xl">
+              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-6xl">
                 Try the workspace before signing in.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
@@ -275,7 +275,7 @@ export default function DemoPage() {
                 type="button"
                 onClick={handleRun}
                 disabled={runState === "running"}
-                className="inline-flex h-11 items-center justify-center rounded-md bg-amber-300 px-5 text-sm font-black text-black shadow-lg shadow-amber-300/15 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-amber-300 px-5 text-sm font-semibold text-black shadow-lg shadow-amber-300/15 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {runState === "running" ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -288,7 +288,7 @@ export default function DemoPage() {
                 type="button"
                 onClick={handleDeploy}
                 disabled={deployState === "building"}
-                className="inline-flex h-11 items-center justify-center rounded-md bg-teal-300 px-5 text-sm font-black text-black shadow-lg shadow-teal-300/15 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-teal-300 px-5 text-sm font-semibold text-black shadow-lg shadow-teal-300/15 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {deployState === "building" ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -304,7 +304,7 @@ export default function DemoPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] px-5 text-sm font-bold text-slate-100 transition hover:bg-white/10"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-bold text-slate-100 transition hover:bg-white/10"
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Reset
@@ -312,7 +312,7 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-white/10 bg-black/35 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
               <span
                 className={cn(
@@ -333,7 +333,7 @@ export default function DemoPage() {
                 <button
                   type="button"
                   onClick={handleJumpToPreview}
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-teal-300 px-3 text-xs font-black text-black transition hover:bg-teal-200"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-teal-300 px-3 text-xs font-semibold text-black transition hover:bg-teal-200"
                 >
                   <ArrowRight className="mr-2 h-3.5 w-3.5" />
                   View Preview
@@ -346,12 +346,12 @@ export default function DemoPage() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="overflow-hidden rounded-lg border border-white/10 bg-[#071013]/90 shadow-2xl shadow-black/40"
+            className="overflow-hidden rounded-2xl border border-white/10 bg-[#071013]/90 shadow-2xl shadow-black/40"
           >
             <div className="grid min-h-[610px] grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_290px]">
               <aside className="border-b border-white/10 bg-black/30 p-4 lg:border-b-0 lg:border-r">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="text-[10px] font-black uppercase tracking-[0.26em] text-slate-500">Explorer</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">Explorer</div>
                   <GitBranch className="h-4 w-4 text-amber-300" />
                 </div>
                 <div className="space-y-2">
@@ -361,7 +361,7 @@ export default function DemoPage() {
                       type="button"
                       onClick={() => handleFileSelect(file)}
                       className={cn(
-                        "flex h-10 w-full items-center gap-2 rounded-md px-3 text-left text-sm transition",
+                        "flex h-10 w-full items-center gap-2 rounded-xl px-3 text-left text-sm transition",
                         activeFile === file
                           ? "bg-teal-300/12 text-teal-100"
                           : "text-slate-500 hover:bg-white/5 hover:text-slate-200"
@@ -373,7 +373,7 @@ export default function DemoPage() {
                   ))}
                 </div>
 
-                <div className="mt-6 rounded-md border border-amber-300/20 bg-amber-300/10 p-3">
+                <div className="mt-6 rounded-xl border border-amber-300/20 bg-amber-300/10 p-3">
                   <div className="mb-2 flex items-center gap-2 text-xs font-bold text-amber-100">
                     <ShieldCheck className="h-4 w-4" />
                     Organizer only
@@ -385,7 +385,7 @@ export default function DemoPage() {
 
                 <Link
                   href="/signup"
-                  className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md border border-teal-300/25 bg-teal-300/10 text-sm font-bold text-teal-100 transition hover:bg-teal-300/15"
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-xl border border-teal-300/25 bg-teal-300/10 text-sm font-bold text-teal-100 transition hover:bg-teal-300/15"
                 >
                   Choose Setup
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -398,7 +398,7 @@ export default function DemoPage() {
                     <Code2 className="h-4 w-4 text-teal-300" />
                     <span className="font-mono text-sm text-slate-200">{activeFile}</span>
                   </div>
-                  <div className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                     {statusText}
                   </div>
                 </div>
@@ -413,23 +413,23 @@ export default function DemoPage() {
                 </div>
 
                 <div className="border-t border-white/10 bg-black/45 p-4">
-                  <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+                  <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                     <TerminalSquare className="h-4 w-4 text-amber-300" />
                     Terminal
                   </div>
-                  <pre className="h-28 overflow-auto whitespace-pre-wrap rounded-md border border-white/10 bg-black/35 p-3 text-xs leading-6 text-teal-100">
+                  <pre className="h-28 overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-black/35 p-3 text-xs leading-6 text-teal-100">
                     {terminalOutput.join("\n")}
                   </pre>
                 </div>
               </section>
 
               <aside className="border-t border-white/10 bg-black/30 p-4 lg:border-l lg:border-t-0">
-                <div className="mb-4 text-[10px] font-black uppercase tracking-[0.26em] text-slate-500">Team</div>
+                <div className="mb-4 text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">Team</div>
                 <div className="space-y-3">
                   {teamRows.map((row, index) => (
-                    <div key={row.initials} className="rounded-md border border-white/10 bg-white/[0.03] p-3">
+                    <div key={row.initials} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                       <div className="flex items-center gap-3">
-                        <span className={cn("flex h-9 w-9 items-center justify-center rounded-md text-xs font-black", row.color)}>
+                        <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl text-xs font-semibold", row.color)}>
                           {row.initials}
                         </span>
                         <div className="min-w-0">
@@ -444,19 +444,19 @@ export default function DemoPage() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-md border border-white/10 bg-[#071519] p-3">
-                    <div className="text-2xl font-black text-white">{lineCount}</div>
+                  <div className="rounded-xl border border-white/10 bg-[#071519] p-3">
+                    <div className="text-2xl font-semibold text-white">{lineCount}</div>
                     <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Lines</div>
                   </div>
-                  <div className="rounded-md border border-white/10 bg-[#071519] p-3">
-                    <div className="text-2xl font-black text-white">
+                  <div className="rounded-xl border border-white/10 bg-[#071519] p-3">
+                    <div className="text-2xl font-semibold text-white">
                       {deployState === "building" ? "..." : deployState === "deployed" ? "Live" : "Off"}
                     </div>
                     <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Preview</div>
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-md border border-teal-300/20 bg-teal-300/10 p-4">
+                <div className="mt-6 rounded-xl border border-teal-300/20 bg-teal-300/10 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-bold text-teal-100">
                     <Users className="h-4 w-4" />
                     Anonymous mode
@@ -477,46 +477,46 @@ export default function DemoPage() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 18 }}
-                className="mt-5 overflow-hidden rounded-lg border border-white/10 bg-[#071013]/90 shadow-2xl shadow-black/35"
+                className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#071013]/90 shadow-2xl shadow-black/35"
               >
                 <div className="flex flex-col gap-3 border-b border-white/10 bg-black/35 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">Deploy preview</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Deploy preview</div>
                     <div className="mt-1 font-bold text-white">
                       {deployState === "building" ? "Building ScoreLens preview" : "ScoreLens preview is interactive"}
                     </div>
                   </div>
                   {deployState === "deployed" && (
-                    <span className="inline-flex h-10 items-center rounded-md border border-teal-300/20 bg-teal-300/10 px-4 text-sm font-bold text-teal-100">
+                    <span className="inline-flex h-10 items-center rounded-xl border border-teal-300/20 bg-teal-300/10 px-4 text-sm font-bold text-teal-100">
                       /deployments/codeverse-public-demo
                     </span>
                   )}
                 </div>
                 <div className="bg-[#081113] p-4">
                   {deployState === "building" ? (
-                    <div className="flex min-h-72 items-center justify-center rounded-md border border-dashed border-amber-300/25 bg-black/30 text-sm font-bold text-amber-100">
+                    <div className="flex min-h-72 items-center justify-center rounded-xl border border-dashed border-amber-300/25 bg-black/30 text-sm font-bold text-amber-100">
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Bundling preview assets
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-teal-300/20 bg-[#061012] p-5 md:p-6">
+                    <div className="rounded-2xl border border-teal-300/20 bg-[#061012] p-5 md:p-6">
                       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
                         <div>
-                          <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-teal-300">
+                          <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-teal-300">
                             /deployments/codeverse-public-demo
                           </div>
-                          <h2 className="text-3xl font-black text-white md:text-5xl">ScoreLens is live.</h2>
+                          <h2 className="text-3xl font-semibold text-white md:text-5xl">ScoreLens is live.</h2>
                           <p className="mt-3 max-w-xl text-sm leading-7 text-slate-400 md:text-base">
                             This is the generated preview running inside the public demo. Change scores, recalculate,
                             and confirm the deployed app updates without signing in.
                           </p>
-                          <div className="mt-4 rounded-md border border-white/10 bg-black/35 px-3 py-2 text-sm text-teal-100">
+                          <div className="mt-4 rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-teal-100">
                             {previewMessage}
                           </div>
                         </div>
 
-                        <form onSubmit={handlePreviewSubmit} className="rounded-lg border border-white/10 bg-black/30 p-4">
-                          <label htmlFor="preview-scores" className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                        <form onSubmit={handlePreviewSubmit} className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                          <label htmlFor="preview-scores" className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Scores
                           </label>
                           <textarea
@@ -524,11 +524,11 @@ export default function DemoPage() {
                             rows={5}
                             value={previewInput}
                             onChange={(event) => setPreviewInput(event.target.value)}
-                            className="mt-3 w-full resize-y rounded-md border border-white/10 bg-black/40 p-3 font-mono text-sm leading-6 text-slate-100 outline-none transition focus:border-teal-300/60 focus:ring-2 focus:ring-teal-300/15"
+                            className="mt-3 w-full resize-y rounded-xl border border-white/10 bg-black/40 p-3 font-mono text-sm leading-6 text-slate-100 outline-none transition focus:border-teal-300/60 focus:ring-2 focus:ring-teal-300/15"
                           />
                           <button
                             type="submit"
-                            className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-md bg-teal-300 px-4 text-sm font-black text-black transition hover:bg-teal-200"
+                            className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl bg-teal-300 px-4 text-sm font-semibold text-black transition hover:bg-teal-200"
                           >
                             Recalculate Preview
                           </button>
@@ -541,9 +541,9 @@ export default function DemoPage() {
                           ["Average", previewSummary.average],
                           ["Count", previewSummary.count],
                         ].map(([label, value]) => (
-                          <div key={label} className="rounded-md border border-white/10 bg-black/30 p-4">
-                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</div>
-                            <div className="mt-4 text-4xl font-black text-white">{value}</div>
+                          <div key={label} className="rounded-xl border border-white/10 bg-black/30 p-4">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{label}</div>
+                            <div className="mt-4 text-4xl font-semibold text-white">{value}</div>
                           </div>
                         ))}
                       </div>

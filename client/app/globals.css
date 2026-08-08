@@ -753,3 +753,71 @@
 .reduced-motion .apm-power-gutter {
   animation: none;
 }
+
+
+/* ============================================
+   CALM PROFESSIONAL PRODUCT SYSTEM
+   Shared across public, account, learning, and workspace surfaces.
+   ============================================ */
+:root {
+  --surface-quiet: 222 36% 7%;
+  --surface-raised: 222 32% 9%;
+  --surface-hover: 222 28% 12%;
+  --line-soft: 215 25% 20%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 18% -10%, hsl(var(--primary) / 0.08), transparent 34rem),
+    radial-gradient(circle at 88% 0%, hsl(var(--semantic-concept) / 0.05), transparent 30rem),
+    hsl(var(--background));
+}
+
+button,
+a,
+input,
+textarea,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.72);
+  outline-offset: 2px;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  a,
+  summary {
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  button:active:not(:disabled),
+  [role="button"]:active {
+    transform: translateY(1px);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: 215 24% 26%;
+    --muted-foreground: 215 18% 74%;
+  }
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}

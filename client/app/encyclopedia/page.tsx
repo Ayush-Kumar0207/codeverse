@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AT_ALGORITHMS, type AlgorithmEntry, type AlgorithmStoryDryRun } from "@/data/algos";
+import type { AlgorithmEntry, AlgorithmStoryDryRun } from "@/data/algos";
 import { buildAlgorithmLearningProfile } from "@/lib/approach-learning";
 import {
   BookOpen,
@@ -85,10 +85,70 @@ export default function EncyclopediaPage() {
 }
 
 function EncyclopediaContent() {
+  const [algorithms, setAlgorithms] = useState<AlgorithmEntry[]>([]);
+  const [catalogError, setCatalogError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setCatalogError(false);
+    void import("@/data/algos")
+      .then((catalog) => {
+        if (active) setAlgorithms(catalog.AT_ALGORITHMS);
+      })
+      .catch(() => {
+        if (active) setCatalogError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadAttempt]);
+
+  if (!algorithms.length) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-[#070b12] px-6 text-slate-100">
+        <section className="w-full max-w-xl rounded-2xl border border-white/10 bg-[#0b111c] p-7 shadow-2xl shadow-black/30" role="status" aria-live="polite">
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-indigo-400/20 bg-indigo-400/10 text-indigo-200">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-300">Learning library</p>
+              <h1 className="mt-1 text-xl font-semibold text-white">Algorithm Encyclopedia</h1>
+            </div>
+          </div>
+          {catalogError ? (
+            <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/[0.06] p-4">
+              <p className="text-sm text-amber-100">The catalog could not be opened just now.</p>
+              <button
+                type="button"
+                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                className="mt-3 rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <div className="mt-7 space-y-3">
+              <div className="h-2 w-28 animate-pulse rounded-full bg-indigo-400/40" />
+              <div className="h-4 w-4/5 animate-pulse rounded-full bg-white/10" />
+              <div className="h-3 w-3/5 animate-pulse rounded-full bg-white/[0.07]" />
+              <p className="pt-2 text-xs font-medium text-slate-500">Opening the searchable catalog…</p>
+            </div>
+          )}
+        </section>
+      </div>
+    );
+  }
+
+  return <LoadedEncyclopedia algorithms={algorithms} />;
+}
+
+function LoadedEncyclopedia({ algorithms }: { algorithms: AlgorithmEntry[] }) {
   const searchParams = useSearchParams();
   const queryFromUrl = searchParams?.get("query") || "";
   const algoFromUrl = searchParams?.get("algo") || "";
-  const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(AT_ALGORITHMS[0]);
+  const [activeAlgo, setActiveAlgo] = useState<AlgorithmEntry>(algorithms[0]);
   const [searchTerm, setSearchTerm] = useState(queryFromUrl);
   const [activeApproachIdx, setActiveApproachIdx] = useState(0);
   const [selectedLang, setSelectedLang] = useState("JavaScript");
@@ -97,7 +157,7 @@ function EncyclopediaContent() {
   const [copied, setCopied] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
-    if (AT_ALGORITHMS[0]?.topic) initial[AT_ALGORITHMS[0].topic] = true;
+    if (algorithms[0]?.topic) initial[algorithms[0].topic] = true;
     return initial;
   });
 
@@ -108,14 +168,14 @@ function EncyclopediaContent() {
 
   const filteredAlgos = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return AT_ALGORITHMS;
+    if (!query) return algorithms;
 
-    return AT_ALGORITHMS.filter((algo) =>
+    return algorithms.filter((algo) =>
       `${algo.title} ${algo.topic} ${algo.category} ${algo.difficulty} ${algo.frequencyLevel}`
         .toLowerCase()
         .includes(query)
     );
-  }, [searchTerm]);
+  }, [algorithms, searchTerm]);
 
   const groupedAlgos = useMemo(
     () =>
@@ -128,7 +188,7 @@ function EncyclopediaContent() {
     [filteredAlgos]
   );
 
-  const topicCount = useMemo(() => new Set(AT_ALGORITHMS.map((algo) => algo.topic || "Uncategorized")).size, []);
+  const topicCount = useMemo(() => new Set(algorithms.map((algo) => algo.topic || "Uncategorized")).size, [algorithms]);
   const activeApproach = activeAlgo.approaches[activeApproachIdx] || activeAlgo.approaches[0];
   const approachTabs = useMemo(() => buildApproachTabs(activeAlgo.approaches), [activeAlgo.approaches]);
   const activeImplementation =
@@ -183,23 +243,23 @@ function EncyclopediaContent() {
 
   useEffect(() => {
     if (!algoFromUrl.trim()) return;
-    const match = AT_ALGORITHMS.find((algo) => algo.id === algoFromUrl.trim());
+    const match = algorithms.find((algo) => algo.id === algoFromUrl.trim());
     if (match) handleSelectAlgo(match);
-  }, [algoFromUrl, handleSelectAlgo]);
+  }, [algoFromUrl, algorithms, handleSelectAlgo]);
 
   useEffect(() => {
     if (!queryFromUrl.trim()) return;
 
     setSearchTerm(queryFromUrl);
     const query = queryFromUrl.trim().toLowerCase();
-    const match = AT_ALGORITHMS.find((algo) =>
+    const match = algorithms.find((algo) =>
       `${algo.title} ${algo.topic} ${algo.category} ${algo.difficulty} ${algo.frequencyLevel}`
         .toLowerCase()
         .includes(query)
     );
 
     if (match) handleSelectAlgo(match);
-  }, [handleSelectAlgo, queryFromUrl]);
+  }, [algorithms, handleSelectAlgo, queryFromUrl]);
 
   const toggleTopic = (topic: string) => {
     setExpandedTopics((prev) => ({ ...prev, [topic]: !prev[topic] }));
@@ -224,6 +284,7 @@ function EncyclopediaContent() {
       onToggleTopic={toggleTopic}
       searchTerm={searchTerm}
       topicCount={topicCount}
+      totalCount={algorithms.length}
     />
   );
 
@@ -254,7 +315,7 @@ function EncyclopediaContent() {
             {!isFullscreen && (
               <button
                 onClick={() => setIsLibraryOpen(true)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06] lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06] lg:hidden"
                 aria-label="Open algorithm library"
                 title="Open algorithm library"
               >
@@ -271,7 +332,7 @@ function EncyclopediaContent() {
             {activeAlgo.visualizerCode && (
               <a
                 href={`/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&presentation=1&narrate=1`}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950/35 transition hover:bg-indigo-400 sm:px-4"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950/35 transition hover:bg-indigo-400 sm:px-4"
               >
                 <Play className="h-4 w-4" />
                 <span className="hidden sm:inline">Simulate</span>
@@ -279,7 +340,7 @@ function EncyclopediaContent() {
             )}
             <button
               onClick={() => setIsFullscreen((value) => !value)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.06]"
               aria-label={isFullscreen ? "Exit focus view" : "Open focus view"}
               title={isFullscreen ? "Exit focus view" : "Open focus view"}
             >
@@ -291,7 +352,7 @@ function EncyclopediaContent() {
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className={cn("mx-auto flex w-full flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8", isFullscreen ? "max-w-6xl" : "max-w-[1480px]")}>
             <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="rounded-lg border border-white/10 bg-[#0a101b] p-5 shadow-2xl shadow-black/20 sm:p-6">
+              <div className="rounded-2xl border border-white/10 bg-[#0a101b] p-5 shadow-2xl shadow-black/20 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill className="border-indigo-400/25 bg-indigo-400/10 text-indigo-200">{activeAlgo.category || activeAlgo.topic}</Pill>
                   <Pill className={difficultyStyles[activeAlgo.difficulty]}>{activeAlgo.difficulty}</Pill>
@@ -309,7 +370,7 @@ function EncyclopediaContent() {
                 {activeAlgo.useCases?.length > 0 && (
                   <div className="mt-6 flex flex-wrap gap-2">
                     {activeAlgo.useCases.slice(0, 6).map((useCase) => (
-                      <span key={useCase} className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-slate-300">
+                      <span key={useCase} className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-slate-300">
                         <SemanticText>{useCase}</SemanticText>
                       </span>
                     ))}
@@ -326,9 +387,9 @@ function EncyclopediaContent() {
             </section>
 
             {activeAlgo.visualizerCode && (
-              <section className="flex flex-col gap-4 rounded-lg border border-indigo-400/20 bg-indigo-400/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between">
+              <section className="flex flex-col gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-400/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg border border-indigo-300/20 bg-indigo-300/10 p-2 text-indigo-200">
+                  <div className="rounded-2xl border border-indigo-300/20 bg-indigo-300/10 p-2 text-indigo-200">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
@@ -344,7 +405,7 @@ function EncyclopediaContent() {
                 </div>
                 <a
                   href={hasCinematicVisualizer(activeAlgo) ? `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&viz=3d&presentation=1&narrate=1` : `/editor/demo-sandbox?mode=demo&algo=${activeAlgo.id}&presentation=1&narrate=1`}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                 >
                   <Play className="h-4 w-4" />
                   {hasCinematicVisualizer(activeAlgo) ? "Open 3D Visualizer" : "Open Visualizer"}
@@ -352,7 +413,7 @@ function EncyclopediaContent() {
               </section>
             )}
 
-            <section className="rounded-lg border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
+            <section className="rounded-2xl border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
               <div className="flex flex-col gap-4 border-b border-white/10 p-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Selected approach</p>
@@ -436,10 +497,10 @@ function EncyclopediaContent() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
+            <section className="rounded-2xl border border-white/10 bg-[#0a101b] shadow-2xl shadow-black/20">
               <div className="flex flex-col gap-4 border-b border-white/10 p-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-indigo-300">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-indigo-300">
                     <Code2 className="h-4 w-4" />
                   </div>
                   <div>
@@ -453,7 +514,7 @@ function EncyclopediaContent() {
                       key={implementation.language}
                       onClick={() => handleLangChange(implementation.language)}
                       className={cn(
-                        "h-9 rounded-lg px-3 text-sm font-semibold transition",
+                        "h-9 rounded-2xl px-3 text-sm font-semibold transition",
                         activeImplementation?.language === implementation.language
                           ? "bg-indigo-500 text-white"
                           : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
@@ -486,7 +547,7 @@ function EncyclopediaContent() {
                             setCopied(false);
                           }}
                           className={cn(
-                            "inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition",
+                            "inline-flex h-9 shrink-0 items-center rounded-2xl px-3 text-sm font-semibold transition",
                             activeApproachIdx === index
                               ? "bg-white text-slate-950 shadow-lg shadow-black/20"
                               : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]"
@@ -500,7 +561,7 @@ function EncyclopediaContent() {
                   lines={implementationNarration}
                 >
                   {({ activeIndex }) => (
-                    <div id="implementation-code-panel" role="tabpanel" className="overflow-hidden rounded-lg border border-white/10 bg-[#070b12]">
+                    <div id="implementation-code-panel" role="tabpanel" className="overflow-hidden rounded-2xl border border-white/10 bg-[#070b12]">
                       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                         <div className="flex min-w-0 items-center gap-2">
                           <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
@@ -510,7 +571,7 @@ function EncyclopediaContent() {
                         </div>
                         <button
                           onClick={copySnippet}
-                          className="inline-flex h-8 items-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
+                          className="inline-flex h-8 items-center gap-2 rounded-2xl px-2.5 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
                         >
                           {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
                           {copied ? "Copied" : "Copy"}
@@ -533,7 +594,7 @@ function EncyclopediaContent() {
                 href={activeAlgo.leetcodeLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex w-fit items-center gap-2 rounded-lg border border-indigo-400/20 bg-indigo-400/10 px-3 py-2 text-sm font-semibold text-indigo-200 transition hover:border-indigo-300/35 hover:bg-indigo-400/15"
+                className="inline-flex w-fit items-center gap-2 rounded-2xl border border-indigo-400/20 bg-indigo-400/10 px-3 py-2 text-sm font-semibold text-indigo-200 transition hover:border-indigo-300/35 hover:bg-indigo-400/15"
               >
                 Open original problem
                 <ExternalLink className="h-4 w-4" />
@@ -558,6 +619,7 @@ function LibraryPanel({
   onToggleTopic,
   searchTerm,
   topicCount,
+  totalCount,
 }: {
   activeAlgo: AlgorithmEntry;
   expandedTopics: Record<string, boolean>;
@@ -570,6 +632,7 @@ function LibraryPanel({
   onToggleTopic: (topic: string) => void;
   searchTerm: string;
   topicCount: number;
+  totalCount: number;
 }) {
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
@@ -581,12 +644,12 @@ function LibraryPanel({
               Algorithm Library
             </div>
             <p className="mt-1 text-xs text-slate-500">
-              {AT_ALGORITHMS.length} entries across {topicCount} topics
+              {totalCount} entries across {topicCount} topics
             </p>
           </div>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 lg:hidden"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-400 lg:hidden"
             aria-label="Close algorithm library"
             title="Close algorithm library"
           >
@@ -602,7 +665,7 @@ function LibraryPanel({
             placeholder="Search algorithms"
             value={searchTerm}
             onChange={(event) => onSearch(event.target.value)}
-            className="h-11 w-full rounded-lg border border-white/10 bg-[#050910] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
+            className="h-11 w-full rounded-2xl border border-white/10 bg-[#050910] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
 
@@ -627,7 +690,7 @@ function LibraryPanel({
               <section key={topic} className="mb-2">
                 <button
                   onClick={() => onToggleTopic(topic)}
-                  className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
+                  className="flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2 text-left text-sm font-semibold text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
                 >
                   <span className="truncate">{topic}</span>
                   <span className="flex items-center gap-2 text-xs text-slate-500">
@@ -647,7 +710,7 @@ function LibraryPanel({
                           key={algo.id}
                           onClick={() => onSelectAlgo(algo)}
                           className={cn(
-                            "w-full rounded-lg border p-3 text-left transition",
+                            "w-full rounded-2xl border p-3 text-left transition",
                             isActive
                               ? "border-indigo-400/35 bg-indigo-400/10 shadow-lg shadow-indigo-950/20"
                               : "border-transparent hover:border-white/10 hover:bg-white/[0.04]"
@@ -657,12 +720,12 @@ function LibraryPanel({
                             <span className={cn("min-w-0 text-sm font-semibold leading-5", isActive ? "text-indigo-100" : "text-slate-200")}>
                               {algo.title}
                             </span>
-                            <span className={cn("shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[11px]", getComplexityStyle(firstApproach.timeComplexity))}>
+                            <span className={cn("shrink-0 rounded-xl border px-1.5 py-0.5 font-mono text-[11px]", getComplexityStyle(firstApproach.timeComplexity))}>
                               {firstApproach.timeComplexity}
                             </span>
                           </div>
                           <div className="mt-3 flex items-center gap-2">
-                            <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-semibold", difficultyStyles[algo.difficulty])}>
+                            <span className={cn("rounded-xl border px-1.5 py-0.5 text-[11px] font-semibold", difficultyStyles[algo.difficulty])}>
                               {algo.difficulty}
                             </span>
                             <span className="truncate text-xs text-slate-500">{algo.frequencyLevel} frequency</span>
@@ -683,13 +746,13 @@ function LibraryPanel({
 
 function Metric({ label, value, icon: Icon }: { label: string; value: string; icon: LucideIcon }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-[#0a101b] p-4 shadow-xl shadow-black/15">
+    <div className="rounded-2xl border border-white/10 bg-[#0a101b] p-4 shadow-xl shadow-black/15">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
           <p className="mt-2 truncate font-mono text-sm font-semibold text-white">{value}</p>
         </div>
-        <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-300">
+        <div className="rounded-2xl border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-300">
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -698,7 +761,7 @@ function Metric({ label, value, icon: Icon }: { label: string; value: string; ic
 }
 
 function Pill({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn("rounded-md border px-2.5 py-1 text-xs font-semibold", className)}>{children}</span>;
+  return <span className={cn("rounded-xl border px-2.5 py-1 text-xs font-semibold", className)}>{children}</span>;
 }
 
 function InsightCard({
@@ -748,7 +811,7 @@ function StepCard({
         {steps.map((step, index) => (
           <li key={step}>
             <NarratedLine index={index} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 text-sm leading-6 text-slate-300">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
                 {index + 1}
               </span>
               <SemanticText>{step}</SemanticText>
@@ -787,7 +850,7 @@ function StoryDryRunCard({
       lines={lines}
     >
       <div className="space-y-4">
-        <NarratedLine index={0} className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm leading-6 text-slate-300">
+        <NarratedLine index={0} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm leading-6 text-slate-300">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">Sample input</p>
           <p className="mt-2 font-mono text-xs leading-6 text-slate-200">{dryRun.sampleInput}</p>
         </NarratedLine>
@@ -798,9 +861,9 @@ function StoryDryRunCard({
 
             return (
               <li key={`${step.title}-${index}`}>
-                <NarratedLine index={index + 1} className="rounded-lg border border-white/10 bg-[#070b12] p-3 text-sm leading-6 text-slate-300">
+                <NarratedLine index={index + 1} className="rounded-2xl border border-white/10 bg-[#070b12] p-3 text-sm leading-6 text-slate-300">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 font-mono text-xs font-semibold text-cyan-200">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -810,7 +873,7 @@ function StoryDryRunCard({
                       {variables.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
                           {variables.map(([key, value]) => (
-                            <span key={key} className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-slate-300">
+                            <span key={key} className="rounded-xl border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-slate-300">
                               <span className="text-slate-500">{key}</span> = {value}
                             </span>
                           ))}
@@ -824,7 +887,7 @@ function StoryDryRunCard({
           })}
         </ol>
 
-        <NarratedLine index={finalIndex} className="rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm leading-6 text-emerald-50">
+        <NarratedLine index={finalIndex} className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm leading-6 text-emerald-50">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">Sample output</p>
           <p className="mt-2 text-slate-200"><SemanticText>{dryRun.sampleOutput}</SemanticText></p>
           <p className="mt-2 text-slate-300"><SemanticText>{dryRun.closingInsight}</SemanticText></p>

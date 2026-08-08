@@ -150,7 +150,7 @@ export default function SettingsHub() {
               aria-pressed={showCode}
               onClick={() => setShowCode((value) => !value)}
               className={cn(
-                "inline-flex h-10 items-center gap-2 rounded-md border px-4 text-xs font-semibold uppercase tracking-[0.18em] transition-colors",
+                "inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-xs font-semibold uppercase tracking-[0.18em] transition-colors",
                 showCode
                   ? "border-primary/60 bg-primary text-primary-foreground"
                   : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
@@ -169,14 +169,14 @@ export default function SettingsHub() {
           )}
         >
           <aside className="xl:sticky xl:top-5">
-            <div className="grid gap-2 rounded-md border border-border bg-card/90 p-2 shadow-xl shadow-black/20 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="grid gap-2 rounded-xl border border-border bg-card/90 p-2 shadow-xl shadow-black/20 sm:grid-cols-2 xl:grid-cols-1">
               {settingsTabs.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   type="button"
                   onClick={() => setActiveTab(id)}
                   className={cn(
-                    "flex h-11 items-center gap-3 rounded-md px-3 text-left text-sm font-semibold transition-colors",
+                    "flex h-11 items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition-colors",
                     activeTab === id
                       ? "bg-primary text-primary-foreground shadow-lg shadow-black/20"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -188,14 +188,14 @@ export default function SettingsHub() {
               ))}
             </div>
 
-            <div className="mt-4 grid gap-2 rounded-md border border-border bg-card/70 p-4 text-sm">
+            <div className="mt-4 grid gap-2 rounded-xl border border-border bg-card/70 p-4 text-sm">
               <RailStat label="Theme" value={themeDetails[settings.appearance.theme].label} />
               <RailStat label="Scale" value={`${Math.round(settings.appearance.scale * 100)}%`} />
               <RailStat label="Audio" value={settings.audio.profile === "none" ? "Silent" : settings.audio.profile} />
             </div>
           </aside>
 
-          <section className="min-w-0 rounded-md border border-border bg-card/80 shadow-2xl shadow-black/20">
+          <section className="min-w-0 rounded-xl border border-border bg-card/80 shadow-2xl shadow-black/20">
             <div className="flex flex-col gap-1 border-b border-border px-4 py-4 sm:px-5">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{activeMeta.kicker}</div>
               <h2 className="text-xl font-semibold text-foreground">{activeMeta.title}</h2>
@@ -304,7 +304,7 @@ export default function SettingsHub() {
                                   type="button"
                                   onClick={() => updateSetting("editor", { tabSize })}
                                   className={cn(
-                                    "h-10 rounded-md border text-sm font-semibold transition-colors",
+                                    "h-10 rounded-xl border text-sm font-semibold transition-colors",
                                     settings.editor.tabSize === tabSize
                                       ? "border-primary/70 bg-primary/15 text-primary"
                                       : "border-border bg-muted/25 text-muted-foreground hover:border-primary/35 hover:text-foreground"
@@ -331,7 +331,7 @@ export default function SettingsHub() {
                               type="button"
                               onClick={() => updateSetting("audio", { profile: id })}
                               className={cn(
-                                "flex h-14 items-center justify-between rounded-md border px-4 text-left transition-colors",
+                                "flex h-14 items-center justify-between rounded-xl border px-4 text-left transition-colors",
                                 settings.audio.profile === id
                                   ? "border-primary/70 bg-primary/15 text-foreground"
                                   : "border-border bg-muted/25 text-muted-foreground hover:border-primary/35 hover:text-foreground"
@@ -350,9 +350,9 @@ export default function SettingsHub() {
                 {activeTab === "diagnostics" && (
                   <TabMotion key="diagnostics">
                     <div className="grid gap-4">
-                      <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
+                      <div className="flex flex-col gap-4 rounded-xl border border-border bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-primary">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
                             <Database className="h-5 w-5" />
                           </div>
                           <div>
@@ -369,7 +369,7 @@ export default function SettingsHub() {
                             size="sm"
                             onClick={toggleStressMode}
                             className={cn(
-                              "h-9 rounded-md border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:text-foreground",
+                              "h-9 rounded-xl border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:text-foreground",
                               diagnostics.stressMode && "border-destructive/50 bg-destructive/15 text-destructive"
                             )}
                           >
@@ -379,7 +379,7 @@ export default function SettingsHub() {
                             variant="outline"
                             size="sm"
                             onClick={flushMemory}
-                            className="h-9 rounded-md border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                            className="h-9 rounded-xl border-border bg-muted/25 text-xs font-semibold text-muted-foreground hover:border-primary/50 hover:text-foreground"
                           >
                             Flush Memory
                           </Button>
@@ -405,7 +405,7 @@ export default function SettingsHub() {
                       </div>
 
                       <SettingsPanel title="Telemetry Log" icon={Gauge}>
-                        <div className="max-h-64 overflow-y-auto rounded-md border border-border bg-background/70 p-3 font-mono text-xs">
+                        <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-background/70 p-3 font-mono text-xs">
                           {diagnostics.logs.map((log) => (
                             <div key={log.id} className="grid grid-cols-[4.5rem_4.5rem_1fr] gap-3 border-b border-white/5 py-2 last:border-b-0">
                               <span className="text-muted-foreground/70">
@@ -439,9 +439,9 @@ export default function SettingsHub() {
                 {activeTab === "cloud" && (
                   <TabMotion key="cloud">
                     <div className="grid gap-4">
-                      <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/20 p-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-col gap-4 rounded-xl border border-border bg-muted/20 p-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-cyan-400/30 bg-cyan-500/10 text-cyan-300">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-300">
                             <Cloud className="h-5 w-5" />
                           </div>
                           <div>
@@ -455,7 +455,7 @@ export default function SettingsHub() {
                           onClick={() => performSync(true)}
                           disabled={syncStatus === "syncing" || !token}
                           title={token ? "Synchronize settings with the cloud" : "Sign in to enable cloud sync"}
-                          className="h-10 rounded-md bg-primary px-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="h-10 rounded-xl bg-primary px-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {syncStatus === "syncing" ? "Syncing" : token ? "Sync Now" : "Sign In to Sync"}
                         </Button>
@@ -548,7 +548,7 @@ function StatusPill({ label, tone = "default" }: { label: string; tone?: "defaul
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center rounded-md border px-3 text-[10px] font-semibold uppercase tracking-[0.18em]",
+        "inline-flex h-7 items-center rounded-xl border px-3 text-[10px] font-semibold uppercase tracking-[0.18em]",
         tone === "default" && "border-border bg-muted/30 text-muted-foreground",
         tone === "success" && "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
         tone === "primary" && "border-primary/30 bg-primary/10 text-primary"
@@ -562,7 +562,7 @@ function StatusPill({ label, tone = "default" }: { label: string; tone?: "defaul
 function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced" | "error"; isSynced: boolean }) {
   const label = status === "syncing" ? "Syncing" : status === "error" ? "Sync Error" : isSynced ? "Synced" : "Local";
   return (
-    <div className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-muted/30 px-3 text-sm text-foreground">
+    <div className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 text-sm text-foreground">
       <span
         className={cn(
           "h-2 w-2 rounded-full",
@@ -598,7 +598,7 @@ function SettingsPanel({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-md border border-border bg-card/85 p-4 shadow-lg shadow-black/10", className)}>
+    <section className={cn("rounded-xl border border-border bg-card/85 p-4 shadow-lg shadow-black/10", className)}>
       <div className="mb-4 flex items-center gap-3 border-b border-border pb-3">
         <Icon className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -625,7 +625,7 @@ function ThemeOption({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "flex min-h-24 flex-col justify-between rounded-md border p-4 text-left transition-colors",
+        "flex min-h-24 flex-col justify-between rounded-xl border p-4 text-left transition-colors",
         active
           ? "border-primary/70 bg-primary/15 text-foreground shadow-[0_0_0_1px_hsl(var(--primary)/0.16)]"
           : "border-border bg-muted/25 text-foreground hover:border-primary/35 hover:bg-muted/40"
@@ -655,7 +655,7 @@ function SettingToggle({ label, active = false, onToggle }: { label: string; act
       disabled={!onToggle}
       onClick={onToggle}
       className={cn(
-        "flex min-h-12 items-center justify-between gap-4 rounded-md border border-border bg-muted/25 px-4 text-left transition-colors hover:border-primary/35 hover:bg-muted/40 disabled:opacity-70",
+        "flex min-h-12 items-center justify-between gap-4 rounded-xl border border-border bg-muted/25 px-4 text-left transition-colors hover:border-primary/35 hover:bg-muted/40 disabled:opacity-70",
         active && "border-primary/35 bg-primary/10"
       )}
     >
@@ -695,7 +695,7 @@ function StatCard({
   max: number;
 }) {
   return (
-    <div className="rounded-md border border-border bg-card/85 p-4">
+    <div className="rounded-xl border border-border bg-card/85 p-4">
       <div className="mb-3 flex items-end justify-between gap-3">
         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
         <span className="font-mono text-sm font-semibold text-foreground">{value}</span>
@@ -752,7 +752,7 @@ function Sparkline({ data, color, max }: { data: number; color: string; max: num
 
 function EmptyState({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
   return (
-    <div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border text-muted-foreground">
+    <div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border text-muted-foreground">
       <Icon className="h-6 w-6" />
       <span className="text-sm font-semibold">{title}</span>
     </div>
@@ -773,12 +773,12 @@ function SnapshotRow({
   onRollback: () => void;
 }) {
   return (
-    <div className="rounded-md border border-border bg-muted/25">
+    <div className="rounded-xl border border-border bg-muted/25">
       <button
         type="button"
         onClick={onSelect}
         className={cn(
-          "flex w-full items-center justify-between gap-4 rounded-md px-4 py-3 text-left transition-colors",
+          "flex w-full items-center justify-between gap-4 rounded-xl px-4 py-3 text-left transition-colors",
           selected && "bg-primary/10"
         )}
       >
@@ -798,13 +798,13 @@ function SnapshotRow({
             className="overflow-hidden"
           >
             <div className="border-t border-border p-4">
-              <pre className="max-h-56 overflow-auto rounded-md border border-border bg-background/70 p-3 font-mono text-xs leading-5 text-primary">
+              <pre className="max-h-56 overflow-auto rounded-xl border border-border bg-background/70 p-3 font-mono text-xs leading-5 text-primary">
                 {JSON.stringify(snapshot.config, null, 2)}
               </pre>
               <button
                 type="button"
                 onClick={onRollback}
-                className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 text-xs font-semibold uppercase tracking-[0.16em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 text-xs font-semibold uppercase tracking-[0.16em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 Rollback
@@ -827,7 +827,7 @@ function SecurityStatus({
   tone: "success" | "primary" | "warning";
 }) {
   return (
-    <div className="rounded-md border border-border bg-card/85 p-4">
+    <div className="rounded-xl border border-border bg-card/85 p-4">
       <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</div>
       <div
         className={cn(
@@ -845,7 +845,7 @@ function SecurityStatus({
 
 function PostureItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border bg-muted/25 p-4">
+    <div className="rounded-xl border border-border bg-muted/25 p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-sm font-semibold text-foreground">{value}</div>
     </div>
@@ -854,7 +854,7 @@ function PostureItem({ label, value }: { label: string; value: string }) {
 
 function JsonPane({ value, onChange }: { value: string; onChange: (json: string) => void }) {
   return (
-    <div className="rounded-md border border-primary/25 bg-card/95 shadow-2xl shadow-black/30">
+    <div className="rounded-xl border border-primary/25 bg-card/95 shadow-2xl shadow-black/30">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <Code className="h-4 w-4 text-primary" />

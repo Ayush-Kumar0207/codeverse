@@ -154,7 +154,7 @@ export default function ProfilePage() {
         <header className="flex flex-col gap-5 border-b border-white/10 pb-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <span className="rounded-md border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-200">
+              <span className="rounded-xl border border-indigo-400/25 bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-200">
                 Account Profile
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300">
@@ -173,14 +173,14 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={() => router.push("/dashboard")}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06]"
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </button>
             <button
               onClick={() => router.push("/settings")}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 transition hover:bg-indigo-400"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 transition hover:bg-indigo-400"
             >
               <Settings className="h-4 w-4" />
               Settings
@@ -190,12 +190,12 @@ export default function ProfilePage() {
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
           <aside className="flex flex-col gap-6">
-            <section className="rounded-lg border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
+            <section className="rounded-2xl border border-white/10 bg-[#0b111c] p-5 shadow-xl shadow-black/15">
               <div className="flex items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-indigo-400/25 bg-indigo-400/10 text-xl font-semibold text-indigo-100">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-indigo-400/25 bg-indigo-400/10 text-xl font-semibold text-indigo-100">
                   {user.avatar ? (
                     <div
-                      className="h-full w-full rounded-lg bg-cover bg-center"
+                      className="h-full w-full rounded-2xl bg-cover bg-center"
                       role="img"
                       aria-label={user.username}
                       style={{ backgroundImage: `url(${user.avatar})` }}
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-5 rounded-lg border border-white/10 bg-[#070b12] p-3">
+              <div className="mt-5 rounded-2xl border border-white/10 bg-[#070b12] p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                   </div>
                   <button
                     onClick={copyUserId}
-                    className="rounded-md p-2 text-slate-500 transition hover:bg-white/5 hover:text-slate-200"
+                    className="rounded-xl p-2 text-slate-500 transition hover:bg-white/5 hover:text-slate-200"
                     aria-label="Copy user ID"
                     title="Copy user ID"
                   >
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center gap-3 rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3">
+              <div className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-3">
                 <ShieldCheck className="h-5 w-5 text-emerald-300" />
                 <div>
                   <p className="text-sm font-semibold text-white">Session secured</p>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
 
               <button
                 onClick={handleLogout}
-                className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-red-400/25 bg-red-500/10 px-4 text-sm font-semibold text-red-200 transition hover:bg-red-500/15"
+                className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 text-sm font-semibold text-red-200 transition hover:bg-red-500/15"
               >
                 <LogOut className="h-4 w-4" />
                 Sign Out
@@ -253,10 +253,10 @@ export default function ProfilePage() {
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-lg border border-white/10 bg-[#0b111c] p-3 shadow-xl shadow-black/15"
+                  className="rounded-2xl border border-white/10 bg-[#0b111c] p-3 shadow-xl shadow-black/15"
                 >
                   <div className="flex flex-col gap-3">
-                    <div className={`w-fit rounded-md border border-white/10 bg-white/[0.03] p-2 ${stat.tone}`}>
+                    <div className={`w-fit rounded-xl border border-white/10 bg-white/[0.03] p-2 ${stat.tone}`}>
                       <stat.icon className="h-4 w-4" />
                     </div>
                     <div>
@@ -272,7 +272,7 @@ export default function ProfilePage() {
             </section>
           </aside>
 
-          <section className="rounded-lg border border-white/10 bg-[#0b111c] shadow-xl shadow-black/15">
+          <section className="rounded-2xl border border-white/10 bg-[#0b111c] shadow-xl shadow-black/15">
             <div className="flex flex-col gap-4 border-b border-white/10 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-base font-semibold text-white">Saved Artifacts</h2>
@@ -287,21 +287,21 @@ export default function ProfilePage() {
             </div>
 
             {notice && (
-              <div className="mx-5 mt-5 rounded-lg border border-indigo-400/20 bg-indigo-400/10 px-3 py-2 text-sm text-indigo-100">
+              <div className="mx-5 mt-5 rounded-2xl border border-indigo-400/20 bg-indigo-400/10 px-3 py-2 text-sm text-indigo-100">
                 {notice}
               </div>
             )}
 
             {loading ? (
               <div className="flex min-h-[480px] items-center justify-center">
-                <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
                   <Loader2 className="h-4 w-4 animate-spin text-indigo-300" />
                   <span className="text-sm text-slate-300">Loading saved artifacts</span>
                 </div>
               </div>
             ) : savedCodes.length === 0 ? (
               <div className="flex min-h-[480px] flex-col items-center justify-center p-8 text-center">
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-slate-300">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-slate-300">
                   <FileCode className="h-8 w-8" />
                 </div>
                 <h3 className="mt-5 text-base font-semibold text-white">No saved artifacts yet</h3>
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                 </p>
                 <button
                   onClick={() => router.push("/editor/demo-sandbox?mode=demo")}
-                  className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                  className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                 >
                   <Code2 className="h-4 w-4" />
                   Open Sandbox
@@ -321,11 +321,11 @@ export default function ProfilePage() {
                 {savedCodes.map((artifact, index) => (
                   <article
                     key={artifact._id || `${artifact.fileName}-${artifact.createdAt}-${index}`}
-                    className="rounded-lg border border-white/10 bg-[#0f1725] p-4 transition hover:border-indigo-400/35 hover:bg-[#121c2d]"
+                    className="rounded-2xl border border-white/10 bg-[#0f1725] p-4 transition hover:border-indigo-400/35 hover:bg-[#121c2d]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-start gap-3">
-                        <div className="rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-200">
+                        <div className="rounded-2xl border border-indigo-400/20 bg-indigo-400/10 p-2 text-indigo-200">
                           <FileCode className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
@@ -338,7 +338,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                    <pre className="mt-4 max-h-40 overflow-hidden rounded-lg border border-white/10 bg-[#070b12] p-3 text-xs leading-5 text-slate-300">
+                    <pre className="mt-4 max-h-40 overflow-hidden rounded-2xl border border-white/10 bg-[#070b12] p-3 text-xs leading-5 text-slate-300">
                       <code>{artifact.code?.slice(0, 420) || "// No code content"}</code>
                     </pre>
                   </article>

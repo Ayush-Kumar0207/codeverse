@@ -7,6 +7,7 @@ const API_BASE_URL = getApiBaseUrl();
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 12000,
   headers: {
     "X-CodeVerse-Client": "web-v1",
   },

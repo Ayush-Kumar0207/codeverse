@@ -101,35 +101,44 @@ describe("EvidenceOS", () => {
     );
 
     expect(screen.getByLabelText(/evidence coverage 92%/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Line evidence inspector")).toHaveTextContent("script.js:2");
+    expect(screen.getByText(/what would you like to do/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /prove my work/i }));
+    expect(await screen.findByLabelText("Line evidence inspector")).toHaveTextContent("script.js:2");
     expect(screen.getByText("Latest proof package")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("tab", { name: /replay/i }));
-    expect(screen.getByText("Session replay")).toBeInTheDocument();
-    const replayButton = screen.queryByRole("button", { name: /re-execute sealed session/i });
+    await user.click(screen.getByRole("button", { name: /back to proof center/i }));
+    await user.click(screen.getByRole("button", { name: /replay changes/i }));
+    expect(await screen.findByText(/travel through the work/i)).toBeInTheDocument();
+    const replayButton = screen.queryByRole("button", { name: /re-run this session/i });
     if (replayButton && !replayButton.hasAttribute("disabled")) {
       await user.click(replayButton);
       expect(onVerifyReplay).toHaveBeenCalledOnce();
     }
-    const branchButton = screen.getByRole("button", { name: /branch from this moment/i });
+    const branchButton = screen.getByRole("button", { name: /continue from this moment/i });
     if (!branchButton.hasAttribute("disabled")) {
       await user.click(branchButton);
       expect(onBranchFromEvent).toHaveBeenCalledOnce();
     }
 
-    await user.click(screen.getByRole("tab", { name: /board/i }));
-    expect(screen.getByText("Adversarial review board")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /back to proof center/i }));
+    await user.click(screen.getByRole("button", { name: /get an ai review/i }));
+    expect(await screen.findByText(/get a second opinion/i)).toBeInTheDocument();
+    await user.click(screen.getByText(/reviewer and tool details/i));
     expect(screen.getAllByText("Security Agent").length).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("tab", { name: /verify/i }));
-    expect(screen.getByText("Human understanding")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /back to proof center/i }));
+    await user.click(screen.getByRole("button", { name: /check understanding/i }));
+    expect(await screen.findByText("Can you explain this change?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("tab", { name: /twin/i }));
-    expect(screen.getByText("Engineering digital twin")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /back to proof center/i }));
+    await user.click(screen.getByRole("button", { name: /see what could break/i }));
+    expect(await screen.findByText("What could this change affect?")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("tab", { name: /arena/i }));
-    expect(screen.getByText("Engineering arena")).toBeInTheDocument();
-    expect(screen.getByText("Evaluator scenario builder")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /back to proof center/i }));
+    await user.click(screen.getByRole("button", { name: /practice a scenario/i }));
+    expect(await screen.findByText("Practice an engineering scenario")).toBeInTheDocument();
+    expect(screen.getByText("Create a practice scenario")).toBeInTheDocument();
     await user.click(screen.getByLabelText(/consent to evidence recording for this shared assessment/i));
     await user.type(screen.getByLabelText("Arena lobby code"), "TEAM1234");
     await user.click(screen.getByRole("button", { name: "Join" }));
@@ -137,4 +146,3 @@ describe("EvidenceOS", () => {
     expect(screen.getByRole("button", { name: /quick match/i })).toBeInTheDocument();
   });
 });
-

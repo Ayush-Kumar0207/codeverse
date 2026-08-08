@@ -56,6 +56,10 @@ import {
   verifyArenaSignedReport,
   verifyEvidencePackage,
 } from "@/services/evidence";
+type IdleCapableWindow = Omit<Window, "requestIdleCallback" | "cancelIdleCallback"> & {
+  requestIdleCallback?: Window["requestIdleCallback"];
+  cancelIdleCallback?: Window["cancelIdleCallback"];
+};
 
 interface UseEvidenceOSOptions {
   projectId: string;
@@ -340,19 +344,59 @@ export function useEvidenceOS({
 
   useEffect(() => {
     if (!projectId || loading) return;
-    try {
-      window.localStorage.setItem("codeverse:evidence:" + projectId, JSON.stringify(snapshot));
-    } catch {
-      // The in-memory ledger remains usable when browser storage is unavailable.
+    const persist = () => {
+      try {
+        window.localStorage.setItem("codeverse:evidence:" + projectId, JSON.stringify(snapshot));
+      } catch {
+        // The in-memory ledger remains usable when browser storage is unavailable.
+      }
+    };
+
+    let timeoutId: number | undefined;
+    let idleId: number | undefined;
+    const idleWindow = window as IdleCapableWindow;
+    if (idleWindow.requestIdleCallback) {
+      idleId = idleWindow.requestIdleCallback(persist, { timeout: 1500 });
+    } else {
+      timeoutId = idleWindow.setTimeout(persist, 500);
     }
+    return () => {
+      if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, [loading, projectId, snapshot]);
 
   useEffect(() => {
-    const running = snapshot.arenas.find((session) => session.status === "running" || session.status === "lobby") || null;
+    if (!projectId || loading) return;
+    const flush = () => {
+      try {
+        window.localStorage.setItem("codeverse:evidence:" + projectId, JSON.stringify(snapshotRef.current));
+      } catch {
+        // The in-memory ledger remains authoritative if persistence is unavailable.
+      }
+    };
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, [loading, projectId]);
+
+  const arenaStateKey = useMemo(
+    () => snapshot.arenas.map((session) => [
+      session.id,
+      session.status,
+      session.actions.length,
+      session.participants.length,
+      session.weightedScore || "",
+    ].join(":")).join("|"),
+    [snapshot.arenas]
+  );
+
+  useEffect(() => {
+    const arenas = snapshotRef.current.arenas;
+    const running = arenas.find((session) => session.status === "running" || session.status === "lobby") || null;
     setActiveArena(running);
     if (isDemo || offline) {
       setArenaScenarios(localArenaScenarios);
-      setArenaLeaderboard(localLeaderboard(snapshot.arenas));
+      setArenaLeaderboard(localLeaderboard(arenas));
       return;
     }
     void Promise.all([fetchArenaScenarios(), fetchArenaLeaderboard()])
@@ -362,22 +406,43 @@ export function useEvidenceOS({
       })
       .catch(() => {
         setArenaScenarios(localArenaScenarios);
-        setArenaLeaderboard(localLeaderboard(snapshot.arenas));
+        setArenaLeaderboard(localLeaderboard(arenas));
       });
-  }, [isDemo, offline, snapshot.arenas]);
+  }, [arenaStateKey, isDemo, offline]);
 
   useEffect(() => {
     if (!ready || !Object.keys(files).length) return;
-    const timeout = window.setTimeout(() => {
+    let cancelled = false;
+    let idleId: number | undefined;
+    let serverTimeoutId: number | undefined;
+    const localTimeoutId = window.setTimeout(() => {
       const localTwin = createLocalTwin(files, activeFile, snapshotRef.current.events);
-      setTwin(localTwin);
+      if (!cancelled) setTwin(localTwin);
       const capture = captureWorkspace(files);
-      if (isDemo || offline || !capture.complete) return;
-      void postDigitalTwin(projectId, { files: capture.capturedFiles, activeFile, events: snapshotRef.current.events.slice(-200) })
-        .then(setTwin)
-        .catch(() => setOffline(true));
-    }, 700);
-    return () => window.clearTimeout(timeout);
+      if (isDemo || offline || !capture.complete || !navigator.onLine || document.hidden) return;
+
+      const syncTwin = () => {
+        void postDigitalTwin(projectId, { files: capture.capturedFiles, activeFile, events: snapshotRef.current.events.slice(-200) })
+          .then((result) => {
+            if (!cancelled) setTwin(result);
+          })
+          .catch(() => {
+            if (!cancelled) setOffline(true);
+          });
+      };
+      const idleWindow = window as IdleCapableWindow;
+      if (idleWindow.requestIdleCallback) {
+        idleId = idleWindow.requestIdleCallback(syncTwin, { timeout: 5000 });
+      } else {
+        serverTimeoutId = idleWindow.setTimeout(syncTwin, 2500);
+      }
+    }, 600);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(localTimeoutId);
+      if (idleId !== undefined) (window as IdleCapableWindow).cancelIdleCallback?.(idleId);
+      if (serverTimeoutId !== undefined) window.clearTimeout(serverTimeoutId);
+    };
   }, [activeFile, files, isDemo, offline, projectId, ready]);
 
   const runReview = useCallback(async (requirement: string, rollback: string) => {
@@ -905,4 +970,3 @@ export function useEvidenceOS({
     exportEvidence,
   };
 }
-
