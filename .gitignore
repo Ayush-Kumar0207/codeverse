@@ -61,3 +61,6 @@ client/data/algos/line_debug.txt
 client/coverage/
 client/playwright-report/
 client/test-results/
+
+# Private interview planning notes
+/INTERVIEW_BLUEPRINT.md
