@@ -18,7 +18,12 @@ const SOCKET_EVENTS = Object.freeze({
   EDIT_PERMISSION_DENIED: "editPermission:denied",
   REALTIME_PING: "realtime:ping",
   REALTIME_PONG: "realtime:pong",
+  ROOM_JOINED: "room:joined",
+  ROOM_JOIN_ERROR: "room:join-error",
+  ROOM_INVITE_CREATE: "room:invite:create",
+  CRDT_SYNC: "crdt:sync",
+  CRDT_UPDATE: "crdt:update",
+  CRDT_ACK: "crdt:ack",
 });
 
 module.exports = { SOCKET_EVENTS };
-

@@ -28,8 +28,17 @@ jobs:
   server-tests:
     name: Server tests
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7.4-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 10
     env:
       REQUIRE_ALL_LANGUAGE_ADAPTERS: "true"
+      TEST_REDIS_URL: redis://127.0.0.1:6379
     defaults:
       run:
         working-directory: server

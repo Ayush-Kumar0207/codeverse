@@ -12,4 +12,5 @@ export interface SharedProject {
   createdAt?: string;
   updatedAt?: string;
   storage?: "cloud" | "device" | "pending";
+  collaborationRole?: "organizer" | "editor" | "viewer";
 }

@@ -13,6 +13,8 @@ const versionRoutes = require("./routes/versions.routes");
 const deploymentRoutes = require("./routes/deployment.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const evidenceRoutes = require("./routes/evidence.routes");
+const statusRoutes = require("./routes/status.routes");
+const collaborationRoutes = require("./routes/collaboration.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const { apiLimiter } = require("./middlewares/rateLimit.middleware");
 const createRequestSecurityMiddleware = require("./middlewares/requestSecurity.middleware");
@@ -37,6 +39,9 @@ function isAllowedOrigin(origin) {
 
   try {
     const { hostname } = new URL(origin);
+    if (process.env.NODE_ENV !== "production" && (hostname === "localhost" || hostname === "127.0.0.1")) {
+      return true;
+    }
     return hostname === "codeverse-rho.vercel.app" || hostname.endsWith("-ayush-kumar0207s-projects.vercel.app");
   } catch {
     return false;
@@ -80,6 +85,8 @@ function createApp() {
   app.use("/api/deploy", deploymentRoutes);
   app.use("/api/settings", settingsRoutes);
   app.use("/api/evidence", evidenceRoutes);
+  app.use("/api/status", statusRoutes);
+  app.use("/api/collaboration", collaborationRoutes);
 
   app.get("/", (req, res) => {
     res.send("✅ CodeVerse Backend Running!");
