@@ -4,13 +4,14 @@ This is a working launch document, not a collection of inflated claims. Update t
 
 ## Publishing identity
 
-Public launch communication uses **The Grey Eminence** as a privacy-preserving creator identity. The voice should be calm, technically specific, and personal: write about decisions, trade-offs, mistakes, and observed results in the first person. Do not invent a team, credentials, customers, testimonials, or usage.
+Public launch communication uses **The Sable Falcon** as a privacy-preserving creator identity. The voice should be calm, technically specific, and personal: write about decisions, trade-offs, mistakes, and observed results in the first person. Do not invent a team, credentials, customers, testimonials, or usage.
 
-- **Display name:** The Grey Eminence
+- **Display name:** The Sable Falcon
+- **Public handle:** [@TheSableFalcon](https://x.com/TheSableFalcon)
 - **Short byline:** Independent builder of CodeVerse
-- **Canonical avatar:** [`docs/brand/the-grey-eminence-avatar.png`](brand/the-grey-eminence-avatar.png)
-- **Visual direction:** a minimal charcoal-grey chess knight on a quiet neutral background; no face, initials, neon effects, or gaming treatment
-- **Short bio:** Building open developer tools for collaborative engineering, verifiable review, and resilient software delivery.
+- **Canonical avatar:** [`docs/brand/the-sable-falcon-avatar.png`](brand/the-sable-falcon-avatar.png)
+- **Visual direction:** a calm sable-black falcon rendered in restrained graphite planes on a quiet charcoal background; no text, neon effects, or gaming treatment
+- **Short bio:** Independent builder exploring useful software, intelligent systems, and resilient products. Currently building CodeVerse.
 - **Account rule:** use this identity only where pseudonymous or project/brand accounts are permitted. On services that require an authentic personal identity, publish through a CodeVerse project page or keep the existing verified account rather than supplying a false legal name.
 - **Consent rule:** notify the maintainer immediately before creating an external account or submitting a public post.
 - **Separation rule:** do not rewrite existing Git history, GitHub ownership, legal notices, or accounts already attached to Ayush Kumar without a separate explicit decision.
@@ -55,7 +56,7 @@ I built it after repeatedly seeing development, chat, review, learning, and depl
 
 **Maker comment:**
 
-I am the independent builder behind CodeVerse, publishing as The Grey Eminence. The difficult part was not putting Monaco in a browser; it was making collaboration survive reconnects and multiple server instances while keeping authorization server-side, then making the evidence layer honest about what was actually verified. The repository includes the production contracts and 100/500-client benchmark method, including limitations. If you try it, tell me where the product becomes confusing. That feedback is more useful than a polite compliment.
+I am the independent builder behind CodeVerse, publishing as The Sable Falcon. The difficult part was not putting Monaco in a browser; it was making collaboration survive reconnects and multiple server instances while keeping authorization server-side, then making the evidence layer honest about what was actually verified. The repository includes the production contracts and 100/500-client benchmark method, including limitations. If you try it, tell me where the product becomes confusing. That feedback is more useful than a polite compliment.
 
 ## Show HN
 

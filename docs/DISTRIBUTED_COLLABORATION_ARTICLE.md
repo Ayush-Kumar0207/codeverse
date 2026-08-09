@@ -145,4 +145,4 @@ If this architecture interests you, I would value criticism of the boundaries ab
 - [See the contributor guide](https://github.com/Ayush-Kumar0207/codeverse/blob/main/CONTRIBUTING.md)
 - [Join the feature-freeze discussion](https://github.com/Ayush-Kumar0207/codeverse/discussions/48)
 
-I built the project independently and publish launch notes under **The Grey Eminence**. The code, benchmark method, limitations, and open work are public because quiet work should still be inspectable.
+I built the project independently and publish launch notes under **The Sable Falcon** ([@TheSableFalcon](https://x.com/TheSableFalcon)). The code, benchmark method, limitations, and open work are public because quiet work should still be inspectable.
