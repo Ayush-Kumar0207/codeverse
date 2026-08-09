@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
-  deployment_status:
 
 concurrency:
   group: production-smoke
@@ -20,7 +19,6 @@ env:
 jobs:
   production-smoke:
     name: App, API, realtime, OAuth, and deployment contracts
-    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
