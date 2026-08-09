@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Ask a question
+    url: https://github.com/Ayush-Kumar0207/codeverse/discussions/categories/q-a
+    about: Get help with setup, architecture, or using CodeVerse.
+  - name: Suggest an idea
+    url: https://github.com/Ayush-Kumar0207/codeverse/discussions/categories/ideas
+    about: Discuss an idea with the community before opening implementation work.
   - name: Security vulnerability
     url: https://github.com/Ayush-Kumar0207/codeverse/security/advisories/new
     about: Report vulnerabilities privately. Do not open a public issue.

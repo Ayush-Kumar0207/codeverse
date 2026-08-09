@@ -2,7 +2,18 @@
   "name": "codeverse",
   "version": "1.0.0",
   "private": true,
-  "description": "A verifiable collaborative engineering platform with tamper-evident replay, proof-carrying changes, adversarial review, and understanding assessment.",
+  "description": "An open-source collaborative browser IDE with CRDT editing, isolated execution, AI-assisted review, and verifiable change evidence.",
+  "keywords": [
+    "collaborative-editor",
+    "browser-ide",
+    "crdt",
+    "yjs",
+    "socket-io",
+    "developer-tools",
+    "code-review",
+    "open-source"
+  ],
+  "homepage": "https://codeverse-rho.vercel.app",
   "license": "MIT",
   "author": "Ayush Kumar",
   "repository": {

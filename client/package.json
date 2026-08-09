@@ -88,9 +88,16 @@
     "typescript": "^5",
     "vitest": "^4.1.10"
   },
-  "description": "The EvidenceOS workspace for verifiable human-and-AI collaborative engineering.",
+  "description": "The CodeVerse collaborative browser workspace for building, reviewing, and proving software changes.",
   "keywords": [
-    "collaborative-ide",
+    "collaborative-editor",
+    "browser-ide",
+    "crdt",
+    "yjs",
+    "socket-io",
+    "developer-tools",
+    "code-review",
+    "open-source",
     "nextjs",
     "monaco-editor",
     "threejs",

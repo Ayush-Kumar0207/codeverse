@@ -2,12 +2,14 @@
 
   # ⚡ CodeVerse
 
-  ### _"Build it. Prove it. Understand it. — Together."_
+  ### Build together. Prove what changed.
 
-  **A verifiable collaborative engineering platform where humans and AI build, debug, review, and ship software—and every change carries evidence that it works and is understood.**
+  **An open-source collaborative browser IDE where live code, execution, review, and replayable engineering evidence stay in one workspace.**
 
   <p>
-    <a href="https://codeverse-rho.vercel.app"><img src="https://img.shields.io/badge/🌐_Live-codeverse--rho.vercel.app-000?style=for-the-badge&labelColor=000" alt="Live Website" /></a>
+    <a href="https://codeverse-rho.vercel.app"><img src="https://img.shields.io/badge/Try_the_live_app-14b8a6?style=for-the-badge" alt="Try the live CodeVerse app" /></a>
+    <a href="https://codeverse-rho.vercel.app/demo"><img src="https://img.shields.io/badge/Open_the_demo-0f172a?style=for-the-badge" alt="Open the CodeVerse demo" /></a>
+    <a href="https://github.com/Ayush-Kumar0207/codeverse/labels/good%20first%20issue"><img src="https://img.shields.io/badge/Make_a_first_contribution-f59e0b?style=for-the-badge" alt="Find a good first issue" /></a>
   </p>
 
   <p>
@@ -30,12 +32,11 @@
   </p>
 
   <p>
-    <a href="#-the-problem-why-codeverse-exists">🎯 The Problem</a> •
-    <a href="#-features">✨ Features</a> •
-    <a href="#-quick-start">🚀 Quick Start</a> •
-    <a href="#-architecture">🏛 Architecture</a> •
-    <a href="#-api-reference--usage-examples">📡 API</a> •
-    <a href="#-author--team">👥 Team</a>
+    <a href="#start-here">Start here</a> •
+    <a href="#-the-problem-why-codeverse-exists">Why CodeVerse</a> •
+    <a href="#-quick-start">Run locally</a> •
+    <a href="CONTRIBUTING.md">Contribute</a> •
+    <a href="docs/ROADMAP.md">Roadmap</a>
   </p>
 
 </div>
@@ -63,6 +64,34 @@
 | **Public Tunnel** | Optional localtunnel URL when `DEPLOY_TUNNEL_ENABLED=true` |
 
 > **Zero-config local development.** CodeVerse runs locally without cloud credentials for the core IDE flow. Supabase, OAuth, Ollama, and remote execution are optional integrations that unlock persistence, sign-in providers, AI help, and sandboxed execution.
+
+---
+
+<a id="start-here"></a>
+
+## Start here
+
+You do not need to understand every subsystem before using or contributing to CodeVerse.
+
+| I want to… | Best next step |
+| --- | --- |
+| See the product without an account | [Open the demo workspace](https://codeverse-rho.vercel.app/demo) |
+| Build something in the hosted workspace | [Launch CodeVerse](https://codeverse-rho.vercel.app) |
+| Understand the engineering | Read the [architecture](#-architecture) and [collaboration benchmarks](docs/COLLABORATION_BENCHMARKS.md) |
+| Make a small contribution | Choose a [`good first issue`](https://github.com/Ayush-Kumar0207/codeverse/labels/good%20first%20issue) and follow [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Ask a design or setup question | Start a [GitHub Discussion](https://github.com/Ayush-Kumar0207/codeverse/discussions) |
+| Check whether production is healthy | Open the [public status page](https://codeverse-rho.vercel.app/status) |
+
+### Why it is different
+
+| Typical browser IDE | CodeVerse |
+| --- | --- |
+| Synchronizes editor text | CRDT editing, awareness cursors, roles, reconnect recovery, and Redis-backed multi-instance rooms |
+| Shows the latest output | Connects work to replay, tests, runtime events, review, deployment, and recovery evidence |
+| Adds an opaque AI badge | Separates unverified previews from server-executed, digest-bound verification |
+| Treats the demo as proof of scale | Publishes production contracts, measured 100/500-client baselines, and their limitations |
+
+The project is under a **feature freeze**. Current work is intentionally centered on reliability, accessibility, security, documentation, performance, and real contributor feedback—not a longer feature list. See the [public roadmap](docs/ROADMAP.md) and [adoption scorecard](docs/ADOPTION.md).
 
 ---
 
@@ -1114,45 +1143,20 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 
 **Feature freeze:** CodeVerse now prioritizes reliability, benchmarks, security updates, and real-user adoption. A starter gallery and plugin system are intentionally not scheduled because they add surface area without strengthening the core engineering claim.
 
+The maintained roadmap, accepted contribution areas, and intentionally deferred work live in [docs/ROADMAP.md](docs/ROADMAP.md).
+
 ---
 
 ## 🤝 Contributing
 
-Contributions make the open-source community thrive. Any contribution is **greatly appreciated**.
+You do not need to learn the whole platform before helping. Good first contributions include unclear copy, missing failure states, accessibility fixes, focused tests, setup diagnostics, and documentation examples.
 
-1. **Fork** the repository
-2. **Create** your feature branch:
+- Browse [`good first issue`](https://github.com/Ayush-Kumar0207/codeverse/labels/good%20first%20issue) and [`help wanted`](https://github.com/Ayush-Kumar0207/codeverse/labels/help%20wanted).
+- Read the contributor paths and repository map in [CONTRIBUTING.md](CONTRIBUTING.md).
+- Discuss larger ideas before implementation in [GitHub Discussions](https://github.com/Ayush-Kumar0207/codeverse/discussions).
+- Use [SUPPORT.md](SUPPORT.md) to choose the right place for questions, bugs, documentation, and security reports.
 
-```bash
-git checkout -b feature/your-feature-name
-```
-
-3. **Install** dependencies and run checks:
-
-```bash
-cd client && npm ci && npm run build
-cd ../server && npm ci && node -e "require('./src/app')"
-```
-
-4. **Commit** with clear messages:
-
-```bash
-git commit -m "feat: add workspace invite controls"
-```
-
-5. **Open a Pull Request** with:
-   - What changed and why.
-   - Screenshots or recordings for UI changes.
-   - Any new environment variables or migration steps.
-   - Manual test notes for realtime, execution, or deployment behavior.
-
-### Development Guidelines
-
-- Follow the existing code style and component patterns.
-- Use TypeScript strict mode — avoid `any`.
-- Keep logic separated from UI — use `services/` and `utils/`.
-- Test Socket.IO events with multiple browser tabs.
-- Keep the backend server-authoritative — never trust the client.
+The project uses lightweight, maintainer-led decision making described in [GOVERNANCE.md](GOVERNANCE.md). Small, complete pull requests with honest validation notes are strongly preferred over broad rewrites.
 
 ---
 

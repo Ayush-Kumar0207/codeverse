@@ -1,0 +1,32 @@
+title: "[Idea] "
+labels: [ideas]
+body:
+  - type: markdown
+    attributes:
+      value: Start with the user problem. CodeVerse is feature-frozen, but focused improvements to clarity, reliability, accessibility, security, performance, and contribution workflows are welcome.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem did you encounter?
+      description: Explain the workflow and who is affected without jumping straight to implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: What happens today?
+      description: Include a link, screenshot, or short reproduction when useful.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What is the smallest useful improvement?
+      description: Describe the result and how we could tell it worked.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Trade-offs or alternatives
+      description: Note extra complexity, compatibility concerns, or a simpler workaround.
