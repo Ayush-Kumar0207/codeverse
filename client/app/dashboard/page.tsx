@@ -63,6 +63,13 @@ const slugify = (value?: string) => {
 const getProjectKey = (project: SharedProject, index: number) =>
   project._id || `${slugify(project.title)}-${project.language}-${index}`;
 
+const projectStorageLabel = (project: SharedProject) => {
+  if (project.isDemo) return "Demo workspace";
+  if (project.storage === "device") return "Recovered on this device";
+  if (project.storage === "pending") return "Awaiting cloud confirmation";
+  return "Private cloud workspace";
+};
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<SharedProject[]>([]);
@@ -90,13 +97,20 @@ export default function Dashboard() {
       .then((projectData) => {
         if (!active) return;
         setProjects(projectData.projects || []);
-        setProjectServiceAvailable(true);
+        setProjectServiceAvailable(projectData.cloudAvailable);
+        if (!projectData.cloudAvailable) {
+          setActionMessage("Cloud projects are temporarily unavailable; showing work saved on this device");
+        } else if (projectData.recoveredCount > 0) {
+          setActionMessage(
+            `${projectData.recoveredCount} workspace${projectData.recoveredCount === 1 ? "" : "s"} recovered from this device`
+          );
+        }
       })
       .catch(() => {
         if (!active) return;
         setProjects([]);
         setProjectServiceAvailable(false);
-        setActionMessage("Project service unavailable; showing an empty workspace");
+        setActionMessage("Cloud projects are unavailable and no device recovery copy was found");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -274,13 +288,13 @@ export default function Dashboard() {
   );
 
   const handleDeleteProject = async (project: SharedProject) => {
-    if (!project._id) return;
+    if (!project._id || !user) return;
 
     const ok = window.confirm(`Delete "${project.title}"? This removes it from your project browser.`);
     if (!ok) return;
 
     try {
-      await deleteProject(project._id);
+      await deleteProject(project._id, user.username, project.storage);
       setProjects((prev) => prev.filter((item) => item._id !== project._id));
       setActionMessage(`Deleted ${project.title}`);
     } catch {
@@ -454,7 +468,7 @@ export default function Dashboard() {
 
                     <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
                       <span className="text-xs font-medium text-slate-500">
-                        {project.isDemo ? "Demo workspace" : "Private workspace"}
+                        {projectStorageLabel(project)}
                       </span>
                       <button
                         onClick={() => router.push(`/editor/${project._id || "demo"}`)}
@@ -541,7 +555,7 @@ export default function Dashboard() {
                       projectServiceAvailable ? "text-emerald-300" : "text-amber-300"
                     )}
                   >
-                    {projectServiceAvailable ? "Loaded" : "Limited"}
+                    {projectServiceAvailable ? "Cloud connected" : "Device recovery"}
                   </p>
                 </div>
               </div>

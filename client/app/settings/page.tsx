@@ -128,20 +128,24 @@ export default function SettingsHub() {
   const activeMeta = tabMeta[activeTab];
   const syncTitle = syncStatus === "syncing"
     ? syncPhase === "verifying" ? "Verifying snapshot history" : "Uploading settings"
-    : syncStatus === "error"
-      ? "Sync needs attention"
-      : isSynced
-        ? "Cloud snapshot verified"
-        : "Local changes are waiting";
+    : syncStatus === "pending"
+      ? "Saved here, waiting for cloud"
+      : syncStatus === "error"
+        ? "Sync needs attention"
+        : isSynced
+          ? "Cloud snapshot verified"
+          : "Local changes are waiting";
   const syncDescription = syncStatus === "syncing"
     ? syncPhase === "verifying"
       ? "The cloud accepted the snapshot. CodeVerse is refreshing your saved history now."
       : "Your current settings are moving from this device to the authenticated cloud API."
-    : syncStatus === "error"
-      ? syncError || "The cloud could not confirm this snapshot."
-      : isSynced
-        ? "This device matches the latest persisted cloud snapshot."
-        : "Sync now to make these settings available from your other sessions.";
+    : syncStatus === "pending"
+      ? syncError || "These settings are safe on this device and will retry automatically."
+      : syncStatus === "error"
+        ? syncError || "The cloud could not confirm this snapshot."
+        : isSynced
+          ? "This device matches the latest persisted cloud snapshot."
+          : "Sync now to make these settings available from your other sessions.";
   const lastSyncLabel = lastSyncAt
     ? new Date(lastSyncAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
     : "No successful cloud sync yet";
@@ -493,7 +497,7 @@ export default function SettingsHub() {
                             ? syncPhase === "verifying" ? "Verifying" : "Uploading"
                             : !token
                               ? "Sign In to Sync"
-                              : syncStatus === "error"
+                              : syncStatus === "error" || syncStatus === "pending"
                                 ? "Retry Sync"
                                 : isSynced
                                   ? "Sync Again"
@@ -510,7 +514,9 @@ export default function SettingsHub() {
                           "overflow-hidden rounded-xl border p-4",
                           syncStatus === "error"
                             ? "border-rose-400/20 bg-rose-400/[0.05]"
-                            : isSynced
+                            : syncStatus === "pending"
+                              ? "border-amber-300/20 bg-amber-300/[0.05]"
+                              : isSynced
                               ? "border-emerald-400/20 bg-emerald-400/[0.045]"
                               : "border-border bg-muted/20"
                         )}
@@ -521,7 +527,9 @@ export default function SettingsHub() {
                               "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
                               syncStatus === "error"
                                 ? "border-rose-400/20 bg-rose-400/10 text-rose-300"
-                                : isSynced
+                                : syncStatus === "pending"
+                                  ? "border-amber-300/20 bg-amber-300/10 text-amber-200"
+                                  : isSynced
                                   ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
                                   : "border-cyan-400/20 bg-cyan-400/10 text-cyan-300"
                             )}>
@@ -529,6 +537,8 @@ export default function SettingsHub() {
                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                               ) : syncStatus === "error" ? (
                                 <AlertCircle className="h-4 w-4" />
+                              ) : syncStatus === "pending" ? (
+                                <CloudUpload className="h-4 w-4" />
                               ) : isSynced ? (
                                 <CheckCircle2 className="h-4 w-4" />
                               ) : (
@@ -656,8 +666,8 @@ function StatusPill({ label, tone = "default" }: { label: string; tone?: "defaul
   );
 }
 
-function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced" | "error"; isSynced: boolean }) {
-  const label = status === "syncing" ? "Syncing" : status === "error" ? "Sync Error" : isSynced ? "Synced" : "Local";
+function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced" | "pending" | "error"; isSynced: boolean }) {
+  const label = status === "syncing" ? "Syncing" : status === "pending" ? "Retry queued" : status === "error" ? "Sync Error" : isSynced ? "Synced" : "Local";
   return (
     <div className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 text-sm text-foreground">
       <span
@@ -665,9 +675,10 @@ function SyncBadge({ status, isSynced }: { status: "idle" | "syncing" | "synced"
           "h-2 w-2 rounded-full",
           status === "syncing" && "animate-pulse",
           status === "error" && "bg-destructive",
-          status === "syncing" && "bg-amber-300",
-          status !== "error" && status !== "syncing" && isSynced && "bg-emerald-300",
-          status !== "error" && status !== "syncing" && !isSynced && "bg-primary"
+          status === "syncing" && "bg-cyan-300",
+          status === "pending" && "animate-pulse bg-amber-300",
+          status !== "error" && status !== "syncing" && status !== "pending" && isSynced && "bg-emerald-300",
+          status !== "error" && status !== "syncing" && status !== "pending" && !isSynced && "bg-primary"
         )}
       />
       {label}

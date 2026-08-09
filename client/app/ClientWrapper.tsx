@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
-  const isEditorRoute = pathname?.startsWith("/editor/");
+  const isEditorRoute = pathname === "/editor" || pathname?.startsWith("/editor/");
   const isDemoEditorRoute = pathname === "/editor/demo-sandbox";
   const isIndependentScrollRoute = isEditorRoute || pathname === "/encyclopedia";
   const canPaintBeforeAuth =

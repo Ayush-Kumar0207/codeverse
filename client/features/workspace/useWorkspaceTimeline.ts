@@ -141,17 +141,24 @@ export function useWorkspaceTimeline({
       const validSnapshots = Array.isArray(parsed)
         ? parsed.filter((snapshot) => snapshot?.id && snapshot?.createdAt && snapshot?.files)
         : [];
+      const latest = validSnapshots[0];
       setSnapshots(validSnapshots);
-      setCurrentSnapshotId(validSnapshots[0]?.id || null);
-      lastSignatureRef.current = validSnapshots[0]
-        ? createWorkspaceSnapshotSignature(validSnapshots[0].files)
-        : "";
+      setCurrentSnapshotId(latest?.id || null);
+      lastSignatureRef.current = latest ? createWorkspaceSnapshotSignature(latest.files) : "";
+      if (latest && Object.keys(latest.files).length > 0) {
+        skipNextAutoSnapshotRef.current = true;
+        setFiles({ ...latest.files });
+        const restoredActiveFile = Object.hasOwn(latest.files, latest.activeFile)
+          ? latest.activeFile
+          : Object.keys(latest.files)[0] || "";
+        if (restoredActiveFile) setActiveFile(restoredActiveFile);
+      }
     } catch {
       setSnapshots([]);
       setCurrentSnapshotId(null);
       lastSignatureRef.current = "";
     }
-  }, [isOrganizer, storageKey]);
+  }, [isOrganizer, setActiveFile, setFiles, storageKey]);
 
   useEffect(() => {
     if (!isOrganizer || typeof window === "undefined") return;

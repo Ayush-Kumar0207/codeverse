@@ -57,6 +57,9 @@ const DEFAULT_SETTINGS: SettingsConfig = {
 
 const THEME_OPTIONS: ThemeType[] = ["midnight", "hacker", "solarized", "amoled"];
 const AUDIO_OPTIONS: AudioProfile[] = ["none", "mechanical", "synth"];
+const PENDING_SYNC_KEY = "codeverse-pending-settings-sync";
+const PENDING_SYNC_MESSAGE =
+  "Saved on this device. Cloud storage is temporarily unavailable; CodeVerse will retry automatically.";
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
@@ -139,8 +142,8 @@ interface SettingsContextType {
     logs: { id: string; msg: string; type: 'sys' | 'sync' | 'neural' | 'critical'; timestamp: number }[];
     stressMode: boolean;
   };
-  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
-  syncPhase: 'idle' | 'uploading' | 'verifying' | 'complete' | 'failed';
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'pending' | 'error';
+  syncPhase: 'idle' | 'queued' | 'uploading' | 'verifying' | 'complete' | 'failed';
   syncError: string | null;
   lastSyncAt: number | null;
   snapshots: Snapshot[];
@@ -180,6 +183,13 @@ const isUnauthorizedError = (err: unknown) => {
 
   const maybeResponse = err as { response?: { status?: number; data?: { statusCode?: number } } };
   return maybeResponse.response?.status === 401 || maybeResponse.response?.data?.statusCode === 401;
+};
+
+const isRetryableCloudError = (err: unknown) => {
+  if (typeof err !== "object" || err === null) return true;
+  const maybeResponse = err as { response?: { status?: number } };
+  const status = maybeResponse.response?.status;
+  return status === undefined || status === 408 || status === 429 || status >= 500;
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -231,6 +241,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem("codeverse-settings");
     const savedHash = localStorage.getItem("codeverse-last-pushed-hash");
     const savedSyncAt = Number(localStorage.getItem("codeverse-last-sync-at"));
+    const pendingSync = localStorage.getItem(PENDING_SYNC_KEY);
+
+    if (pendingSync) {
+      setSyncStatus('pending');
+      setSyncPhase('queued');
+      setSyncError(PENDING_SYNC_MESSAGE);
+    }
 
     if (savedHash) setLastPushedHash(savedHash);
     if (Number.isFinite(savedSyncAt) && savedSyncAt > 0) setLastSyncAt(savedSyncAt);
@@ -332,6 +349,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLastSyncAt(completedAt);
       localStorage.setItem("codeverse-last-pushed-hash", currentHash);
       localStorage.setItem("codeverse-last-sync-at", String(completedAt));
+      localStorage.removeItem(PENDING_SYNC_KEY);
       logEvent("Cloud sync complete: snapshot persisted and verified.", "sync");
 
       if (savedSnapshot?.id) {
@@ -370,6 +388,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.removeItem("codeverse-last-pushed-hash");
         logEvent("Session expired: Cloud sync paused. Please sign in again.", "critical");
         logout();
+        return;
+      }
+
+      if (isRetryableCloudError(err)) {
+        localStorage.setItem(
+          PENDING_SYNC_KEY,
+          JSON.stringify({ config: settings, hash: currentHash, queuedAt: Date.now() })
+        );
+        setSyncStatus('pending');
+        setSyncPhase('queued');
+        setSyncError(PENDING_SYNC_MESSAGE);
+        logEvent("Cloud sync queued: settings are safe on this device and will retry automatically.", "sync");
         return;
       }
 
@@ -458,11 +488,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           return;
         }
 
-        const errorMsg = getErrorMessage(err, "Cloud settings are temporarily unavailable.");
-        setSyncStatus('error');
-        setSyncPhase('failed');
-        setSyncError(errorMsg);
-        logEvent(`Cloud sync: ${errorMsg}`, "critical");
+        if (isRetryableCloudError(err)) {
+          localStorage.setItem(
+            PENDING_SYNC_KEY,
+            JSON.stringify({ config: settingsRef.current, hash: currentHashRef.current, queuedAt: Date.now() })
+          );
+          setSyncStatus('pending');
+          setSyncPhase('queued');
+          setSyncError(PENDING_SYNC_MESSAGE);
+          logEvent("Cloud sync is waiting for storage connectivity; device settings remain available.", "sync");
+        } else {
+          const errorMsg = getErrorMessage(err, "Cloud settings are temporarily unavailable.");
+          setSyncStatus('error');
+          setSyncPhase('failed');
+          setSyncError(errorMsg);
+          logEvent(`Cloud sync: ${errorMsg}`, "critical");
+        }
       } finally {
         if (active) setCloudReady(true);
       }
@@ -490,6 +531,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setSyncPhase('idle');
     }
   }, [isSynced, syncStatus]);
+
+  useEffect(() => {
+    if (!token || !cloudReady || syncStatus !== 'pending') return;
+
+    const retry = () => void performSync();
+    window.addEventListener("online", retry);
+    const timer = window.setTimeout(retry, 15_000);
+    return () => {
+      window.removeEventListener("online", retry);
+      window.clearTimeout(timer);
+    };
+  }, [cloudReady, performSync, syncStatus, token]);
 
   // Debounced Auto-Snapshot & Auto-Push (Optimistic)
   useEffect(() => {

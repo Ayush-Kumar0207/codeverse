@@ -303,8 +303,19 @@ const logout = asyncHandler(async (_req, res) => {
 });
 
 const profile = asyncHandler(async (req, res) => {
-  const result = await authService.getProfile(req.user.username);
-  res.json(result);
+  try {
+    const result = await authService.getProfile(req.user.username);
+    res.json(result);
+  } catch (error) {
+    if (error.statusCode !== 503) throw error;
+    res.json({
+      user: {
+        _id: req.user._id,
+        username: req.user.username,
+      },
+      storageStatus: "temporarily-unavailable",
+    });
+  }
 });
 
 const githubStart = asyncHandler(async (req, res) => {
@@ -469,4 +480,3 @@ module.exports = {
   googleStart,
   googleCallback,
 };
-

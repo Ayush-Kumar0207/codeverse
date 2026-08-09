@@ -7,7 +7,9 @@ export interface SharedProject {
   owner?: string;
   isDemo?: boolean;
   code?: string;
+  files?: Record<string, string>;
+  activeFile?: string;
   createdAt?: string;
   updatedAt?: string;
+  storage?: "cloud" | "device" | "pending";
 }
-

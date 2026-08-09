@@ -10,7 +10,8 @@ export interface SaveActions {
 export function useCodeSave(
   activeFile: string,
   code: string,
-  onSaveSuccess?: () => void
+  onSaveSuccess?: () => void,
+  saveWorkspace?: () => Promise<void>
 ) {
   const { user, token } = useAuth();
 
@@ -21,21 +22,24 @@ export function useCodeSave(
     }
 
     try {
-      await saveCodeVersion({
-        code,
-        userId: user._id || "",
-        fileName: activeFile,
-      });
-      alert("✅ Saved and snapshot created.");
+      await Promise.all([
+        saveCodeVersion({
+          code,
+          userId: user._id || "",
+          fileName: activeFile,
+        }),
+        saveWorkspace?.(),
+      ]);
+      alert("Saved to cloud with a versioned checkpoint.");
       onSaveSuccess?.();
       window.dispatchEvent(new CustomEvent("codeverse:evidence", {
-        detail: { type: "snapshot.created", summary: "Saved a versioned code checkpoint.", source: "version-history", fileName: activeFile, payload: { bytes: code.length } },
+        detail: { type: "snapshot.created", summary: "Saved a durable workspace checkpoint.", source: "version-history", fileName: activeFile, payload: { bytes: code.length } },
       }));
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to save.");
+      alert("Your workspace is safe on this device, but the cloud save is still pending. Please retry when storage is available.");
     }
-  }, [user, token, activeFile, code, onSaveSuccess]);
+  }, [user, token, activeFile, code, onSaveSuccess, saveWorkspace]);
 
   return { handleSave };
 }

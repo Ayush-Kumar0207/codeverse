@@ -56,6 +56,13 @@ function readmeFor(project: SharedProject) {
 }
 
 function getProjectStarter(project: SharedProject) {
+  if (project.files && Object.keys(project.files).length > 0) {
+    const activeFile = project.activeFile && Object.hasOwn(project.files, project.activeFile)
+      ? project.activeFile
+      : Object.keys(project.files)[0];
+    return { files: { ...project.files }, activeFile };
+  }
+
   if (project.language === "html") {
     return {
       files: {
@@ -179,4 +186,3 @@ export function useEditorState(initialState?: InitialEditorState | null) {
     getLanguageFromFilename,
   };
 }
-
