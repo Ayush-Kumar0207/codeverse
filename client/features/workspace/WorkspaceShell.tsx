@@ -13,7 +13,8 @@ import { getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { useSocket } from "@/hooks/useSocket";
 import { useCodeSave } from "@/hooks/useCodeSave";
 import { useHtmlPreview } from "@/hooks/useHtmlPreview";
-import { fetchProjectById } from "@/services/projects";
+import { fetchProjectById, saveProjectWorkspace } from "@/services/projects";
+import { rememberLastOpenedProject } from "@/services/project-library";
 import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 import type { SharedProject } from "@shared/types/project";
 import { createDemoWorkspace } from "@/features/workspace/demo-workspace";
@@ -76,6 +77,7 @@ function EditorWorkspace() {
   const { socket } = useSocket(roomId);
 
   const [project, setProject] = useState<SharedProject | null>(() => initialDemoWorkspace?.project || null);
+  const [projectLoadError, setProjectLoadError] = useState("");
   const [refreshCount, setRefreshCount] = useState(0);
   const {
     files,
@@ -163,9 +165,16 @@ function EditorWorkspace() {
   });
 
   // Code save hook
-  const { handleSave } = useCodeSave(activeFile, code, () => {
-    setRefreshCount((prev) => prev + 1);
-  });
+  const { handleSave } = useCodeSave(
+    activeFile,
+    code,
+    () => setRefreshCount((prev) => prev + 1),
+    id && id !== "demo-sandbox"
+      ? async () => {
+          await saveProjectWorkspace(id, { files, activeFile });
+        }
+      : undefined
+  );
 
   // HTML preview hook
   const { combinedPreview } = useHtmlPreview(files, language);
@@ -327,30 +336,51 @@ function EditorWorkspace() {
       };
     }
 
-    fetchProjectById(id)
+    if (!user?.username) return;
+    setProjectLoadError("");
+    fetchProjectById(id, user.username)
       .then((res) => {
         if (!active) return;
         setProject(res.project);
         initializeProjectFiles(res.project);
+        rememberLastOpenedProject(user.username, id);
       })
       .catch((err) => {
-        if (active) console.warn("Failed to load project", err);
+        if (!active) return;
+        console.warn("Failed to load project", err);
+        setProjectLoadError(err instanceof Error ? err.message : "This workspace could not be opened.");
       });
     return () => {
       active = false;
     };
-  }, [id, algoId, visualizerMode, initializeProjectFiles, setActiveFile, setFiles]);
+  }, [id, algoId, visualizerMode, initializeProjectFiles, setActiveFile, setFiles, user?.username]);
 
   if (!project) {
     return (
-      <div className="h-full flex items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-background p-6">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-4"
+          className="flex max-w-md flex-col items-center gap-4 text-center"
         >
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-muted-foreground">{algoId ? "Preparing algorithm workspace…" : "Opening workspace…"}</p>
+          {projectLoadError ? (
+            <>
+              <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                {projectLoadError}
+              </div>
+              <p className="text-sm leading-6 text-muted-foreground">
+                CodeVerse checked both cloud storage and this device. Return to the project browser to choose another workspace.
+              </p>
+              <Button onClick={() => window.location.assign("/dashboard")} className="rounded-xl">
+                Back to project browser
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <p className="text-muted-foreground">{algoId ? "Preparing algorithm workspace…" : "Opening workspace…"}</p>
+            </>
+          )}
         </motion.div>
       </div>
     );

@@ -53,7 +53,7 @@ export function ActivityBar() {
       icon: MessageSquare,
       label: "Editor",
       id: "editor",
-      href: pathname?.startsWith("/editor/") ? pathname : "/dashboard",
+      href: pathname?.startsWith("/editor/") ? pathname : "/editor",
     },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
   ];
@@ -102,7 +102,7 @@ export function ActivityBar() {
                 aria-label={item.label}
                 className={cn(
                   "relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-white/[0.05]",
-                  (item.id !== "editor" && pathname === item.href) || (item.id === "editor" && pathname?.startsWith("/editor"))
+                  (item.id !== "editor" && pathname === item.href) || (item.id === "editor" && (pathname === "/editor" || pathname?.startsWith("/editor/")))
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}

@@ -6,16 +6,28 @@ function isSupabaseUnavailable(error) {
   const message = `${error?.message || ""} ${error?.cause?.message || ""}`;
   return (
     !supabase ||
-    /fetch failed|getaddrinfo|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|network/i.test(message)
+    /fetch failed|getaddrinfo|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|timed out|timeout|network/i.test(message)
   );
 }
 
-function shouldUseLocalStore(error) {
+function canUseLocalCodeStore() {
+  return process.env.NODE_ENV !== "production";
+}
+
+function cloudVersionError() {
+  return new HttpError(
+    503,
+    "Cloud version storage is temporarily unavailable. Your workspace remains safe on this device; retry the cloud save later."
+  );
+}
+
+function shouldUseDevelopmentStore(error) {
   return (
-    isSupabaseUnavailable(error) ||
-    error?.code === "22P02" ||
-    error?.code === "23503" ||
-    /invalid input syntax|foreign key/i.test(error?.message || "")
+    canUseLocalCodeStore() &&
+    (isSupabaseUnavailable(error) ||
+      error?.code === "22P02" ||
+      error?.code === "23503" ||
+      /invalid input syntax|foreign key/i.test(error?.message || ""))
   );
 }
 
@@ -42,15 +54,18 @@ async function saveCodeVersion({ code, userId, fileName }) {
   };
 
   if (!payload.code || !payload.userId || !payload.fileName) {
-    throw new HttpError(400, "Missing code, fileName or userId");
+    throw new HttpError(400, "Missing code, fileName or authenticated user");
   }
 
   const saveLocalVersion = async () => {
     await localCodeStore.saveVersion(payload);
-    return { message: "Code version saved successfully" };
+    return { message: "Code version saved on this development device" };
   };
 
-  if (!supabase) return saveLocalVersion();
+  if (!supabase) {
+    if (canUseLocalCodeStore()) return saveLocalVersion();
+    throw cloudVersionError();
+  }
 
   try {
     const { error } = await supabase
@@ -62,7 +77,8 @@ async function saveCodeVersion({ code, userId, fileName }) {
     if (error) throw error;
     return { message: "Code version saved successfully" };
   } catch (error) {
-    if (shouldUseLocalStore(error)) return saveLocalVersion();
+    if (shouldUseDevelopmentStore(error)) return saveLocalVersion();
+    if (isSupabaseUnavailable(error)) throw cloudVersionError();
     throw error;
   }
 }
@@ -74,7 +90,7 @@ async function getCodeVersions({ userId, fileName }) {
   };
 
   if (!params.userId || !params.fileName) {
-    throw new HttpError(400, "Missing userId or fileName");
+    throw new HttpError(400, "Missing authenticated user or fileName");
   }
 
   const getLocalVersions = async () => {
@@ -82,7 +98,10 @@ async function getCodeVersions({ userId, fileName }) {
     return { versions: versions.map(normalizeVersion) };
   };
 
-  if (!supabase) return getLocalVersions();
+  if (!supabase) {
+    if (canUseLocalCodeStore()) return getLocalVersions();
+    throw cloudVersionError();
+  }
 
   try {
     const { data: versions, error } = await supabase
@@ -96,21 +115,25 @@ async function getCodeVersions({ userId, fileName }) {
     if (error) throw error;
     return { versions: (versions || []).map(normalizeVersion) };
   } catch (error) {
-    if (shouldUseLocalStore(error)) return getLocalVersions();
+    if (shouldUseDevelopmentStore(error)) return getLocalVersions();
+    if (isSupabaseUnavailable(error)) throw cloudVersionError();
     throw error;
   }
 }
 
 async function getSavedCodes(userId) {
   const cleanUserId = cleanText(userId);
-  if (!cleanUserId) throw new HttpError(400, "Missing userId");
+  if (!cleanUserId) throw new HttpError(400, "Missing authenticated user");
 
   const getLocalCodes = async () => {
     const codes = await localCodeStore.findByUser(cleanUserId);
     return { codes: codes.map(normalizeVersion) };
   };
 
-  if (!supabase) return getLocalCodes();
+  if (!supabase) {
+    if (canUseLocalCodeStore()) return getLocalCodes();
+    throw cloudVersionError();
+  }
 
   try {
     const { data: codes, error } = await supabase
@@ -120,10 +143,10 @@ async function getSavedCodes(userId) {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    if (!codes?.length) return getLocalCodes();
-    return { codes: codes.map(normalizeVersion) };
+    return { codes: (codes || []).map(normalizeVersion) };
   } catch (error) {
-    if (shouldUseLocalStore(error)) return getLocalCodes();
+    if (shouldUseDevelopmentStore(error)) return getLocalCodes();
+    if (isSupabaseUnavailable(error)) throw cloudVersionError();
     throw error;
   }
 }
@@ -137,6 +160,7 @@ async function getLegacyVersions(userId, fileName) {
 }
 
 module.exports = {
+  canUseLocalCodeStore,
   getCodeVersions,
   getLegacyVersions,
   getSavedCodes,

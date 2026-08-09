@@ -12,15 +12,32 @@ function isSupabaseUnavailable(error) {
   );
 }
 
+function canUseLocalAuthStore() {
+  return process.env.NODE_ENV !== "production";
+}
+
+function authPersistenceError() {
+  return new HttpError(
+    503,
+    "Account storage is temporarily unavailable. Existing sessions can continue on this device; new sign-ins will resume when storage is restored."
+  );
+}
+
 async function withAuthStore(primary, fallback) {
-  if (!supabase) return fallback();
+  if (!supabase) {
+    if (canUseLocalAuthStore()) return fallback();
+    throw authPersistenceError();
+  }
 
   try {
     return await primary();
   } catch (error) {
     if (isSupabaseUnavailable(error)) {
-      console.warn("[auth] Supabase unavailable; using local development auth store.");
-      return fallback();
+      if (canUseLocalAuthStore()) {
+        console.warn("[auth] Supabase unavailable; using local development auth store.");
+        return fallback();
+      }
+      throw authPersistenceError();
     }
 
     throw error;
@@ -150,7 +167,10 @@ async function loginUser({ username, password }) {
     return buildLoginResponse(user, payload.password);
   };
 
-  if (!supabase) return localLogin();
+  if (!supabase) {
+    if (canUseLocalAuthStore()) return localLogin();
+    throw authPersistenceError();
+  }
 
   try {
     const { data: user, error } = await supabase
@@ -160,13 +180,19 @@ async function loginUser({ username, password }) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!user) return localLogin();
+    if (!user) {
+      if (canUseLocalAuthStore()) return localLogin();
+      throw new HttpError(401, "Invalid credentials");
+    }
 
     return buildLoginResponse(user, payload.password);
   } catch (error) {
     if (isSupabaseUnavailable(error)) {
-      console.warn("[auth] Supabase unavailable; using local development auth store.");
-      return localLogin();
+      if (canUseLocalAuthStore()) {
+        console.warn("[auth] Supabase unavailable; using local development auth store.");
+        return localLogin();
+      }
+      throw authPersistenceError();
     }
 
     throw error;
@@ -185,7 +211,10 @@ async function getProfile(username) {
     return { user: toAuthUser(user) };
   };
 
-  if (!supabase) return localProfile();
+  if (!supabase) {
+    if (canUseLocalAuthStore()) return localProfile();
+    throw authPersistenceError();
+  }
 
   try {
     const { data: user, error } = await supabase
@@ -195,13 +224,19 @@ async function getProfile(username) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!user) return localProfile();
+    if (!user) {
+      if (canUseLocalAuthStore()) return localProfile();
+      throw new HttpError(404, "User not found");
+    }
 
     return { user: toAuthUser(user) };
   } catch (error) {
     if (isSupabaseUnavailable(error)) {
-      console.warn("[auth] Supabase unavailable; using local development auth store.");
-      return localProfile();
+      if (canUseLocalAuthStore()) {
+        console.warn("[auth] Supabase unavailable; using local development auth store.");
+        return localProfile();
+      }
+      throw authPersistenceError();
     }
 
     throw error;
@@ -372,10 +407,10 @@ function buildTokenResponse(user) {
 }
 
 module.exports = {
+  canUseLocalAuthStore,
   registerUser,
   loginUser,
   getProfile,
   processGithubUser,
   processGoogleUser,
 };
-

@@ -17,9 +17,15 @@ describe("NetworkTopology", () => {
     expect(screen.getByRole("img", { name: /snapshot verified/i })).toBeInTheDocument();
   });
 
+  it("shows device-safe queued work without pretending data is moving", () => {
+    render(<NetworkTopology status="pending" phase="queued" isSynced={false} />);
+    expect(screen.getByRole("img", { name: /saved on device.*retry queued/i })).toBeInTheDocument();
+    expect(screen.queryByText("Snapshot verified")).not.toBeInTheDocument();
+  });
+
   it("shows an interrupted connection as an error, not a successful transfer", () => {
     render(<NetworkTopology status="error" phase="failed" isSynced={false} />);
-    expect(screen.getByRole("img", { name: /connection interrupted/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /sync could not continue/i })).toBeInTheDocument();
     expect(screen.queryByText("Snapshot verified")).not.toBeInTheDocument();
   });
 });
