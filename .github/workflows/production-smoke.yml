@@ -38,13 +38,13 @@ jobs:
         run: |
           curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_API_URL/socket.io/?EIO=4&transport=polling" | grep --quiet '^0{'
 
-      - name: OAuth start and callback redirects
+      - name: OAuth starts redirect and invalid callbacks are rejected
         run: |
           for provider in github google; do
             start_code="$(curl --silent --show-error --max-time 30 --max-redirs 0 --output /dev/null --write-out '%{http_code}' "$CODEVERSE_WEB_URL/api/auth/$provider")"
             test "$start_code" = "302" || test "$start_code" = "307"
             callback_code="$(curl --silent --show-error --max-time 30 --max-redirs 0 --output /dev/null --write-out '%{http_code}' "$CODEVERSE_API_URL/api/auth/$provider/callback")"
-            test "$callback_code" = "302" || test "$callback_code" = "307"
+            test "$callback_code" = "401"
           done
 
       - name: Hosted deployment writes remain authenticated
