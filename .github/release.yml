@@ -1,0 +1,26 @@
+changelog:
+  categories:
+    - title: Product experience
+      labels:
+        - enhancement
+        - ux
+    - title: Reliability and performance
+      labels:
+        - reliability
+        - performance
+    - title: Security
+      labels:
+        - security
+    - title: Documentation and community
+      labels:
+        - documentation
+        - community
+    - title: Fixes
+      labels:
+        - bug
+    - title: Other changes
+      labels:
+        - "*"
+  exclude:
+    labels:
+      - skip-changelog

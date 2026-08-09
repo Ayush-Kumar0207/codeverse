@@ -1,0 +1,26 @@
+title: "[Show and tell] "
+labels: [show-and-tell]
+body:
+  - type: markdown
+    attributes:
+      value: Built, learned, tested, or taught something with CodeVerse? Share the honest story, including what did not work yet.
+  - type: textarea
+    id: project
+    attributes:
+      label: What did you make or explore?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: How did CodeVerse fit into the workflow?
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: Demo, repository, screenshots, or notes
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What should CodeVerse improve for the next person?

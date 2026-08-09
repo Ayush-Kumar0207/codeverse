@@ -1,16 +1,27 @@
-## Summary
+## Why this change?
 
-Describe what changed and why.
+Describe the user or maintainer problem. Link the issue or discussion when one exists.
 
-## Validation
+## What changed?
 
-- [ ] `npm run test`
+Explain the smallest complete solution and any important design choice.
+
+## How did you verify it?
+
+- [ ] Relevant unit or server tests
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
 - [ ] `npm run audit:repo`
 - [ ] Relevant application or catalog audits
-- [ ] Screenshots or recordings added for visible UI changes
+- [ ] Production build when the client changed
+- [ ] Screenshots or recording for visible UI changes
 
-## Risk and rollout
+List the exact commands and manual scenarios you ran. Say what was not tested.
 
-Describe compatibility concerns, new environment variables, migrations, security impact, and rollback steps.
+## Risk, rollout, and recovery
+
+Describe compatibility concerns, migrations, new environment variables, security impact, rollout steps, and the simplest rollback.
+
+## Reviewer guide
+
+Point reviewers to the two or three files or decisions that deserve the closest attention.
