@@ -11,7 +11,7 @@ Public launch communication uses **The Sable Falcon** as a privacy-preserving cr
 - **Short byline:** Independent builder of CodeVerse
 - **Canonical avatar:** [`docs/brand/the-sable-falcon-avatar.png`](brand/the-sable-falcon-avatar.png)
 - **Visual direction:** a calm sable-black falcon rendered in restrained graphite planes on a quiet charcoal background; no text, neon effects, or gaming treatment
-- **Short bio:** Building open developer tools for collaborative engineering, verifiable review, and resilient software delivery.
+- **Short bio:** Independent builder exploring useful software, intelligent systems, and resilient products. Currently building CodeVerse.
 - **Account rule:** use this identity only where pseudonymous or project/brand accounts are permitted. On services that require an authentic personal identity, publish through a CodeVerse project page or keep the existing verified account rather than supplying a false legal name.
 - **Consent rule:** notify the maintainer immediately before creating an external account or submitting a public post.
 - **Separation rule:** do not rewrite existing Git history, GitHub ownership, legal notices, or accounts already attached to Ayush Kumar without a separate explicit decision.
