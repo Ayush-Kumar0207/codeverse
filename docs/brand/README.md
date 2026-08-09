@@ -10,6 +10,12 @@ Use `the-sable-falcon-avatar.png` without filters, overlays, text, borders, or a
 
 The mark represents observant, deliberate work behind CodeVerse. It is intentionally separate from the CodeVerse product identity: use the CodeVerse name and product screenshots for repository, release, and application pages; use this avatar only for the creator account or byline.
 
+## Header
+
+![The Sable Falcon graphite wing header](the-sable-falcon-header.png)
+
+Use `the-sable-falcon-header.png` as the creator account's wide cover image. Its left-side negative space protects the avatar overlap and responsive crops. Do not add text, product logos, filters, or platform-specific badges; the header should remain usable as future products are launched.
+
 ## Identity boundaries
 
 - Display name: **The Sable Falcon**

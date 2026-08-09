@@ -109,11 +109,31 @@ Source: https://github.com/Ayush-Kumar0207/codeverse
 
 ## X / short thread
 
-1. I feature-froze CodeVerse, my open-source collaborative browser IDE. The next milestone is not more surface area—it is reliability, contributors, and real usage. https://github.com/Ayush-Kumar0207/codeverse
-2. The realtime path uses Yjs + Socket.IO + Redis, durable Supabase snapshots, server-side roles, presence cursors, reconnect recovery, and idempotent operations.
-3. EvidenceOS connects changes to replay, tests, review, runtime behavior, deployment, rollback, and understanding checks. It does not call a browser-only preview “verified.”
-4. I published the production contracts and 100/500-client benchmark method, including limitations. I am looking for criticism and small contributions around accessibility, docs, tests, security, and failure states.
-5. Try it: https://codeverse-rho.vercel.app — if something is confusing, please open an issue instead of being polite.
+Attach [`docs/screenshots/features-highlights.png`](screenshots/features-highlights.png) to the first post and [`docs/screenshots/code-execution.png`](screenshots/code-execution.png) to the last. These images show the public product without exposing the maintainer's private identity.
+
+1. I’ve stopped adding features to CodeVerse.
+
+   That’s deliberate.
+
+   It’s a collaborative browser IDE where code, execution, review, and engineering evidence stay together.
+
+   Now I’m looking for real criticism—not polite applause.
+
+   https://github.com/Ayush-Kumar0207/codeverse
+
+2. The difficult part was not putting an editor in a browser. It was making collaboration survive reconnects and multiple server instances while keeping permissions server-side.
+
+   The realtime path uses Yjs, Socket.IO, Redis, and durable Supabase snapshots.
+
+3. CodeVerse also includes EvidenceOS: changes can be connected to replay, tests, review, runtime behavior, deployment, rollback, and understanding checks.
+
+   It deliberately does not call a browser-only preview “verified.”
+
+4. I published the architecture, production contracts, and 100/500-client benchmark method—including the limitations.
+
+   Try the public workspace and tell me where it becomes confusing. That feedback is more useful than a compliment.
+
+   https://codeverse-rho.vercel.app
 
 ## Technical article outline
 
