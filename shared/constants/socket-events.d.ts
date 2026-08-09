@@ -18,4 +18,10 @@ export declare const SOCKET_EVENTS: {
   readonly EDIT_PERMISSION_DENIED: "editPermission:denied";
   readonly REALTIME_PING: "realtime:ping";
   readonly REALTIME_PONG: "realtime:pong";
+  readonly ROOM_JOINED: "room:joined";
+  readonly ROOM_JOIN_ERROR: "room:join-error";
+  readonly ROOM_INVITE_CREATE: "room:invite:create";
+  readonly CRDT_SYNC: "crdt:sync";
+  readonly CRDT_UPDATE: "crdt:update";
+  readonly CRDT_ACK: "crdt:ack";
 };

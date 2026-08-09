@@ -17,6 +17,7 @@ function AuthenticatedShell({ children }: { children: React.ReactNode }) {
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/demo" ||
+    pathname === "/status" ||
     isDemoEditorRoute ||
     pathname === "/privacy" ||
     pathname === "/terms" ||

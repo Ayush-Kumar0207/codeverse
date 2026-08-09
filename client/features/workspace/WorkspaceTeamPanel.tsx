@@ -3,6 +3,8 @@
 import ChatBox from "@/components/ChatBox";
 import { Check, Eye, Lock, MessageSquare, ShieldCheck, Unlock, UserMinus, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CollaborationStatusStrip } from "./CollaborationStatusStrip";
+import type { CollaborationRuntimeState } from "./collaboration-types";
 import type { CollaborationAccess, PresenceUser } from "./types";
 
 interface WorkspaceTeamPanelProps {
@@ -10,6 +12,7 @@ interface WorkspaceTeamPanelProps {
   activeUsers: PresenceUser[];
   currentUsername?: string;
   collaborationAccess: CollaborationAccess;
+  collaborationState?: CollaborationRuntimeState;
   canEdit: boolean;
   isOrganizer: boolean;
   inviteCopied: boolean;
@@ -25,6 +28,13 @@ export function WorkspaceTeamPanel({
   activeUsers,
   currentUsername,
   collaborationAccess,
+  collaborationState = {
+    mode: "connecting",
+    revision: 0,
+    syncReady: false,
+    pendingOperations: 0,
+    recovered: false,
+  },
   canEdit,
   isOrganizer,
   inviteCopied,
@@ -88,6 +98,8 @@ export function WorkspaceTeamPanel({
           )}
         </div>
       </div>
+
+      <CollaborationStatusStrip state={collaborationState} />
 
       {notice && (
         <div className="border-b border-amber-400/10 bg-amber-400/5 px-3 py-2 text-xs text-amber-200" role="status">

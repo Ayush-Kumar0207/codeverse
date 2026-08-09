@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { CollaborationAccess, FullscreenPanel, PresenceUser } from "./types";
+import type { CollaborationRuntimeState } from "./collaboration-types";
 import type { useEvidenceOS } from "./useEvidenceOS";
 
 const AlgoTraceCanvas = dynamic(() => import("@/components/algotrace/AlgoTraceCanvas"), {
@@ -56,6 +57,7 @@ interface WorkspaceRightPanelProps {
   activeUsers: PresenceUser[];
   currentUsername?: string;
   collaborationAccess: CollaborationAccess;
+  collaborationState: CollaborationRuntimeState;
   canEditWorkspace: boolean;
   isProjectOrganizer: boolean;
   inviteCopied: boolean;
@@ -85,6 +87,7 @@ export function WorkspaceRightPanel({
   activeUsers,
   currentUsername,
   collaborationAccess,
+  collaborationState,
   canEditWorkspace,
   isProjectOrganizer,
   inviteCopied,
@@ -195,6 +198,7 @@ export function WorkspaceRightPanel({
                     activeUsers={activeUsers}
                     currentUsername={currentUsername}
                     collaborationAccess={collaborationAccess}
+                    collaborationState={collaborationState}
                     canEdit={canEditWorkspace}
                     isOrganizer={isProjectOrganizer}
                     inviteCopied={inviteCopied}

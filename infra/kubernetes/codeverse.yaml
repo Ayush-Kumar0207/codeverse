@@ -12,6 +12,9 @@ data:
   NODE_ENV: production
   PORT: "5000"
   CLIENT_URL: https://codeverse.example.com
+  COLLABORATION_REQUIRE_REDIS: "true"
+  COLLABORATION_REDIS_PREFIX: codeverse:collaboration
+  COLLABORATION_RECOVERY_WINDOW_MS: "120000"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -19,7 +22,7 @@ metadata:
   name: codeverse-server
   namespace: codeverse
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:

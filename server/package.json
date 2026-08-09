@@ -6,7 +6,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "check": "node --check index.js && node --check src/app.js && node -e \"require('./src/app'); console.log('Server modules loaded')\"",
-    "test": "node --test"
+    "test": "node --test",
+    "benchmark:collaboration": "node scripts/benchmark-collaboration.js"
   },
   "keywords": [
     "collaborative-ide",
@@ -27,6 +28,7 @@
     "@ast-grep/lang-rust": "^0.0.7",
     "@ast-grep/napi": "^0.45.0",
     "@google/generative-ai": "^0.24.1",
+    "@socket.io/redis-adapter": "^8.3.0",
     "@supabase/supabase-js": "^2.103.0",
     "axios": "^1.18.1",
     "bcrypt": "^6.0.0",
@@ -37,9 +39,11 @@
     "jsonwebtoken": "^9.0.2",
     "localtunnel": "^2.0.2",
     "openai": "^5.3.0",
+    "redis": "^5.12.1",
     "socket.io": "^4.8.1",
     "ts-morph": "^27.0.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "yjs": "^13.6.32"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

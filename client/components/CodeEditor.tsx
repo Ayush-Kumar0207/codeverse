@@ -207,9 +207,8 @@ const CodeEditor = forwardRef<CodeEditorHandle, Props>(
     const handleEditorChange = (newValue: string | undefined) => {
       if (newValue === undefined) return;
       if (applyingRemoteChangeRef.current) return;
-      onChange(newValue);
       if (readOnly) return;
-      socket.emit(SOCKET_EVENTS.CODE_CHANGE, { roomId, fileName: activeFile, code: newValue });
+      onChange(newValue);
     };
 
     return (

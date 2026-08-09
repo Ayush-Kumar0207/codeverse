@@ -14,7 +14,8 @@ import {
   LogOut,
   Command,
   LayoutGrid,
-  BookOpen
+  BookOpen,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -56,6 +57,7 @@ export function ActivityBar() {
       href: pathname?.startsWith("/editor/") ? pathname : "/editor",
     },
     { icon: LayoutGrid, label: "About", id: "about", href: "/about" },
+    { icon: Activity, label: "System status", id: "status", href: "/status" },
   ];
 
   return (

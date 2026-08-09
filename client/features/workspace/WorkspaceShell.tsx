@@ -13,13 +13,12 @@ import { getLanguageFromFilename } from "@/hooks/useLanguageDetection";
 import { useSocket } from "@/hooks/useSocket";
 import { useCodeSave } from "@/hooks/useCodeSave";
 import { useHtmlPreview } from "@/hooks/useHtmlPreview";
-import { fetchProjectById, saveProjectWorkspace } from "@/services/projects";
+import { fetchCollaborativeProjectById, fetchProjectById, saveProjectWorkspace } from "@/services/projects";
 import { rememberLastOpenedProject } from "@/services/project-library";
-import { SOCKET_EVENTS } from "@shared/constants/socket-events";
 import type { SharedProject } from "@shared/types/project";
 import { createDemoWorkspace } from "@/features/workspace/demo-workspace";
 import { buildAssistantWorkspaceContext } from "@/features/workspace/workspace-utils";
-import { useWorkspaceCollaboration } from "@/features/workspace/useWorkspaceCollaboration";
+import { useWorkspaceCollaboration } from "@/features/workspace/useDistributedWorkspaceCollaboration";
 import { useWorkspaceTimeline } from "@/features/workspace/useWorkspaceTimeline";
 import { useWorkspaceDeployment } from "@/features/workspace/useWorkspaceDeployment";
 import { useWorkspaceExecution } from "@/features/workspace/useWorkspaceExecution";
@@ -66,9 +65,12 @@ function EditorWorkspace() {
   const narrationRequested = searchParams?.get("narrate") === "1";
   const demoRole = searchParams?.get("demoRole");
   const demoUser = searchParams?.get("demoUser");
+  const inviteToken = searchParams?.get("invite");
 
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const roomId = id || "room1";
+  const roomId = id === "demo-sandbox" && algoId
+    ? `demo-sandbox:${algoId}:${visualizerMode || "2d"}`
+    : id || "room1";
   const initialDemoWorkspace = useMemo(
     () => id === "demo-sandbox" && !algoId ? createDemoWorkspace() : null,
     [algoId, id]
@@ -136,16 +138,23 @@ function EditorWorkspace() {
     handleToggleTeamEditing,
     handleCopyInviteLink,
     handleRemoveCollaborator,
+    collaborationMode,
+    collaborationRevision,
+    collaborationSyncReady,
+    collaborationPendingOperations,
+    collaborationRecovered,
   } = useWorkspaceCollaboration({
     socket,
     roomId,
     project,
     user,
+    files,
     activeFile,
     setActiveFile,
     setFiles,
     demoRole,
     demoUser,
+    inviteToken,
   });
   const {
     output,
@@ -169,7 +178,10 @@ function EditorWorkspace() {
     activeFile,
     code,
     () => setRefreshCount((prev) => prev + 1),
-    id && id !== "demo-sandbox"
+    id &&
+      id !== "demo-sandbox" &&
+      project?.collaborationRole !== "editor" &&
+      project?.collaborationRole !== "viewer"
       ? async () => {
           await saveProjectWorkspace(id, { files, activeFile });
         }
@@ -224,7 +236,6 @@ function EditorWorkspace() {
     }
 
     setFiles((prev) => ({ ...prev, [activeFile]: nextCode }));
-    socket?.emit(SOCKET_EVENTS.CODE_CHANGE, { roomId, fileName: activeFile, code: nextCode });
   };
 
   const handleRevertFromDiff = () => {
@@ -338,7 +349,10 @@ function EditorWorkspace() {
 
     if (!user?.username) return;
     setProjectLoadError("");
-    fetchProjectById(id, user.username)
+    const projectRequest = inviteToken
+      ? fetchCollaborativeProjectById(id, inviteToken)
+      : fetchProjectById(id, user.username);
+    projectRequest
       .then((res) => {
         if (!active) return;
         setProject(res.project);
@@ -353,7 +367,7 @@ function EditorWorkspace() {
     return () => {
       active = false;
     };
-  }, [id, algoId, visualizerMode, initializeProjectFiles, setActiveFile, setFiles, user?.username]);
+  }, [id, algoId, inviteToken, visualizerMode, initializeProjectFiles, setActiveFile, setFiles, user?.username]);
 
   if (!project) {
     return (
@@ -512,6 +526,13 @@ function EditorWorkspace() {
             activeUsers={activeUsers}
             currentUsername={collaborationIdentity?.username}
             collaborationAccess={collaborationAccess}
+            collaborationState={{
+              mode: collaborationMode,
+              revision: collaborationRevision,
+              syncReady: collaborationSyncReady,
+              pendingOperations: collaborationPendingOperations,
+              recovered: collaborationRecovered,
+            }}
             canEditWorkspace={canEditWorkspace}
             isProjectOrganizer={isProjectOrganizer}
             inviteCopied={inviteCopied}

@@ -1,4 +1,18 @@
 services:
+  redis:
+    image: redis:7.4-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    volumes:
+      - codeverse_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
   server:
     build:
       context: .
@@ -11,6 +25,9 @@ services:
       NODE_ENV: development
       PORT: 5000
       CLIENT_URL: http://localhost:3000
+      REDIS_URL: redis://redis:6379
+      COLLABORATION_REQUIRE_REDIS: "true"
+      COLLABORATION_REDIS_PREFIX: codeverse:collaboration
       EVIDENCE_REPLAY_ENGINE: process
       EVIDENCE_ANALYZER_ENGINE: process
       ARENA_EXECUTION_ENGINE: process
@@ -21,6 +38,9 @@ services:
     volumes:
       - codeverse_data:/workspace/server/.data
       - codeverse_deployments:/workspace/server/deployments
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000/api/health"]
       interval: 30s
@@ -52,5 +72,6 @@ services:
       start_period: 30s
 
 volumes:
+  codeverse_redis:
   codeverse_data:
   codeverse_deployments:

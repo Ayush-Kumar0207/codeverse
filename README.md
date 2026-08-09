@@ -13,6 +13,7 @@
   <p>
     <a href="https://codeverse-rho.vercel.app"><img src="https://img.shields.io/badge/vercel-deployed-000000?style=flat-square&logo=vercel" alt="Vercel" /></a>
     <a href="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/ci.yml"><img src="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/ci.yml/badge.svg" alt="Continuous Integration" /></a>
+    <a href="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/production-smoke.yml"><img src="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/production-smoke.yml/badge.svg" alt="Production uptime" /></a>
     <a href="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/codeql.yml"><img src="https://github.com/Ayush-Kumar0207/codeverse/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
     <a href="./LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=flat-square" alt="MIT License" /></a>
     <img src="https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 15" />
@@ -52,11 +53,12 @@
 | Surface | URL / Status |
 | --- | --- |
 | **Production App** | [codeverse-rho.vercel.app](https://codeverse-rho.vercel.app) |
+| **Public Status** | [codeverse-rho.vercel.app/status](https://codeverse-rho.vercel.app/status) · live API, database, collaboration, and SLO telemetry |
 | **Frontend Host** | Vercel |
-| **Backend API** | Configure via `NEXT_PUBLIC_API_BASE_URL` |
+| **Backend API** | [codeverse-5422.onrender.com](https://codeverse-5422.onrender.com) · configure via `NEXT_PUBLIC_API_BASE_URL` |
 | **Local Frontend** | `http://localhost:3000` |
 | **Local API** | `http://localhost:5000` |
-| **Health Check** | `GET http://localhost:5000/api/health` |
+| **Health Checks** | `GET /api/health` · `GET /api/status` |
 | **Deployment Bridge** | `http://localhost:5001/:projectId/` |
 | **Public Tunnel** | Optional localtunnel URL when `DEPLOY_TUNNEL_ENABLED=true` |
 
@@ -372,8 +374,11 @@ graph LR
 | **Markdown** | react-markdown, remark-gfm, github-markdown-css |
 | **Speech & Audio** | Web Speech API narration, Web Audio API haptic feedback |
 | **Backend** | Node.js, Express 5, Socket.IO, encrypted HttpOnly cookie authentication, rate limiting |
+| **Distributed Realtime** | Socket.IO Redis adapter, Redis-backed rooms/presence/idempotency, expiring signed reconnect and invite tokens |
+| **Conflict Resolution** | Yjs CRDT documents with incremental Monaco edits and cross-instance convergence |
 | **Auth** | bcrypt password hashing, AES-GCM-sealed JWT cookies, signed OAuth state, GitHub OAuth, Google OAuth |
 | **Database** | Supabase PostgreSQL, local JSON fallback stores, SQL schema |
+| **Observability** | Public component status, realtime percentile telemetry, scheduled production smoke checks, reproducible 100/500-socket benchmarks |
 | **AI** | Ollama local generation, OpenAI SDK v5 (chat completions), Google Generative AI SDK (maintenance scripts), streaming responses |
 | **Execution** | Piston remote sandbox by default; argument-safe local subprocesses only through explicit development opt-in |
 | **Deployment** | Vercel frontend, Node/Express backend, local static publisher, optional localtunnel bridge |
@@ -401,10 +406,17 @@ flowchart LR
 
   subgraph R["⚡ Realtime Layer"]
     SocketClient["Socket.IO Client"]
-    SocketServer["Socket.IO Rooms"]
-    RoomState["Room State: Files · Presence · Permissions"]
-    SocketClient <--> SocketServer
-    SocketServer --> RoomState
+    YDoc["Yjs CRDT Document"]
+    SocketA["Socket.IO Instance A"]
+    SocketB["Socket.IO Instance B+"]
+    Redis["Redis Adapter · Rooms · Presence · Locks"]
+    DurableRooms["Postgres Room Snapshots · Memberships"]
+    SocketClient <--> YDoc
+    YDoc <--> SocketA
+    YDoc <--> SocketB
+    SocketA <--> Redis
+    SocketB <--> Redis
+    Redis --> DurableRooms
   end
 
   subgraph A["🔧 Express API :5000"]
@@ -464,9 +476,9 @@ flowchart LR
   Execute --> Piston
   Deploy --> Deployments
 
-  class Browser,Workspace,Panels,SocketClient client;
-  class API,Auth,Projects,Code,AI,Execute,Deploy,Settings,SocketServer,RoomState server;
-  class Supabase,LocalJSON,LocalState data;
+  class Browser,Workspace,Panels,SocketClient,YDoc client;
+  class API,Auth,Projects,Code,AI,Execute,Deploy,Settings,SocketA,SocketB server;
+  class Supabase,LocalJSON,LocalState,Redis,DurableRooms data;
   class Ollama,OpenAI,LocalRuntime,Piston runtime;
   class Deployments,StaticAPI,StaticBridge,Tunnel deploy;
 ```
@@ -474,8 +486,8 @@ flowchart LR
 ### Request Flow
 
 1. The **Next.js app** calls the Express API through `NEXT_PUBLIC_API_BASE_URL`, defaulting to `http://localhost:5000` during local development.
-2. **Realtime collaboration** uses Socket.IO rooms. The server tracks active users, current room files, edit permissions, and room-local events in memory.
-3. **Supabase** stores users, projects, files, versions, and settings snapshots. If Supabase is unavailable, auth/projects/code versions gracefully degrade to **local JSON stores**.
+2. **Realtime collaboration** uses Yjs incremental CRDT updates across multiple Socket.IO instances. Redis provides pub/sub, room snapshots, expiring presence, idempotency keys, and distributed mutation locks; signed reconnect tokens recover interrupted sessions.
+3. **Supabase** stores users, projects, collaboration memberships, durable room snapshots, versions, and settings snapshots. Local development labels a single-process fallback explicitly; production can require Redis and fail startup instead of silently losing horizontal consistency.
 4. **Execution** is routed to the Piston sandbox by default. Local language runtimes require `ALLOW_LOCAL_EXECUTION=true`, use argument-safe process APIs, and remain unavailable in production.
 5. **Deployments** write sanitized workspace files into `deployments/` and serve them from the API, static bridge, and optional public localtunnel URL.
 
@@ -778,12 +790,15 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 | `NEXT_PUBLIC_API_BASE_URL` | Production | Public backend URL used by the Next.js client. |
 | `SESSION_SECRET` | Production | HMAC secret used to protect OAuth state parameters. |
 | `JWT_SECRET` | Production | JWT signing secret and key material for the encrypted authentication cookie. |
+| `REDIS_URL` | Production | Shared Redis endpoint for the Socket.IO adapter, room state, presence, distributed locks, and idempotency keys. |
+| `COLLABORATION_REQUIRE_REDIS` | Production | Set `true` so a horizontally scaled deployment fails startup instead of silently falling back to process memory. |
+| `COLLABORATION_*` | Optional | Tunes Redis key prefix, room/presence TTLs, persistence debounce, lock TTL, and Socket.IO recovery window. |
 | `EVIDENCE_SIGNING_*`, `ARENA_SIGNING_*` | Evidence server | Independent keys, issuer names, and key IDs. Proof/report creation fails with `503` when either purpose is not validly configured. |
 | `EVIDENCE_*_ENGINE`, `ARENA_EXECUTION_ENGINE`, `UNDERSTANDING_EXECUTION_ENGINE` | Production | Must use `docker`; process workers are development/test only. |
 | `EVIDENCE_{NODE,PYTHON,JAVA,GO,C,CPP,RUST}_RUNNER_IMAGE`, `ARENA_RUNNER_IMAGE`, `UNDERSTANDING_*_RUNNER_IMAGE`, `EVIDENCE_ANALYZER_IMAGE` | Production | Per-language allow-listed container images pinned by `@sha256:` digest. |
 | `EVIDENCE_BUILDER_AI` | Optional | Enables complete-workspace autonomous Builder proposals; invalid or unavailable proposals fall back to deterministic safe repair and remain visible in the review result. |
 | `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH` | Production | Dedicated rootless or TLS-protected executor endpoint; do not mount the host Docker socket into the application container. |
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Recommended | Enables persistent users, projects, versions, and settings snapshots. |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Recommended | Enables persistent users, projects, collaboration memberships and room snapshots, versions, and settings snapshots. |
 | `GITHUB_*`, `GOOGLE_*` | Optional | Enables OAuth login buttons. |
 | `EXECUTION_STRATEGY` | No | Defaults to `remote` for Piston. `local` is accepted only with the development opt-in below. |
 | `ALLOW_LOCAL_EXECUTION` | No | Set `true` only for trusted local development; ignored in production. |
@@ -995,9 +1010,14 @@ cd client && npm run release:audit
 | `algo:audit:3d` | Validates cinematic 3D visualizer coverage |
 | `cpp:audit` | Checks C++ variant catalog integrity |
 
-**Recommended future benchmarks:**
+**Measured distributed-collaboration baseline:**
 
-- Socket.IO edit propagation latency across 2, 10, and 50 clients.
+- 100 clients across two Socket.IO instances: 20.42 ms propagation p95, 94.65 ms CRDT acknowledgement p95, 100% sampled reconnect recovery.
+- 500 clients across two instances: 54.95 ms propagation p95, 104.27 ms CRDT acknowledgement p95, 100% sampled reconnect recovery.
+- The complete environment, methodology, p50/p95/p99 tables, limitations, and reproduction command are in [docs/COLLABORATION_BENCHMARKS.md](docs/COLLABORATION_BENCHMARKS.md).
+
+**Next benchmark areas:**
+
 - Cold and warm AI response latency per Ollama model.
 - Deployment time for 10, 100, and 1,000 file workspaces.
 - Execution latency per language and strategy.
@@ -1079,18 +1099,20 @@ See [docs/TESTING.md](docs/TESTING.md) for the verification matrix and scope of 
 - [x] Repository-hygiene audit preventing generated artifacts and credential patterns
 - [x] Committed product screenshots in `docs/screenshots/`
 
-### 🔮 Coming Next
+### ✅ Feature-complete reliability milestone
 
 - [x] Dockerfile and `docker-compose` for one-command local infrastructure
 - [x] Digest-pinned, network-disabled container isolation for EvidenceOS execution and analyzers
 - [x] Production Docker-path CI proving non-root identity, read-only workspaces, network denial, exit propagation, and volume cleanup
-- [ ] Persistent collaboration permissions and room state beyond process memory
-- [ ] Public status page and production API uptime badge
+- [x] Redis adapter plus distributed room state, presence, operation idempotency, and mutation locks
+- [x] Durable collaboration memberships, room snapshots, expiring organizer invites, and reconnect recovery
+- [x] Public status page, realtime p50/p95/p99 telemetry, SLO display, and scheduled production uptime badge
 - [x] Vitest component coverage plus Playwright editor, cinematic 3D, and two-browser collaboration tests
-- [ ] Expand browser coverage for OAuth provider callbacks and hosted deployment infrastructure
-- [ ] Multi-cursor collaborative editing (OT/CRDT)
-- [ ] Workspace templates and starter projects gallery
-- [ ] Plugin/extension system for custom panels and tools
+- [x] Browser and hosted smoke coverage for OAuth callbacks, Socket.IO handshakes, and deployment authentication
+- [x] Yjs CRDT multi-user editing with Monaco presence cursors and cross-instance convergence tests
+- [x] Reproducible 100/500-socket benchmark with measured propagation and reconnect percentiles
+
+**Feature freeze:** CodeVerse now prioritizes reliability, benchmarks, security updates, and real-user adoption. A starter gallery and plugin system are intentionally not scheduled because they add surface area without strengthening the core engineering claim.
 
 ---
 

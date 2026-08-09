@@ -76,6 +76,24 @@ export async function fetchProjectById(id: string, owner?: string): Promise<{ pr
   return request;
 }
 
+export async function fetchCollaborativeProjectById(
+  id: string,
+  inviteToken?: string | null
+): Promise<{ project: SharedProject }> {
+  const params = new URLSearchParams();
+  if (inviteToken) params.set("invite", inviteToken);
+  const query = params.toString();
+  try {
+    const { data } = await apiClient.get<{ project: SharedProject }>(
+      `/api/collaboration/${encodeURIComponent(id)}/project${query ? `?${query}` : ""}`,
+      { timeout: 12000 }
+    );
+    return { project: { ...data.project, storage: "cloud" as const } };
+  } catch (error) {
+    throw new Error(getProjectErrorMessage(error, "This collaboration invite is invalid or has expired"));
+  }
+}
+
 export async function fetchProjectsByOwner(owner: string): Promise<ProjectListResult> {
   try {
     const cloudProjects = await fetchCloudProjects(owner);

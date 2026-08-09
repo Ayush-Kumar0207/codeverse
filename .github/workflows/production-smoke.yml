@@ -1,0 +1,53 @@
+name: Production uptime and hosted contracts
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: production-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CODEVERSE_WEB_URL: https://codeverse-rho.vercel.app
+  CODEVERSE_API_URL: https://codeverse-5422.onrender.com
+
+jobs:
+  production-smoke:
+    name: App, API, realtime, OAuth, and deployment contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Frontend and public status page
+        run: |
+          curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_WEB_URL/" >/dev/null
+          curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_WEB_URL/status" >/dev/null
+
+      - name: API health and structured status
+        run: |
+          curl --fail --silent --show-error --retry 6 --retry-all-errors --max-time 45 "$CODEVERSE_API_URL/api/health" >health.json
+          status_code="$(curl --silent --show-error --retry 4 --retry-all-errors --max-time 30 --output status.json --write-out '%{http_code}' "$CODEVERSE_API_URL/api/status")"
+          test "$status_code" = "200" || test "$status_code" = "503"
+          node -e "const fs=require('fs'); const health=JSON.parse(fs.readFileSync('health.json')); const status=JSON.parse(fs.readFileSync('status.json')); if(health.status!=='ok'||!status.components?.api?.ready||!status.components?.collaboration) process.exit(1); console.log({health:health.status,status:status.status,collaboration:status.components.collaboration.mode});"
+
+      - name: Socket.IO hosted handshake
+        run: |
+          curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_API_URL/socket.io/?EIO=4&transport=polling" | grep --quiet '^0{'
+
+      - name: OAuth start and callback redirects
+        run: |
+          for provider in github google; do
+            start_code="$(curl --silent --show-error --max-time 30 --max-redirs 0 --output /dev/null --write-out '%{http_code}' "$CODEVERSE_WEB_URL/api/auth/$provider")"
+            test "$start_code" = "302" || test "$start_code" = "307"
+            callback_code="$(curl --silent --show-error --max-time 30 --max-redirs 0 --output /dev/null --write-out '%{http_code}' "$CODEVERSE_API_URL/api/auth/$provider/callback")"
+            test "$callback_code" = "302" || test "$callback_code" = "307"
+          done
+
+      - name: Hosted deployment writes remain authenticated
+        run: |
+          deploy_code="$(curl --silent --show-error --max-time 30 --output /dev/null --write-out '%{http_code}' --request POST --header 'content-type: application/json' --data '{}' "$CODEVERSE_API_URL/api/deploy")"
+          test "$deploy_code" = "401"
