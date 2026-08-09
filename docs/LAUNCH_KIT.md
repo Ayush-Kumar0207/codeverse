@@ -8,7 +8,8 @@ Public launch communication uses **The Grey Eminence** as a privacy-preserving c
 
 - **Display name:** The Grey Eminence
 - **Short byline:** Independent builder of CodeVerse
-- **Visual direction:** a minimal charcoal-grey chess knight or king on a quiet neutral background; no face, initials, neon effects, or gaming treatment
+- **Canonical avatar:** [`docs/brand/the-grey-eminence-avatar.png`](brand/the-grey-eminence-avatar.png)
+- **Visual direction:** a minimal charcoal-grey chess knight on a quiet neutral background; no face, initials, neon effects, or gaming treatment
 - **Short bio:** Building open developer tools for collaborative engineering, verifiable review, and resilient software delivery.
 - **Account rule:** use this identity only where pseudonymous or project/brand accounts are permitted. On services that require an authentic personal identity, publish through a CodeVerse project page or keep the existing verified account rather than supplying a false legal name.
 - **Consent rule:** notify the maintainer immediately before creating an external account or submitting a public post.
