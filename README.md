@@ -60,6 +60,14 @@ The tour is captured from the real local application with a maintained Playwrigh
 
 ---
 
+## Read the distributed collaboration deep dive
+
+**[What it took to move a collaborative browser IDE beyond process memory](https://dev.to/thesablefalcon/what-it-took-to-move-a-collaborative-browser-ide-beyond-process-memory-3cj8)** explains why CodeVerse separates Yjs document convergence, Redis-backed live state and fan-out, server-side permissions, reconnect identity, and durable Supabase snapshots.
+
+The article publishes the measured 100/500-client method and its limitations instead of presenting a local loopback benchmark as hosted capacity. Review the [reproducible benchmark report](docs/COLLABORATION_BENCHMARKS.md) or choose a focused issue from the [v1.1 community reliability milestone](https://github.com/Ayush-Kumar0207/codeverse/milestone/1).
+
+---
+
 ## 🔴 Live Demo & Status
 
 <p align="center">

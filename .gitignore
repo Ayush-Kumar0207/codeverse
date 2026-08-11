@@ -63,5 +63,8 @@ client/playwright-report/
 client/test-results/
 docs/demo/raw/
 
-# Private interview planning notes
-/INTERVIEW_BLUEPRINT.md
+# Private interview planning notes and generated exports
+/INTERVIEW_BLUEPRINT*.md
+/INTERVIEW_BLUEPRINT*.html
+/generate_html.js
+
