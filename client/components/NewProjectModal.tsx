@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useProjectCreation } from "@/hooks/useProjectCreation";
 import type { SupportedLanguage } from "@shared/types/language";
@@ -16,8 +16,43 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const { handleCreate, isAuthenticated } = useProjectCreation();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const canCreate = title.trim().length > 0 && !isCreating;
+
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    titleInputRef.current?.focus();
+    return () => opener?.focus();
+  }, []);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      onClose();
+      return;
+    }
+
+    if (event.key !== "Tab" || !dialogRef.current) return;
+
+    const focusable = Array.from(
+      dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
@@ -43,8 +78,16 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-      <motion.div 
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+      onKeyDown={handleKeyDown}
+    >
+      <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-project-modal-title"
+        aria-describedby="new-project-modal-description"
         initial={{ opacity: 0, scale: 0.98, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 12 }}
@@ -52,8 +95,8 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">New Project</h2>
-            <p className="mt-1 text-sm text-slate-400">Choose a name and language for your workspace.</p>
+            <h2 id="new-project-modal-title" className="text-lg font-semibold text-white">New Project</h2>
+            <p id="new-project-modal-description" className="mt-1 text-sm text-slate-400">Choose a name and language for your workspace.</p>
           </div>
           <button
             onClick={onClose}
@@ -72,8 +115,10 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
           }}
         >
           <div>
-            <label className="text-sm font-medium text-slate-200">Project Title</label>
+            <label htmlFor="new-project-title" className="text-sm font-medium text-slate-200">Project Title</label>
             <input
+              id="new-project-title"
+              ref={titleInputRef}
               type="text"
               placeholder="e.g. Portfolio API"
               value={title}
@@ -84,8 +129,9 @@ const NewProjectModal: React.FC<Props> = ({ onClose }) => {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-200">Language</label>
+            <label htmlFor="new-project-language" className="text-sm font-medium text-slate-200">Language</label>
             <select
+              id="new-project-language"
               value={language}
               onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
               disabled={isCreating}
