@@ -12,6 +12,7 @@
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
+    "demo:record": "playwright test --config=playwright.demo.config.ts",
     "algo:audit": "node scripts/audit_algo_catalog.cjs",
     "algo:ollama": "node scripts/run_ollama_algo_pipeline.js",
     "algo:ollama:continuous": "node scripts/run_ollama_algo_pipeline.js --continuous --batch=6 --concurrency=2 --interval-ms=8000",

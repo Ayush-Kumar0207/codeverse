@@ -43,6 +43,31 @@
 
 ---
 
+## Watch CodeVerse in 76 seconds
+
+<p align="center">
+  <a href="./docs/demo/codeverse-demo.mp4">
+    <img src="./docs/demo/codeverse-demo-poster.png" alt="CodeVerse product tour showing an anonymous workspace, interactive deployment preview, and EvidenceOS proof center" width="900" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>Run an anonymous workspace, inspect a live preview, and trace the resulting engineering evidence.</strong><br />
+  <a href="./docs/demo/codeverse-demo.mp4">Play the captioned product tour</a> · <a href="https://codeverse-rho.vercel.app/demo">Try the same journey</a>
+</p>
+
+The tour is captured from the real local application with a maintained Playwright journey. Its raw recording, captions, MP4 packaging, poster generation, privacy checks, and duration gate are reproducible with `npm run demo:build`; see [`docs/demo/README.md`](docs/demo/README.md).
+
+---
+
+## Read the distributed collaboration deep dive
+
+**[What it took to move a collaborative browser IDE beyond process memory](https://dev.to/thesablefalcon/what-it-took-to-move-a-collaborative-browser-ide-beyond-process-memory-3cj8)** explains why CodeVerse separates Yjs document convergence, Redis-backed live state and fan-out, server-side permissions, reconnect identity, and durable Supabase snapshots.
+
+The article publishes the measured 100/500-client method and its limitations instead of presenting a local loopback benchmark as hosted capacity. Review the [reproducible benchmark report](docs/COLLABORATION_BENCHMARKS.md) or choose a focused issue from the [v1.1 community reliability milestone](https://github.com/Ayush-Kumar0207/codeverse/milestone/1).
+
+---
+
 ## 🔴 Live Demo & Status
 
 <p align="center">
