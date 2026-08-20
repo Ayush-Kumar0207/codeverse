@@ -24,13 +24,6 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - run: node scripts/audit_repository.cjs
-      - name: Export canonical demo for narration pass
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeverse-demo-source
-          path: docs/demo/codeverse-demo.mp4
-          if-no-files-found: error
-          retention-days: 1
 
   server-tests:
     name: Server tests
