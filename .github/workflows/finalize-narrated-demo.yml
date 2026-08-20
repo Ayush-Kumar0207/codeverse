@@ -1,0 +1,132 @@
+name: Finalize narrated demo
+
+on:
+  push:
+    branches:
+      - fix/narrated-demo-audio
+    paths:
+      - '.github/workflows/finalize-narrated-demo.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/narrated-demo-audio
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Install Playwright Chromium
+        run: npx --prefix client playwright install --with-deps chromium
+
+      - name: Record clean demo without burned captions
+        run: npm run demo:record
+
+      - name: Rebuild final audio and publish clean video
+        shell: bash
+        run: |
+          set -euo pipefail
+          RAW="$(find docs/demo/raw -type f -name video.webm -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)"
+          test -n "$RAW"
+
+          cat .tmp-demo/final16.part*.b64 | tr -d '\n\r' | base64 -d > /tmp/codeverse-final-audio.m4a
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 /tmp/codeverse-final-audio.m4a
+
+          mkdir -p client/public/media
+          ffmpeg -y \
+            -i "$RAW" \
+            -i /tmp/codeverse-final-audio.m4a \
+            -t 76.44 \
+            -map 0:v:0 -map 1:a:0 \
+            -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -r 25 \
+            -c:a aac -b:a 128k \
+            -movflags +faststart \
+            client/public/media/codeverse-demo.mp4
+
+          ffmpeg -y -i docs/demo/codeverse-demo.srt client/public/media/codeverse-demo.vtt
+          ffmpeg -y -ss 00:00:32 -i client/public/media/codeverse-demo.mp4 -frames:v 1 -update 1 client/public/media/codeverse-demo-poster.jpg
+
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_name,width,height,r_frame_rate -of default=nw=1 client/public/media/codeverse-demo.mp4
+
+      - name: Add browser video page with optional captions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p client/app/demo-video
+          cat > client/app/demo-video/page.tsx <<'EOF'
+          export default function DemoVideoPage() {
+            return (
+              <main className="min-h-screen bg-black text-white flex items-center justify-center p-4 sm:p-8">
+                <div className="w-full max-w-6xl">
+                  <h1 className="mb-4 text-2xl font-semibold">CodeVerse Product Tour</h1>
+                  <video
+                    className="w-full rounded-xl border border-white/15 bg-black"
+                    controls
+                    preload="metadata"
+                    poster="/media/codeverse-demo-poster.jpg"
+                  >
+                    <source src="/media/codeverse-demo.mp4" type="video/mp4" />
+                    <track
+                      kind="captions"
+                      src="/media/codeverse-demo.vtt"
+                      srcLang="en"
+                      label="English"
+                    />
+                    Your browser does not support HTML5 video.
+                  </video>
+                  <p className="mt-3 text-sm text-white/60">
+                    Captions are off by default. Use the player controls to enable English captions when needed.
+                  </p>
+                </div>
+              </main>
+            );
+          }
+          EOF
+
+      - name: Point README to browser-playable player
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text()
+          s = s.replace('https://codeverse-rho.vercel.app/media/codeverse-demo.mp4', 'https://codeverse-rho.vercel.app/demo-video')
+          s = s.replace('Play the product tour', 'Play the narrated product tour')
+          p.write_text(s)
+          PY
+
+      - name: Remove temporary export/build files before final commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .tmp-demo
+          rm -f .github/workflows/export-raw-demo.yml
+          rm -f .github/workflows/finalize-narrated-demo.yml
+
+      - name: Commit final assets and cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat(demo): publish narrated tour with optional captions'
+          git push origin HEAD:fix/narrated-demo-audio
