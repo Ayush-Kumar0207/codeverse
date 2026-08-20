@@ -1,0 +1,25 @@
+name: Export demo artifact
+
+on:
+  push:
+    branches:
+      - fix/demo-video-playback
+    paths:
+      - '.github/workflows/export-demo-artifact.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Upload canonical demo
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeverse-demo-source
+          path: docs/demo/codeverse-demo.mp4
+          if-no-files-found: error
+          retention-days: 1
