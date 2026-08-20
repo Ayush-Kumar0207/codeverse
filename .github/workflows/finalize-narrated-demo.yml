@@ -1,9 +1,9 @@
 name: Finalize narrated demo
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/narrated-demo-audio
+      - main
     paths:
       - '.github/workflows/finalize-narrated-demo.yml'
 
