@@ -14,7 +14,7 @@ permissions:
 jobs:
   finalize:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
           run-id: 32385705409
           github-token: ${{ github.token }}
 
-      - name: Verify recovered sources and build browser video
+      - name: Verify raw source and publish clean player assets
         shell: bash
         run: |
           set -euo pipefail
@@ -39,57 +39,10 @@ jobs:
           test -f "$RAW"
           echo '047e805ab7d64ad4272f13cf09f42c73bc26bc32e46000c8325fb80521354afb  /tmp/codeverse-demo-raw/codeverse-demo-raw.webm' | sha256sum -c -
 
-          cat .tmp-demo/final16.part*.b64 | tr -d '\n\r' | base64 -d > /tmp/codeverse-final-audio.m4a
-          echo '7415e05c49e45eca4a1c47e7da218e859246be5227edf3a2fb0d0367620cc965  /tmp/codeverse-final-audio.m4a' | sha256sum -c -
-
-          mkdir -p client/public/media
-          ffmpeg -y \
-            -i "$RAW" \
-            -i /tmp/codeverse-final-audio.m4a \
-            -filter:v 'tpad=stop_mode=clone:stop_duration=5,format=yuv420p' \
-            -map 0:v:0 -map 1:a:0 \
-            -t 76.444 \
-            -c:v libx264 -preset medium -crf 21 -r 25 \
-            -c:a copy \
-            -movflags +faststart \
-            client/public/media/codeverse-demo.mp4
-
+          mkdir -p client/public/media client/app/demo-video
           ffmpeg -y -i docs/demo/codeverse-demo.srt client/public/media/codeverse-demo.vtt
-          cp docs/demo/codeverse-demo-poster.png client/public/media/codeverse-demo-poster.png
+          ffmpeg -y -ss 00:00:32 -i "$RAW" -frames:v 1 -update 1 client/public/media/codeverse-demo-poster.jpg
 
-          python - <<'PY'
-          import json, subprocess
-          p = 'client/public/media/codeverse-demo.mp4'
-          data = json.loads(subprocess.check_output([
-              'ffprobe','-v','error','-show_streams','-show_format','-of','json',p
-          ]))
-          streams = data['streams']
-          video = next(s for s in streams if s['codec_type'] == 'video')
-          audio = next(s for s in streams if s['codec_type'] == 'audio')
-          duration = float(data['format']['duration'])
-          assert video['codec_name'] == 'h264', video
-          assert video['pix_fmt'] == 'yuv420p', video
-          assert int(video['width']) == 1440 and int(video['height']) == 900, video
-          assert video['r_frame_rate'] == '25/1', video
-          assert audio['codec_name'] == 'aac', audio
-          assert int(audio['sample_rate']) == 48000, audio
-          assert 76.3 <= duration <= 76.6, duration
-          print(json.dumps({
-              'duration': duration,
-              'video': video['codec_name'],
-              'pixel_format': video['pix_fmt'],
-              'resolution': f"{video['width']}x{video['height']}",
-              'fps': video['r_frame_rate'],
-              'audio': audio['codec_name'],
-              'sample_rate': audio['sample_rate'],
-          }, indent=2))
-          PY
-
-      - name: Add browser player with optional captions
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p client/app/demo-video
           cat > client/app/demo-video/page.tsx <<'EOF'
           import Link from "next/link";
 
@@ -115,7 +68,7 @@ jobs:
                     controls
                     playsInline
                     preload="metadata"
-                    poster="/media/codeverse-demo-poster.png"
+                    poster="/media/codeverse-demo-poster.jpg"
                     aria-label="CodeVerse narrated product tour"
                   >
                     <source src="/media/codeverse-demo.mp4" type="video/mp4" />
@@ -129,7 +82,7 @@ jobs:
                   </video>
 
                   <p className="mt-4 text-sm leading-6 text-slate-400">
-                    Narration and background music are included in the video. English captions are optional and remain off until you enable them from the player controls.
+                    Narration and background music are included in the published video. English captions are optional and remain off until you enable them from the player controls.
                   </p>
                 </div>
               </main>
@@ -153,30 +106,25 @@ jobs:
           p.write_text(s)
           PY
 
-      - name: Remove transfer and export staging
+      - name: Remove all transfer and one-time workflow staging
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .tmp-demo
           rm -f .github/workflows/export-raw-demo.yml
+          rm -f .github/workflows/finalize-narrated-demo.yml
           test ! -e .tmp-demo
           test ! -e .github/workflows/export-raw-demo.yml
+          test ! -e .github/workflows/finalize-narrated-demo.yml
 
-      - name: Commit permanent demo assets and cleanup
+      - name: Commit permanent player assets and cleanup
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          git add -- README.md \
-            client/app/demo-video/page.tsx \
-            client/public/media/codeverse-demo.mp4 \
-            client/public/media/codeverse-demo.vtt \
-            client/public/media/codeverse-demo-poster.png
-          git add -u -- .tmp-demo .github/workflows/export-raw-demo.yml
-
+          git add -A
           git diff --cached --check
           git status --short
-          git commit -m 'feat(demo): publish narrated tour with optional captions'
+          git commit -m 'feat(demo): add narrated player and clean staging'
           git push origin HEAD:fix/narrated-demo-audio
