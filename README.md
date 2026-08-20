@@ -46,14 +46,14 @@
 ## Watch CodeVerse in 76 seconds
 
 <p align="center">
-  <a href="https://codeverse-rho.vercel.app/media/codeverse-demo.mp4">
+  <a href="https://codeverse-rho.vercel.app/demo-video">
     <img src="./docs/demo/codeverse-demo-poster.png" alt="CodeVerse product tour showing an anonymous workspace, interactive deployment preview, and EvidenceOS proof center" width="900" />
   </a>
 </p>
 
 <p align="center">
   <strong>Run an anonymous workspace, inspect a live preview, and trace the resulting engineering evidence.</strong><br />
-  <a href="https://codeverse-rho.vercel.app/media/codeverse-demo.mp4">Play the product tour</a> · <a href="https://codeverse-rho.vercel.app/demo">Try the same journey</a>
+  <a href="https://codeverse-rho.vercel.app/demo-video">Play the narrated product tour</a> · <a href="https://codeverse-rho.vercel.app/demo">Try the same journey</a>
 </p>
 
 The tour is captured from the real local application with a maintained Playwright journey. Its raw recording, captions, MP4 packaging, poster generation, privacy checks, and duration gate are reproducible with `npm run demo:build`; see [`docs/demo/README.md`](docs/demo/README.md).
