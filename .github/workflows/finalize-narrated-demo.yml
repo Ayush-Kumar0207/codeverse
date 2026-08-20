@@ -31,6 +31,12 @@ jobs:
           run-id: 32385705409
           github-token: ${{ github.token }}
 
+      - name: Install FFmpeg
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Verify raw source and publish clean player assets
         shell: bash
         run: |
