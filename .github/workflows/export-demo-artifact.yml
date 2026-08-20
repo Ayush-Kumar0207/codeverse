@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - fix/demo-video-playback
-    paths:
-      - '.github/workflows/export-demo-artifact.yml'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
