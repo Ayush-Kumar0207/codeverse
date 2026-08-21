@@ -27,12 +27,32 @@ jobs:
           curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_WEB_URL/" >/dev/null
           curl --fail --silent --show-error --retry 4 --retry-all-errors --max-time 30 "$CODEVERSE_WEB_URL/status" >/dev/null
 
-      - name: API health and structured status
+      - name: Wake backend and verify API health and structured status
+        shell: bash
         run: |
-          curl --fail --silent --show-error --retry 6 --retry-all-errors --max-time 45 "$CODEVERSE_API_URL/api/health" >health.json
-          status_code="$(curl --silent --show-error --retry 4 --retry-all-errors --max-time 30 --output status.json --write-out '%{http_code}' "$CODEVERSE_API_URL/api/status")"
+          set -euo pipefail
+
+          health_code=""
+          for attempt in {1..12}; do
+            health_code="$(curl --silent --show-error --max-time 30 --output health.json --write-out '%{http_code}' "$CODEVERSE_API_URL/api/health" || true)"
+            if [ "$health_code" = "200" ]; then
+              break
+            fi
+
+            echo "Health probe attempt $attempt returned HTTP ${health_code:-transport-error}; waiting 15s for the hosted backend to wake."
+            sleep 15
+          done
+
+          if [ "$health_code" != "200" ]; then
+            echo "Backend did not become healthy within the cold-start allowance; last HTTP status: ${health_code:-transport-error}."
+            exit 1
+          fi
+
+          node -e "const fs=require('fs'); const health=JSON.parse(fs.readFileSync('health.json')); if(health.status!=='ok') process.exit(1); console.log({health:health.status,uptime:health.uptime});"
+
+          status_code="$(curl --silent --show-error --max-time 30 --output status.json --write-out '%{http_code}' "$CODEVERSE_API_URL/api/status")"
           test "$status_code" = "200" || test "$status_code" = "503"
-          node -e "const fs=require('fs'); const health=JSON.parse(fs.readFileSync('health.json')); const status=JSON.parse(fs.readFileSync('status.json')); if(health.status!=='ok'||!status.components?.api?.ready||!status.components?.collaboration) process.exit(1); console.log({health:health.status,status:status.status,collaboration:status.components.collaboration.mode});"
+          node -e "const fs=require('fs'); const status=JSON.parse(fs.readFileSync('status.json')); if(!status.components?.api?.ready||!status.components?.collaboration) process.exit(1); console.log({status:status.status,collaboration:status.components.collaboration.mode});"
 
       - name: Socket.IO hosted handshake
         run: |
