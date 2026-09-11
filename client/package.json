@@ -87,7 +87,7 @@
     "postcss": "^8.5.23",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   },
   "description": "The CodeVerse collaborative browser workspace for building, reviewing, and proving software changes.",
   "keywords": [
