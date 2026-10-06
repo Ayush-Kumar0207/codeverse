@@ -60,7 +60,7 @@
   },
   "overrides": {
     "axios": "$axios",
-    "brace-expansion": "^5.0.9",
+    "brace-expansion": "^5.0.12",
     "ip-address": "^10.4.0"
   }
 }
