@@ -12,6 +12,8 @@ COPY shared/ ../shared/
 ARG NEXT_PUBLIC_API_BASE_URL=""
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 RUN npm run build
+RUN npm prune --omit=dev --ignore-scripts --no-audit --no-fund \
+  && node -e "process.env.NODE_ENV='production'; const fs=require('node:fs'); for(const name of ['tailwindcss','@tailwindcss/forms','@tailwindcss/typography','tailwind-scrollbar-hide']) { if(fs.existsSync('node_modules/'+name)) throw new Error('Build-only dependency in runtime: '+name); } require('next/dist/server/config').default(require('next/constants').PHASE_PRODUCTION_SERVER, process.cwd()).then(()=>console.log('Pruned runtime configuration loaded')).catch(error=>{console.error(error); process.exitCode=1;});"
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
