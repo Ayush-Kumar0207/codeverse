@@ -43,20 +43,35 @@
 
 ---
 
-## Watch CodeVerse in 76 seconds
+<!-- current-codeverse-demo: update this section and poster for the next video edition -->
+## 🎬 Watch CodeVerse in Action
+
+**Follow a real change from collaborative editing to Docker execution, compiler review, replay, and development proof verification.**
 
 <p align="center">
-  <a href="https://codeverse-rho.vercel.app/demo-video">
-    <img src="./docs/demo/codeverse-demo-poster.png" alt="CodeVerse product tour showing an anonymous workspace, interactive deployment preview, and EvidenceOS proof center" width="900" />
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview">
+    <img src="./docs/assets/codeverse-v4-showcase.jpg" alt="Watch the current CodeVerse V4 demo — real Monaco IDE, shared ScoreLens project, terminal, and collaborator presence" width="900" />
   </a>
 </p>
 
 <p align="center">
-  <strong>Run an anonymous workspace, inspect a live preview, and trace the resulting engineering evidence.</strong><br />
-  <a href="https://codeverse-rho.vercel.app/demo-video">Play the narrated product tour</a> · <a href="https://codeverse-rho.vercel.app/demo">Try the same journey</a>
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_1080p.mp4"><strong>Watch Full Demo — 1080p</strong></a> ·
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_Cinematic_Trailer.mp4"><strong>Watch Cinematic Trailer</strong></a> ·
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_Light.mp4">Lightweight 720p</a>
 </p>
 
+The current cinematic product demonstration is **V4**: a **2:48** film with narration, music, and sound design, plus a **50.5-second** trailer. [Video release and downloads](https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview). V4 identifies the video edition; the application version is tracked separately.
+
+<details>
+<summary>Recorded workflow and the maintained interactive tour</summary>
+
+The film uses genuine local CodeVerse footage. Its recorded example includes scripted understanding answers, a local development issuer, and localhost deployment; explanatory diagrams and audio are editorial production elements.
+
+The earlier [76-second narrated product tour](https://codeverse-rho.vercel.app/demo-video) and its [interactive demo journey](https://codeverse-rho.vercel.app/demo) remain available.
+
 The tour is captured from the real local application with a maintained Playwright journey. Its raw recording, captions, MP4 packaging, poster generation, privacy checks, and duration gate are reproducible with `npm run demo:build`; see [`docs/demo/README.md`](docs/demo/README.md).
+
+</details>
 
 ---
 
