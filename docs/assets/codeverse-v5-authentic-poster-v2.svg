@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+<title id="title">CodeVerse V5 — From bug to verified fix</title>
+<desc id="description">An original, accurately typeset editorial poster presenting CodeVerse's recorded bestScore bug, passing boundary tests, and verified proof package. It is not a screenshot or AI-generated imitation of the application.</desc>
+<defs>
+<linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050d1d"/><stop offset=".56" stop-color="#0d1d37"/><stop offset="1" stop-color="#091326"/></linearGradient>
+<linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#37f4d4"/><stop offset=".54" stop-color="#61bcff"/><stop offset="1" stop-color="#9f90ff"/></linearGradient>
+<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#5376a1" stroke-opacity=".07"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#background)"/>
+<rect width="1600" height="900" fill="url(#grid)"/>
+<path d="M75 41H1525" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+<g font-family="Arial, Helvetica, sans-serif">
+  <rect x="76" y="68" width="414" height="54" rx="27" fill="#102c41" stroke="#35d8d4" stroke-width="1.5"/>
+  <circle cx="110" cy="95" r="8" fill="#44f4d6"/>
+  <text x="132" y="103" font-size="23" font-weight="700" letter-spacing="1" fill="#d8fff7">RECORDED CODEVERSE WORKFLOW</text>
+  <text x="76" y="236" font-size="110" font-weight="800" letter-spacing="-5" fill="#f3f8ff">CodeVerse</text>
+  <text x="731" y="236" font-size="112" font-weight="900" fill="url(#accent)">V5</text>
+  <text x="80" y="311" font-size="49" font-weight="700" fill="#d7e6fa">From Bug to <tspan fill="#59f0dc">Verified Fix</tspan></text>
+  <text x="1523" y="100" text-anchor="end" font-size="22" font-weight="600" fill="#c4d7ee">180 SECONDS  /  1080P</text>
+</g>
+<!-- Three clearly editorial data panels, with authentic recorded CodeVerse examples -->
+<g font-family="Arial, Helvetica, sans-serif">
+  <rect x="76" y="357" width="456" height="354" rx="22" fill="#0b172b" stroke="#378fe5" stroke-width="2"/>
+  <rect x="76" y="357" width="456" height="69" rx="22" fill="#163253"/>
+  <path d="M76 404H532" stroke="#35638d"/>
+  <circle cx="113" cy="390" r="20" fill="#62d8ff"/>
+  <text x="113" y="398" font-size="23" font-weight="800" fill="#071525" text-anchor="middle">1</text>
+  <text x="150" y="400" font-size="28" font-weight="800" fill="#e9f6ff">FIX THE BUG</text>
+  <text x="105" y="462" font-family="monospace" font-size="23" fill="#a8cdf2">scores.js</text>
+  <path d="M103 478H503" stroke="#2c4f75" stroke-width="2"/>
+  <g font-family="monospace" font-size="21">
+   <text x="101" y="526" fill="#e7efff"><tspan fill="#c4afff">function</tspan> bestScore(scores) {</text>
+   <text x="115" y="567" fill="#edf6ff">if (!Array.isArray(scores) ||</text>
+   <text x="137" y="604" fill="#edf6ff">scores.length === 0)</text>
+   <rect x="106" y="618" width="393" height="42" rx="8" fill="#124038"/>
+   <text x="139" y="647" fill="#60f4c7">return 0;</text>
+   <text x="105" y="692" fill="#9edcf8">return Math.max(...scores);</text>
+  </g>
+  <rect x="572" y="357" width="456" height="354" rx="22" fill="#0b172b" stroke="#27bcb2" stroke-width="2"/>
+  <rect x="572" y="357" width="456" height="69" rx="22" fill="#133c3e"/>
+  <path d="M572 404H1028" stroke="#27747b"/>
+  <circle cx="609" cy="390" r="20" fill="#65efd0"/>
+  <text x="609" y="398" font-size="23" font-weight="800" fill="#061b20" text-anchor="middle">2</text>
+  <text x="646" y="400" font-size="28" font-weight="800" fill="#edfffa">TESTS PASS</text>
+  <text x="599" y="462" font-family="monospace" font-size="23" fill="#a8cdf2">terminal</text>
+  <path d="M599 478H999" stroke="#2b615f" stroke-width="2"/>
+  <g font-family="monospace" font-size="23">
+   <text x="603" y="527" fill="#64f3c8">PASS <tspan fill="#e2f1ff">empty list: [] to 0</tspan></text>
+   <text x="603" y="585" fill="#64f3c8">PASS <tspan fill="#e2f1ff">mixed scores: 94</tspan></text>
+   <text x="603" y="643" fill="#64f3c8">PASS <tspan fill="#e2f1ff">negative scores: -2</tspan></text>
+  </g>
+  <rect x="600" y="666" width="400" height="31" rx="10" fill="#0a332e"/>
+  <text x="800" y="689" font-size="21" font-weight="800" fill="#9effe2" text-anchor="middle">ALL THREE BOUNDARIES PASSED</text>
+  <rect x="1068" y="357" width="456" height="354" rx="22" fill="#0b172b" stroke="#9180f2" stroke-width="2"/>
+  <rect x="1068" y="357" width="456" height="69" rx="22" fill="#302852"/>
+  <path d="M1068 404H1524" stroke="#5f4d98"/>
+  <circle cx="1105" cy="390" r="20" fill="#bea7ff"/>
+  <text x="1105" y="398" font-size="23" font-weight="800" fill="#151029" text-anchor="middle">3</text>
+  <text x="1142" y="400" font-size="28" font-weight="800" fill="#f2eaff">PROOF VERIFIED</text>
+  <text x="1097" y="462" font-size="23" font-weight="700" fill="#ecf2ff">ScoreLens proof package</text>
+  <path d="M1095 478H1493" stroke="#5c518c" stroke-width="2"/>
+  <text x="1095" y="524" font-size="25" fill="#ffffff" font-weight="700">Executed, reviewed</text>
+  <text x="1095" y="556" font-size="25" fill="#ffffff" font-weight="700">and recovered</text>
+  <circle cx="1110" cy="610" r="11" fill="#2ad9b4"/>
+  <path d="M1103 610L1109 615L1118 604" stroke="#082a28" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1132" y="619" font-size="23" fill="#d4e9f8">Recorded tests attested</text>
+  <circle cx="1110" cy="659" r="11" fill="#2ad9b4"/>
+  <path d="M1103 659L1109 664L1118 653" stroke="#082a28" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1132" y="668" font-size="23" fill="#d4e9f8">Review and proof recorded</text>
+</g>
+<!-- Simple truthful result sequence; not fake UI -->
+<g font-family="Arial, Helvetica, sans-serif">
+  <rect x="76" y="759" width="220" height="77" rx="18" fill="#371e3b" stroke="#fe6899" stroke-width="2"/>
+  <text x="186" y="809" font-size="43" font-weight="800" fill="#ffbdd5" text-anchor="middle">−Infinity</text>
+  <path d="M314 796H380M368 783L381 796L368 809" fill="none" stroke="#a2bff0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="397" y="759" width="103" height="77" rx="18" fill="#0c3b37" stroke="#32e3c1" stroke-width="2"/>
+  <text x="449" y="813" font-size="60" font-weight="800" fill="#6cffe2" text-anchor="middle">0</text>
+  <text x="547" y="805" font-size="27" font-weight="700" fill="#e5edf9">BUG</text>
+  <text x="623" y="805" font-size="26" fill="#87b0d7">→</text>
+  <text x="667" y="805" font-size="27" font-weight="700" fill="#e5edf9">FIX</text>
+  <text x="732" y="805" font-size="26" fill="#87b0d7">→</text>
+  <text x="776" y="805" font-size="27" font-weight="700" fill="#e5edf9">PROOF</text>
+  <rect x="1068" y="758" width="456" height="81" rx="19" fill="url(#accent)"/>
+  <circle cx="1121" cy="799" r="25" fill="#0a2133"/>
+  <path d="M1115 784V814L1138 799Z" fill="#f4ffff"/>
+  <text x="1172" y="811" font-size="35" font-weight="800" fill="#0b2236">WATCH THE FILM</text>
+</g>
+<path d="M76 869H1524" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+</svg>
