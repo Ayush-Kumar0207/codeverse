@@ -49,15 +49,11 @@ This **three-minute film** follows a specific change through its complete demons
 - [CodeVerse interactive demonstration](https://codeverse-rho.vercel.app/demo)
 - [Previous V4 showcase](https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview)
 
-## Publisher checklist
+## Published GitHub showcase release
 
-This file is also the prepared description for the `showcase-v5` GitHub Release.
+- **Release:** [CodeVerse V5 — Build Together. Prove Every Change.](https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v5)
+- **Download:** [V5 — 1080p, 180-second MP4](https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v5/CodeVerse_V5_Release_Locked_Compact_AV1_180s_1080p.mp4)
+- **Asset verification:** GitHub reports 21,916,573 bytes and SHA-256 `c2f90b3c0a6ae312dac72301a9b74cfadfe34c186faf1e7a2cf67b8746be9e21`, matching the approved source file.
+- **Older release:** V4 and its three downloadable video assets remain available as an archive.
 
-1. Create **a new GitHub Release**, tagged `showcase-v5` on `main`; mark it as the latest showcase when appropriate, without altering application version tags.
-2. Attach the exact **V5 MP4** listed above. Ensure the upload completes and the release download works.
-3. Compare the downloaded asset's SHA-256 to the verified checksum above.
-4. Once the release and asset are public, merge the README promotion PR.
-5. Keep the existing `showcase-v4-preview` release and its assets as an archive.
-6. If a YouTube version is published later, add its actual public URL to the README; do not invent a video ID.
-
-Do not merge the prepared README update **before** its GitHub Release asset is online; that would produce a temporary broken featured video link.
+A YouTube upload can be linked here when a real public YouTube URL exists; no unverified video URL is included.
