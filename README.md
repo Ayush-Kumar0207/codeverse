@@ -50,7 +50,7 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=oTNcNrIEsXs">
-    <img src="./docs/assets/codeverse-v5-authentic-poster-v2.svg" alt="Play CodeVerse V5 on YouTube — clean thumbnail showing the recorded bestScore boundary bug, all three passing tests, and proof verification" width="900" />
+    <img src="./docs/assets/codeverse-v5-bug-to-proof-corrected.png" alt="Play CodeVerse V5 on YouTube — bug-to-proof thumbnail showing the bestScore fix, passing boundary tests, and verified evidence" width="900" />
   </a>
 </p>
 
