@@ -50,7 +50,7 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=oTNcNrIEsXs">
-    <img src="./docs/assets/codeverse-v5-showcase.svg" alt="Play CodeVerse V5 on YouTube — a 3-minute cinematic film about the real bestScore bug, its fix, verified tests, review, replay and proof" width="900" />
+    <img src="./docs/assets/codeverse-v5-authentic-poster-v2.svg" alt="Play CodeVerse V5 on YouTube — clean thumbnail showing the recorded bestScore boundary bug, all three passing tests, and proof verification" width="900" />
   </a>
 </p>
 
