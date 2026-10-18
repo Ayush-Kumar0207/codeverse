@@ -43,33 +43,39 @@
 
 ---
 
-<!-- current-codeverse-demo: update this section and poster for the next video edition -->
+<!-- current-codeverse-demo: V5 film, V4 preserved in archival details -->
 ## 🎬 Watch CodeVerse in Action
 
-**Follow a real change from collaborative editing to Docker execution, compiler review, replay, and development proof verification.**
+**CodeVerse V5 — Build Together. Prove Every Change.** Follow a real recorded local CodeVerse workflow from an empty-array boundary-case bug to verified tests, independent review, impact inspection, replay, and local deployment—all in a **three-minute cinematic showcase**.
+
+<p align="center">
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v5/CodeVerse_V5_Release_Locked_Compact_AV1_180s_1080p.mp4"><strong>▶ Watch V5 — Full Cinematic Demo (1080p, 3:00)</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v5">GitHub Release &amp; Download</a>
+</p>
+
+**In the film:** collaborative workspace → reproduce `bestScore([]) = -Infinity` → implement an empty-input guard → verify three boundary cases → resolve a separate input-type review finding → understand changes and their impact → replay and test a local deployment → review the final evidence.
+
+The screens, test outputs, code, and review workflow come from local CodeVerse recordings; cinematic graphics and captions explain the story, and the instrumental score **“The Geometry of Victory”** was generated with Google's music-generation tools and professionally edited for the film. Local deployment shown in the video is not a public hosting claim.
+
+[V5 production notes and authenticity details](docs/releases/SHOWCASE_V5.md). V5 names the **showcase film**, not a new application version.
+
+<details>
+<summary>Previous cinematic release — V4 (2:48) and earlier demos</summary>
 
 <p align="center">
   <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview">
-    <img src="./docs/assets/codeverse-v4-showcase.jpg" alt="Watch the current CodeVerse V4 demo — real Monaco IDE, shared ScoreLens project, terminal, and collaborator presence" width="900" />
+    <img src="./docs/assets/codeverse-v4-showcase.jpg" alt="CodeVerse V4 demo archive — real Monaco IDE, ScoreLens, terminal and collaborator presence" width="900" />
   </a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_1080p.mp4"><strong>Watch Full Demo — 1080p</strong></a> ·
-  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_Cinematic_Trailer.mp4"><strong>Watch Cinematic Trailer</strong></a> ·
-  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_Light.mp4">Lightweight 720p</a>
-</p>
+[Watch V4 full demo (1080p)](https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_1080p.mp4) ·
+[Watch V4 cinematic trailer](https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_Cinematic_Trailer.mp4) ·
+[Download V4 lightweight (720p)](https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v4-preview/CodeVerse_V4_GitHub_Light.mp4)
 
-The current cinematic product demonstration is **V4**: a **2:48** film with narration, music, and sound design, plus a **50.5-second** trailer. [Video release and downloads](https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview). V4 identifies the video edition; the application version is tracked separately.
+The V4 film is 2:48 with narration, music, and sound design, plus a 50.5-second trailer. The recorded example includes scripted understanding answers, a local development issuer, and localhost deployment; diagrams and audio are editorial production elements.
 
-<details>
-<summary>Recorded workflow and the maintained interactive tour</summary>
-
-The film uses genuine local CodeVerse footage. Its recorded example includes scripted understanding answers, a local development issuer, and localhost deployment; explanatory diagrams and audio are editorial production elements.
-
-The earlier [76-second narrated product tour](https://codeverse-rho.vercel.app/demo-video) and its [interactive demo journey](https://codeverse-rho.vercel.app/demo) remain available.
-
-The tour is captured from the real local application with a maintained Playwright journey. Its raw recording, captions, MP4 packaging, poster generation, privacy checks, and duration gate are reproducible with `npm run demo:build`; see [`docs/demo/README.md`](docs/demo/README.md).
+The earlier [76-second narrated tour](https://codeverse-rho.vercel.app/demo-video) and [interactive demo journey](https://codeverse-rho.vercel.app/demo) remain available. The original local-capture process is documented in [docs/demo/README.md](docs/demo/README.md).
 
 </details>
 
