@@ -49,6 +49,12 @@
 **CodeVerse V5 — Build Together. Prove Every Change.** Follow a real recorded local CodeVerse workflow from an empty-array boundary-case bug to verified tests, independent review, impact inspection, replay, and local deployment—all in a **three-minute cinematic showcase**.
 
 <p align="center">
+  <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v5/CodeVerse_V5_Release_Locked_Compact_AV1_180s_1080p.mp4">
+    <img src="./docs/assets/codeverse-v5-showcase.svg" alt="Watch CodeVerse V5 — a 3-minute cinematic film about a real bestScore boundary bug, its fix, three tests, review, replay and proof" width="900" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/download/showcase-v5/CodeVerse_V5_Release_Locked_Compact_AV1_180s_1080p.mp4"><strong>▶ Watch V5 — Full Cinematic Demo (1080p, 3:00)</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v5">GitHub Release &amp; Download</a>
