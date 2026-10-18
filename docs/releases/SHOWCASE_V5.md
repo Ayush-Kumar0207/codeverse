@@ -47,6 +47,7 @@ This **three-minute film** follows a specific change through its complete demons
 - [Source code](https://github.com/Ayush-Kumar0207/codeverse)
 - [Live CodeVerse application](https://codeverse-rho.vercel.app)
 - [CodeVerse interactive demonstration](https://codeverse-rho.vercel.app/demo)
+- [Watch V5 on YouTube](https://www.youtube.com/watch?v=oTNcNrIEsXs)
 - [Previous V4 showcase](https://github.com/Ayush-Kumar0207/codeverse/releases/tag/showcase-v4-preview)
 
 ## Published GitHub showcase release
@@ -56,4 +57,4 @@ This **three-minute film** follows a specific change through its complete demons
 - **Asset verification:** GitHub reports 21,916,573 bytes and SHA-256 `c2f90b3c0a6ae312dac72301a9b74cfadfe34c186faf1e7a2cf67b8746be9e21`, matching the approved source file.
 - **Older release:** V4 and its three downloadable video assets remain available as an archive.
 
-A YouTube upload can be linked here when a real public YouTube URL exists; no unverified video URL is included.
+The V5 showcase is also available to stream online: [Watch CodeVerse V5 on YouTube](https://www.youtube.com/watch?v=oTNcNrIEsXs). The GitHub Release MP4 remains available for downloading.
