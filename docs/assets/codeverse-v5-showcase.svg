@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="t d">
+<title id="t">CodeVerse V5: Build together. Prove every change. Watch the three-minute cinematic film.</title>
+<desc id="d">Editorial title graphic using the real CodeVerse bestScore empty-array fix, three boundary tests and the film's source, execution, review, replay and proof workflow. Not a product screenshot.</desc>
+<defs>
+<linearGradient id="bg" x2="1" y2="1"><stop stop-color="#040b1a"/><stop offset=".65" stop-color="#0c1b37"/><stop offset="1" stop-color="#050b1a"/></linearGradient>
+<linearGradient id="a" x2="1"><stop stop-color="#1adfc9"/><stop offset=".5" stop-color="#62b8ff"/><stop offset="1" stop-color="#ac7cff"/></linearGradient>
+<linearGradient id="glass" x2="1" y2="1"><stop stop-color="#182f53"/><stop offset="1" stop-color="#091325"/></linearGradient>
+<radialGradient id="shine"><stop stop-color="#478bdf" stop-opacity=".3"/><stop offset="1" stop-color="#478bdf" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="68" height="68" patternUnits="userSpaceOnUse"><path d="M68 0H0V68" stroke="#94c9ff" stroke-opacity=".09" fill="none"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/><rect width="1600" height="900" fill="url(#grid)"/>
+<circle cx="1150" cy="420" r="600" fill="url(#shine)"/>
+<path d="M1010 140L1170 20L1325 189L1180 278Z" fill="#3caafe" opacity=".07" stroke="#5aa8e9" stroke-opacity=".25"/>
+<path d="M1355 125L1520 70L1595 310L1450 356Z" fill="#837cf7" opacity=".09" stroke="#a097ff" stroke-opacity=".3"/>
+<path d="M0 792C300 703 375 852 670 786S1220 758 1600 826" fill="none" stroke="#4ce6ed" stroke-opacity=".25" stroke-width="3"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<rect x="78" y="90" width="324" height="56" rx="28" fill="#0e3041" stroke="#20dacb" stroke-opacity=".65"/>
+<circle cx="109" cy="118" r="8" fill="#30f6db"/><text x="132" y="127" font-size="23" font-weight="700" letter-spacing="2" fill="#bbfff4">CINEMATIC SHOWCASE</text>
+<text x="72" y="280" font-size="107" font-weight="800" letter-spacing="-5" fill="#f6faff">CodeVerse</text>
+<text x="78" y="397" font-size="131" font-weight="900" fill="url(#a)">V5</text>
+<text x="79" y="477" font-size="39" font-weight="700" fill="#f4f7ff">Build together.</text>
+<text x="79" y="526" font-size="39" font-weight="700" fill="#51e9e5">Prove every change.</text>
+<rect x="78" y="574" width="353" height="92" rx="22" fill="url(#a)"/>
+<circle cx="131" cy="621" r="32" fill="#051a2a"/>
+<path d="M123 604V639L151 621Z" fill="#fff"/>
+<text x="184" y="638" font-size="43" font-weight="800" fill="#061523">WATCH V5</text>
+<text x="78" y="727" font-size="25" letter-spacing="1.3" fill="#b2c7e5">180 SECONDS · 1080P · REAL WORKFLOW</text>
+<text x="79" y="768" font-size="23" fill="#91a6c9">Authentic project evidence. Cinematic storytelling.</text>
+</g>
+<g font-family="Arial, Helvetica, sans-serif" transform="translate(770 147)">
+<rect x="0" y="0" width="745" height="595" rx="29" fill="url(#glass)" stroke="#62b8ed" stroke-width="3"/>
+<rect x="20" y="21" width="704" height="552" rx="22" fill="#071120" stroke="#244469" stroke-width="2"/>
+<rect x="20" y="21" width="704" height="70" rx="20" fill="#142744"/>
+<circle cx="54" cy="54" r="9" fill="#e46e78"/><circle cx="84" cy="54" r="9" fill="#e9bb60"/><circle cx="114" cy="54" r="9" fill="#4bdda9"/>
+<text x="156" y="65" font-size="28" font-weight="700" fill="#e5ecff">scores.js</text>
+<rect x="538" y="36" width="159" height="36" rx="8" stroke="#4fe8df" fill="#09333d"/>
+<text x="556" y="62" font-size="19" font-weight="800" fill="#68ffee">CODEVERSE</text>
+<text x="53" y="137" font-size="19" font-weight="700" letter-spacing="2" fill="#87a8ca">THE ACTUAL BOUNDARY-CASE STORY</text>
+<rect x="47" y="163" width="652" height="241" rx="18" fill="#0b1b32" stroke="#37628a" stroke-width="2"/>
+<rect x="47" y="163" width="6" height="241" rx="3" fill="#26ebeb"/>
+<g font-family="monospace" font-size="25">
+<text x="71" y="220" fill="#ad9df6">function <tspan fill="#8bdcf7">bestScore</tspan><tspan fill="#ecf3ff">(scores) {</tspan></text>
+<text x="89" y="270" fill="#b8d2f5">if <tspan fill="#e9f1ff">(!Array.isArray(scores) ||</tspan></text>
+<text x="158" y="309" fill="#e9f1ff">scores.length === 0)</text>
+<text x="139" y="353" fill="#58efb9">return 0;</text>
+<text x="98" y="391" fill="#b7d2f6">return Math.max(...scores);</text>
+</g>
+<rect x="47" y="431" width="203" height="96" rx="17" fill="#2d1d32" stroke="#f5759b" stroke-width="2"/>
+<text x="66" y="465" font-size="18" font-weight="800" letter-spacing="1" fill="#ffb5cb">BUG FOUND</text>
+<text x="66" y="505" font-size="33" font-weight="800" fill="#fff2f6">−Infinity</text>
+<path d="M257 481H302" stroke="#adc3e6" stroke-width="3" fill="none"/><path d="M290 470L307 481L290 493" stroke="#adc3e6" stroke-width="3" fill="none"/>
+<rect x="316" y="431" width="162" height="96" rx="17" fill="#0b322d" stroke="#35e8b9" stroke-width="2"/>
+<text x="333" y="465" font-size="17" font-weight="800" fill="#b2ffec">FIX VERIFIED</text>
+<text x="335" y="506" font-size="41" font-weight="900" fill="#4defba">0</text>
+<rect x="495" y="431" width="204" height="96" rx="17" fill="#192349" stroke="#8b80ff" stroke-width="2"/>
+<text x="513" y="465" font-size="17" font-weight="800" fill="#c9cfff">BOUNDARY TESTS</text>
+<text x="514" y="506" font-size="38" font-weight="900" fill="#e1ffff">3 / 3</text>
+<text x="47" y="564" font-size="18" letter-spacing=".7" fill="#a5bddb">SOURCE  →  EXECUTION  →  REVIEW  →  REPLAY  →  PROOF</text>
+</g>
+<path d="M0 890H1600" stroke="url(#a)" stroke-width="5"/>
+</svg>
