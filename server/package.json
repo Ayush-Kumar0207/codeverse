@@ -26,28 +26,28 @@
     "@ast-grep/lang-java": "^0.0.7",
     "@ast-grep/lang-python": "^0.0.6",
     "@ast-grep/lang-rust": "^0.0.7",
-    "@ast-grep/napi": "^0.45.0",
+    "@ast-grep/napi": "^0.51.0",
     "@google/generative-ai": "^0.24.1",
     "@socket.io/redis-adapter": "^8.3.0",
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.118.0",
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.6.0",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
     "jsonwebtoken": "^9.0.2",
     "localtunnel": "^2.0.2",
     "openai": "^5.3.0",
     "redis": "^5.12.1",
-    "socket.io": "^4.8.1",
+    "socket.io": "^4.8.4",
     "ts-morph": "^27.0.2",
     "uuid": "^11.1.0",
-    "yjs": "^13.6.32"
+    "yjs": "^13.6.33"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.4"
   },
   "repository": {
     "type": "git",
