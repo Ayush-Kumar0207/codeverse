@@ -119,7 +119,7 @@
   "overrides": {
     "sharp": "^0.35.5",
     "postcss": "^8.5.23",
-    "dompurify": "^3.4.16",
+    "dompurify": "^3.4.17",
     "nanoid": "^3.3.17"
   }
 }
